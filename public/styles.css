@@ -1,89 +1,110 @@
 :root {
   color-scheme: light;
-  --border: #dddddd;
+  --border: #d9d9d9;
   --muted: #666666;
   --text: #111111;
 }
 
-body {
-  margin: 0;
-  font-family: Consolas, "Lucida Console", "Courier New", monospace;
-  color: var(--text);
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
   background: #ffffff;
-  line-height: 1.45;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: #ffffff;
+  color: var(--text);
+  font-family: Consolas, "Lucida Console", "Courier New", monospace;
+  line-height: 1.42;
 }
 
 a {
   color: inherit;
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .page {
-  max-width: 980px;
+  width: 100%;
+  max-width: 430px;
+  min-height: 100vh;
   margin: 0 auto;
-  padding: 20px;
+  padding: 25px 16px 17px;
+  display: flex;
+  flex-direction: column;
 }
 
-header {
+.masthead {
+  padding-bottom: 18px;
   border-bottom: 1px solid var(--border);
-  padding-bottom: 16px;
-  margin-bottom: 18px;
 }
 
 h1 {
-  font-size: 26px;
-  line-height: 1.1;
   margin: 0;
+  font-size: 25px;
+  line-height: 1.05;
   font-weight: 700;
+  letter-spacing: 0;
 }
 
-.tagline {
-  margin: 8px 0 0;
+.masthead p,
+.status,
+.date,
+footer {
   color: var(--muted);
+  font-size: 12px;
 }
 
-.feed {
-  border-top: 1px solid var(--border);
-}
-
-.date {
-  color: var(--muted);
-  font-size: 13px;
-  margin: 22px 0 8px;
-}
-
-article {
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border);
-}
-
-.blurb {
-  font-size: 17px;
-  margin: 0;
-  max-width: 760px;
-}
-
-.empty {
-  color: var(--muted);
-  margin: 22px 0 0;
+.masthead p {
+  margin: 12px 0 0;
 }
 
 .status {
+  margin: 19px 0 15px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  max-width: 350px;
+}
+
+.feed {
+  border-bottom: 1px solid var(--border);
+}
+
+.date {
+  margin: 20px 0 8px;
+}
+
+.item {
+  padding: 0 0 17px;
+  margin: 0 0 17px;
+  border-bottom: 1px solid var(--border);
+}
+
+.item:last-child {
+  margin-bottom: 0;
+}
+
+.blurb {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.empty {
+  margin: 20px 0 17px;
   color: var(--muted);
-  font-size: 14px;
-  margin: 18px 0;
+  font-size: 16px;
+}
+
+main {
+  flex: 1;
 }
 
 footer {
-  border-top: 1px solid var(--border);
-  margin-top: 24px;
-  padding-top: 14px;
-  color: var(--muted);
-  font-size: 14px;
-}
-
-@media (max-width: 700px) {
-  .page {
-    padding: 16px;
-  }
+  margin-top: auto;
+  padding-top: 15px;
 }

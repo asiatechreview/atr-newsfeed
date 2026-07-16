@@ -4,209 +4,38 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Asia Tech Review</title>
-  <style>
-    :root {
-      color-scheme: light;
-      --border: #dddddd;
-      --muted: #666666;
-      --text: #111111;
-    }
-
-    body {
-      margin: 0;
-      font-family: Consolas, "Lucida Console", "Courier New", monospace;
-      color: var(--text);
-      background: #ffffff;
-      line-height: 1.45;
-    }
-
-    a {
-      color: inherit;
-      text-decoration: underline;
-    }
-
-    .page {
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-
-    header {
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 16px;
-      margin-bottom: 18px;
-    }
-
-    h1 {
-      font-size: 26px;
-      line-height: 1.1;
-      margin: 0;
-      font-weight: 700;
-    }
-
-    .tagline {
-      margin: 8px 0 0;
-      color: var(--muted);
-    }
-
-    .feed {
-      border-top: 1px solid var(--border);
-    }
-
-    .date {
-      color: var(--muted);
-      font-size: 13px;
-      margin: 22px 0 8px;
-    }
-
-    article {
-      padding: 12px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .blurb {
-      font-size: 17px;
-      margin: 0;
-      max-width: 760px;
-    }
-
-    .status {
-      color: var(--muted);
-      font-size: 14px;
-      margin: 18px 0;
-    }
-
-    footer {
-      border-top: 1px solid var(--border);
-      margin-top: 24px;
-      padding-top: 14px;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    @media (max-width: 700px) {
-      .page {
-        padding: 16px;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
   <div class="page">
-    <header>
+    <header class="masthead">
       <h1>Asia Tech Review</h1>
-      <p class="tagline">Keeping up with Asia news</p>
+      <p>Keeping up with Asia news</p>
     </header>
 
     <main>
-      <p id="status" class="status">Loading news links...</p>
-      <section id="feed" class="feed" aria-label="Newsfeed"></section>
+      <p id="feed-status" class="status">
+        Sample data shown. Replace SHEET_CSV_URL in index.html with your published Google Sheet CSV link.
+      </p>
+
+      <section id="feed-list" class="feed" aria-label="Asia Tech Review feed"></section>
     </main>
 
     <footer>
-      <p>Updated from ATR Daily.</p>
+      Updated from Google Sheets.
     </footer>
   </div>
 
-  <script>
-    const fallbackItems = [
-      {
-        published_at: "2026-07-13",
-        blurb: "South Korea's SK Hynix closed 13% higher on its US debut after raising $26.5 billion through a Nasdaq ADR offering",
-        source_name: "Bloomberg",
-        source_url: "https://example.com"
-      },
-      {
-        published_at: "2026-07-13",
-        blurb: "Indian premium grocery startup FirstClub raised a $55 million Series B round led by Peak XV Partners and Sofina at a $255 million valuation",
-        source_name: "TechCrunch",
-        source_url: "https://example.com"
-      },
-      {
-        published_at: "2026-07-12",
-        blurb: "Paste each new item into the feed as a finished daily blurb, then add the source name and link",
-        source_name: "Source Name",
-        source_url: "https://example.com"
-      }
-    ];
+  <template id="date-template">
+    <p class="date"></p>
+  </template>
 
-    function formatDate(dateValue) {
-      if (!dateValue) {
-        return "Undated";
-      }
+  <template id="item-template">
+    <article class="item">
+      <p class="blurb"></p>
+    </article>
+  </template>
 
-      const date = new Date(dateValue);
-      if (Number.isNaN(date.getTime())) {
-        return dateValue;
-      }
-
-      return date.toLocaleDateString("en-GB", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-        timeZone: "Asia/Bangkok"
-      });
-    }
-
-    function renderFeed(items, note) {
-      const feed = document.getElementById("feed");
-      const status = document.getElementById("status");
-      feed.textContent = "";
-      status.textContent = note || "";
-
-      let currentDate = "";
-
-      items.forEach((item) => {
-        const displayDate = formatDate(item.published_at);
-        if (displayDate !== currentDate) {
-          currentDate = displayDate;
-          const date = document.createElement("p");
-          date.className = "date";
-          date.textContent = displayDate;
-          feed.appendChild(date);
-        }
-
-        const article = document.createElement("article");
-        const blurb = document.createElement("p");
-        blurb.className = "blurb";
-        blurb.append(document.createTextNode(item.blurb + " ["));
-
-        const source = document.createElement("a");
-        source.href = item.source_url || "#";
-        source.textContent = item.source_name || "Source";
-        source.target = "_blank";
-        source.rel = "noopener";
-
-        blurb.appendChild(source);
-        blurb.append(document.createTextNode("]"));
-        article.appendChild(blurb);
-        feed.appendChild(article);
-      });
-    }
-
-    async function loadFeed() {
-      try {
-        const response = await fetch("/api/items?limit=100", {
-          headers: { Accept: "application/json" }
-        });
-
-        if (!response.ok) {
-          throw new Error("Could not load feed");
-        }
-
-        const payload = await response.json();
-        const items = payload.items || [];
-        if (!items.length) {
-          renderFeed(fallbackItems, "No published items yet. Showing sample data.");
-          return;
-        }
-        renderFeed(items, "");
-      } catch (error) {
-        renderFeed(fallbackItems, "Could not load feed. Showing sample data.");
-      }
-    }
-
-    loadFeed();
-  </script>
+  <script src="/app.js" defer></script>
 </body>
 </html>

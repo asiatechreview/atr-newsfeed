@@ -3,15 +3,36 @@ const status = document.querySelector("#feed-status");
 const dateTemplate = document.querySelector("#date-template");
 const itemTemplate = document.querySelector("#item-template");
 
+const sampleItems = [
+  {
+    published_at: "2026-07-13T00:00:00+07:00",
+    blurb: "South Korea's SK Hynix closed 13% higher on its US debut after raising $26.5 billion through a Nasdaq ADR offering",
+    source_name: "Bloomberg",
+    source_url: "https://example.com"
+  },
+  {
+    published_at: "2026-07-13T00:00:00+07:00",
+    blurb: "Indian premium grocery startup FirstClub raised a $55 million Series B round led by Peak XV Partners and Sofina at a $255 million valuation",
+    source_name: "TechCrunch",
+    source_url: "https://example.com"
+  },
+  {
+    published_at: "2026-07-12T00:00:00+07:00",
+    blurb: "Paste each new item into the Google Sheet as a finished daily blurb, then add the source name and link in the next columns",
+    source_name: "Source Name",
+    source_url: "https://example.com"
+  }
+];
+
 function formatDate(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
     return value || "Undated";
   }
 
-  return date.toLocaleDateString("en-US", {
-    month: "long",
+  return date.toLocaleDateString("en-GB", {
     day: "numeric",
+    month: "long",
     year: "numeric",
     timeZone: "Asia/Bangkok"
   });
@@ -20,7 +41,7 @@ function formatDate(value) {
 function dateKey(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return "Undated";
+    return value || "Undated";
   }
 
   return new Intl.DateTimeFormat("en-CA", {
@@ -31,48 +52,47 @@ function dateKey(value) {
   }).format(date);
 }
 
-function appendSource(blurb, item) {
-  blurb.append(document.createTextNode(`${item.blurb} [`));
+function appendItemText(target, item) {
+  target.append(document.createTextNode(`${item.blurb} [`));
 
-  const link = document.createElement("a");
-  link.href = item.source_url || "#";
-  link.target = "_blank";
-  link.rel = "noopener";
-  link.textContent = item.source_name || "Source";
-  blurb.appendChild(link);
-  blurb.append(document.createTextNode("]"));
+  const source = document.createElement("a");
+  source.href = item.source_url || "#";
+  source.target = "_blank";
+  source.rel = "noopener";
+  source.textContent = item.source_name || "Source";
+
+  target.appendChild(source);
+  target.append(document.createTextNode("]"));
 }
 
-function render(items) {
+function render(items, options = {}) {
   feed.textContent = "";
+  status.textContent = options.statusText || "";
 
   if (!items.length) {
     const empty = document.createElement("p");
     empty.className = "empty";
     empty.textContent = "No updates yet.";
     feed.appendChild(empty);
-    status.textContent = "Waiting for the first published item.";
     return;
   }
 
   let currentDate = "";
 
   for (const item of items) {
-    const itemDate = dateKey(item.published_at);
+    const nextDate = dateKey(item.published_at);
 
-    if (itemDate !== currentDate) {
-      currentDate = itemDate;
+    if (nextDate !== currentDate) {
+      currentDate = nextDate;
       const dateNode = dateTemplate.content.cloneNode(true);
       dateNode.querySelector(".date").textContent = formatDate(item.published_at);
       feed.appendChild(dateNode);
     }
 
-    const node = itemTemplate.content.cloneNode(true);
-    appendSource(node.querySelector(".blurb"), item);
-    feed.appendChild(node);
+    const itemNode = itemTemplate.content.cloneNode(true);
+    appendItemText(itemNode.querySelector(".blurb"), item);
+    feed.appendChild(itemNode);
   }
-
-  status.textContent = `${items.length} published update${items.length === 1 ? "" : "s"}.`;
 }
 
 async function loadFeed() {
@@ -86,11 +106,20 @@ async function loadFeed() {
     }
 
     const payload = await response.json();
-    render(payload.items || []);
+    const items = payload.items || [];
+
+    if (!items.length) {
+      render(sampleItems, {
+        statusText: "Sample data shown. Replace SHEET_CSV_URL in index.html with your published Google Sheet CSV link."
+      });
+      return;
+    }
+
+    render(items, { statusText: "" });
   } catch (error) {
-    console.error(error);
-    feed.innerHTML = '<p class="empty">The feed is unavailable right now.</p>';
-    status.textContent = "Could not load latest updates.";
+    render(sampleItems, {
+      statusText: "Sample data shown. Replace SHEET_CSV_URL in index.html with your published Google Sheet CSV link."
+    });
   }
 }
 
