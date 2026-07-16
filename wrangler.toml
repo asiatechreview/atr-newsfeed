@@ -1,3 +1,8 @@
 name = "atr-newsfeed"
 compatibility_date = "2026-07-16"
 pages_build_output_dir = "public"
+
+[[d1_databases]]
+binding = "ATR_FEED_DB"
+database_name = "atr-newsfeed-db"
+database_id = "b02c4b49-922e-48d8-8c54-ceeedd76c41a"
