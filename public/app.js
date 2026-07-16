@@ -281,11 +281,15 @@ function inferTags(item, blurb) {
     }
   };
 
-  if (/\b(fund|funding|raised|raise|series [a-z]|seed|ipo|valuation|stake|acquisition|buy|bought|deal|invest|investment|grant)\b/.test(text)) {
+  if (/\b(e-commerce|ecommerce|commerce|marketplace|online retail|retail|b2b e-commerce|b2b ecommerce|udaan|shein|amazon)\b/.test(text)) {
+    add("e-commerce");
+  }
+
+  if (/\b(fund|funding|raised|raise|secured|series [a-z]|seed|ipo|listing|public listing|valuation|stake|acquisition|buy|bought|deal|invest|investment|grant|equity|debt|convertible|restructuring)\b/.test(text)) {
     add("deals");
   }
 
-  if (/\b(markets?|shares?|stock|trading|revenue|profit|sales|tax|yield|price|valuation|ipo|investors?)\b/.test(text)) {
+  if (/\b(markets?|shares?|stock|trading|revenue|profit|sales|tax|yield|price|valuation|ipo|listing|public listing|investors?|equity|debt|convertible|balance sheet)\b/.test(text)) {
     add("markets");
   }
 
