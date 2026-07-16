@@ -10,20 +10,29 @@ let allItems = [];
 let currentPage = getRequestedPage();
 
 function getRequestedPage() {
-  const page = Number(new URLSearchParams(window.location.search).get("page"));
+  const match = window.location.search.match(/[?&]page=([0-9]+)/);
+  const page = match ? Number(match[1]) : 1;
   return Number.isInteger(page) && page > 0 ? page : 1;
 }
 
 function updatePageUrl(page) {
-  const url = new URL(window.location.href);
-
-  if (page <= 1) {
-    url.searchParams.delete("page");
-  } else {
-    url.searchParams.set("page", String(page));
+  if (!window.history || !window.history.replaceState) {
+    return;
   }
 
-  window.history.replaceState({}, "", url);
+  try {
+    const url = new URL(window.location.href);
+
+    if (page <= 1) {
+      url.searchParams.delete("page");
+    } else {
+      url.searchParams.set("page", String(page));
+    }
+
+    window.history.replaceState({}, "", url);
+  } catch (error) {
+    // Some mobile in-app browsers expose partial URL/history APIs.
+  }
 }
 
 function parseDate(item) {
@@ -47,12 +56,16 @@ function formatDate(value) {
     return value || "Undated";
   }
 
-  return date.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "Asia/Bangkok"
-  });
+  try {
+    return date.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      timeZone: "Asia/Bangkok"
+    });
+  } catch (error) {
+    return fallbackDateLabel(date, true);
+  }
 }
 
 function shortDateLabel(value) {
@@ -74,11 +87,15 @@ function shortDateLabel(value) {
     return value || "Undated";
   }
 
-  return date.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "long",
-    timeZone: "Asia/Bangkok"
-  });
+  try {
+    return date.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "long",
+      timeZone: "Asia/Bangkok"
+    });
+  } catch (error) {
+    return fallbackDateLabel(date, false);
+  }
 }
 
 function dateKey(value) {
@@ -90,12 +107,43 @@ function dateKey(value) {
     return value || "Undated";
   }
 
-  return new Intl.DateTimeFormat("en-CA", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    timeZone: "Asia/Bangkok"
-  }).format(date);
+  try {
+    return new Intl.DateTimeFormat("en-CA", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      timeZone: "Asia/Bangkok"
+    }).format(date);
+  } catch (error) {
+    return [
+      date.getFullYear(),
+      pad2(date.getMonth() + 1),
+      pad2(date.getDate())
+    ].join("-");
+  }
+}
+
+function pad2(value) {
+  return value < 10 ? `0${value}` : String(value);
+}
+
+function fallbackDateLabel(date, includeYear) {
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+  ];
+  const label = `${date.getDate()} ${months[date.getMonth()]}`;
+  return includeYear ? `${label} ${date.getFullYear()}` : label;
 }
 
 function isValidLink(value) {
@@ -141,13 +189,13 @@ function appendItemText(target, item) {
     target.appendChild(region);
   }
 
-  target.append(document.createTextNode(item.blurb));
+  target.appendChild(document.createTextNode(item.blurb));
 
   if (!item.source_name) {
     return;
   }
 
-  target.append(document.createTextNode(" ["));
+  target.appendChild(document.createTextNode(" ["));
 
   if (item.source_url) {
     const source = document.createElement("a");
@@ -157,10 +205,10 @@ function appendItemText(target, item) {
     source.textContent = item.source_name;
     target.appendChild(source);
   } else {
-    target.append(document.createTextNode(item.source_name));
+    target.appendChild(document.createTextNode(item.source_name));
   }
 
-  target.append(document.createTextNode("]"));
+  target.appendChild(document.createTextNode("]"));
 }
 
 function renderArchive(items) {
