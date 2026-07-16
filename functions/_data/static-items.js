@@ -1,5 +1,15 @@
 export const STATIC_ITEMS = [
   {
+    "id": "manual-telegram-2026-07-16-006",
+    "blurb": "TSMC pledged Thursday to invest another $100 billion in Arizona, saying AI-driven demand will stay strong through 2030. The chipmaker posted a 77% jump in second-quarter profit to a record T$706.6 billion ($22 billion), topping forecasts and marking its ninth straight quarter of double-digit growth.",
+    "source_name": "Reuters",
+    "source_url": "https://www.reuters.com/world/asia-pacific/tsmcs-second-quarter-profit-seen-hitting-record-ai-boom-2026-07-15/",
+    "category": "",
+    "telegram_message_id": "17950",
+    "published_at": "2026-07-16T09:11:08.681Z",
+    "created_at": "2026-07-16T09:11:08.681Z"
+  },
+  {
     "id": "manual-telegram-2026-07-16-005",
     "blurb": "Nvidia and four Japanese industrial automation companies will expand collaboration on robot development through its Cosmos physical AI platform, deepening its push into AI-enabled robotics and factory automation",
     "source_name": "Bloomberg",
