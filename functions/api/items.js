@@ -42,15 +42,15 @@ export async function onRequestPost({ env, request }) {
   const blurb = clean(body.blurb);
   const sourceName = clean(body.sourceName || body.source_name);
   const sourceUrl = clean(body.sourceUrl || body.source_url);
-  const category = clean(body.category) || "Other news";
+  const category = clean(body.region || body.category) || "Other news";
   const telegramMessageId = clean(body.telegramMessageId || body.telegram_message_id);
   const publishedAt = clean(body.publishedAt || body.published_at) || new Date().toISOString();
 
-  if (!blurb || !sourceName || !sourceUrl) {
-    return json({ error: "blurb, sourceName and sourceUrl are required" }, 400);
+  if (!blurb) {
+    return json({ error: "blurb is required" }, 400);
   }
 
-  if (!/^https?:\/\//i.test(sourceUrl)) {
+  if (sourceUrl && !/^https?:\/\//i.test(sourceUrl)) {
     return json({ error: "sourceUrl must be an http(s) URL" }, 400);
   }
 
