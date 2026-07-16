@@ -5,6 +5,7 @@ const pagination = document.querySelector("#pagination");
 const dateTemplate = document.querySelector("#date-template");
 const itemTemplate = document.querySelector("#item-template");
 const ITEMS_PER_PAGE = 15;
+const ARCHIVE_DAYS = 7;
 
 let allItems = [];
 let currentPage = getRequestedPage();
@@ -99,12 +100,45 @@ function shortDateLabel(value) {
   }
 }
 
-function archiveDateLabel(value, key) {
-  return key === dateKey(new Date()) ? "Today" : shortDateLabel(value);
+function archiveDateLabel(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value || "Undated";
+  }
+
+  try {
+    return date.toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      timeZone: "Asia/Bangkok"
+    }) + ordinalSuffix(Number(date.toLocaleDateString("en-US", {
+      day: "numeric",
+      timeZone: "Asia/Bangkok"
+    })));
+  } catch (error) {
+    return fallbackDateLabel(date, false) + ordinalSuffix(date.getDate());
+  }
+}
+
+function ordinalSuffix(day) {
+  if (day >= 11 && day <= 13) {
+    return "th";
+  }
+
+  switch (day % 10) {
+    case 1:
+      return "st";
+    case 2:
+      return "nd";
+    case 3:
+      return "rd";
+    default:
+      return "th";
+  }
 }
 
 function dateKey(value) {
-  const date = typeof value === "object" ? parseDate(value) : new Date(value);
+  const date = value instanceof Date ? value : typeof value === "object" ? parseDate(value) : new Date(value);
   if (!date || Number.isNaN(date.getTime())) {
     if (typeof value === "object") {
       return value.Date || value.date || "Undated";
@@ -149,6 +183,39 @@ function fallbackDateLabel(date, includeYear) {
   ];
   const monthDay = `${months[date.getMonth()]} ${date.getDate()}`;
   return includeYear ? `${monthDay} ${date.getFullYear()}` : monthDay;
+}
+
+function bangkokToday() {
+  const now = new Date();
+
+  try {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      timeZone: "Asia/Bangkok"
+    }).formatToParts(now);
+    const values = {};
+    for (const part of parts) {
+      values[part.type] = part.value;
+    }
+    return new Date(`${values.year}-${values.month}-${values.day}T00:00:00+07:00`);
+  } catch (error) {
+    return new Date(now.getTime() + (7 * 60 * 60 * 1000));
+  }
+}
+
+function recentArchiveDates() {
+  const dates = [];
+  const start = bangkokToday();
+
+  for (let index = 0; index < ARCHIVE_DAYS; index += 1) {
+    const date = new Date(start.getTime());
+    date.setUTCDate(start.getUTCDate() - index);
+    dates.push(date);
+  }
+
+  return dates;
 }
 
 function isValidLink(value) {
@@ -216,20 +283,14 @@ function appendItemText(target, item) {
   target.appendChild(document.createTextNode("]"));
 }
 
-function renderArchive(items) {
+function renderArchive() {
   archiveNav.textContent = "";
-  const seen = new Set();
 
-  for (const item of items) {
-    const key = dateKey(item.published_at);
-    if (seen.has(key)) {
-      continue;
-    }
-
-    seen.add(key);
+  for (const date of recentArchiveDates()) {
+    const key = dateKey(date);
     const link = document.createElement("a");
     link.href = `?date=${key}`;
-    link.textContent = archiveDateLabel(item.published_at, key);
+    link.textContent = archiveDateLabel(date);
     link.dataset.date = key;
 
     if (key === currentDateFilter) {
@@ -308,7 +369,7 @@ function renderPage(page = currentPage) {
     return;
   }
 
-  renderArchive(allItems);
+  renderArchive();
   renderItems(pageItems);
   renderPagination(allItems.length);
 }
@@ -326,7 +387,7 @@ function renderDate(date) {
   pagination.textContent = "";
   pagination.hidden = true;
 
-  renderArchive(allItems);
+  renderArchive();
 
   if (!dateItems.length) {
     const empty = document.createElement("p");
