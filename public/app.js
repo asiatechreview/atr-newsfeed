@@ -1,8 +1,30 @@
 const feed = document.querySelector("#feed-list");
 const status = document.querySelector("#feed-status");
 const archiveNav = document.querySelector("#archive-nav");
+const pagination = document.querySelector("#pagination");
 const dateTemplate = document.querySelector("#date-template");
 const itemTemplate = document.querySelector("#item-template");
+const ITEMS_PER_PAGE = 15;
+
+let allItems = [];
+let currentPage = getRequestedPage();
+
+function getRequestedPage() {
+  const page = Number(new URLSearchParams(window.location.search).get("page"));
+  return Number.isInteger(page) && page > 0 ? page : 1;
+}
+
+function updatePageUrl(page) {
+  const url = new URL(window.location.href);
+
+  if (page <= 1) {
+    url.searchParams.delete("page");
+  } else {
+    url.searchParams.set("page", String(page));
+  }
+
+  window.history.replaceState({}, "", url);
+}
 
 function parseDate(item) {
   const dateValue = item.Date || item.date || item.published_at || item.publishedAt || item.created_at || "";
@@ -163,26 +185,72 @@ function renderArchive(items) {
   }
 }
 
-function render(items, options = {}) {
-  const cleanItems = sortItems(items.map(normalizeItem).filter(Boolean));
+function createPageButton(label, page, options = {}) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = label;
+  button.disabled = options.disabled || false;
+
+  if (options.current) {
+    button.className = "current";
+    button.setAttribute("aria-current", "page");
+  }
+
+  button.addEventListener("click", () => renderPage(page));
+  return button;
+}
+
+function renderPagination(totalItems) {
+  pagination.textContent = "";
+
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+  if (totalPages <= 1) {
+    pagination.hidden = true;
+    return;
+  }
+
+  pagination.hidden = false;
+  pagination.appendChild(createPageButton("Previous", Math.max(1, currentPage - 1), {
+    disabled: currentPage === 1
+  }));
+
+  for (let page = 1; page <= totalPages; page += 1) {
+    pagination.appendChild(createPageButton(String(page), page, {
+      current: page === currentPage
+    }));
+  }
+
+  pagination.appendChild(createPageButton("Next", Math.min(totalPages, currentPage + 1), {
+    disabled: currentPage === totalPages
+  }));
+}
+
+function renderPage(page = currentPage) {
+  const totalPages = Math.max(1, Math.ceil(allItems.length / ITEMS_PER_PAGE));
+  currentPage = Math.min(Math.max(1, page), totalPages);
+  updatePageUrl(currentPage);
+
+  const start = (currentPage - 1) * ITEMS_PER_PAGE;
+  const pageItems = allItems.slice(start, start + ITEMS_PER_PAGE);
 
   feed.textContent = "";
   archiveNav.textContent = "";
-  status.textContent = options.statusText || "";
+  status.textContent = "";
 
-  if (!cleanItems.length) {
+  if (!pageItems.length) {
     const empty = document.createElement("p");
     empty.className = "empty";
     empty.textContent = "No updates yet.";
     feed.appendChild(empty);
+    renderPagination(0);
     return;
   }
 
-  renderArchive(cleanItems);
+  renderArchive(pageItems);
 
   let currentDate = "";
 
-  for (const item of cleanItems) {
+  for (const item of pageItems) {
     const nextDate = dateKey(item.published_at);
 
     if (nextDate !== currentDate) {
@@ -198,6 +266,23 @@ function render(items, options = {}) {
     appendItemText(itemNode.querySelector(".blurb"), item);
     feed.appendChild(itemNode);
   }
+
+  renderPagination(allItems.length);
+}
+
+function render(items, options = {}) {
+  allItems = sortItems(items.map(normalizeItem).filter(Boolean));
+
+  if (options.statusText) {
+    feed.textContent = "";
+    archiveNav.textContent = "";
+    pagination.textContent = "";
+    pagination.hidden = true;
+    status.textContent = options.statusText;
+    return;
+  }
+
+  renderPage(currentPage);
 }
 
 async function loadFeed() {

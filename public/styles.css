@@ -98,6 +98,44 @@ footer {
   border-bottom: 1px solid var(--border);
 }
 
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 16px 0 0;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--border);
+}
+
+.pagination[hidden] {
+  display: none;
+}
+
+.pagination button {
+  min-width: 30px;
+  min-height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  background: #ffffff;
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.pagination button.current {
+  background: var(--text);
+  border-color: var(--text);
+  color: #ffffff;
+}
+
+.pagination button:disabled {
+  color: var(--muted);
+  cursor: default;
+  opacity: 0.45;
+}
+
 .date {
   margin: 20px 0 8px;
   scroll-margin-top: 15px;
