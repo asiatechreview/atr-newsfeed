@@ -1,3 +1,5 @@
+import { STATIC_ITEMS } from "../_data/static-items.js";
+
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 200;
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1-9bPUuh73mgFWM1gDc_3qlTe_-VNZGrgRfWMApv8yxU/gviz/tq?tqx=out:csv&gid=0&headers=1";
@@ -33,11 +35,29 @@ export async function onRequestGet({ env, request }) {
     });
   }
 
+  const staticItems = loadStaticItems({ limit, category });
+  if (staticItems.length) {
+    return json({
+      items: staticItems
+    });
+  }
+
   const sheetItems = await loadSheetItems({ limit, category });
 
   return json({
     items: sheetItems
   });
+}
+
+function loadStaticItems({ limit, category }) {
+  return STATIC_ITEMS
+    .filter((item) => item && (!category || item.category === category))
+    .sort((a, b) => {
+      const aTime = new Date(a.published_at).getTime() || 0;
+      const bTime = new Date(b.published_at).getTime() || 0;
+      return bTime - aTime;
+    })
+    .slice(0, limit);
 }
 
 export async function onRequestPost({ env, request }) {
