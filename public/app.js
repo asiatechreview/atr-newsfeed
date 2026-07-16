@@ -281,7 +281,7 @@ function inferTags(item, blurb) {
     }
   };
 
-  if (/\b(e-commerce|ecommerce|commerce|marketplace|online retail|retail|b2b e-commerce|b2b ecommerce|udaan|shein|amazon)\b/.test(text)) {
+  if (/\b(e-commerce|ecommerce|commerce|marketplace|online retail|retail|b2b e-commerce|b2b ecommerce|udaan|shein|amazon|fast-fashion|warehouses?)\b/.test(text)) {
     add("e-commerce");
   }
 
@@ -293,11 +293,11 @@ function inferTags(item, blurb) {
     add("markets");
   }
 
-  if (/\b(ai|artificial intelligence|llm|large model|model|claude|openai|anthropic|deepseek|minimax|moonshot|agentic|nvidia|waic)\b/.test(text)) {
+  if (/\b(ai|artificial intelligence|llm|large model|multimodal|foundation model|model|claude|openai|anthropic|deepseek|minimax|moonshot|agentic|nvidia|waic|persona|distillation)\b/.test(text)) {
     add("ai");
   }
 
-  if (/\b(chip|chips|semiconductor|semiconductors|tsmc|samsung|sk hynix|hynix|cxmt|umc|silicon|photonics|fab|foundry|packaging|hbm|nvidia)\b/.test(text)) {
+  if (/\b(chip|chips|chipmaker|chipmaking|semiconductor|semiconductors|integrated-circuit|integrated circuit|circuit board|circuit boards|pcb|pcbs|tsmc|samsung|sk hynix|hynix|cxmt|umc|silicon|photonics|fab|foundry|packaging|hbm|memory-chip|memory chips|nvidia)\b/.test(text)) {
     add("chips");
   }
 
@@ -307,6 +307,46 @@ function inferTags(item, blurb) {
 
   if (/\b(crypto|bitcoin|stablecoin|stablecoins|blockchain|onchain|token|digital asset|solana)\b/.test(text)) {
     add("crypto");
+  }
+
+  if (/\b(bank|banking|fintech|financial|payments?|qr payment|insurance|lending|yield|securities regulator|central bank|islamic law)\b/.test(text)) {
+    add("fintech");
+  }
+
+  if (/\b(regulator|regulators|regulation|policy|government|ministry|customs|approval|approved|audit|probe|immigration|law|rules|compliance|incentives|tax|grant|public sector)\b/.test(text)) {
+    add("policy");
+  }
+
+  if (/\b(cloud|data centre|data center|datacentre|datacenter|infrastructure|compute|air-gapped|oracle|aws|microsoft|google)\b/.test(text)) {
+    add("cloud");
+  }
+
+  if (/\b(cybersecurity|security|intelligence-sharing|critical infrastructure|export controls?|export-restricted|illicit finance|shadow economy)\b/.test(text)) {
+    add("security");
+  }
+
+  if (/\b(smartphone|iphone|device|devices|handset|huawei|apple|xiaomi|oppo|vivo|honor)\b/.test(text)) {
+    add("devices");
+  }
+
+  if (/\b(gaming|games|famitsu|media|publication|newsletter|content|entertainment)\b/.test(text)) {
+    add("media");
+  }
+
+  if (/\b(energy|battery|solar|inverter|power supplies|power supply|renewable)\b/.test(text)) {
+    add("energy");
+  }
+
+  if (/\b(drone|drones|uav|defence|defense|military)\b/.test(text)) {
+    add("defence");
+  }
+
+  if (/\b(outsourcing|bpo|jobs forecast|labour|labor|workforce)\b/.test(text)) {
+    add("workforce");
+  }
+
+  if (!tags.length) {
+    add("tech");
   }
 
   return tags;
