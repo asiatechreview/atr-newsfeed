@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Asia Tech Review's rolling feed of concise Asia tech news updates.">
+  <title>Asia Tech Review Feed</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="masthead">
+      <a class="brand" href="/" aria-label="Asia Tech Review Feed">
+        <span class="brand-mark">ATR</span>
+        <span>
+          <strong>Asia Tech Review</strong>
+          <small>Daily Feed</small>
+        </span>
+      </a>
+      <nav class="nav" aria-label="Feed links">
+        <a href="/feed.json">JSON</a>
+        <a href="/rss.xml">RSS</a>
+        <a href="https://asiatechreview.com">Main site</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="intro">
+      <p class="eyebrow">Rolling Asia tech notes</p>
+      <h1>Short, sourced updates from Asia's startup and technology markets.</h1>
+      <p class="dek">A public feed of the concise ATR Daily blurbs posted to the Asia Tech Review news channel.</p>
+    </section>
+
+    <section class="toolbar" aria-label="Feed controls">
+      <div class="status-group">
+        <span id="feed-count">Loading</span>
+        <span id="feed-updated">Fetching latest items</span>
+      </div>
+      <label class="filter">
+        <span>Segment</span>
+        <select id="category-filter">
+          <option value="">All</option>
+        </select>
+      </label>
+    </section>
+
+    <section id="feed" class="feed" aria-live="polite"></section>
+  </main>
+
+  <footer class="footer">
+    <p>Asia Tech Review covers technology, startups and digital markets across Asia.</p>
+  </footer>
+
+  <template id="item-template">
+    <article class="feed-item">
+      <div class="item-meta">
+        <time></time>
+        <span class="category"></span>
+      </div>
+      <p class="blurb"></p>
+    </article>
+  </template>
+
+  <script src="/app.js" type="module"></script>
+</body>
+</html>

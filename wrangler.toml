@@ -1,0 +1,8 @@
+name = "atr-newsfeed"
+compatibility_date = "2026-07-16"
+pages_build_output_dir = "public"
+
+[[d1_databases]]
+binding = "ATR_FEED_DB"
+database_name = "atr-feed-db"
+database_id = "replace-after-cloudflare-d1-create"
