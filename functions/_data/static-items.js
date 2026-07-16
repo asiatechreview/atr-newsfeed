@@ -1,5 +1,45 @@
 export const STATIC_ITEMS = [
   {
+    "id": "manual-telegram-2026-07-16-004",
+    "blurb": "Hyundai will buy SoftBank's roughly 10% stake in Boston Dynamics, making the US robotics company a wholly owned subsidiary, with plans to deploy Atlas humanoid robots at a Georgia car plant from 2028",
+    "source_name": "Reuters",
+    "source_url": "https://www.reuters.com/world/hyundai-motor-group-make-boston-dynamics-wholly-owned-with-purchase-softbank-2026-07-16/",
+    "category": "",
+    "telegram_message_id": "17948",
+    "published_at": "2026-07-16T05:13:02.738Z",
+    "created_at": "2026-07-16T05:13:02.738Z"
+  },
+  {
+    "id": "manual-telegram-2026-07-16-003",
+    "blurb": "OnePlus plans to wind down US and Europe operations as early as this week under an Oppo restructuring, with a wider global shutdown including India expected in 2027",
+    "source_name": "Bloomberg",
+    "source_url": "https://www.bloomberg.com/news/articles/2026-07-15/oneplus-once-popular-with-tech-fans-to-pull-out-of-us-and-europe",
+    "category": "",
+    "telegram_message_id": null,
+    "published_at": "2026-07-16T01:16:14.176Z",
+    "created_at": "2026-07-16T01:16:14.176Z"
+  },
+  {
+    "id": "manual-telegram-2026-07-16-002",
+    "blurb": "Thinking Machines Lab released Inkling, its first general-purpose AI model, using an architecture based on DeepSeek-V3 and post-training data from Moonshot AI's Kimi K2.5",
+    "source_name": "Financial Times",
+    "source_url": "https://www.ft.com/content/ef486929-d2c2-480b-8b00-9cb98bda6acf?syn-25a6b1a6=1",
+    "category": "",
+    "telegram_message_id": null,
+    "published_at": "2026-07-16T01:12:25.805Z",
+    "created_at": "2026-07-16T01:12:25.805Z"
+  },
+  {
+    "id": "manual-telegram-2026-07-16-001",
+    "blurb": "Taiwan is building its own AI model, TAIDE, to preserve traditional-script language and counter mainland Chinese political framing and vocabulary in global AI systems trained mostly on simplified-script data",
+    "source_name": "Nikkei Asia",
+    "source_url": "https://asia.nikkei.com/business/technology/artificial-intelligence/taiwan-eyes-local-ai-as-digital-bulwark-against-chinese-influence",
+    "category": "",
+    "telegram_message_id": null,
+    "published_at": "2026-07-16T01:09:03.598Z",
+    "created_at": "2026-07-16T01:09:03.598Z"
+  },
+  {
     "id": "html-2026-07-16-001",
     "blurb": "SBI Holdings and the Solana Foundation teamed up to build an onchain financial market in Japan, with Solana taking a stake in SBI R3 Japan as part of the venture",
     "source_name": "The Block",
