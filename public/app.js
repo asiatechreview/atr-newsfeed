@@ -99,6 +99,10 @@ function shortDateLabel(value) {
   }
 }
 
+function archiveDateLabel(value, key) {
+  return key === dateKey(new Date()) ? "Today" : shortDateLabel(value);
+}
+
 function dateKey(value) {
   const date = typeof value === "object" ? parseDate(value) : new Date(value);
   if (!date || Number.isNaN(date.getTime())) {
@@ -225,7 +229,7 @@ function renderArchive(items) {
     seen.add(key);
     const link = document.createElement("a");
     link.href = `?date=${key}`;
-    link.textContent = shortDateLabel(item.published_at);
+    link.textContent = archiveDateLabel(item.published_at, key);
     link.dataset.date = key;
 
     if (key === currentDateFilter) {
