@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Asia Tech Review</title>
-  <link rel="stylesheet" href="/styles.css?v=20260716-share-test">
+  <link rel="stylesheet" href="/styles.css?v=20260716-search">
 </head>
 <body>
   <div class="page">
@@ -15,6 +15,10 @@
 
     <main>
       <nav id="archive-nav" class="archive" aria-label="Recent dates"></nav>
+      <form id="search-form" class="search" role="search">
+        <label for="search-input">Search</label>
+        <input id="search-input" name="q" type="search" autocomplete="off" placeholder="Search">
+      </form>
       <p id="feed-status" class="status" aria-live="polite">Loading news links...</p>
 
       <section id="feed-list" class="feed" aria-label="Asia Tech Review feed"></section>
@@ -38,6 +42,6 @@
     </article>
   </template>
 
-  <script src="/app.js?v=20260716-share-test" defer></script>
+  <script src="/app.js?v=20260716-search" defer></script>
 </body>
 </html>

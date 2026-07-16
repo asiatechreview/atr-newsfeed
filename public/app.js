@@ -2,6 +2,8 @@ const feed = document.querySelector("#feed-list");
 const status = document.querySelector("#feed-status");
 const archiveNav = document.querySelector("#archive-nav");
 const pagination = document.querySelector("#pagination");
+const searchForm = document.querySelector("#search-form");
+const searchInput = document.querySelector("#search-input");
 const dateTemplate = document.querySelector("#date-template");
 const itemTemplate = document.querySelector("#item-template");
 const ITEMS_PER_PAGE = 15;
@@ -11,6 +13,7 @@ let allItems = [];
 let currentPage = getRequestedPage();
 let currentDateFilter = getRequestedDateFilter();
 let currentTagFilter = getRequestedTagFilter();
+let currentSearchQuery = getRequestedSearchQuery();
 
 function getRequestedPage() {
   const match = window.location.search.match(/[?&]page=([0-9]+)/);
@@ -28,6 +31,11 @@ function getRequestedTagFilter() {
   return match ? normalizeTag(decodeURIComponent(match[1].replace(/\+/g, " "))) : "";
 }
 
+function getRequestedSearchQuery() {
+  const match = window.location.search.match(/[?&]q=([^&]+)/);
+  return match ? decodeURIComponent(match[1].replace(/\+/g, " ")).trim() : "";
+}
+
 function updateFeedUrl(options = {}) {
   if (!window.history || !window.history.replaceState) {
     return;
@@ -38,10 +46,12 @@ function updateFeedUrl(options = {}) {
     const page = options.page || 1;
     const date = options.date || "";
     const tag = options.tag || "";
+    const query = options.query || "";
 
     if (date) {
       url.searchParams.set("date", date);
       url.searchParams.delete("page");
+      url.searchParams.delete("q");
     } else {
       url.searchParams.delete("date");
     }
@@ -49,8 +59,17 @@ function updateFeedUrl(options = {}) {
     if (tag) {
       url.searchParams.set("tag", tag);
       url.searchParams.delete("date");
+      url.searchParams.delete("q");
     } else {
       url.searchParams.delete("tag");
+    }
+
+    if (query) {
+      url.searchParams.set("q", query);
+      url.searchParams.delete("date");
+      url.searchParams.delete("tag");
+    } else {
+      url.searchParams.delete("q");
     }
 
     if (!date && page > 1) {
@@ -605,7 +624,9 @@ function createPageButton(label, page, options = {}) {
   }
 
   button.addEventListener("click", () => {
-    if (currentTagFilter) {
+    if (currentSearchQuery) {
+      renderSearch(currentSearchQuery, page);
+    } else if (currentTagFilter) {
       renderTag(currentTagFilter, page);
     } else {
       renderPage(page);
@@ -642,6 +663,8 @@ function renderPagination(totalItems) {
 function renderPage(page = currentPage) {
   currentDateFilter = "";
   currentTagFilter = "";
+  currentSearchQuery = "";
+  syncSearchInput();
   const totalPages = Math.max(1, Math.ceil(allItems.length / ITEMS_PER_PAGE));
   currentPage = Math.min(Math.max(1, page), totalPages);
   updateFeedUrl({ page: currentPage });
@@ -670,6 +693,8 @@ function renderPage(page = currentPage) {
 function renderDate(date) {
   currentDateFilter = date;
   currentTagFilter = "";
+  currentSearchQuery = "";
+  syncSearchInput();
   currentPage = 1;
   updateFeedUrl({ date });
 
@@ -697,6 +722,8 @@ function renderDate(date) {
 function renderTag(tag, page = currentPage) {
   currentDateFilter = "";
   currentTagFilter = normalizeTag(tag);
+  currentSearchQuery = "";
+  syncSearchInput();
 
   const tagItems = allItems.filter((item) => item.tags.includes(currentTagFilter));
   const totalPages = Math.max(1, Math.ceil(tagItems.length / ITEMS_PER_PAGE));
@@ -725,6 +752,63 @@ function renderTag(tag, page = currentPage) {
   renderPagination(tagItems.length);
 }
 
+function normalizeSearchQuery(query) {
+  return String(query || "").trim().replace(/\s+/g, " ");
+}
+
+function searchText(item) {
+  return [
+    item.blurb,
+    item.source_name,
+    item.source_url,
+    item.published_at,
+    formatDate(item.published_at),
+    ...(item.tags || [])
+  ].join(" ").toLowerCase();
+}
+
+function renderSearch(query, page = currentPage) {
+  currentDateFilter = "";
+  currentTagFilter = "";
+  currentSearchQuery = normalizeSearchQuery(query);
+  syncSearchInput();
+
+  if (!currentSearchQuery) {
+    renderPage(1);
+    return;
+  }
+
+  const terms = currentSearchQuery.toLowerCase().split(/\s+/).filter(Boolean);
+  const searchItems = allItems.filter((item) => {
+    const text = searchText(item);
+    return terms.every((term) => text.includes(term));
+  });
+  const totalPages = Math.max(1, Math.ceil(searchItems.length / ITEMS_PER_PAGE));
+  currentPage = Math.min(Math.max(1, page), totalPages);
+  updateFeedUrl({ query: currentSearchQuery, page: currentPage });
+
+  const start = (currentPage - 1) * ITEMS_PER_PAGE;
+  const pageItems = searchItems.slice(start, start + ITEMS_PER_PAGE);
+
+  feed.textContent = "";
+  archiveNav.textContent = "";
+  status.textContent = "";
+
+  renderArchive();
+
+  if (!pageItems.length) {
+    const empty = document.createElement("p");
+    empty.className = "empty";
+    empty.textContent = "No matching updates.";
+    feed.appendChild(empty);
+    renderPagination(0);
+    return;
+  }
+
+  renderItems(pageItems);
+  renderPagination(searchItems.length);
+}
+
 function renderItems(items) {
   let currentDate = "";
 
@@ -750,6 +834,7 @@ function renderItems(items) {
 
 function render(items, options = {}) {
   allItems = sortItems(items.map(normalizeItem).filter(Boolean));
+  syncSearchInput();
 
   if (options.statusText) {
     feed.textContent = "";
@@ -760,7 +845,9 @@ function render(items, options = {}) {
     return;
   }
 
-  if (currentTagFilter) {
+  if (currentSearchQuery) {
+    renderSearch(currentSearchQuery);
+  } else if (currentTagFilter) {
     renderTag(currentTagFilter);
   } else if (currentDateFilter) {
     renderDate(currentDateFilter);
@@ -771,10 +858,7 @@ function render(items, options = {}) {
 
 async function loadFeed() {
   try {
-    const params = [`limit=${currentDateFilter || currentTagFilter ? 500 : 100}`];
-    if (currentDateFilter) {
-      params.push(`date=${encodeURIComponent(currentDateFilter)}`);
-    }
+    const params = ["limit=500"];
 
     const response = await fetch(`/api/items?${params.join("&")}`, {
       headers: { Accept: "application/json" }
@@ -791,6 +875,25 @@ async function loadFeed() {
       statusText: "Feed unavailable. Try again shortly."
     });
   }
+}
+
+function syncSearchInput() {
+  if (searchInput && searchInput.value !== currentSearchQuery) {
+    searchInput.value = currentSearchQuery;
+  }
+}
+
+if (searchForm && searchInput) {
+  searchInput.value = currentSearchQuery;
+
+  searchForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    renderSearch(searchInput.value, 1);
+  });
+
+  searchInput.addEventListener("input", () => {
+    renderSearch(searchInput.value, 1);
+  });
 }
 
 loadFeed();
