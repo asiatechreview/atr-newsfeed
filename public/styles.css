@@ -84,6 +84,11 @@ footer {
   text-underline-offset: 2px;
 }
 
+.archive a.current {
+  color: var(--text);
+  font-weight: 700;
+}
+
 .status {
   margin: 19px 0 15px;
   padding-bottom: 14px;

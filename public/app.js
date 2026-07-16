@@ -8,6 +8,7 @@ const ITEMS_PER_PAGE = 15;
 
 let allItems = [];
 let currentPage = getRequestedPage();
+let currentDateFilter = getRequestedDateFilter();
 
 function getRequestedPage() {
   const match = window.location.search.match(/[?&]page=([0-9]+)/);
@@ -15,18 +16,32 @@ function getRequestedPage() {
   return Number.isInteger(page) && page > 0 ? page : 1;
 }
 
-function updatePageUrl(page) {
+function getRequestedDateFilter() {
+  const match = window.location.search.match(/[?&]date=([0-9]{4}-[0-9]{2}-[0-9]{2})/);
+  return match ? match[1] : "";
+}
+
+function updateFeedUrl(options = {}) {
   if (!window.history || !window.history.replaceState) {
     return;
   }
 
   try {
     const url = new URL(window.location.href);
+    const page = options.page || 1;
+    const date = options.date || "";
 
-    if (page <= 1) {
+    if (date) {
+      url.searchParams.set("date", date);
       url.searchParams.delete("page");
     } else {
+      url.searchParams.delete("date");
+    }
+
+    if (!date && page > 1) {
       url.searchParams.set("page", String(page));
+    } else {
+      url.searchParams.delete("page");
     }
 
     window.history.replaceState({}, "", url);
@@ -57,40 +72,26 @@ function formatDate(value) {
   }
 
   try {
-    return date.toLocaleDateString("en-GB", {
-      day: "numeric",
+    return date.toLocaleDateString("en-US", {
       month: "long",
-      year: "numeric",
+      day: "numeric",
       timeZone: "Asia/Bangkok"
     });
   } catch (error) {
-    return fallbackDateLabel(date, true);
+    return fallbackDateLabel(date, false);
   }
 }
 
 function shortDateLabel(value) {
-  const key = dateKey(value);
-  const today = dateKey(new Date().toISOString());
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-
-  if (key === today) {
-    return "Today";
-  }
-
-  if (key === dateKey(yesterday.toISOString())) {
-    return "Yesterday";
-  }
-
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
     return value || "Undated";
   }
 
   try {
-    return date.toLocaleDateString("en-GB", {
-      day: "numeric",
+    return date.toLocaleDateString("en-US", {
       month: "long",
+      day: "numeric",
       timeZone: "Asia/Bangkok"
     });
   } catch (error) {
@@ -142,8 +143,8 @@ function fallbackDateLabel(date, includeYear) {
     "November",
     "December"
   ];
-  const label = `${date.getDate()} ${months[date.getMonth()]}`;
-  return includeYear ? `${label} ${date.getFullYear()}` : label;
+  const monthDay = `${months[date.getMonth()]} ${date.getDate()}`;
+  return includeYear ? `${monthDay} ${date.getFullYear()}` : monthDay;
 }
 
 function isValidLink(value) {
@@ -223,13 +224,21 @@ function renderArchive(items) {
 
     seen.add(key);
     const link = document.createElement("a");
-    link.href = `#${key}`;
+    link.href = `?date=${key}`;
     link.textContent = shortDateLabel(item.published_at);
-    archiveNav.appendChild(link);
+    link.dataset.date = key;
 
-    if (seen.size >= 5) {
-      break;
+    if (key === currentDateFilter) {
+      link.className = "current";
+      link.setAttribute("aria-current", "page");
     }
+
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      renderDate(key);
+    });
+
+    archiveNav.appendChild(link);
   }
 }
 
@@ -274,9 +283,10 @@ function renderPagination(totalItems) {
 }
 
 function renderPage(page = currentPage) {
+  currentDateFilter = "";
   const totalPages = Math.max(1, Math.ceil(allItems.length / ITEMS_PER_PAGE));
   currentPage = Math.min(Math.max(1, page), totalPages);
-  updatePageUrl(currentPage);
+  updateFeedUrl({ page: currentPage });
 
   const start = (currentPage - 1) * ITEMS_PER_PAGE;
   const pageItems = allItems.slice(start, start + ITEMS_PER_PAGE);
@@ -294,11 +304,41 @@ function renderPage(page = currentPage) {
     return;
   }
 
-  renderArchive(pageItems);
+  renderArchive(allItems);
+  renderItems(pageItems);
+  renderPagination(allItems.length);
+}
 
+function renderDate(date) {
+  currentDateFilter = date;
+  currentPage = 1;
+  updateFeedUrl({ date });
+
+  const dateItems = allItems.filter((item) => dateKey(item.published_at) === date);
+
+  feed.textContent = "";
+  archiveNav.textContent = "";
+  status.textContent = "";
+  pagination.textContent = "";
+  pagination.hidden = true;
+
+  renderArchive(allItems);
+
+  if (!dateItems.length) {
+    const empty = document.createElement("p");
+    empty.className = "empty";
+    empty.textContent = "No updates for this date.";
+    feed.appendChild(empty);
+    return;
+  }
+
+  renderItems(dateItems);
+}
+
+function renderItems(items) {
   let currentDate = "";
 
-  for (const item of pageItems) {
+  for (const item of items) {
     const nextDate = dateKey(item.published_at);
 
     if (nextDate !== currentDate) {
@@ -314,8 +354,6 @@ function renderPage(page = currentPage) {
     appendItemText(itemNode.querySelector(".blurb"), item);
     feed.appendChild(itemNode);
   }
-
-  renderPagination(allItems.length);
 }
 
 function render(items, options = {}) {
@@ -330,7 +368,11 @@ function render(items, options = {}) {
     return;
   }
 
-  renderPage(currentPage);
+  if (currentDateFilter) {
+    renderDate(currentDateFilter);
+  } else {
+    renderPage(currentPage);
+  }
 }
 
 async function loadFeed() {
