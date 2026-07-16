@@ -149,6 +149,7 @@ footer {
 .date {
   margin: 20px 0 8px;
   scroll-margin-top: 15px;
+  font-weight: 700;
 }
 
 .item {

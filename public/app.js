@@ -87,13 +87,21 @@ function formatDate(value) {
   }
 
   try {
-    return date.toLocaleDateString("en-US", {
+    const month = date.toLocaleDateString("en-US", {
       month: "long",
-      day: "numeric",
       timeZone: "Asia/Bangkok"
     });
+    const day = Number(date.toLocaleDateString("en-US", {
+      day: "numeric",
+      timeZone: "Asia/Bangkok"
+    }));
+    const year = date.toLocaleDateString("en-US", {
+      year: "numeric",
+      timeZone: "Asia/Bangkok"
+    });
+    return `${month} ${day}${ordinalSuffix(day)}, ${year}`;
   } catch (error) {
-    return fallbackDateLabel(date, false);
+    return fallbackDateLabel(date, true);
   }
 }
 
@@ -196,7 +204,7 @@ function fallbackDateLabel(date, includeYear) {
     "December"
   ];
   const monthDay = `${months[date.getMonth()]} ${date.getDate()}`;
-  return includeYear ? `${monthDay} ${date.getFullYear()}` : monthDay;
+  return includeYear ? `${monthDay}${ordinalSuffix(date.getDate())}, ${date.getFullYear()}` : monthDay;
 }
 
 function bangkokToday() {
