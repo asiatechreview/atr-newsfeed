@@ -10,6 +10,7 @@ const ARCHIVE_DAYS = 7;
 let allItems = [];
 let currentPage = getRequestedPage();
 let currentDateFilter = getRequestedDateFilter();
+let currentTagFilter = getRequestedTagFilter();
 
 function getRequestedPage() {
   const match = window.location.search.match(/[?&]page=([0-9]+)/);
@@ -22,6 +23,11 @@ function getRequestedDateFilter() {
   return match ? match[1] : "";
 }
 
+function getRequestedTagFilter() {
+  const match = window.location.search.match(/[?&]tag=([^&]+)/);
+  return match ? normalizeTag(decodeURIComponent(match[1].replace(/\+/g, " "))) : "";
+}
+
 function updateFeedUrl(options = {}) {
   if (!window.history || !window.history.replaceState) {
     return;
@@ -31,12 +37,20 @@ function updateFeedUrl(options = {}) {
     const url = new URL(window.location.href);
     const page = options.page || 1;
     const date = options.date || "";
+    const tag = options.tag || "";
 
     if (date) {
       url.searchParams.set("date", date);
       url.searchParams.delete("page");
     } else {
       url.searchParams.delete("date");
+    }
+
+    if (tag) {
+      url.searchParams.set("tag", tag);
+      url.searchParams.delete("date");
+    } else {
+      url.searchParams.delete("tag");
     }
 
     if (!date && page > 1) {
@@ -227,6 +241,78 @@ function isValidLink(value) {
   }
 }
 
+function normalizeTag(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/^#/, "")
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function explicitTags(item) {
+  const value = item.Tags || item.tags || item.Tag || item.tag || "";
+  if (Array.isArray(value)) {
+    return value.map(normalizeTag).filter(Boolean);
+  }
+
+  return String(value)
+    .split(/[,|#]/)
+    .map(normalizeTag)
+    .filter(Boolean);
+}
+
+function inferTags(item, blurb) {
+  const text = [
+    blurb,
+    item.Region,
+    item.region,
+    item.Category,
+    item.category,
+    item.source_name,
+    item.Source,
+    item.source
+  ].join(" ").toLowerCase();
+
+  const tags = [];
+  const add = (tag) => {
+    if (!tags.includes(tag)) {
+      tags.push(tag);
+    }
+  };
+
+  if (/\b(fund|funding|raised|raise|series [a-z]|seed|ipo|valuation|stake|acquisition|buy|bought|deal|invest|investment|grant)\b/.test(text)) {
+    add("deals");
+  }
+
+  if (/\b(markets?|shares?|stock|trading|revenue|profit|sales|tax|yield|price|valuation|ipo|investors?)\b/.test(text)) {
+    add("markets");
+  }
+
+  if (/\b(ai|artificial intelligence|llm|large model|model|claude|openai|anthropic|deepseek|minimax|moonshot|agentic|nvidia|waic)\b/.test(text)) {
+    add("ai");
+  }
+
+  if (/\b(chip|chips|semiconductor|semiconductors|tsmc|samsung|sk hynix|hynix|cxmt|umc|silicon|photonics|fab|foundry|packaging|hbm|nvidia)\b/.test(text)) {
+    add("chips");
+  }
+
+  if (/\b(robot|robots|robotics|humanoid|automation|factory|atlas|x[p]?eng|boston dynamics)\b/.test(text)) {
+    add("robotics");
+  }
+
+  if (/\b(crypto|bitcoin|stablecoin|stablecoins|blockchain|onchain|token|digital asset|solana)\b/.test(text)) {
+    add("crypto");
+  }
+
+  return tags;
+}
+
+function itemTags(item, blurb) {
+  const tags = [...explicitTags(item), ...inferTags(item, blurb)];
+  return [...new Set(tags)].slice(0, 4);
+}
+
 function normalizeItem(item) {
   const blurb = String(item.Blurb || item.blurb || "").trim();
   if (!blurb) {
@@ -241,7 +327,8 @@ function normalizeItem(item) {
     published_at: parsedDate && !Number.isNaN(parsedDate.getTime()) ? parsedDate.toISOString() : new Date().toISOString(),
     region: String(item.Region || item.region || item.Category || item.category || "").trim(),
     source_name: String(item.Source || item.source || item.source_name || item.sourceName || "").trim(),
-    source_url: isValidLink(sourceUrl) ? sourceUrl : ""
+    source_url: isValidLink(sourceUrl) ? sourceUrl : "",
+    tags: itemTags(item, blurb)
   };
 }
 
@@ -283,6 +370,30 @@ function appendItemText(target, item) {
   target.appendChild(document.createTextNode("]"));
 }
 
+function renderTags(target, item) {
+  target.textContent = "";
+
+  if (!item.tags.length) {
+    target.hidden = true;
+    return;
+  }
+
+  target.hidden = false;
+
+  for (const tag of item.tags) {
+    const link = document.createElement("a");
+    link.href = `?tag=${encodeURIComponent(tag)}`;
+    link.textContent = `#${tag}`;
+
+    if (tag === currentTagFilter) {
+      link.className = "current";
+      link.setAttribute("aria-current", "page");
+    }
+
+    target.appendChild(link);
+  }
+}
+
 function renderArchive() {
   archiveNav.textContent = "";
 
@@ -313,7 +424,13 @@ function createPageButton(label, page, options = {}) {
     button.setAttribute("aria-current", "page");
   }
 
-  button.addEventListener("click", () => renderPage(page));
+  button.addEventListener("click", () => {
+    if (currentTagFilter) {
+      renderTag(currentTagFilter, page);
+    } else {
+      renderPage(page);
+    }
+  });
   return button;
 }
 
@@ -344,6 +461,7 @@ function renderPagination(totalItems) {
 
 function renderPage(page = currentPage) {
   currentDateFilter = "";
+  currentTagFilter = "";
   const totalPages = Math.max(1, Math.ceil(allItems.length / ITEMS_PER_PAGE));
   currentPage = Math.min(Math.max(1, page), totalPages);
   updateFeedUrl({ page: currentPage });
@@ -371,6 +489,7 @@ function renderPage(page = currentPage) {
 
 function renderDate(date) {
   currentDateFilter = date;
+  currentTagFilter = "";
   currentPage = 1;
   updateFeedUrl({ date });
 
@@ -395,6 +514,37 @@ function renderDate(date) {
   renderItems(dateItems);
 }
 
+function renderTag(tag, page = currentPage) {
+  currentDateFilter = "";
+  currentTagFilter = normalizeTag(tag);
+
+  const tagItems = allItems.filter((item) => item.tags.includes(currentTagFilter));
+  const totalPages = Math.max(1, Math.ceil(tagItems.length / ITEMS_PER_PAGE));
+  currentPage = Math.min(Math.max(1, page), totalPages);
+  updateFeedUrl({ tag: currentTagFilter, page: currentPage });
+
+  const start = (currentPage - 1) * ITEMS_PER_PAGE;
+  const pageItems = tagItems.slice(start, start + ITEMS_PER_PAGE);
+
+  feed.textContent = "";
+  archiveNav.textContent = "";
+  status.textContent = "";
+
+  renderArchive();
+
+  if (!pageItems.length) {
+    const empty = document.createElement("p");
+    empty.className = "empty";
+    empty.textContent = `No updates tagged #${currentTagFilter}.`;
+    feed.appendChild(empty);
+    renderPagination(0);
+    return;
+  }
+
+  renderItems(pageItems);
+  renderPagination(tagItems.length);
+}
+
 function renderItems(items) {
   let currentDate = "";
 
@@ -412,6 +562,7 @@ function renderItems(items) {
 
     const itemNode = itemTemplate.content.cloneNode(true);
     appendItemText(itemNode.querySelector(".blurb"), item);
+    renderTags(itemNode.querySelector(".tags"), item);
     feed.appendChild(itemNode);
   }
 }
@@ -428,7 +579,9 @@ function render(items, options = {}) {
     return;
   }
 
-  if (currentDateFilter) {
+  if (currentTagFilter) {
+    renderTag(currentTagFilter);
+  } else if (currentDateFilter) {
     renderDate(currentDateFilter);
   } else {
     renderPage(currentPage);
@@ -437,7 +590,7 @@ function render(items, options = {}) {
 
 async function loadFeed() {
   try {
-    const params = [`limit=${currentDateFilter ? 500 : 100}`];
+    const params = [`limit=${currentDateFilter || currentTagFilter ? 500 : 100}`];
     if (currentDateFilter) {
       params.push(`date=${encodeURIComponent(currentDateFilter)}`);
     }
