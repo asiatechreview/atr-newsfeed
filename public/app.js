@@ -360,9 +360,88 @@ function inferTags(item, blurb) {
   return tags;
 }
 
+function inferCountryTags(item, blurb) {
+  const text = [
+    blurb,
+    item.Region,
+    item.region,
+    item.Category,
+    item.category
+  ].join(" ").toLowerCase();
+
+  const tags = [];
+  const add = (tag) => {
+    if (!tags.includes(tag)) {
+      tags.push(tag);
+    }
+  };
+
+  if (/\b(china|chinese|beijing|shanghai|shenzhen|hong kong|huawei|alibaba|baidu|bytedance|deepseek|minimax|moonshot|cxmt|dfsx|dongfang suanxin|xpeng|shein)\b/.test(text)) {
+    add("china");
+  }
+
+  if (/\b(india|indian|delhi|mumbai|bengaluru|bangalore|sebi|rupee|inr|sarvam|bharatgen|udaan|elevation capital|insurancedekho)\b/.test(text)) {
+    add("india");
+  }
+
+  if (/\b(japan|japanese|tokyo|sbi holdings|sbi group|sbi vc trade|softbank|sony|panasonic|hitachi|famitsu|yongin)\b/.test(text)) {
+    add("japan");
+  }
+
+  if (/\b(taiwan|taiwanese|taipei|tsmc|umc|chiayi)\b/.test(text)) {
+    add("taiwan");
+  }
+
+  if (/\b(south korea|korea|korean|seoul|samsung|sk hynix|hynix|hyundai)\b/.test(text)) {
+    add("south-korea");
+  }
+
+  if (/\b(singapore)\b/.test(text)) {
+    add("singapore");
+  }
+
+  if (/\b(thailand|thai|bangkok|siam commercial bank|scb x)\b/.test(text)) {
+    add("thailand");
+  }
+
+  if (/\b(malaysia|malaysian|johor)\b/.test(text)) {
+    add("malaysia");
+  }
+
+  if (/\b(vietnam|vietnamese|hanoi|viettel)\b/.test(text)) {
+    add("vietnam");
+  }
+
+  if (/\b(pakistan|pakistani)\b/.test(text)) {
+    add("pakistan");
+  }
+
+  if (/\b(bangladesh|bangla)\b/.test(text)) {
+    add("bangladesh");
+  }
+
+  if (/\b(philippines|philippine|manila)\b/.test(text)) {
+    add("philippines");
+  }
+
+  if (/\b(saudi arabia|saudi)\b/.test(text)) {
+    add("saudi-arabia");
+  }
+
+  if (/\b(israel|israeli)\b/.test(text)) {
+    add("israel");
+  }
+
+  if (/\b(united states|u\.s\.|us|american|arizona|georgia|nasdaq)\b/.test(text)) {
+    add("us");
+  }
+
+  return tags;
+}
+
 function itemTags(item, blurb) {
-  const tags = [...explicitTags(item), ...inferTags(item, blurb)];
-  return [...new Set(tags)].slice(0, 4);
+  const tags = [...inferCountryTags(item, blurb), ...explicitTags(item), ...inferTags(item, blurb)];
+  return [...new Set(tags)].slice(0, 5);
 }
 
 function normalizeItem(item) {
