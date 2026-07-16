@@ -7,6 +7,7 @@ const searchInput = document.querySelector("#search-input");
 const dateTemplate = document.querySelector("#date-template");
 const itemTemplate = document.querySelector("#item-template");
 const ITEMS_PER_PAGE = 15;
+const VISIBLE_PAGE_BUTTONS = 8;
 const ARCHIVE_DAYS = 7;
 
 let allItems = [];
@@ -649,7 +650,13 @@ function renderPagination(totalItems) {
     disabled: currentPage === 1
   }));
 
-  for (let page = 1; page <= totalPages; page += 1) {
+  const visiblePages = Math.min(totalPages, VISIBLE_PAGE_BUTTONS);
+  const halfWindow = Math.floor(visiblePages / 2);
+  let firstPage = currentPage - halfWindow + 1;
+  firstPage = Math.max(1, Math.min(firstPage, totalPages - visiblePages + 1));
+  const lastPage = firstPage + visiblePages - 1;
+
+  for (let page = firstPage; page <= lastPage; page += 1) {
     pagination.appendChild(createPageButton(String(page), page, {
       current: page === currentPage
     }));

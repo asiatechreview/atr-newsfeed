@@ -140,11 +140,13 @@ footer {
 
 .pagination {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 7px;
   margin: 16px 0 0;
   padding-bottom: 15px;
   border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  white-space: nowrap;
 }
 
 .pagination[hidden] {
