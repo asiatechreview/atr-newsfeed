@@ -1,13 +1,15 @@
 import { STATIC_ITEMS } from "../_data/static-items.js";
 
 const DEFAULT_LIMIT = 50;
-const MAX_LIMIT = 200;
+const MAX_LIMIT = 500;
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1-9bPUuh73mgFWM1gDc_3qlTe_-VNZGrgRfWMApv8yxU/gviz/tq?tqx=out:csv&gid=0&headers=1";
 
 export async function onRequestGet({ env, request }) {
   const url = new URL(request.url);
   const limit = Math.min(Number(url.searchParams.get("limit")) || DEFAULT_LIMIT, MAX_LIMIT);
   const category = url.searchParams.get("category");
+  const date = parseDateParam(url.searchParams.get("date"));
+  const dateRange = date ? bangkokDateRange(date) : null;
 
   let query = "SELECT id, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at FROM feed_items WHERE status = ?";
   const params = ["published"];
@@ -15,6 +17,11 @@ export async function onRequestGet({ env, request }) {
   if (category) {
     query += " AND category = ?";
     params.push(category);
+  }
+
+  if (dateRange) {
+    query += " AND published_at >= ? AND published_at < ?";
+    params.push(dateRange.start, dateRange.end);
   }
 
   query += " ORDER BY published_at DESC, id DESC LIMIT ?";
@@ -35,23 +42,23 @@ export async function onRequestGet({ env, request }) {
     });
   }
 
-  const staticItems = loadStaticItems({ limit, category });
+  const staticItems = loadStaticItems({ limit, category, date });
   if (staticItems.length) {
     return json({
       items: staticItems
     });
   }
 
-  const sheetItems = await loadSheetItems({ limit, category });
+  const sheetItems = await loadSheetItems({ limit, category, date });
 
   return json({
     items: sheetItems
   });
 }
 
-function loadStaticItems({ limit, category }) {
+function loadStaticItems({ limit, category, date }) {
   return STATIC_ITEMS
-    .filter((item) => item && (!category || item.category === category))
+    .filter((item) => item && (!category || item.category === category) && (!date || dateKey(item.published_at) === date))
     .sort((a, b) => {
       const aTime = new Date(a.published_at).getTime() || 0;
       const bTime = new Date(b.published_at).getTime() || 0;
@@ -106,7 +113,7 @@ function clean(value) {
   return typeof value === "string" ? value.trim() : "";
 }
 
-async function loadSheetItems({ limit, category }) {
+async function loadSheetItems({ limit, category, date }) {
   const response = await fetch(SHEET_CSV_URL);
   if (!response.ok) {
     throw new Error(`Feed sheet returned ${response.status}`);
@@ -114,7 +121,7 @@ async function loadSheetItems({ limit, category }) {
 
   return parseCsv(await response.text())
     .map(normalizeSheetItem)
-    .filter((item) => item && (!category || item.category === category))
+    .filter((item) => item && (!category || item.category === category) && (!date || dateKey(item.published_at) === date))
     .sort((a, b) => {
       const aTime = new Date(a.published_at).getTime() || 0;
       const bTime = new Date(b.published_at).getTime() || 0;
@@ -211,6 +218,48 @@ function parseSheetDate(item) {
     : new Date(`${dateValue}T00:00:00+07:00`);
 
   return Number.isNaN(parsed.getTime()) ? "" : parsed.toISOString();
+}
+
+function parseDateParam(value) {
+  const cleaned = clean(value);
+  return /^\d{4}-\d{2}-\d{2}$/.test(cleaned) ? cleaned : "";
+}
+
+function bangkokDateRange(date) {
+  const start = new Date(`${date}T00:00:00+07:00`);
+  const end = new Date(start.getTime() + (24 * 60 * 60 * 1000));
+
+  return {
+    start: start.toISOString(),
+    end: end.toISOString()
+  };
+}
+
+function dateKey(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  try {
+    return new Intl.DateTimeFormat("en-CA", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      timeZone: "Asia/Bangkok"
+    }).format(date);
+  } catch {
+    const bangkok = new Date(date.getTime() + (7 * 60 * 60 * 1000));
+    return [
+      bangkok.getUTCFullYear(),
+      pad2(bangkok.getUTCMonth() + 1),
+      pad2(bangkok.getUTCDate())
+    ].join("-");
+  }
+}
+
+function pad2(value) {
+  return value < 10 ? `0${value}` : String(value);
 }
 
 function json(payload, status = 200) {

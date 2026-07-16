@@ -298,11 +298,6 @@ function renderArchive() {
       link.setAttribute("aria-current", "page");
     }
 
-    link.addEventListener("click", (event) => {
-      event.preventDefault();
-      renderDate(key);
-    });
-
     archiveNav.appendChild(link);
   }
 }
@@ -442,7 +437,12 @@ function render(items, options = {}) {
 
 async function loadFeed() {
   try {
-    const response = await fetch("/api/items?limit=100", {
+    const params = [`limit=${currentDateFilter ? 500 : 100}`];
+    if (currentDateFilter) {
+      params.push(`date=${encodeURIComponent(currentDateFilter)}`);
+    }
+
+    const response = await fetch(`/api/items?${params.join("&")}`, {
       headers: { Accept: "application/json" }
     });
 
