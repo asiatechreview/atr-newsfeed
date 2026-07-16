@@ -3,64 +3,34 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Asia Tech Review's rolling notepad of concise Asia tech news updates.">
-  <title>ATR Daily Feed</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@500;700;800&display=swap" rel="stylesheet">
+  <meta name="description" content="Asia Tech Review's rolling feed of concise Asia tech news updates.">
+  <title>Asia Tech Review</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-  <header class="site-header">
-    <div class="masthead">
-      <a class="brand" href="/" aria-label="Asia Tech Review Feed">
-        <span class="brand-mark">ATR</span>
-        <span>
-          <strong>Asia Tech Review</strong>
-          <small>Daily feed</small>
-        </span>
-      </a>
-      <nav class="nav" aria-label="Feed links">
-        <a href="/feed.json">JSON</a>
-        <a href="/rss.xml">RSS</a>
-        <a href="https://asiatechreview.com">Main site</a>
-      </nav>
-    </div>
-  </header>
+  <div class="page">
+    <header>
+      <h1>Asia Tech Review</h1>
+      <p class="tagline">Keeping up with Asia news</p>
+    </header>
 
-  <main class="page">
-    <section class="intro" aria-labelledby="page-title">
-      <p class="eyebrow">ATR Daily</p>
-      <h1 id="page-title">Latest notes</h1>
-      <p class="dek">Concise, sourced Asia tech updates.</p>
-    </section>
+    <main>
+      <section id="feed" aria-label="Newsfeed">
+        <div class="feed" id="feed-list" aria-live="polite"></div>
+      </section>
+    </main>
 
-    <section class="toolbar" aria-label="Feed controls">
-      <div class="status-group">
-        <span id="feed-count">Loading</span>
-        <span id="feed-updated">Fetching latest items</span>
-      </div>
-      <label class="filter">
-        <span>Segment</span>
-        <select id="category-filter">
-          <option value="">All</option>
-        </select>
-      </label>
-    </section>
+    <footer>
+      <p id="feed-status">Loading latest updates.</p>
+    </footer>
+  </div>
 
-    <section id="feed" class="feed" aria-live="polite"></section>
-  </main>
-
-  <footer class="footer">
-    <p>Asia Tech Review</p>
-  </footer>
+  <template id="date-template">
+    <p class="date"></p>
+  </template>
 
   <template id="item-template">
-    <article class="feed-item">
-      <div class="item-meta">
-        <time></time>
-        <span class="category"></span>
-      </div>
+    <article>
       <p class="blurb"></p>
     </article>
   </template>
