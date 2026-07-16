@@ -439,9 +439,42 @@ function inferCountryTags(item, blurb) {
   return tags;
 }
 
+function isCountryTag(tag) {
+  return [
+    "china",
+    "india",
+    "japan",
+    "taiwan",
+    "south-korea",
+    "singapore",
+    "thailand",
+    "malaysia",
+    "vietnam",
+    "pakistan",
+    "bangladesh",
+    "philippines",
+    "saudi-arabia",
+    "israel",
+    "us"
+  ].includes(tag);
+}
+
 function itemTags(item, blurb) {
-  const tags = [...inferCountryTags(item, blurb), ...explicitTags(item), ...inferTags(item, blurb)];
-  return [...new Set(tags)].slice(0, 5);
+  const explicit = explicitTags(item);
+  const countries = [...new Set([...inferCountryTags(item, blurb), ...explicit.filter(isCountryTag)])];
+  const topics = [...new Set([...explicit, ...inferTags(item, blurb)].filter((tag) => !isCountryTag(tag)))];
+
+  if (!countries.length) {
+    countries.push("asia");
+  }
+
+  if (!topics.length) {
+    topics.push("tech");
+  }
+
+  const visibleCountries = countries.slice(0, 4);
+  const visibleTopics = topics.slice(0, 5 - visibleCountries.length);
+  return [...visibleCountries, ...visibleTopics].slice(0, 5);
 }
 
 function normalizeItem(item) {
