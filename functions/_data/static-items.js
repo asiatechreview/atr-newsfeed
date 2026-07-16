@@ -1,5 +1,15 @@
 export const STATIC_ITEMS = [
   {
+    "id": "manual-telegram-2026-07-16-005",
+    "blurb": "Nvidia and four Japanese industrial automation companies will expand collaboration on robot development through its Cosmos physical AI platform, deepening its push into AI-enabled robotics and factory automation",
+    "source_name": "Bloomberg",
+    "source_url": "https://www.bloomberg.com/news/articles/2026-07-16/japan-s-robot-makers-join-nvidia-s-physical-ai-cosmos-coalition",
+    "category": "",
+    "telegram_message_id": null,
+    "published_at": "2026-07-16T05:24:45.467Z",
+    "created_at": "2026-07-16T05:24:45.467Z"
+  },
+  {
     "id": "manual-telegram-2026-07-16-004",
     "blurb": "Hyundai will buy SoftBank's roughly 10% stake in Boston Dynamics, making the US robotics company a wholly owned subsidiary, with plans to deploy Atlas humanoid robots at a Georgia car plant from 2028",
     "source_name": "Reuters",
