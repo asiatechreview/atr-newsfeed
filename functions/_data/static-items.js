@@ -42,7 +42,7 @@ export const STATIC_ITEMS = [
   {
     "id": "manual-telegram-2026-07-16-002",
     "blurb": "Thinking Machines Lab released Inkling, its first general-purpose AI model, using an architecture based on DeepSeek-V3 and post-training data from Moonshot AI's Kimi K2.5",
-    "source_name": "Financial Times",
+    "source_name": "FT",
     "source_url": "https://www.ft.com/content/ef486929-d2c2-480b-8b00-9cb98bda6acf?syn-25a6b1a6=1",
     "category": "",
     "telegram_message_id": null,
