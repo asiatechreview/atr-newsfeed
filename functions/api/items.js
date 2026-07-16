@@ -1,5 +1,6 @@
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 200;
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1-9bPUuh73mgFWM1gDc_3qlTe_-VNZGrgRfWMApv8yxU/gviz/tq?tqx=out:csv&gid=0&headers=1";
 
 export async function onRequestGet({ env, request }) {
   const url = new URL(request.url);
@@ -17,10 +18,25 @@ export async function onRequestGet({ env, request }) {
   query += " ORDER BY published_at DESC, id DESC LIMIT ?";
   params.push(limit);
 
-  const result = await env.ATR_FEED_DB.prepare(query).bind(...params).all();
+  let d1Items = [];
+
+  try {
+    const result = await env.ATR_FEED_DB.prepare(query).bind(...params).all();
+    d1Items = result.results || [];
+  } catch (error) {
+    d1Items = [];
+  }
+
+  if (d1Items.length) {
+    return json({
+      items: d1Items
+    });
+  }
+
+  const sheetItems = await loadSheetItems({ limit, category });
 
   return json({
-    items: result.results || []
+    items: sheetItems
   });
 }
 
@@ -68,6 +84,113 @@ export async function onRequestPost({ env, request }) {
 
 function clean(value) {
   return typeof value === "string" ? value.trim() : "";
+}
+
+async function loadSheetItems({ limit, category }) {
+  const response = await fetch(SHEET_CSV_URL);
+  if (!response.ok) {
+    throw new Error(`Feed sheet returned ${response.status}`);
+  }
+
+  return parseCsv(await response.text())
+    .map(normalizeSheetItem)
+    .filter((item) => item && (!category || item.category === category))
+    .sort((a, b) => {
+      const aTime = new Date(a.published_at).getTime() || 0;
+      const bTime = new Date(b.published_at).getTime() || 0;
+      return bTime - aTime;
+    })
+    .slice(0, limit);
+}
+
+function parseCsv(text) {
+  const rows = [];
+  let row = [];
+  let value = "";
+  let inQuotes = false;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    const next = text[index + 1];
+
+    if (char === '"' && inQuotes && next === '"') {
+      value += '"';
+      index += 1;
+    } else if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === "," && !inQuotes) {
+      row.push(value);
+      value = "";
+    } else if ((char === "\n" || char === "\r") && !inQuotes) {
+      if (value || row.length) {
+        row.push(value);
+        rows.push(row);
+        row = [];
+        value = "";
+      }
+      if (char === "\r" && next === "\n") {
+        index += 1;
+      }
+    } else {
+      value += char;
+    }
+  }
+
+  if (value || row.length) {
+    row.push(value);
+    rows.push(row);
+  }
+
+  if (!rows.length) {
+    return [];
+  }
+
+  const headers = rows.shift().map((header) => header.trim());
+  return rows
+    .filter((cells) => cells.some((cell) => clean(cell)))
+    .map((cells) => {
+      const item = {};
+      headers.forEach((header, index) => {
+        item[header] = clean(cells[index]);
+      });
+      return item;
+    });
+}
+
+function normalizeSheetItem(item) {
+  const blurb = clean(item.Blurb || item.blurb);
+  if (!blurb) {
+    return null;
+  }
+
+  const sourceUrl = clean(item.URL || item.Url || item.url);
+  const publishedAt = parseSheetDate(item) || new Date().toISOString();
+
+  return {
+    id: `sheet-${publishedAt}-${blurb.slice(0, 24)}`,
+    blurb,
+    source_name: clean(item.Source || item.source),
+    source_url: /^https?:\/\//i.test(sourceUrl) ? sourceUrl : "",
+    category: clean(item.Region || item.region || item.Category || item.category),
+    telegram_message_id: null,
+    published_at: publishedAt,
+    created_at: publishedAt
+  };
+}
+
+function parseSheetDate(item) {
+  const dateValue = clean(item.Date || item.date);
+  const timeValue = clean(item.Time || item.time);
+
+  if (!dateValue) {
+    return "";
+  }
+
+  const parsed = timeValue && /^\d{1,2}:\d{2}/.test(timeValue)
+    ? new Date(`${dateValue}T${timeValue}:00+07:00`)
+    : new Date(`${dateValue}T00:00:00+07:00`);
+
+  return Number.isNaN(parsed.getTime()) ? "" : parsed.toISOString();
 }
 
 function json(payload, status = 200) {

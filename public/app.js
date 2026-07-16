@@ -4,6 +4,21 @@ const archiveNav = document.querySelector("#archive-nav");
 const dateTemplate = document.querySelector("#date-template");
 const itemTemplate = document.querySelector("#item-template");
 
+function parseDate(item) {
+  const dateValue = item.Date || item.date || item.published_at || item.publishedAt || item.created_at || "";
+  const timeValue = item.Time || item.time || "";
+
+  if (!dateValue) {
+    return null;
+  }
+
+  if (timeValue && /^\d{1,2}:\d{2}/.test(timeValue)) {
+    return new Date(`${dateValue}T${timeValue}:00+07:00`);
+  }
+
+  return new Date(dateValue);
+}
+
 function formatDate(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
@@ -45,8 +60,11 @@ function shortDateLabel(value) {
 }
 
 function dateKey(value) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
+  const date = typeof value === "object" ? parseDate(value) : new Date(value);
+  if (!date || Number.isNaN(date.getTime())) {
+    if (typeof value === "object") {
+      return value.Date || value.date || "Undated";
+    }
     return value || "Undated";
   }
 
@@ -68,19 +86,19 @@ function isValidLink(value) {
 }
 
 function normalizeItem(item) {
-  const blurb = String(item.blurb || "").trim();
+  const blurb = String(item.Blurb || item.blurb || "").trim();
   if (!blurb) {
     return null;
   }
 
-  const publishedAt = item.published_at || item.publishedAt || item.created_at || new Date().toISOString();
-  const sourceUrl = String(item.source_url || item.sourceUrl || "").trim();
+  const parsedDate = parseDate(item);
+  const sourceUrl = String(item.URL || item.Url || item.url || item.source_url || item.sourceUrl || "").trim();
 
   return {
     blurb,
-    published_at: publishedAt,
-    region: String(item.region || item.category || "").trim(),
-    source_name: String(item.source_name || item.sourceName || "").trim(),
+    published_at: parsedDate && !Number.isNaN(parsedDate.getTime()) ? parsedDate.toISOString() : new Date().toISOString(),
+    region: String(item.Region || item.region || item.Category || item.category || "").trim(),
+    source_name: String(item.Source || item.source || item.source_name || item.sourceName || "").trim(),
     source_url: isValidLink(sourceUrl) ? sourceUrl : ""
   };
 }
