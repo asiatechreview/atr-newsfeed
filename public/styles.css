@@ -193,6 +193,23 @@ footer {
   font-weight: 700;
 }
 
+.share-actions {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.share-actions[hidden] {
+  display: none;
+}
+
+.share-actions a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
 .region {
   color: var(--muted);
 }
@@ -210,4 +227,85 @@ main {
 footer {
   margin-top: auto;
   padding-top: 15px;
+}
+
+.share-page {
+  max-width: 560px;
+}
+
+.share-card-wrap {
+  margin: 18px 0 0;
+}
+
+.share-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-top: 1px solid #c7c7c7;
+  border-bottom: 1px solid #c7c7c7;
+  background: #fbfbfa;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 42px 30px 40px;
+  text-align: center;
+}
+
+.share-card-brand {
+  margin: 0;
+}
+
+.share-card-brand strong {
+  display: block;
+  font-size: 25px;
+  line-height: 1.05;
+}
+
+.share-card-brand span {
+  display: block;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.share-card-main {
+  margin: 0;
+}
+
+.share-card-blurb {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(25px, 5.4vw, 50px);
+  line-height: 1.26;
+}
+
+.share-card-source {
+  display: inline-block;
+  margin-top: 38px;
+  font-size: clamp(24px, 4.6vw, 42px);
+  line-height: 1.05;
+  font-weight: 700;
+}
+
+.share-card-footer {
+  margin: 0;
+  color: #c01818;
+  font-size: clamp(12px, 2.3vw, 24px);
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.share-card-footer a {
+  color: #c01818;
+}
+
+.share-tools {
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.share-tools a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }

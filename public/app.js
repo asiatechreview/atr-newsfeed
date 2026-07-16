@@ -487,6 +487,7 @@ function normalizeItem(item) {
   const sourceUrl = String(item.URL || item.Url || item.url || item.source_url || item.sourceUrl || "").trim();
 
   return {
+    id: String(item.id || item.ID || item.ItemID || item.item_id || "").trim(),
     blurb,
     published_at: parsedDate && !Number.isNaN(parsedDate.getTime()) ? parsedDate.toISOString() : new Date().toISOString(),
     region: String(item.Region || item.region || item.Category || item.category || "").trim(),
@@ -556,6 +557,21 @@ function renderTags(target, item) {
 
     target.appendChild(link);
   }
+}
+
+function renderShareAction(target, item) {
+  target.textContent = "";
+
+  if (!allItems.length || !item.id || item.id !== allItems[0].id) {
+    target.hidden = true;
+    return;
+  }
+
+  target.hidden = false;
+  const link = document.createElement("a");
+  link.href = `/share.html?id=${encodeURIComponent(item.id)}`;
+  link.textContent = "Share";
+  target.appendChild(link);
 }
 
 function renderArchive() {
@@ -727,6 +743,7 @@ function renderItems(items) {
     const itemNode = itemTemplate.content.cloneNode(true);
     appendItemText(itemNode.querySelector(".blurb"), item);
     renderTags(itemNode.querySelector(".tags"), item);
+    renderShareAction(itemNode.querySelector(".share-actions"), item);
     feed.appendChild(itemNode);
   }
 }
