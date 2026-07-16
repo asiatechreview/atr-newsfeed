@@ -66,10 +66,15 @@ footer {
 }
 
 .archive {
-  display: block;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 7px 18px;
   margin: 0;
-  padding: 27px 0 26px;
+  padding: 18px 0 17px;
+  border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
+  text-align: center;
 }
 
 .archive:empty {
@@ -77,15 +82,10 @@ footer {
 }
 
 .archive a {
-  display: block;
-  width: fit-content;
+  display: inline-block;
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
-}
-
-.archive a + a {
-  margin-top: 13px;
 }
 
 .archive a.current {
