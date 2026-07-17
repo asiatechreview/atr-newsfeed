@@ -1,5 +1,15 @@
 export const STATIC_ITEMS = [
   {
+    "id": "manual-telegram-2026-07-17-004",
+    "blurb": "South Korean authorities searched and seized materials from Chinese chipmaker Montage Technology's local office over a potential competition law violation, while Montage said it is cooperating with Seoul prosecutors and that no directors or employees have been charged, with South Korea accounting for 2.93 billion yuan ($432.63 million) of its fiscal 2025 sales",
+    "source_name": "Reuters",
+    "source_url": "https://www.reuters.com/world/asia-pacific/south-korea-searches-chinese-chipmaker-montage-technologys-office-competition-2026-07-17/",
+    "category": "",
+    "telegram_message_id": "17958",
+    "published_at": "2026-07-17T01:33:30.000Z",
+    "created_at": "2026-07-17T01:33:30.000Z"
+  },
+  {
     "id": "manual-telegram-2026-07-17-003",
     "blurb": "Tata Electronics is preparing to produce India's first semiconductor wafers on 90nm process technology at its Dholera, Gujarat fab, using a mature node for industrial and automotive chips as it steps down from the 28nm process parent Tata Sons had touted in March 2025.",
     "source_name": "Bloomberg",
