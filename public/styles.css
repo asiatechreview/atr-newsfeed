@@ -341,3 +341,138 @@ footer {
   text-decoration: underline;
   text-underline-offset: 2px;
 }
+
+.longform-page,
+.longform-index {
+  max-width: 720px;
+  padding-top: 28px;
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.58;
+}
+
+.longform-header {
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--border);
+}
+
+.longform-site,
+.longform-meta,
+.longform-footer {
+  margin: 0;
+  color: var(--muted);
+  font-family: Consolas, "Lucida Console", "Courier New", monospace;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.longform-site {
+  margin-bottom: 18px;
+}
+
+.longform-site a,
+.longform-footer a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.longform-header h1 {
+  max-width: 680px;
+  font-size: 40px;
+  line-height: 1.08;
+}
+
+.longform-dek {
+  max-width: 620px;
+  margin: 14px 0 16px;
+  color: #333333;
+  font-size: 19px;
+  line-height: 1.42;
+}
+
+.longform-article {
+  padding-top: 8px;
+  font-size: 18px;
+}
+
+.longform-article p {
+  margin: 18px 0;
+}
+
+.longform-article h2 {
+  margin: 34px 0 14px;
+  font-size: 25px;
+  line-height: 1.18;
+}
+
+.longform-article a,
+.longform-list a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.longform-article hr {
+  margin: 34px 0 30px;
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
+.longform-article blockquote {
+  margin: 24px 0;
+  padding: 0 0 0 18px;
+  border-left: 2px solid var(--text);
+  color: #333333;
+}
+
+.longform-embed {
+  font-family: Consolas, "Lucida Console", "Courier New", monospace;
+  font-size: 13px;
+  line-height: 1.45;
+  white-space: pre-line;
+}
+
+.longform-footer {
+  margin-top: 34px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+.longform-list {
+  padding-top: 18px;
+}
+
+.longform-list article {
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.longform-list h2 {
+  margin: 8px 0;
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+.longform-list p {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+@media (max-width: 520px) {
+  .longform-page,
+  .longform-index {
+    padding-top: 22px;
+  }
+
+  .longform-header h1 {
+    font-size: 30px;
+  }
+
+  .longform-dek {
+    font-size: 17px;
+  }
+
+  .longform-article {
+    font-size: 16px;
+  }
+}
