@@ -2,12 +2,14 @@
   "name": "atr-newsfeed",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "description": "Asia Tech Review public feed website for ATR Daily blurbs.",
   "scripts": {
     "dev": "wrangler pages dev public --d1 ATR_FEED_DB=atr-feed-db",
     "deploy": "wrangler pages deploy public --project-name atr-newsfeed",
     "d1:migrate": "wrangler d1 execute atr-feed-db --file=./schema.sql",
-    "check": "node scripts/check.mjs"
+    "check": "node scripts/check.mjs",
+    "check:live": "node scripts/validate-live-feed.mjs"
   },
   "devDependencies": {
     "wrangler": "^4.24.0"
