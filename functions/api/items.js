@@ -36,16 +36,12 @@ export async function onRequestGet({ env, request }) {
     d1Items = [];
   }
 
-  if (d1Items.length) {
-    return json({
-      items: d1Items
-    });
-  }
+  const staticItems = loadStaticItems({ limit: MAX_LIMIT, category, date });
+  const mergedItems = mergeItems(d1Items, staticItems).slice(0, limit);
 
-  const staticItems = loadStaticItems({ limit, category, date });
-  if (staticItems.length) {
+  if (mergedItems.length) {
     return json({
-      items: staticItems
+      items: mergedItems
     });
   }
 
@@ -54,6 +50,24 @@ export async function onRequestGet({ env, request }) {
   return json({
     items: sheetItems
   });
+}
+
+function mergeItems(...groups) {
+  const seen = new Set();
+  return groups
+    .flat()
+    .filter((item) => {
+      if (!item) return false;
+      const key = String(item.source_url || item.id || `${item.blurb}-${item.published_at}`).toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .sort((a, b) => {
+      const aTime = new Date(a.published_at).getTime() || 0;
+      const bTime = new Date(b.published_at).getTime() || 0;
+      return bTime - aTime;
+    });
 }
 
 function loadStaticItems({ limit, category, date }) {
