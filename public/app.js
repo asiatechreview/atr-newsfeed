@@ -526,13 +526,6 @@ function sortItems(items) {
 }
 
 function appendItemText(target, item) {
-  if (item.region) {
-    const region = document.createElement("span");
-    region.className = "region";
-    region.textContent = `[${item.region}] `;
-    target.appendChild(region);
-  }
-
   target.appendChild(document.createTextNode(item.blurb));
 
   if (!item.source_name) {
