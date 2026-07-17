@@ -100,6 +100,6 @@ GET /api/health
 
 ## Automation Contract
 
-After a blurb is archived to the AUTO Google Doc, the automation can call `POST /api/items` with the same finished blurb and source metadata. ATR News Feed Telegram posting is a separate approval-gated distribution step.
+After a blurb is successfully posted to ATR News Feed and archived to the AUTO Google Doc, the automation can call `POST /api/items` with the same finished blurb and source metadata.
 
 If website ingest fails, it should be reported separately and must not imply the Telegram post failed.
