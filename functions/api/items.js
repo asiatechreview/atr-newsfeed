@@ -337,6 +337,11 @@ function parseSheetDate(item) {
 
 function parseDateParam(value) {
   const cleaned = clean(value);
+  const dmy = cleaned.match(/^([0-9]{2})-([0-9]{2})-([0-9]{4})$/);
+  if (dmy) {
+    return `${dmy[3]}-${dmy[2]}-${dmy[1]}`;
+  }
+
   return /^\d{4}-\d{2}-\d{2}$/.test(cleaned) ? cleaned : "";
 }
 

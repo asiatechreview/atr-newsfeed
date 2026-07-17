@@ -23,8 +23,8 @@ function getRequestedPage() {
 }
 
 function getRequestedDateFilter() {
-  const match = window.location.search.match(/[?&]date=([0-9]{4}-[0-9]{2}-[0-9]{2})/);
-  return match ? match[1] : "";
+  const value = new URLSearchParams(window.location.search).get("date");
+  return dateKeyFromParam(value);
 }
 
 function getRequestedTagFilter() {
@@ -50,7 +50,7 @@ function updateFeedUrl(options = {}) {
     const query = options.query || "";
 
     if (date) {
-      url.searchParams.set("date", date);
+      url.searchParams.set("date", dateParamFromKey(date));
       url.searchParams.delete("page");
       url.searchParams.delete("q");
     } else {
@@ -202,6 +202,21 @@ function dateKey(value) {
       pad2(date.getDate())
     ].join("-");
   }
+}
+
+function dateKeyFromParam(value) {
+  const cleaned = String(value || "").trim();
+  const dmy = cleaned.match(/^([0-9]{2})-([0-9]{2})-([0-9]{4})$/);
+  if (dmy) {
+    return `${dmy[3]}-${dmy[2]}-${dmy[1]}`;
+  }
+
+  return /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(cleaned) ? cleaned : "";
+}
+
+function dateParamFromKey(value) {
+  const match = String(value || "").match(/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/);
+  return match ? `${match[3]}-${match[2]}-${match[1]}` : value;
 }
 
 function pad2(value) {
@@ -593,7 +608,7 @@ function renderArchive() {
   for (const date of recentArchiveDates()) {
     const key = dateKey(date);
     const link = document.createElement("a");
-    link.href = `?date=${key}`;
+    link.href = `?date=${dateParamFromKey(key)}`;
     link.textContent = archiveDateLabel(date);
     link.dataset.date = key;
 
