@@ -200,21 +200,6 @@ footer {
   line-height: 1.35;
 }
 
-.quoted-blurb {
-  margin: 0 0 9px;
-  padding: 0 0 0 12px;
-  border-left: 2px solid var(--text);
-  color: var(--muted);
-  font-size: 15px;
-  line-height: 1.35;
-}
-
-.commentary {
-  margin: 0;
-  font-size: 16px;
-  line-height: 1.35;
-}
-
 .tags {
   display: flex;
   flex-wrap: wrap;

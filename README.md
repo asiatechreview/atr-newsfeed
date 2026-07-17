@@ -40,8 +40,6 @@ npx wrangler d1 create atr-feed-db
 npx wrangler d1 execute atr-feed-db --file=./schema.sql
 ```
 
-For existing databases, run the latest files in `migrations/` instead of recreating the table.
-
 5. Create a Cloudflare Pages project connected to the GitHub repo.
 6. Set build output directory to `public`; no build command is required.
 7. Add a D1 binding:
@@ -73,8 +71,6 @@ Payload:
 ```json
 {
   "blurb": "Indian AI coding startup Emergent raised a $130 million Series C round at a $1.5 billion valuation",
-  "quote": "Emergent said it raised a new Series C round led by Example Capital.",
-  "commentary": "The round gives India another AI infra company with serious late-stage backing.",
   "sourceName": "TechCrunch",
   "sourceUrl": "https://techcrunch.com/example",
   "category": "Deals",
@@ -84,8 +80,6 @@ Payload:
 ```
 
 The frontend renders the source as `[TechCrunch]`, with only the outlet name linked.
-
-For commentary-style posts, `quote`/`quoteBlurb` stores the quoted source blurb and `commentary` stores Jon's note. Plain feed items can continue to send only `blurb`.
 
 ### Health
 

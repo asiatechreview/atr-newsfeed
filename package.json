@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "wrangler pages dev public --d1 ATR_FEED_DB=atr-feed-db",
     "deploy": "wrangler pages deploy public --project-name atr-newsfeed",
-    "d1:migrate": "wrangler d1 execute atr-newsfeed-db --file=./schema.sql",
+    "d1:migrate": "wrangler d1 execute atr-feed-db --file=./schema.sql",
     "check": "node scripts/check.mjs",
     "check:live": "node scripts/validate-live-feed.mjs"
   },
