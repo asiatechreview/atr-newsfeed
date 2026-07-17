@@ -1,5 +1,15 @@
 export const STATIC_ITEMS = [
   {
+    "id": "manual-telegram-2026-07-17-001",
+    "blurb": "DeepSeek was valued at 350.88 billion yuan ($51.82 billion) in its first external funding round, according to a Chinese filing that showed a fund backed by Anhui Korrun invested 2.9 billion yuan for an indirect 0.8265% stake",
+    "source_name": "Reuters",
+    "source_url": "https://www.reuters.com/world/asia-pacific/chinese-filing-implies-deepseek-valuation-around-52-billion-2026-07-16/",
+    "category": "",
+    "telegram_message_id": "17955",
+    "published_at": "2026-07-17T01:25:25.000Z",
+    "created_at": "2026-07-17T01:25:25.000Z"
+  },
+  {
     "id": "manual-telegram-2026-07-16-009",
     "blurb": "Representatives from 29 countries signed an agreement to establish a global AI cooperation body headquartered in Shanghai, with founding members including Russia, Belarus, Serbia, Cuba, Brazil and Venezuela, plus 10 African and 12 Asian countries, Xinhua said.",
     "source_name": "Reuters",
