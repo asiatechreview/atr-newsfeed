@@ -1,13 +1,13 @@
 export const STATIC_ITEMS = [
   {
     "id": "manual-telegram-2026-07-17-005",
-    "blurb": "DeepSeek is showing how China can compete in frontier AI on cost, with a standardized task on its V4 Flash model priced at about two cents versus more than $2 on Anthropic's premium model, as the company reportedly closes a $7 billion-plus funding round at a valuation above $40 billion",
+    "blurb": "DeepSeek is pushing China’s AI price war into enterprise adoption, with its V4 Flash model completing a standard intelligence task for about two cents versus more than $2 for Anthropic’s premium model, as founder Liang Wenfeng closes a first funding round of over $7 billion at a valuation above $40 billion",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/newsletters/2026-07-17/china-can-still-win-the-ai-race-with-inferior-technology",
     "category": "AI and Chips",
     "telegram_message_id": "23783",
-    "published_at": "2026-07-17T12:24:00.000Z",
-    "created_at": "2026-07-17T12:24:00.000Z"
+    "published_at": "2026-07-17T12:13:57.105992Z",
+    "created_at": "2026-07-17T12:13:57.105992Z"
   },
   {
     "id": "manual-telegram-2026-07-17-004",
