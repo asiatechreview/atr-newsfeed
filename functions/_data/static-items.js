@@ -1,5 +1,25 @@
 export const STATIC_ITEMS = [
   {
+    "id": "manual-telegram-2026-07-17-003",
+    "blurb": "Tata Electronics is preparing to produce India's first semiconductor wafers on 90nm process technology at its Dholera, Gujarat fab, using a mature node for industrial and automotive chips as it steps down from the 28nm process parent Tata Sons had touted in March 2025.",
+    "source_name": "Bloomberg",
+    "source_url": "https://www.bloomberg.com/news/articles/2026-07-17/tata-group-resorts-to-older-tech-to-launch-its-chip-foray",
+    "category": "",
+    "telegram_message_id": null,
+    "published_at": "2026-07-17T01:31:26.000Z",
+    "created_at": "2026-07-17T01:31:26.000Z"
+  },
+  {
+    "id": "manual-telegram-2026-07-17-002",
+    "blurb": "Moonshot AI unveiled Kimi K3, a 2.8-trillion-parameter model built on its Kimi Delta Attention architecture, with a 1-million-token context window and claimed top open-model results across its evaluation suite.",
+    "source_name": "Kimi",
+    "source_url": "https://www.kimi.com/blog/kimi-k3",
+    "category": "",
+    "telegram_message_id": null,
+    "published_at": "2026-07-17T01:30:26.000Z",
+    "created_at": "2026-07-17T01:30:26.000Z"
+  },
+  {
     "id": "manual-telegram-2026-07-17-001",
     "blurb": "DeepSeek was valued at 350.88 billion yuan ($51.82 billion) in its first external funding round, according to a Chinese filing that showed a fund backed by Anhui Korrun invested 2.9 billion yuan for an indirect 0.8265% stake",
     "source_name": "Reuters",
