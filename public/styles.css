@@ -1,8 +1,28 @@
 :root {
-  color-scheme: light;
+  color-scheme: light dark;
+  --bg: #ffffff;
   --border: #d9d9d9;
+  --card-bg: #fbfbfa;
+  --card-border: #c7c7c7;
+  --dek: #333333;
   --muted: #666666;
+  --on-text: #ffffff;
+  --red: #c01818;
   --text: #111111;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #000000;
+    --border: #242424;
+    --card-bg: #050505;
+    --card-border: #333333;
+    --dek: #d6d6d6;
+    --muted: #a7a7a7;
+    --on-text: #000000;
+    --red: #ff5555;
+    --text: #f4f4f4;
+  }
 }
 
 * {
@@ -11,13 +31,13 @@
 
 html {
   min-height: 100%;
-  background: #ffffff;
+  background: var(--bg);
 }
 
 body {
   min-height: 100vh;
   margin: 0;
-  background: #ffffff;
+  background: var(--bg);
   color: var(--text);
   font-family: Consolas, "Lucida Console", "Courier New", monospace;
   line-height: 1.42;
@@ -110,7 +130,7 @@ footer {
   padding: 0 8px;
   border: 1px solid var(--border);
   border-radius: 0;
-  background: #ffffff;
+  background: var(--bg);
   color: var(--text);
   font: inherit;
   font-size: 13px;
@@ -158,7 +178,7 @@ footer {
   min-height: 30px;
   padding: 0 8px;
   border: 1px solid var(--border);
-  background: #ffffff;
+  background: var(--bg);
   color: var(--text);
   font: inherit;
   font-size: 12px;
@@ -169,7 +189,7 @@ footer {
 .pagination button.current {
   background: var(--text);
   border-color: var(--text);
-  color: #ffffff;
+  color: var(--on-text);
 }
 
 .pagination button:disabled {
@@ -273,9 +293,9 @@ footer {
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
-  border-top: 1px solid #c7c7c7;
-  border-bottom: 1px solid #c7c7c7;
-  background: #fbfbfa;
+  border-top: 1px solid var(--card-border);
+  border-bottom: 1px solid var(--card-border);
+  background: var(--card-bg);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -321,14 +341,14 @@ footer {
 
 .share-card-footer {
   margin: 0;
-  color: #c01818;
+  color: var(--red);
   font-size: clamp(12px, 2.3vw, 24px);
   line-height: 1.2;
   font-weight: 700;
 }
 
 .share-card-footer a {
-  color: #c01818;
+  color: var(--red);
 }
 
 .share-tools {
@@ -384,7 +404,7 @@ footer {
 .longform-dek {
   max-width: 620px;
   margin: 14px 0 16px;
-  color: #333333;
+  color: var(--dek);
   font-size: 19px;
   line-height: 1.42;
 }
@@ -420,7 +440,7 @@ footer {
   margin: 24px 0;
   padding: 0 0 0 18px;
   border-left: 2px solid var(--text);
-  color: #333333;
+  color: var(--dek);
 }
 
 .longform-embed {
