@@ -73,7 +73,7 @@ function updateFeedUrl(options = {}) {
       url.searchParams.delete("q");
     }
 
-    if (!date && page > 1) {
+    if (page > 1) {
       url.searchParams.set("page", String(page));
     } else {
       url.searchParams.delete("page");
@@ -618,7 +618,9 @@ function createPageButton(label, page, options = {}) {
   }
 
   button.addEventListener("click", () => {
-    if (currentSearchQuery) {
+    if (currentDateFilter) {
+      renderDate(currentDateFilter, page);
+    } else if (currentSearchQuery) {
       renderSearch(currentSearchQuery, page);
     } else if (currentTagFilter) {
       renderTag(currentTagFilter, page);
@@ -690,33 +692,37 @@ function renderPage(page = currentPage) {
   renderPagination(allItems.length);
 }
 
-function renderDate(date) {
+function renderDate(date, page = currentPage) {
   currentDateFilter = date;
   currentTagFilter = "";
   currentSearchQuery = "";
   syncSearchInput();
-  currentPage = 1;
-  updateFeedUrl({ date });
 
   const dateItems = allItems.filter((item) => dateKey(item.published_at) === date);
+  const totalPages = Math.max(1, Math.ceil(dateItems.length / ITEMS_PER_PAGE));
+  currentPage = Math.min(Math.max(1, page), totalPages);
+  updateFeedUrl({ date, page: currentPage });
+
+  const start = (currentPage - 1) * ITEMS_PER_PAGE;
+  const pageItems = dateItems.slice(start, start + ITEMS_PER_PAGE);
 
   feed.textContent = "";
   archiveNav.textContent = "";
   status.textContent = "";
-  pagination.textContent = "";
-  pagination.hidden = true;
 
   renderArchive();
 
-  if (!dateItems.length) {
+  if (!pageItems.length) {
     const empty = document.createElement("p");
     empty.className = "empty";
     empty.textContent = "No updates for this date.";
     feed.appendChild(empty);
+    renderPagination(0);
     return;
   }
 
-  renderItems(dateItems);
+  renderItems(pageItems);
+  renderPagination(dateItems.length);
 }
 
 function renderTag(tag, page = currentPage) {
