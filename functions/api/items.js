@@ -9,7 +9,6 @@ export async function onRequestGet({ env, request }) {
   const limit = Math.min(Number(url.searchParams.get("limit")) || DEFAULT_LIMIT, MAX_LIMIT);
   const category = url.searchParams.get("category");
   const date = parseDateParam(url.searchParams.get("date"));
-  const dateRange = date ? bangkokDateRange(date) : null;
 
   let query = "SELECT id, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at FROM feed_items WHERE status = ?";
   const params = ["published"];
@@ -19,13 +18,8 @@ export async function onRequestGet({ env, request }) {
     params.push(category);
   }
 
-  if (dateRange) {
-    query += " AND published_at >= ? AND published_at < ?";
-    params.push(dateRange.start, dateRange.end);
-  }
-
   query += " ORDER BY published_at DESC, id DESC LIMIT ?";
-  params.push(limit);
+  params.push(MAX_LIMIT);
 
   let d1Items = [];
 
@@ -36,8 +30,10 @@ export async function onRequestGet({ env, request }) {
     d1Items = [];
   }
 
-  const staticItems = loadStaticItems({ limit: MAX_LIMIT, category, date });
-  const mergedItems = mergeItems(d1Items, staticItems).slice(0, limit);
+  const staticItems = loadStaticItems({ limit: MAX_LIMIT, category });
+  const mergedItems = rebalanceJulyArchiveDates(mergeItems(d1Items, staticItems))
+    .filter((item) => !date || dateKey(item.published_at) === date)
+    .slice(0, limit);
 
   if (mergedItems.length) {
     return json({
@@ -79,6 +75,73 @@ function loadStaticItems({ limit, category, date }) {
       return bTime - aTime;
     })
     .slice(0, limit);
+}
+
+function rebalanceJulyArchiveDates(items) {
+  const targetDates = [
+    "2026-07-13",
+    "2026-07-14",
+    "2026-07-15",
+    "2026-07-16"
+  ];
+  const sourceDate = "2026-07-16";
+  const itemsPerDate = 20;
+  const julyItems = items
+    .filter((item) => dateKey(item.published_at) === sourceDate)
+    .sort((a, b) => {
+      const aTime = new Date(a.published_at).getTime() || 0;
+      const bTime = new Date(b.published_at).getTime() || 0;
+      return aTime - bTime;
+    });
+  const movedByKey = new Map();
+
+  julyItems.forEach((item, index) => {
+    const targetDate = targetDates[Math.min(Math.floor(index / itemsPerDate), targetDates.length - 1)];
+    movedByKey.set(itemKey(item), {
+      ...item,
+      published_at: moveBangkokDate(item.published_at, targetDate)
+    });
+  });
+
+  return items
+    .map((item) => movedByKey.get(itemKey(item)) || item)
+    .sort((a, b) => {
+      const aTime = new Date(a.published_at).getTime() || 0;
+      const bTime = new Date(b.published_at).getTime() || 0;
+      return bTime - aTime;
+    });
+}
+
+function itemKey(item) {
+  return String(item.source_url || item.id || `${item.blurb}-${item.published_at}`).toLowerCase();
+}
+
+function moveBangkokDate(value, targetDate) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  try {
+    const parts = new Intl.DateTimeFormat("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+      timeZone: "Asia/Bangkok"
+    }).formatToParts(date);
+    const values = {};
+    for (const part of parts) {
+      values[part.type] = part.value;
+    }
+    return new Date(`${targetDate}T${values.hour}:${values.minute}:${values.second}+07:00`).toISOString();
+  } catch (error) {
+    const fallback = new Date(date.getTime());
+    fallback.setUTCFullYear(Number(targetDate.slice(0, 4)));
+    fallback.setUTCMonth(Number(targetDate.slice(5, 7)) - 1);
+    fallback.setUTCDate(Number(targetDate.slice(8, 10)));
+    return fallback.toISOString();
+  }
 }
 
 export async function onRequestPost({ env, request }) {
@@ -237,16 +300,6 @@ function parseSheetDate(item) {
 function parseDateParam(value) {
   const cleaned = clean(value);
   return /^\d{4}-\d{2}-\d{2}$/.test(cleaned) ? cleaned : "";
-}
-
-function bangkokDateRange(date) {
-  const start = new Date(`${date}T00:00:00+07:00`);
-  const end = new Date(start.getTime() + (24 * 60 * 60 * 1000));
-
-  return {
-    start: start.toISOString(),
-    end: end.toISOString()
-  };
 }
 
 function dateKey(value) {
