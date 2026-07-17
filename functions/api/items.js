@@ -31,7 +31,7 @@ export async function onRequestGet({ env, request }) {
   }
 
   const staticItems = loadStaticItems({ limit: MAX_LIMIT, category });
-  const mergedItems = rebalanceJulyArchiveDates(mergeItems(d1Items, staticItems))
+  const mergedItems = balanceArchiveDates(rebalanceJulyArchiveDates(mergeItems(d1Items, staticItems)))
     .filter((item) => !date || dateKey(item.published_at) === date)
     .slice(0, limit);
 
@@ -105,6 +105,44 @@ function rebalanceJulyArchiveDates(items) {
 
   return items
     .map((item) => movedByKey.get(itemKey(item)) || item)
+    .sort((a, b) => {
+      const aTime = new Date(a.published_at).getTime() || 0;
+      const bTime = new Date(b.published_at).getTime() || 0;
+      return bTime - aTime;
+    });
+}
+
+function balanceArchiveDates(items) {
+  return [
+    ["2026-07-04", "2026-07-03", 5],
+    ["2026-07-12", "2026-07-11", 9]
+  ].reduce((balancedItems, [sourceDate, targetDate, count]) => {
+    return shiftOldestItemsByDate(balancedItems, sourceDate, targetDate, count);
+  }, items);
+}
+
+function shiftOldestItemsByDate(items, sourceDate, targetDate, count) {
+  const itemsToMove = items
+    .filter((item) => dateKey(item.published_at) === sourceDate)
+    .sort((a, b) => {
+      const aTime = new Date(a.published_at).getTime() || 0;
+      const bTime = new Date(b.published_at).getTime() || 0;
+      return aTime - bTime;
+    })
+    .slice(0, count);
+  const movedKeys = new Set(itemsToMove.map(itemKey));
+
+  return items
+    .map((item) => {
+      if (!movedKeys.has(itemKey(item))) {
+        return item;
+      }
+
+      return {
+        ...item,
+        published_at: moveBangkokDate(item.published_at, targetDate)
+      };
+    })
     .sort((a, b) => {
       const aTime = new Date(a.published_at).getTime() || 0;
       const bTime = new Date(b.published_at).getTime() || 0;
