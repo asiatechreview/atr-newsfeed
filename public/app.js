@@ -520,10 +520,14 @@ function normalizeItem(item) {
 
   const parsedDate = parseDate(item);
   const sourceUrl = String(item.URL || item.Url || item.url || item.source_url || item.sourceUrl || "").trim();
+  const quoteBlurb = String(item.Quote || item.quote || item.QuoteBlurb || item.quoteBlurb || item.quote_blurb || item.quotedBlurb || item.quoted_blurb || "").trim();
+  const commentary = String(item.Commentary || item.commentary || item.Comment || item.comment || "").trim();
 
   return {
     id: String(item.id || item.ID || item.ItemID || item.item_id || "").trim(),
     blurb,
+    quote_blurb: quoteBlurb,
+    commentary,
     published_at: parsedDate && !Number.isNaN(parsedDate.getTime()) ? parsedDate.toISOString() : new Date().toISOString(),
     region: String(item.Region || item.region || item.Category || item.category || "").trim(),
     source_name: String(item.Source || item.source || item.source_name || item.sourceName || "").trim(),
@@ -541,7 +545,7 @@ function sortItems(items) {
 }
 
 function appendItemText(target, item) {
-  target.appendChild(document.createTextNode(item.blurb));
+  target.appendChild(document.createTextNode(item.commentary || item.blurb));
 
   if (!item.source_name) {
     return;
@@ -561,6 +565,33 @@ function appendItemText(target, item) {
   }
 
   target.appendChild(document.createTextNode("]"));
+}
+
+function renderItemBody(itemNode, item) {
+  const blurb = itemNode.querySelector(".blurb");
+
+  if (!item.quote_blurb && !item.commentary) {
+    appendItemText(blurb, item);
+    return;
+  }
+
+  blurb.remove();
+
+  if (item.quote_blurb) {
+    const quote = document.createElement("blockquote");
+    quote.className = "quoted-blurb";
+    appendItemText(quote, {
+      ...item,
+      blurb: item.quote_blurb,
+      commentary: ""
+    });
+    itemNode.querySelector(".item").insertBefore(quote, itemNode.querySelector(".tags"));
+  }
+
+  const commentary = document.createElement("p");
+  commentary.className = "commentary";
+  commentary.textContent = item.commentary || item.blurb;
+  itemNode.querySelector(".item").insertBefore(commentary, itemNode.querySelector(".tags"));
 }
 
 function renderTags(target, item) {
@@ -765,6 +796,8 @@ function normalizeSearchQuery(query) {
 function searchText(item) {
   return [
     item.blurb,
+    item.quote_blurb,
+    item.commentary,
     item.source_name,
     item.source_url,
     item.published_at,
@@ -831,7 +864,7 @@ function renderItems(items) {
     }
 
     const itemNode = itemTemplate.content.cloneNode(true);
-    appendItemText(itemNode.querySelector(".blurb"), item);
+    renderItemBody(itemNode, item);
     renderTags(itemNode.querySelector(".tags"), item);
     feed.appendChild(itemNode);
   }

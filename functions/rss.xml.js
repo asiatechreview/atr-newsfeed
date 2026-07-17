@@ -3,7 +3,7 @@ const SITE_URL = "https://feed.asiatechreview.com";
 
 export async function onRequestGet({ env }) {
   const result = await env.ATR_FEED_DB.prepare(
-    "SELECT id, blurb, source_name, source_url, category, published_at FROM feed_items WHERE status = ? ORDER BY published_at DESC, id DESC LIMIT 50"
+    "SELECT * FROM feed_items WHERE status = ? ORDER BY published_at DESC, id DESC LIMIT 50"
   )
     .bind("published")
     .all();
@@ -12,12 +12,12 @@ export async function onRequestGet({ env }) {
     const link = `${SITE_URL}/?item=${item.id}`;
     return [
       "<item>",
-      `<title>${escapeXml(item.blurb)}</title>`,
+      `<title>${escapeXml(item.commentary || item.blurb)}</title>`,
       `<link>${escapeXml(link)}</link>`,
       `<guid isPermaLink=\"false\">atr-feed-${item.id}</guid>`,
       `<pubDate>${new Date(item.published_at).toUTCString()}</pubDate>`,
       `<category>${escapeXml(item.category || "Other news")}</category>`,
-      `<description>${escapeXml(`${item.blurb} [${item.source_name}] ${item.source_url}`)}</description>`,
+      `<description>${escapeXml(itemDescription(item))}</description>`,
       "</item>"
     ].join("");
   });
@@ -39,6 +39,16 @@ export async function onRequestGet({ env }) {
       "cache-control": "public, max-age=120"
     }
   });
+}
+
+function itemDescription(item) {
+  const text = [
+    item.quote_blurb ? `Quote: ${item.quote_blurb}` : "",
+    item.commentary || item.blurb,
+    `[${item.source_name}] ${item.source_url}`
+  ].filter(Boolean);
+
+  return text.join("\n\n");
 }
 
 function escapeXml(value) {

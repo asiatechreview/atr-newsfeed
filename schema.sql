@@ -1,6 +1,8 @@
 CREATE TABLE IF NOT EXISTS feed_items (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   blurb TEXT NOT NULL,
+  quote_blurb TEXT,
+  commentary TEXT,
   source_name TEXT NOT NULL,
   source_url TEXT NOT NULL,
   category TEXT NOT NULL DEFAULT 'Other news',

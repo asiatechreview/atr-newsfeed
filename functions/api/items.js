@@ -10,7 +10,7 @@ export async function onRequestGet({ env, request }) {
   const category = url.searchParams.get("category");
   const date = parseDateParam(url.searchParams.get("date"));
 
-  let query = "SELECT id, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at FROM feed_items WHERE status = ?";
+  let query = "SELECT * FROM feed_items WHERE status = ?";
   const params = ["published"];
 
   if (category) {
@@ -198,6 +198,8 @@ export async function onRequestPost({ env, request }) {
   }
 
   const blurb = clean(body.blurb);
+  const quoteBlurb = clean(body.quote || body.quoteBlurb || body.quote_blurb || body.quotedBlurb || body.quoted_blurb);
+  const commentary = clean(body.commentary || body.comment || body.jonCommentary || body.jon_commentary);
   const sourceName = clean(body.sourceName || body.source_name);
   const sourceUrl = clean(body.sourceUrl || body.source_url);
   const category = clean(body.region || body.category) || "Other news";
@@ -212,20 +214,41 @@ export async function onRequestPost({ env, request }) {
     return json({ error: "sourceUrl must be an http(s) URL" }, 400);
   }
 
-  const result = await env.ATR_FEED_DB.prepare(
-    `INSERT INTO feed_items
-      (blurb, source_name, source_url, category, telegram_message_id, published_at)
-     VALUES (?, ?, ?, ?, ?, ?)
-     RETURNING id, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at`
-  )
-    .bind(blurb, sourceName, sourceUrl, category, telegramMessageId || null, publishedAt)
-    .first();
+  let result;
+
+  try {
+    result = await env.ATR_FEED_DB.prepare(
+      `INSERT INTO feed_items
+        (blurb, quote_blurb, commentary, source_name, source_url, category, telegram_message_id, published_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+       RETURNING id, blurb, quote_blurb, commentary, source_name, source_url, category, telegram_message_id, published_at, created_at`
+    )
+      .bind(blurb, quoteBlurb || null, commentary || null, sourceName, sourceUrl, category, telegramMessageId || null, publishedAt)
+      .first();
+  } catch (error) {
+    if (!isMissingCommentaryColumnError(error)) {
+      throw error;
+    }
+
+    result = await env.ATR_FEED_DB.prepare(
+      `INSERT INTO feed_items
+        (blurb, source_name, source_url, category, telegram_message_id, published_at)
+       VALUES (?, ?, ?, ?, ?, ?)
+       RETURNING id, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at`
+    )
+      .bind(commentary || blurb, sourceName, sourceUrl, category, telegramMessageId || null, publishedAt)
+      .first();
+  }
 
   return json({ item: result }, 201);
 }
 
 function clean(value) {
   return typeof value === "string" ? value.trim() : "";
+}
+
+function isMissingCommentaryColumnError(error) {
+  return /no such column|table feed_items has no column named/i.test(String(error?.message || error));
 }
 
 async function loadSheetItems({ limit, category, date }) {
@@ -311,6 +334,8 @@ function normalizeSheetItem(item) {
   return {
     id: `sheet-${publishedAt}-${blurb.slice(0, 24)}`,
     blurb,
+    quote_blurb: clean(item.Quote || item.quote || item.QuoteBlurb || item.quote_blurb),
+    commentary: clean(item.Commentary || item.commentary || item.Comment || item.comment),
     source_name: clean(item.Source || item.source),
     source_url: /^https?:\/\//i.test(sourceUrl) ? sourceUrl : "",
     category: clean(item.Region || item.region || item.Category || item.category),
