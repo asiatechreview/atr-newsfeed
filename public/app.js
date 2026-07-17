@@ -587,21 +587,6 @@ function renderTags(target, item) {
   }
 }
 
-function renderShareAction(target, item) {
-  target.textContent = "";
-
-  if (!allItems.length || !item.id || item.id !== allItems[0].id) {
-    target.hidden = true;
-    return;
-  }
-
-  target.hidden = false;
-  const link = document.createElement("a");
-  link.href = `/share.html?id=${encodeURIComponent(item.id)}`;
-  link.textContent = "Share";
-  target.appendChild(link);
-}
-
 function renderArchive() {
   archiveNav.textContent = "";
 
@@ -848,7 +833,6 @@ function renderItems(items) {
     const itemNode = itemTemplate.content.cloneNode(true);
     appendItemText(itemNode.querySelector(".blurb"), item);
     renderTags(itemNode.querySelector(".tags"), item);
-    renderShareAction(itemNode.querySelector(".share-actions"), item);
     feed.appendChild(itemNode);
   }
 }
