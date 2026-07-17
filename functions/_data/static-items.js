@@ -1,5 +1,35 @@
 export const STATIC_ITEMS = [
   {
+    "id": "manual-telegram-2026-07-16-009",
+    "blurb": "Representatives from 29 countries signed an agreement to establish a global AI cooperation body headquartered in Shanghai, with founding members including Russia, Belarus, Serbia, Cuba, Brazil and Venezuela, plus 10 African and 12 Asian countries, Xinhua said.",
+    "source_name": "Reuters",
+    "source_url": "https://www.reuters.com/world/china/twenty-nine-countries-sign-agreement-establish-global-ai-cooperation-body-2026-07-16",
+    "category": "",
+    "telegram_message_id": null,
+    "published_at": "2026-07-16T15:38:00.000Z",
+    "created_at": "2026-07-16T15:38:00.000Z"
+  },
+  {
+    "id": "manual-telegram-2026-07-16-008",
+    "blurb": "US House China committee chair John Moolenaar urged the Trump administration to ban US companies from buying CXMT and YMTC memory chips, warning reliance on Chinese suppliers would create an unacceptable national, economic and supply-chain security risk.",
+    "source_name": "FT",
+    "source_url": "https://www.ft.com/content/9e7cdf3c-2e52-492f-afeb-b63d86a53ce6",
+    "category": "",
+    "telegram_message_id": null,
+    "published_at": "2026-07-16T11:58:00.000Z",
+    "created_at": "2026-07-16T11:58:00.000Z"
+  },
+  {
+    "id": "manual-telegram-2026-07-16-007",
+    "blurb": "Moonshot is preparing to launch Kimi K3, a 2tn-3tn parameter open-weight model that could challenge Anthropic's Opus 4.8 on mainstream benchmarks, while raising funding at about a $31.5 billion valuation as Chinese labs narrow the gap with US frontier models.",
+    "source_name": "FT",
+    "source_url": "https://www.ft.com/content/c6ecd8ce-c441-4d7c-aea6-fae3e28fb6ff",
+    "category": "",
+    "telegram_message_id": null,
+    "published_at": "2026-07-16T11:29:00.000Z",
+    "created_at": "2026-07-16T11:29:00.000Z"
+  },
+  {
     "id": "manual-telegram-2026-07-16-006",
     "blurb": "TSMC pledged Thursday to invest another $100 billion in Arizona, saying AI-driven demand will stay strong through 2030. The chipmaker posted a 77% jump in second-quarter profit to a record T$706.6 billion ($22 billion), topping forecasts and marking its ninth straight quarter of double-digit growth.",
     "source_name": "Reuters",
