@@ -8,7 +8,7 @@ const dateTemplate = document.querySelector("#date-template");
 const itemTemplate = document.querySelector("#item-template");
 const ITEMS_PER_PAGE = 15;
 const VISIBLE_PAGE_BUTTONS = 8;
-const ARCHIVE_DAYS = 7;
+const ARCHIVE_DAYS = 5;
 
 let allItems = [];
 let currentPage = getRequestedPage();
