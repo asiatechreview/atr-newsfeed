@@ -72,7 +72,7 @@ function renderCard(item) {
   footer.append(
     makeLink("https://asiatechreview.com", "asiatechreview.com"),
     document.createTextNode(" · "),
-    makeLink("https://feed.asiatechreview.com", "feed.asiatechreview.com")
+    makeLink("https://bulletin.asiatechreview.com", "bulletin.asiatechreview.com")
   );
 
   card.append(brand, main, footer);

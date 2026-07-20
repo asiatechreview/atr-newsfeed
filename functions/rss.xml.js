@@ -1,5 +1,5 @@
 const SITE_TITLE = "Asia Tech Review Daily Feed";
-const SITE_URL = "https://feed.asiatechreview.com";
+const SITE_URL = "https://bulletin.asiatechreview.com";
 
 export async function onRequestGet({ env }) {
   const result = await env.ATR_FEED_DB.prepare(
