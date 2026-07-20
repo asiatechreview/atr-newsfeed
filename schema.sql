@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS feed_items (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  headline TEXT,
   blurb TEXT NOT NULL,
   source_name TEXT NOT NULL,
   source_url TEXT NOT NULL,

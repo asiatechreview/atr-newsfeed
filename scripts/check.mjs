@@ -23,7 +23,7 @@ if (missing.length) {
 }
 
 const schema = readFileSync(join(root, "schema.sql"), "utf8");
-for (const column of ["blurb", "source_name", "source_url", "category", "published_at"]) {
+for (const column of ["headline", "blurb", "source_name", "source_url", "category", "published_at"]) {
   if (!schema.includes(column)) {
     console.error(`schema.sql missing ${column}`);
     process.exit(1);

@@ -220,7 +220,7 @@ export async function onRequestGet({ env, request }) {
   const category = url.searchParams.get("category");
   const date = parseDateParam(url.searchParams.get("date"));
 
-  let query = "SELECT id, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at FROM feed_items WHERE status = ?";
+  let query = "SELECT id, headline, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at FROM feed_items WHERE status = ?";
   const params = ["published"];
 
   if (category) {
@@ -237,7 +237,7 @@ export async function onRequestGet({ env, request }) {
     const result = await env.ATR_FEED_DB.prepare(query).bind(...params).all();
     d1Items = result.results || [];
   } catch (error) {
-    d1Items = [];
+    d1Items = await loadD1ItemsWithoutHeadline({ env, category });
   }
 
   const staticItems = loadStaticItems({ limit: MAX_LIMIT, category });
@@ -260,10 +260,12 @@ export async function onRequestGet({ env, request }) {
 
 function withHeadlines(items) {
   return items.map((item) => {
-    const headline = clean(item.headline || item.Headline || item.title) || headlineForItem(item);
+    const storedHeadline = clean(item.headline || item.Headline || item.title);
+    const headline = storedHeadline || headlineForItem(item);
     return {
       ...item,
-      headline
+      headline,
+      headline_source: storedHeadline ? "stored" : "generated"
     };
   });
 }
@@ -423,6 +425,7 @@ export async function onRequestPost({ env, request }) {
   }
 
   const blurb = clean(body.blurb);
+  const headline = clean(body.headline || body.title);
   const sourceName = clean(body.sourceName || body.source_name);
   const sourceUrl = clean(body.sourceUrl || body.source_url);
   const category = clean(body.region || body.category) || "Other news";
@@ -437,20 +440,71 @@ export async function onRequestPost({ env, request }) {
     return json({ error: "sourceUrl must be an http(s) URL" }, 400);
   }
 
+  if (headline && isWeakHeadline(headline)) {
+    return json({ error: "headline must be a clean ATR-style scan title" }, 400);
+  }
+
+  await ensureHeadlineColumn(env);
+
   const result = await env.ATR_FEED_DB.prepare(
     `INSERT INTO feed_items
-      (blurb, source_name, source_url, category, telegram_message_id, published_at)
-     VALUES (?, ?, ?, ?, ?, ?)
-     RETURNING id, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at`
+      (headline, blurb, source_name, source_url, category, telegram_message_id, published_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)
+     RETURNING id, headline, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at`
   )
-    .bind(blurb, sourceName, sourceUrl, category, telegramMessageId || null, publishedAt)
+    .bind(headline || null, blurb, sourceName, sourceUrl, category, telegramMessageId || null, publishedAt)
     .first();
 
   return json({ item: withHeadlines([result])[0] }, 201);
 }
 
+async function loadD1ItemsWithoutHeadline({ env, category }) {
+  let query = "SELECT id, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at FROM feed_items WHERE status = ?";
+  const params = ["published"];
+
+  if (category) {
+    query += " AND category = ?";
+    params.push(category);
+  }
+
+  query += " ORDER BY published_at DESC, id DESC LIMIT ?";
+  params.push(MAX_LIMIT);
+
+  try {
+    const result = await env.ATR_FEED_DB.prepare(query).bind(...params).all();
+    return result.results || [];
+  } catch {
+    return [];
+  }
+}
+
+async function ensureHeadlineColumn(env) {
+  try {
+    await env.ATR_FEED_DB.prepare("ALTER TABLE feed_items ADD COLUMN headline TEXT").run();
+  } catch {
+    // D1 throws once the column already exists. The POST insert/readback below is the real verification.
+  }
+}
+
 function clean(value) {
   return typeof value === "string" ? value.trim() : "";
+}
+
+function isWeakHeadline(headline) {
+  const value = clean(headline).replace(/\bU\.S\./g, "US");
+  const words = value.split(/\s+/).filter(Boolean);
+
+  if (!value) return true;
+  if (value.length > 72) return true;
+  if (words.length < 4 || words.length > 14) return true;
+  if (/\b(?:a|an|the|to|for|from|of|in|on|at|by|with|into|as|and|or|but|after|before|while|amid|among|including|through|using|than|more|less|around|roughly|nearly|over|under|about|its|their|his|her|this|that|which|who|what|where|when|why|how|would|will|could|should|has|have|had|is|are|was|were|being|been|called|known|also|first|new|world's|yuan|chipmaker|prime minister anwar)\s*$/i.test(value)) return true;
+  if (/\$[0-9.]+$/.test(value)) return true;
+  if (/\b(?:is in talks|has held talks|has started preparing|is preparing|plans to file|will show|will debut|are expected|is previewing|is pushing|began auditing|declined to stay|opened an immigration|marked its|launched a nationwide|is building|said residents|begins trading|told staff|plans to spend|approved a manufacturing|has been supplying|has won|raised a \$|targeted a valuation|reported a |closed down|outlined several|are leaning|begins shipping|is shutting|pledged another|will feature|has closed|has told Meta|is expanding|will invest|are leading|is in talks to buy|will begin renting|launched ZCode|has narrowed|has referred|sentenced five|has passed|will pour|has laid out|is nearing|launches investor|has ramped|has stalled|jailed former|announced|has filed|has open-sourced|launched Hong|finalized rules|has accused|has signed|now account|aims to finalize|will tighten|has chosen)\b/i.test(value)) return true;
+  if (/^(?:Sources:|A look at|How |More numbers|India:)/i.test(value)) return true;
+  if (/\b(?:inside the story|The Economic Times|surfacing|front and center)\b/i.test(value)) return true;
+  if (/(?:\$[0-9.]+ billion|[0-9]+ trillion rupees|T\$|HK\$|\bRs\s)/i.test(value)) return true;
+
+  return false;
 }
 
 function firstSentence(text) {
