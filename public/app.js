@@ -11,6 +11,7 @@ const ITEMS_PER_PAGE = 15;
 const VISIBLE_PAGE_BUTTONS = 8;
 const ARCHIVE_DAYS = 5;
 const HEADLINE_OVERRIDES = new Map(Object.entries({
+  "42": "01.ai lines up Hong Kong IPO push",
   "40": "Offline AI device targets Indian language gap",
   "39": "Upbit operator faces sanctions over $30m hack",
   "38": "Hugging Face breach tests AI response",
@@ -576,36 +577,132 @@ function firstSentence(text) {
   return match ? match[1] : String(text || "").trim();
 }
 
-function deriveHeadline(blurb) {
-  const sentence = firstSentence(blurb)
+function stripAttribution(text) {
+  return String(text || "")
     .replace(/\s+\[[^\]]+\]\s*$/, "")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function simplifyLeadPhrase(text) {
+  return stripAttribution(text)
+    .replace(/^(?:Chinese|Indian|Singapore-based|Japanese|South Korean|Indonesian|Taiwanese|Malaysian|Thai|Vietnamese|Philippine|Hong Kong|UAE|US|American)\s+(?:[\w-]+\s+){0,5}(?:startup|company|firm|chipmaker|operator|chain|platform|designer|developer|maker|group|giant|giants)\s+([A-Z0-9][A-Za-z0-9.&' -]{1,42})\s+/i, "$1 ")
+    .replace(/\bhas begun\b/gi, "begins")
+    .replace(/\bhas started\b/gi, "starts")
+    .replace(/\bhas launched\b/gi, "launches")
+    .replace(/\bhas unveiled\b/gi, "unveils")
+    .replace(/\bhas completed\b/gi, "completes")
+    .replace(/\bhas won\b/gi, "wins")
+    .replace(/\bhas rolled out\b/gi, "rolls out")
+    .replace(/\bhas raised\b/gi, "raises")
+    .replace(/\bhas cut\b/gi, "cuts")
+    .replace(/\bhas dismissed\b/gi, "rejects")
+    .replace(/\bis preparing to\b/gi, "plans to")
+    .replace(/\bis planning to\b/gi, "plans to")
+    .replace(/\bis pushing ahead with plans to\b/gi, "plans to")
+    .replace(/\bwill work with\b/gi, "adds")
+    .replace(/\bwill buy\b/gi, "buys")
+    .replace(/\bwould likely set\b/gi, "may set")
+    .replace(/\bappears set to raise\b/gi, "nears")
+    .replace(/\bsaid it will\b/gi, "will")
+    .replace(/\bsaid it would\b/gi, "would")
+    .replace(/\bsaid\b/gi, "says")
+    .replace(/\bannounced\b/gi, "unveiled")
+    .replace(/\s*,\s*(?:the|a|an)\s+(?:Chinese|Indian|South Korean|Singapore-based|Japanese|US|American|UAE|Abu Dhabi|Taiwanese|Indonesian|Malaysian|Thai|Vietnamese|Philippine|Hong Kong)\b[^,]{10,90},\s*/gi, " ")
+    .replace(/\s*,\s*(?:the|a|an)\s+[^,]{12,90},\s*/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function shortMoney(amount, unit) {
+  const normalizedUnit = String(unit || "").toLowerCase();
+  const suffix = normalizedUnit.startsWith("b") ? "bn" : "m";
+  return `$${amount}${suffix}`;
+}
+
+function headlineFromPattern(sentence) {
+  const patterns = [
+    [/^(.+?)\s+plans to raise pre-IPO funding before a planned Hong Kong listing/i, "$1 lines up Hong Kong IPO push"],
+    [/^(.+?)\s+is on pace for\s+\$?([0-9.]+)\s*(billion|million|mn|m)\s+in annual recurring revenue/i, (match) => `${match[1]} nears ${shortMoney(match[2], match[3])} ARR`],
+    [/^(.+?)\s+has held talks with banks about a potential listing/i, "$1 weighs IPO"],
+    [/^Xi Jinping\s+used .*?World AI Conference.*?to praise\s+China.*$/i, "Xi uses WAIC to pitch China AI"],
+    [/^(.+?)\s+plans to produce India's first semiconductor wafers on ([0-9]+nm).*$/i, "$1 plans India's first $2 wafers"],
+    [/^(.+?)\s+plans to launch (.+?),\s+a\s+([0-9]+tn-[0-9]+tn|[0-9.]+-trillion)[^,]*model/i, "$1 readies $2 model launch"],
+    [/^(.+?)\s+unveiled\s+(.+?),\s+(?:a|an|billed as)/i, "$1 unveils $2"],
+    [/^(.+?)\s+launches?\s+(.+?),\s+(?:a|an|billed as)/i, "$1 launches $2"],
+    [/^(.+?)\s+raises?\s+(?:nearly\s+|more than\s+)?(?:a\s+)?\$?([0-9.]+)\s*(billion|million|mn|m)\b/i, (match) => `${match[1]} raises ${shortMoney(match[2], match[3])}`],
+    [/^(.+?)\s+secured\s+(?:a\s+)?\$?([0-9.]+)\s*(billion|million|mn|m)\b/i, (match) => `${match[1]} secures ${shortMoney(match[2], match[3])}`],
+    [/^(.+?)\s+completed its majority acquisition of\s+(.+?)\s+after/i, "$1 completes $2 deal"],
+    [/^(.+?)\s+wins approval .*? for its IPO/i, "$1 clears IPO review"],
+    [/^(.+?)\s+targeted a valuation of more than\s+\$?([0-9.]+)\s*(billion|million|mn|m)\b/i, (match) => `${match[1]} targets ${shortMoney(match[2], match[3])} valuation`],
+    [/^(.+?)\s+closed down more than\s+([0-9.]+%)/i, "$1 shares fall $2"],
+    [/^(.+?)\s+fell as much as\s+([0-9.]+%).*$/i, "$1 shares fall $2"],
+    [/^(.+?)\s+ordered\s+(.+?)\s+to pay\s+\$?([0-9.]+)\s*(billion|million|mn|m)\b/i, (match) => `${match[2]} hit with ${shortMoney(match[3], match[4])} verdict`],
+    [/^(.+?)\s+asked\s+(.+?)\s+for a meeting.*$/i, "$1 seeks $2 meeting"],
+    [/^(.+?)\s+used .*? to promote\s+(.+?)$/i, "$1 promotes $2"],
+    [/^(.+?)\s+is turning\s+(.+?)\s+into\s+(.+?)$/i, "$1 turns $2 into $3"],
+    [/^(.+?)\s+are turning\s+(.+?)\s+into\s+(.+?)$/i, "$1 turn $2 into $3"],
+    [/^(.+?)\s+found\s+(.+?)\s+now perform/i, "$1 finds open models closing gap"],
+    [/^(.+?)\s+rejects allegations.*?Chinese rivals/i, "$1 rejects model-distillation claims"],
+    [/^(.+?)\s+will expand collaboration on\s+(.+?)$/i, "$1 expands $2 push"],
+    [/^(.+?)\s+teamed up to build\s+(.+?)$/i, "$1 team on $2"],
+    [/^(.+?)\s+reported a\s+([0-9.]+%)\s+jump/i, "$1 reports $2 sales jump"],
+    [/^(.+?)\s+pledged .*? to invest another\s+\$?([0-9.]+)\s*(billion|million|mn|m)\b/i, (match) => `${match[1]} adds ${shortMoney(match[2], match[3])} investment pledge`],
+    [/^(.+?)\s+and four Japanese industrial automation companies\s+will expand collaboration on robotics/i, "$1 expands Japan robotics push"],
+    [/^Representatives from\s+([0-9]+)\s+countries signed an agreement to establish\s+(?:a\s+)?(?:global\s+)?(.+?)(?:\s+body|\s+headquartered|,|$).*$/i, "$1 countries back $2"],
+    [/^US House China committee chair John Moolenaar urged .*? to ban\s+US companies from buying\s+(.+?)\s+chips.*$/i, "US lawmaker pushes $1 chip ban"],
+    [/^(.+?)\s+plans to file draft IPO papers/i, "$1 prepares IPO filing"],
+    [/^(.+?)\s+is in early talks .*? about\s+(.+?)$/i, "$1 weighs $2"],
+    [/^(.+?)\s+exports nearly doubled/i, "$1 exports nearly double"],
+    [/^(.+?)\s+has started preparing for an IPO/i, "$1 starts IPO prep"]
+  ];
+
+  for (const [pattern, replacement] of patterns) {
+    const match = sentence.match(pattern);
+    if (match) {
+      return typeof replacement === "function" ? replacement(match) : sentence.replace(pattern, replacement);
+    }
+  }
+
+  return "";
+}
+
+function limitHeadline(text, maxLength = 58) {
+  const words = stripAttribution(text)
+    .replace(/\$([0-9.]+)billion\b/gi, "$$$1bn")
+    .replace(/\$([0-9.]+)million\b/gi, "$$$1m")
+    .replace(/\s+(?:that|which|while|warning|after|before|as|with|where|including|using|following)\b.*$/i, "")
+    .replace(/\s+and\s*$/i, "")
+    .replace(/[,:;.-]+$/, "")
+    .split(/\s+/)
+    .filter(Boolean);
+  const kept = [];
+
+  for (const word of words) {
+    const next = [...kept, word].join(" ");
+    if (next.length > maxLength) break;
+    kept.push(word);
+  }
+
+  return (kept.length ? kept.join(" ") : words.slice(0, 8).join(" ")).replace(/[,:;.-]+$/, "");
+}
+
+function deriveHeadline(blurb) {
+  const sentence = simplifyLeadPhrase(firstSentence(blurb));
 
   if (!sentence) {
     return "Asia tech update";
   }
 
-  const clauses = sentence.split(/,\s+(?:with|as|while|after|amid|according to|marking|making|in a move|where)\b/i);
-  let headline = clauses[0].trim();
-
-  if (headline.length < 44 && clauses[1]) {
-    headline = `${headline}, ${clauses[1].trim()}`;
+  const patterned = headlineFromPattern(sentence);
+  if (patterned) {
+    return limitHeadline(patterned, 62);
   }
 
-  if (headline.length > 92) {
-    const words = headline.split(/\s+/);
-    const kept = [];
-    for (const word of words) {
-      if ([...kept, word].join(" ").length > 88) {
-        break;
-      }
-      kept.push(word);
-    }
-    headline = kept.join(" ").replace(/[,:;.-]+$/, "");
-  }
+  const clauses = sentence.split(/,\s+(?:with|as|while|after|amid|according to|marking|making|in a move|where|before|part of)\b/i);
+  const headline = clauses[0].trim();
 
-  return headline;
+  return limitHeadline(headline);
 }
 
 function normalizeItem(item) {
