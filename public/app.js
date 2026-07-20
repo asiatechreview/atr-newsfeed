@@ -5,12 +5,17 @@ const pagination = document.querySelector("#pagination");
 const searchForm = document.querySelector("#search-form");
 const searchInput = document.querySelector("#search-input");
 const signalMetrics = document.querySelector("#signal-metrics");
+const watchlist = document.querySelector("#watchlist");
+const watchlistHeadline = document.querySelector("#watchlist-headline");
+const watchlistBlurb = document.querySelector("#watchlist-blurb");
 const dateTemplate = document.querySelector("#date-template");
 const itemTemplate = document.querySelector("#item-template");
 const ITEMS_PER_PAGE = 15;
 const VISIBLE_PAGE_BUTTONS = 8;
 const ARCHIVE_DAYS = 5;
+const FEATURED_ITEM_ID = "manual-telegram-2026-07-17-005";
 const HEADLINE_OVERRIDES = new Map(Object.entries({
+  "manual-telegram-2026-07-17-005": "DeepSeek pushes China AI price war into enterprise adoption",
   "42": "01.ai lines up Hong Kong IPO push",
   "40": "Offline AI device targets Indian language gap",
   "39": "Upbit operator faces sanctions over $30m hack",
@@ -830,6 +835,33 @@ function renderSignal(items) {
   }
 }
 
+function featuredItems() {
+  return allItems.filter((item) => item.id !== FEATURED_ITEM_ID);
+}
+
+function renderWatchlist() {
+  if (!watchlist || !watchlistHeadline || !watchlistBlurb) {
+    return;
+  }
+
+  const item = allItems.find((candidate) => candidate.id === FEATURED_ITEM_ID);
+  if (!item) {
+    watchlist.hidden = true;
+    return;
+  }
+
+  watchlist.hidden = false;
+  watchlistHeadline.textContent = item.headline;
+  watchlistBlurb.textContent = "";
+  appendItemText(watchlistBlurb, item);
+}
+
+function hideWatchlist() {
+  if (watchlist) {
+    watchlist.hidden = true;
+  }
+}
+
 function createPageButton(label, page, options = {}) {
   const button = document.createElement("button");
   button.type = "button";
@@ -891,16 +923,18 @@ function renderPage(page = currentPage) {
   currentTagFilter = "";
   currentSearchQuery = "";
   syncSearchInput();
-  const totalPages = Math.max(1, Math.ceil(allItems.length / ITEMS_PER_PAGE));
+  const homepageItems = featuredItems();
+  const totalPages = Math.max(1, Math.ceil(homepageItems.length / ITEMS_PER_PAGE));
   currentPage = Math.min(Math.max(1, page), totalPages);
   updateFeedUrl({ page: currentPage });
 
   const start = (currentPage - 1) * ITEMS_PER_PAGE;
-  const pageItems = allItems.slice(start, start + ITEMS_PER_PAGE);
+  const pageItems = homepageItems.slice(start, start + ITEMS_PER_PAGE);
 
   feed.textContent = "";
   archiveNav.textContent = "";
   setFeedStatus();
+  renderWatchlist();
 
   if (!pageItems.length) {
     const empty = document.createElement("p");
@@ -913,7 +947,7 @@ function renderPage(page = currentPage) {
 
   renderArchive();
   renderItems(pageItems);
-  renderPagination(allItems.length);
+  renderPagination(homepageItems.length);
 }
 
 function renderDate(date, page = currentPage) {
@@ -933,6 +967,7 @@ function renderDate(date, page = currentPage) {
   feed.textContent = "";
   archiveNav.textContent = "";
   setFeedStatus();
+  hideWatchlist();
 
   renderArchive();
 
@@ -966,6 +1001,7 @@ function renderTag(tag, page = currentPage) {
   feed.textContent = "";
   archiveNav.textContent = "";
   setFeedStatus();
+  hideWatchlist();
 
   renderArchive();
 
@@ -1023,6 +1059,7 @@ function renderSearch(query, page = currentPage) {
   feed.textContent = "";
   archiveNav.textContent = "";
   setFeedStatus();
+  hideWatchlist();
 
   renderArchive();
 
@@ -1078,6 +1115,7 @@ function render(items, options = {}) {
     archiveNav.textContent = "";
     pagination.textContent = "";
     pagination.hidden = true;
+    hideWatchlist();
     setFeedStatus(options.statusText);
     return;
   }

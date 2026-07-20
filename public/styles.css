@@ -206,6 +206,36 @@ main {
   border-top: 1px solid var(--border);
 }
 
+.watchlist {
+  margin: 0 0 18px;
+  padding: 16px 0 18px;
+  border-top: 1px solid var(--accent);
+  border-bottom: 1px solid var(--border);
+}
+
+.watchlist[hidden] {
+  display: none;
+}
+
+.watchlist h2 {
+  max-width: 780px;
+  margin: 8px 0 8px;
+  color: var(--text);
+  font: 600 27px/1.12 var(--font-body);
+}
+
+.watchlist-blurb {
+  max-width: 780px;
+  margin: 0;
+  color: var(--text);
+  font: 400 15px/1.6 var(--font-body);
+}
+
+.watchlist-blurb a {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 .pagination {
   display: flex;
   flex-wrap: nowrap;
