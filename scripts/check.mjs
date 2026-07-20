@@ -41,6 +41,11 @@ if (!appScript.includes("FEED_POLL_INTERVAL_MS") || !appScript.includes("startFe
   process.exit(1);
 }
 
+if (!appScript.includes("Intl.DateTimeFormat().resolvedOptions().timeZone") || appScript.includes('timeZone: "Asia/Bangkok"') || appScript.includes("LIVE ${formatTime(new Date())} BKK")) {
+  console.error("public/app.js must render feed timestamps with the reader's browser timezone, not a fixed Bangkok timezone");
+  process.exit(1);
+}
+
 const failures = [];
 const sourceAliases = new Map([
   ["ft.com", "FT"],

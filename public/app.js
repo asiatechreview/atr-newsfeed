@@ -14,6 +14,7 @@ const ITEMS_PER_PAGE = 15;
 const VISIBLE_PAGE_BUTTONS = 8;
 const ARCHIVE_DAYS = 5;
 const FEED_POLL_INTERVAL_MS = 5 * 60 * 1000;
+const LOCAL_TIME_ZONE = getLocalTimeZone();
 const FEATURED_ITEM_ID = "manual-telegram-2026-07-17-005";
 const FEATURED_SOURCE_URL = "https://www.bloomberg.com/news/newsletters/2026-07-17/china-can-still-win-the-ai-race-with-inferior-technology";
 const HEADLINE_OVERRIDES = new Map(Object.entries({
@@ -236,6 +237,18 @@ let currentSearchQuery = getRequestedSearchQuery();
 let feedPollTimer = null;
 let isFetchingFeed = false;
 
+function getLocalTimeZone() {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+  } catch (error) {
+    return "";
+  }
+}
+
+function localTimeOptions(options = {}) {
+  return LOCAL_TIME_ZONE ? { ...options, timeZone: LOCAL_TIME_ZONE } : options;
+}
+
 function getRequestedPage() {
   const match = window.location.search.match(/[?&]page=([0-9]+)/);
   const page = match ? Number(match[1]) : 1;
@@ -328,16 +341,13 @@ function formatDate(value) {
 
   try {
     const month = date.toLocaleDateString("en-US", {
-      month: "long",
-      timeZone: "Asia/Bangkok"
+      ...localTimeOptions({ month: "long" })
     });
     const day = Number(date.toLocaleDateString("en-US", {
-      day: "numeric",
-      timeZone: "Asia/Bangkok"
+      ...localTimeOptions({ day: "numeric" })
     }));
     const year = date.toLocaleDateString("en-US", {
-      year: "numeric",
-      timeZone: "Asia/Bangkok"
+      ...localTimeOptions({ year: "numeric" })
     });
     return `${month} ${day}${ordinalSuffix(day)}, ${year}`;
   } catch (error) {
@@ -353,9 +363,10 @@ function shortDateLabel(value) {
 
   try {
     return date.toLocaleDateString("en-US", {
-      month: "long",
-      day: "numeric",
-      timeZone: "Asia/Bangkok"
+      ...localTimeOptions({
+        month: "long",
+        day: "numeric"
+      })
     });
   } catch (error) {
     return fallbackDateLabel(date, false);
@@ -370,10 +381,11 @@ function formatTime(value) {
 
   try {
     return date.toLocaleTimeString("en-GB", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-      timeZone: "Asia/Bangkok"
+      ...localTimeOptions({
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      })
     });
   } catch (error) {
     return `${pad2(date.getHours())}:${pad2(date.getMinutes())}`;
@@ -388,12 +400,12 @@ function archiveDateLabel(value) {
 
   try {
     return date.toLocaleDateString("en-US", {
-      month: "long",
-      day: "numeric",
-      timeZone: "Asia/Bangkok"
+      ...localTimeOptions({
+        month: "long",
+        day: "numeric"
+      })
     }) + ordinalSuffix(Number(date.toLocaleDateString("en-US", {
-      day: "numeric",
-      timeZone: "Asia/Bangkok"
+      ...localTimeOptions({ day: "numeric" })
     })));
   } catch (error) {
     return fallbackDateLabel(date, false) + ordinalSuffix(date.getDate());
@@ -428,10 +440,11 @@ function dateKey(value) {
 
   try {
     return new Intl.DateTimeFormat("en-CA", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      timeZone: "Asia/Bangkok"
+      ...localTimeOptions({
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      })
     }).format(date);
   } catch (error) {
     return [
@@ -480,33 +493,34 @@ function fallbackDateLabel(date, includeYear) {
   return includeYear ? `${monthDay}${ordinalSuffix(date.getDate())}, ${date.getFullYear()}` : monthDay;
 }
 
-function bangkokToday() {
+function localToday() {
   const now = new Date();
 
   try {
     const parts = new Intl.DateTimeFormat("en-CA", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      timeZone: "Asia/Bangkok"
+      ...localTimeOptions({
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      })
     }).formatToParts(now);
     const values = {};
     for (const part of parts) {
       values[part.type] = part.value;
     }
-    return new Date(`${values.year}-${values.month}-${values.day}T00:00:00+07:00`);
+    return new Date(`${values.year}-${values.month}-${values.day}T00:00:00`);
   } catch (error) {
-    return new Date(now.getTime() + (7 * 60 * 60 * 1000));
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
   }
 }
 
 function recentArchiveDates() {
   const dates = [];
-  const start = bangkokToday();
+  const start = localToday();
 
   for (let index = 0; index < ARCHIVE_DAYS; index += 1) {
     const date = new Date(start.getTime());
-    date.setUTCDate(start.getUTCDate() - index);
+    date.setDate(start.getDate() - index);
     dates.push(date);
   }
 
@@ -1100,7 +1114,7 @@ function setFeedStatus(label = "") {
     return;
   }
 
-  status.textContent = `LIVE ${formatTime(new Date())} BKK`;
+  status.textContent = `LIVE ${formatTime(new Date())} LOCAL`;
 }
 
 function renderSignal(items) {
