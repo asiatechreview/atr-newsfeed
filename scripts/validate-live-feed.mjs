@@ -61,10 +61,13 @@ if (failures.length) {
 console.log(`OK: live feed validated (${items.length} items).`);
 
 function isWeakHeadline(headline) {
-  const value = String(headline || "").trim();
+  const value = String(headline || "").trim().replace(/\bU\.S\./g, "US");
 
   if (!value) return true;
   if (value.length > 72) return true;
+  if (/\b(?:a|an|the|to|for|from|of|in|on|at|by|with|into|as|and|or|but|after|before|while|amid|among|including|through|using|than|more|less|around|roughly|nearly|over|under|about|its|their|his|her|this|that|which|who|what|where|when|why|how|would|will|could|should|has|have|had|is|are|was|were|being|been|called|known|also|first|new)\s*$/i.test(value)) return true;
+  if (/^(?:Chinese|Indian|Singapore-based|Japanese|South Korean|Taiwanese|Malaysian|Thai|Vietnamese|Philippine|Hong Kong|UAE|US|American)\s+(?:startup|company|firm|chipmaker|operator|chain|platform|designer|developer|maker|group|giant|authorities|regulators|lawmaker|ministry|court)\b/i.test(value)) return true;
+  if (/^(?:CXMT|SK Hynix Inc|U\.S|US|Global creditors|ShareChat, positioned|Xiaohongshu, known abroad|Dongfang Suanxin, also known|Chinese AI founders|Indian AI startup Rocket)$/i.test(value)) return true;
   if (/\b(?:says?|said)\s+(?:the|that)\b/i.test(value)) return true;
   if (/\b(?:chairman|CEO|founder|president|minister)\s+[A-Z][A-Za-z-]+\s+[A-Z][A-Za-z-]+\s+says?\b/i.test(value)) return true;
   if (/\b(?:announced|reportedly|according to)\b/i.test(value)) return true;

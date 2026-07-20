@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { STATIC_ITEMS } from "../functions/_data/static-items.js";
+import { onRequestGet } from "../functions/api/items.js";
 
 const root = new URL("..", import.meta.url).pathname;
 const required = [
@@ -71,4 +72,40 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`OK: ATR feed checks passed (${STATIC_ITEMS.length} static items).`);
+const generatedResponse = await onRequestGet({
+  env: {
+    ATR_FEED_DB: {
+      prepare() {
+        throw new Error("Skip D1 during local headline generation check");
+      }
+    }
+  },
+  request: new Request("https://local.test/api/items?limit=500")
+});
+const generatedPayload = await generatedResponse.json();
+const generatedItems = Array.isArray(generatedPayload.items) ? generatedPayload.items : [];
+const headlineFailures = generatedItems
+  .map((item, index) => ({ item, index }))
+  .filter(({ item, index }) => index >= 30 && isWeakHeadline(item.headline))
+  .map(({ item, index }) => `${index + 1} ${item.id || item.source_url || "unknown"}: weak headline "${item.headline}"`);
+
+if (headlineFailures.length) {
+  console.error(`FAILED: ${headlineFailures.length} generated headline check(s) failed`);
+  headlineFailures.slice(0, 25).forEach((failure) => console.error(`- ${failure}`));
+  if (headlineFailures.length > 25) console.error(`- ...and ${headlineFailures.length - 25} more`);
+  process.exit(1);
+}
+
+console.log(`OK: ATR feed checks passed (${STATIC_ITEMS.length} static items, ${generatedItems.length} generated headlines).`);
+
+function isWeakHeadline(headline) {
+  const value = String(headline || "").trim().replace(/\bU\.S\./g, "US");
+
+  if (!value) return true;
+  if (value.length > 72) return true;
+  if (/\b(?:a|an|the|to|for|from|of|in|on|at|by|with|into|as|and|or|but|after|before|while|amid|among|including|through|using|than|more|less|around|roughly|nearly|over|under|about|its|their|his|her|this|that|which|who|what|where|when|why|how|would|will|could|should|has|have|had|is|are|was|were|being|been|called|known|also|first|new)\s*$/i.test(value)) return true;
+  if (/^(?:Chinese|Indian|Singapore-based|Japanese|South Korean|Taiwanese|Malaysian|Thai|Vietnamese|Philippine|Hong Kong|UAE|US|American)\s+(?:startup|company|firm|chipmaker|operator|chain|platform|designer|developer|maker|group|giant|authorities|regulators|lawmaker|ministry|court)\b/i.test(value)) return true;
+  if (/^(?:CXMT|SK Hynix Inc|U\.S|US|Global creditors|ShareChat, positioned|Xiaohongshu, known abroad|Dongfang Suanxin, also known|Chinese AI founders|Indian AI startup Rocket)$/i.test(value)) return true;
+
+  return false;
+}

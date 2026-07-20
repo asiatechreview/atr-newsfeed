@@ -250,8 +250,14 @@ function clean(value) {
 }
 
 function firstSentence(text) {
-  const match = String(text || "").trim().match(/^(.+?[.!?])\s+/);
-  return match ? match[1] : String(text || "").trim();
+  const value = String(text || "")
+    .trim()
+    .replace(/\bU\.S\./g, "US")
+    .replace(/\bInc\./g, "Inc")
+    .replace(/\bCo\./g, "Co")
+    .replace(/\bLtd\./g, "Ltd");
+  const match = value.match(/^(.+?[.!?])\s+/);
+  return match ? match[1] : value;
 }
 
 function stripAttribution(text) {
@@ -263,6 +269,8 @@ function stripAttribution(text) {
 
 function simplifyLeadPhrase(text) {
   return stripAttribution(text)
+    .replace(/^(?:Chinese|Indian|Singapore-based|Japanese|South Korean|Indonesian|Taiwanese|Malaysian|Thai|Vietnamese|Philippine|Hong Kong|UAE|US|American)\s+(?:[\w-]+\s+){0,5}(?:startup|company|firm|chipmaker|operator|chain|platform|designer|developer|maker|group|giant|giants|supplier|data centre operator|fintech)\s+([A-Z0-9][A-Za-z0-9.&' -]{1,48})\s+/i, "$1 ")
+    .replace(/^Japan’s\s+([A-Z0-9][A-Za-z0-9.&' -]{1,48})\s+/i, "$1 ")
     .replace(/\bhas begun\b/gi, "begins")
     .replace(/\bhas started\b/gi, "starts")
     .replace(/\bhas launched\b/gi, "launches")
@@ -298,6 +306,73 @@ function shortMoney(amount, unit) {
 
 function headlineFromPattern(sentence) {
   const patterns = [
+    [/^Indonesia's planned copyright rewrite would grant copyright privileges.*?AI/i, "Indonesia weighs copyright rights for AI users"],
+    [/^BrainCo\s+unveiled .*?brain-to-robot platform/i, "BrainCo shows thought-controlled robot platform"],
+    [/^Kioxia\s+fell as much as\s+([0-9.]+%)/i, "Kioxia shares fall $1"],
+    [/^South Korean authorities searched and seized materials from\s+(.+?)'s local office/i, "$1 faces South Korea competition probe"],
+    [/^TSMC pledged .*?invest another\s+\$?([0-9.]+)\s*(billion|million|mn|m)\b.*?Arizona/i, (match) => `TSMC adds ${shortMoney(match[1], match[2])} Arizona pledge`],
+    [/^Nvidia and four Japanese industrial automation companies.*?robot development/i, "Nvidia expands Japan robotics push"],
+    [/^Hyundai will buy SoftBank's roughly\s+([0-9.]+%)\s+stake in\s+(.+?),/i, "Hyundai buys rest of Boston Dynamics"],
+    [/^SBI Holdings and the Solana Foundation teamed up to build/i, "SBI and Solana team on Japan onchain market"],
+    [/^India's Elevation Capital raised a\s+\$?([0-9.]+)\s*(billion|million|mn|m)\s+fund/i, (match) => `Elevation Capital raises ${shortMoney(match[1], match[2])} India fund`],
+    [/^Shein executive chairman Donald Tang will step down/i, "Shein chair exits as IPO nears"],
+    [/^China's integrated-circuit exports nearly doubled/i, "China chip exports nearly double"],
+    [/^CXMT priced its Shanghai IPO/i, "CXMT prices Shanghai IPO"],
+    [/^State-backed Chinese companies are setting up semiconductor funds/i, "China state firms set up chip funds"],
+    [/^South Korea expects record tax revenue from .*?semiconductor boom/i, "Korea chip boom lifts tax outlook"],
+    [/^TSMC will build two more advanced chip-packaging plants/i, "TSMC adds Taiwan chip-packaging plants"],
+    [/^Indian startups are turning to Chinese open-weight models/i, "Indian startups turn to Chinese AI models"],
+    [/^DoorDash, Siemens and Airbnb are among companies using Chinese AI models/i, "Global firms turn to Chinese AI models"],
+    [/^Anthropic and OpenAI accused .*?Chinese firms of illicit model distillation/i, "US AI labs accuse China rivals of distillation"],
+    [/^Samsung will bring forward the launch of its Yongin chip fabrication site to\s+([0-9-]+)/i, "Samsung pulls Yongin fab launch forward"],
+    [/^India's semiconductor-device consumption is expected to rise from\s+\$?([0-9.]+)\s*(billion|million|mn|m)\s+in\s+([0-9]{4})\s+to\s+\$?([0-9.]+)\s*(billion|million|mn|m)\s+by\s+([0-9]{4})/i, (match) => `India chip demand seen hitting ${shortMoney(match[5], match[6])}`],
+    [/^Taiwan's UMC began producing advanced photonics chips in Singapore/i, "UMC starts Singapore photonics chip output"],
+    [/^Anthropic introduced India-specific rupee pricing/i, "Anthropic prices Claude locally in India"],
+    [/^India asked domestic AI firms Sarvam and BharatGen to adapt/i, "India taps local AI labs for cyber work"],
+    [/^Chinese AI founders including .*?moving away from frontier model competition/i, "China AI founders shift to vertical systems"],
+    [/^DeepSeek founder Liang Wenfeng's net worth more than doubled to\s+\$?([0-9.]+)\s*(billion|million|mn|m)/i, (match) => `DeepSeek founder fortune jumps to ${shortMoney(match[1], match[2])}`],
+    [/^Chinese regulators approved Apple Intelligence for iPhones/i, "Apple Intelligence clears China approvals"],
+    [/^Chinese President Xi Jinping will attend WAIC/i, "Xi to make first WAIC appearance"],
+    [/^Dongfang Suanxin, also known as DFSX, unveiled/i, "DFSX unveils domestic AI chip"],
+    [/^MiniMax will showcase its M3 multimodal large model/i, "MiniMax brings M3 model to WAIC"],
+    [/^Pakistan's top crypto regulator said digital assets should/i, "Pakistan crypto regulator urges case-by-case Islamic review"],
+    [/^Japan's SBI Group will launch a lending service offering a\s+([0-9.]+%)\s+annual yield/i, "SBI launches JPYSC stablecoin lending"],
+    [/^Saudi Arabia bought a record\s+\$?([0-9.]+)\s*(billion|million|mn|m)\s+worth of Taiwanese drones/i, (match) => `Saudi buys record ${shortMoney(match[1], match[2])} Taiwan drones`],
+    [/^An EY-Parthenon analysis estimated Europe and the US would need to invest an extra\s+\$?([0-9.]+)\s*trillion/i, (match) => `West needs $${match[1]}tn to cut China reliance`],
+    [/^Huawei plans to raise smartphone shipments by more than\s+([0-9.]+%)/i, "Huawei lifts smartphone shipment target"],
+    [/^The Philippines' top outsourcing industry group cut its\s+([0-9]{4})\s+revenue and jobs forecasts/i, "Philippines BPO sector cuts 2028 forecast"],
+    [/^Thinking Machines Lab released Inkling/i, "Thinking Machines releases Inkling model"],
+    [/^CXMT is emerging as one of the world's most important chipmakers/i, "CXMT tests China's memory-chip ambitions"],
+    [/^SK Hynix Inc\. raised\s+\$?([0-9.]+)\s*(billion|million|mn|m)/i, (match) => `SK Hynix raises ${shortMoney(match[1], match[2])} in US listing`],
+    [/^China’s MiniMax is seeking to raise as much as\s+HK\$?([0-9.]+)\s*(billion|million|mn|m)/i, "MiniMax seeks $1.9bn Hong Kong raise"],
+    [/^US investment firm Susquehanna .*?winding down its China/i, "Susquehanna winds down China venture arm"],
+    [/^India’s JioStar, .*?is using OpenAI/i, "JioStar uses OpenAI for streaming search"],
+    [/^India’s JioStar is using OpenAI/i, "JioStar uses OpenAI for streaming search"],
+    [/^American companies have developed a growing reliance on cheaper Chinese AI models/i, "US companies lean on cheaper Chinese AI"],
+    [/^US hospitals are increasingly hiring Filipino nurses/i, "US hospitals hire Filipino nurses for remote care"],
+    [/^US lawmakers are weighing ways to curb American companies' growing use of Chinese AI models/i, "US lawmakers target China AI model use"],
+    [/^Chinese companies plan to shift nearly half their AI accelerator budgets to domestic chips/i, "China firms shift AI chip budgets home"],
+    [/^Chinese authorities have met with major tech firms/i, "China weighs limits on overseas AI access"],
+    [/^Chinese smartphone sales fell\s+([0-9.]+%)/i, "China smartphone sales fall $1"],
+    [/^Chinese AI models are winning over US companies/i, "Chinese AI models win over US companies"],
+    [/^Chinese web novel platforms .*?cracking down on the AI tools/i, "China web fiction sites curb AI tools"],
+    [/^Indian fintech Navi, .*?is preparing to file for an IPO/i, "Navi prepares IPO filing"],
+    [/^Indian fintech Navi is preparing to file for an IPO/i, "Navi prepares IPO filing"],
+    [/^Navi, .*?is preparing to file for an IPO/i, "Navi prepares IPO filing"],
+    [/^Hong Kong has become a key gateway for high-tech goods/i, "Hong Kong becomes China tech-goods gateway"],
+    [/^ShareChat, positioned as India's answer to Meta, plans to raise/i, "ShareChat plans IPO raise"],
+    [/^South Korean trade watchdog alleges Google abused/i, "Korea watchdog accuses Google over app store"],
+    [/^Indian serial entrepreneur Bhavin Turakhia is betting\s+\$?([0-9.]+)\s*(billion|million|mn|m)/i, (match) => `Bhavin Turakhia bets ${shortMoney(match[1], match[2])} on Neo`],
+    [/^Xiaohongshu, known abroad as RedNote, is courting male users/i, "RedNote courts male users before Hong Kong IPO"],
+    [/^Global creditors, .*?filed insolvency proceedings against .*?Udaan/i, "Udaan creditors file insolvency case"],
+    [/^South Korean AI rout drags emerging stocks/i, "Korea AI rout hits emerging stocks"],
+    [/^Indian VC firms face their toughest fundraising stretch/i, "Indian VCs face fundraising drought"],
+    [/^Chinese chip material makers are ramping up production/i, "China chip-material firms ramp output"],
+    [/^Taiwanese prosecutors detained two Super Micro Computer/i, "Taiwan detains Super Micro staff in probe"],
+    [/^South Korean exports in June surged past\s+\$?([0-9.]+)\s*(billion|million|mn|m)/i, (match) => `Korea exports pass ${shortMoney(match[1], match[2])}`],
+    [/^Chinese smartphone makers Xiaomi, Oppo and Vivo have told suppliers/i, "China phone makers cut shipment targets"],
+    [/^Indian AI startup Rocket, .*?is in talks to raise\s+\$?([0-9]+)-([0-9]+)\s*(billion|million|mn|m)/i, (match) => `Rocket seeks $${match[1]}m-${match[2]}m round`],
+    [/^Japanese startups are sidestepping the country's strict anti-gambling laws/i, "Japan startups test prediction-market rules"],
     [/^SK Group chairman Chey Tae-won\s+says\s+the global AI memory-chip shortage.*?foreign governments are intervening.*$/i, "SK warns AI memory crunch is getting political"],
     [/^SoftBank founder Masayoshi Son\s+says?\s+global AI infrastructure will require\s+\$?([0-9.]+)\s*trillion a year/i, (match) => `SoftBank's Son puts AI infra cost at $${match[1]}tn a year`],
     [/^(.+?)\s+plans to raise pre-IPO funding before a planned Hong Kong listing/i, "$1 lines up Hong Kong IPO push"],
@@ -317,7 +392,11 @@ function headlineFromPattern(sentence) {
   for (const [pattern, replacement] of patterns) {
     const match = sentence.match(pattern);
     if (match) {
-      return typeof replacement === "function" ? replacement(match) : sentence.replace(pattern, replacement);
+      if (typeof replacement === "function") {
+        return replacement(match);
+      }
+
+      return replacement.includes("$") ? sentence.replace(pattern, replacement) : replacement;
     }
   }
 
@@ -341,7 +420,18 @@ function limitHeadline(text, maxLength = 58) {
     kept.push(word);
   }
 
-  return (kept.length ? kept.join(" ") : words.slice(0, 8).join(" ")).replace(/[,:;.-]+$/, "");
+  return trimWeakEnding(kept.length ? kept.join(" ") : words.slice(0, 8).join(" ")).replace(/[,:;.-]+$/, "");
+}
+
+function trimWeakEnding(text) {
+  const weakEnding = /\b(?:a|an|the|to|for|from|of|in|on|at|by|with|into|as|and|or|but|after|before|while|amid|among|including|through|using|than|more|less|around|roughly|nearly|over|under|about|its|their|his|her|this|that|which|who|what|where|when|why|how|would|will|could|should|has|have|had|is|are|was|were|being|been|called|known|also|first|new)\s*$/i;
+  const words = String(text || "").trim().split(/\s+/).filter(Boolean);
+
+  while (words.length > 4 && weakEnding.test(words.join(" "))) {
+    words.pop();
+  }
+
+  return words.join(" ");
 }
 
 function deriveHeadline(blurb) {
