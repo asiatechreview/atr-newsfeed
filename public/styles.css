@@ -398,21 +398,23 @@ main {
 
 .newsletter-promo {
   display: block;
-  margin: 0 0 18px;
-  padding: 18px;
+  width: min(100%, 840px);
+  margin: 0 auto 18px;
+  padding: 18px 20px 20px;
   border: 1px solid #4f8e6a;
   border-radius: var(--radius);
   background: #18231c;
 }
 
 .newsletter-promo h2 {
+  max-width: 760px;
   margin: 9px 0 8px;
   color: var(--text);
   font: 600 21px/1.2 var(--font-body);
 }
 
 .newsletter-promo p:not(.eyebrow) {
-  max-width: 820px;
+  max-width: 720px;
   margin: 0;
   color: var(--dek);
   font: 400 14px/1.5 var(--font-body);
