@@ -736,7 +736,7 @@ function normalizeItem(item) {
     region: String(item.Region || item.region || item.Category || item.category || "").trim(),
     source_name: String(item.Source || item.source || item.source_name || item.sourceName || "").trim(),
     source_url: isValidLink(sourceUrl) ? sourceUrl : "",
-    headline: HEADLINE_OVERRIDES.get(id) || String(item.Headline || item.headline || item.title || "").trim() || deriveHeadline(blurb),
+    headline: HEADLINE_OVERRIDES.get(id) || String(item.Headline || item.title || "").trim() || deriveHeadline(blurb),
     tags: itemTags(item, blurb)
   };
 }
