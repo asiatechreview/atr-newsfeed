@@ -7,7 +7,9 @@ const HEADLINE_OVERRIDES = new Map(Object.entries({
   "43": "SK warns AI memory crunch is getting political",
   "html-2026-07-16-034": "SoftBank's Son puts AI infra cost at $5tn a year",
   "19": "DeepSeek pushes China AI price war into enterprise adoption",
-  "manual-telegram-2026-07-17-005": "DeepSeek pushes China AI price war into enterprise adoption"
+  "manual-telegram-2026-07-17-005": "DeepSeek pushes China AI price war into enterprise adoption",
+  "manual-telegram-2026-07-17-004": "Montage faces South Korea competition probe",
+  "manual-telegram-2026-07-16-008": "CXMT and YMTC face US chip ban push"
 }));
 
 export async function onRequestGet({ env, request }) {

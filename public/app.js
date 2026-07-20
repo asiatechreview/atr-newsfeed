@@ -51,7 +51,9 @@ const HEADLINE_OVERRIDES = new Map(Object.entries({
   "13": "Coupang fine strains US-South Korea ties",
   "12": "Zepto IPO interest cools below peak",
   "11": "Indonesia AI copyright rewrite advances",
-  "10": "BrainCo shows thought-controlled robots"
+  "10": "BrainCo shows thought-controlled robots",
+  "manual-telegram-2026-07-17-004": "Montage faces South Korea competition probe",
+  "manual-telegram-2026-07-16-008": "CXMT and YMTC face US chip ban push"
 }));
 
 let allItems = [];
