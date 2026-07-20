@@ -3,9 +3,12 @@
   --bg: #0d0e0c;
   --panel: #151713;
   --panel-2: #1b1d18;
+  --sidebar-bg: #10110f;
   --border: #303329;
   --card-bg: #151713;
   --card-border: #303329;
+  --newsletter-bg: #18231c;
+  --newsletter-border: #4f8e6a;
   --dek: #a7a194;
   --muted: #a7a194;
   --quiet: #777267;
@@ -17,6 +20,27 @@
   --font-body: "Berkeley Mono", "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", ui-monospace, monospace;
   --font-meta: "Berkeley Mono", "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", ui-monospace, monospace;
   --radius: 6px;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f5f2ea;
+  --panel: #fffaf0;
+  --panel-2: #eee8dc;
+  --sidebar-bg: #ebe5d8;
+  --border: #d3cab9;
+  --card-bg: #fffaf0;
+  --card-border: #d3cab9;
+  --newsletter-bg: #e6f0e7;
+  --newsletter-border: #8ab49a;
+  --dek: #5d594f;
+  --muted: #6f695e;
+  --quiet: #8a8375;
+  --accent: #21784f;
+  --accent-2: #9a6616;
+  --on-text: #f8f5ef;
+  --red: #b8412d;
+  --text: #191813;
 }
 
 * {
@@ -54,7 +78,7 @@ a {
   min-height: 100vh;
   padding: 22px 18px;
   border-right: 1px solid var(--border);
-  background: #10110f;
+  background: var(--sidebar-bg);
   display: flex;
   flex-direction: column;
   position: sticky;
@@ -129,6 +153,35 @@ main {
   font: 600 12px/1 var(--font-meta);
   text-align: right;
   white-space: nowrap;
+}
+
+.topbar-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.theme-toggle {
+  min-height: 28px;
+  padding: 0 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--muted);
+  font: 600 11px/1 var(--font-meta);
+  cursor: pointer;
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.theme-toggle:focus {
+  outline: 1px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .content-grid {
@@ -401,9 +454,9 @@ main {
   width: min(100%, 840px);
   margin: 0 auto 18px;
   padding: 18px 20px 20px;
-  border: 1px solid #4f8e6a;
+  border: 1px solid var(--newsletter-border);
   border-radius: var(--radius);
-  background: #18231c;
+  background: var(--newsletter-bg);
 }
 
 .newsletter-promo h2 {
@@ -484,8 +537,12 @@ footer {
   }
 
   .status {
-    margin-top: 12px;
     text-align: left;
+  }
+
+  .topbar-actions {
+    align-items: flex-start;
+    margin-top: 12px;
   }
 
   .content-grid {

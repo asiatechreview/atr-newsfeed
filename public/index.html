@@ -5,10 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Asia Tech Review</title>
   <link rel="icon" href="/favicon.svg?v=20260718" type="image/svg+xml">
+  <script>
+    try {
+      if (localStorage.getItem("atr-bulletin-theme") === "light") {
+        document.documentElement.dataset.theme = "light";
+      }
+    } catch (error) {}
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=20260720-substack-proportional">
+  <link rel="stylesheet" href="/styles.css?v=20260720-theme-toggle">
 </head>
 <body>
   <div class="page">
@@ -31,7 +38,10 @@
           <h2>Latest Asia Tech Signals</h2>
           <p class="dek">What's moving in Asia tech, as it happens.</p>
         </div>
-        <p id="feed-status" class="status" aria-live="polite">Loading news links...</p>
+        <div class="topbar-actions">
+          <p id="feed-status" class="status" aria-live="polite">Loading news links...</p>
+          <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to light mode">Light mode</button>
+        </div>
       </div>
 
       <section class="newsletter-promo" aria-label="Latest Asia Tech Review newsletter">
@@ -89,6 +99,6 @@
     </article>
   </template>
 
-  <script src="/app.js?v=20260720-local-time" defer></script>
+  <script src="/app.js?v=20260720-theme-toggle" defer></script>
 </body>
 </html>

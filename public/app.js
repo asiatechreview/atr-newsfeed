@@ -5,6 +5,7 @@ const pagination = document.querySelector("#pagination");
 const searchForm = document.querySelector("#search-form");
 const searchInput = document.querySelector("#search-input");
 const signalMetrics = document.querySelector("#signal-metrics");
+const themeToggle = document.querySelector("#theme-toggle");
 const watchlist = document.querySelector("#watchlist");
 const watchlistHeadline = document.querySelector("#watchlist-headline");
 const watchlistBlurb = document.querySelector("#watchlist-blurb");
@@ -15,6 +16,7 @@ const VISIBLE_PAGE_BUTTONS = 8;
 const ARCHIVE_DAYS = 5;
 const FEED_POLL_INTERVAL_MS = 5 * 60 * 1000;
 const LOCAL_TIME_ZONE = getLocalTimeZone();
+const THEME_STORAGE_KEY = "atr-bulletin-theme";
 const FEATURED_ITEM_ID = "manual-telegram-2026-07-17-005";
 const FEATURED_SOURCE_URL = "https://www.bloomberg.com/news/newsletters/2026-07-17/china-can-still-win-the-ai-race-with-inferior-technology";
 const HEADLINE_OVERRIDES = new Map(Object.entries({
@@ -247,6 +249,50 @@ function getLocalTimeZone() {
 
 function localTimeOptions(options = {}) {
   return LOCAL_TIME_ZONE ? { ...options, timeZone: LOCAL_TIME_ZONE } : options;
+}
+
+function getStoredTheme() {
+  try {
+    return window.localStorage.getItem(THEME_STORAGE_KEY) === "light" ? "light" : "dark";
+  } catch (error) {
+    return "dark";
+  }
+}
+
+function setStoredTheme(theme) {
+  try {
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+  } catch (error) {
+    // Some privacy modes block localStorage; the toggle still works for this page load.
+  }
+}
+
+function applyTheme(theme) {
+  const normalizedTheme = theme === "light" ? "light" : "dark";
+  document.documentElement.dataset.theme = normalizedTheme;
+
+  if (!themeToggle) {
+    return;
+  }
+
+  const nextTheme = normalizedTheme === "light" ? "dark" : "light";
+  themeToggle.textContent = normalizedTheme === "light" ? "Dark mode" : "Light mode";
+  themeToggle.setAttribute("aria-label", `Switch to ${nextTheme} mode`);
+  themeToggle.setAttribute("aria-pressed", normalizedTheme === "light" ? "true" : "false");
+}
+
+function initThemeToggle() {
+  applyTheme(getStoredTheme());
+
+  if (!themeToggle) {
+    return;
+  }
+
+  themeToggle.addEventListener("click", () => {
+    const nextTheme = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+    applyTheme(nextTheme);
+    setStoredTheme(nextTheme);
+  });
 }
 
 function getRequestedPage() {
@@ -1583,5 +1629,6 @@ if (searchForm && searchInput) {
   });
 }
 
+initThemeToggle();
 refreshFeed({ initial: true });
 startFeedPolling();

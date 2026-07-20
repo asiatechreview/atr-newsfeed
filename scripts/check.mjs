@@ -31,6 +31,8 @@ for (const column of ["headline", "blurb", "source_name", "source_url", "categor
 }
 
 const appScript = readFileSync(join(root, "public/app.js"), "utf8");
+const indexHtml = readFileSync(join(root, "public/index.html"), "utf8");
+const stylesCss = readFileSync(join(root, "public/styles.css"), "utf8");
 if (!appScript.includes("function renderTags(target, item)") || !appScript.includes("for (const tag of item.tags)")) {
   console.error("public/app.js must render story tags, not hide the tag container");
   process.exit(1);
@@ -43,6 +45,11 @@ if (!appScript.includes("FEED_POLL_INTERVAL_MS") || !appScript.includes("startFe
 
 if (!appScript.includes("Intl.DateTimeFormat().resolvedOptions().timeZone") || appScript.includes('timeZone: "Asia/Bangkok"') || appScript.includes("LIVE ${formatTime(new Date())} BKK")) {
   console.error("public/app.js must render feed timestamps with the reader's browser timezone, not a fixed Bangkok timezone");
+  process.exit(1);
+}
+
+if (!indexHtml.includes('id="theme-toggle"') || !appScript.includes("THEME_STORAGE_KEY") || !stylesCss.includes(':root[data-theme="light"]')) {
+  console.error("bulletin site must include a dark-default light/dark mode toggle");
   process.exit(1);
 }
 
