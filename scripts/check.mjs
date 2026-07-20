@@ -53,6 +53,11 @@ if (!indexHtml.includes('id="theme-toggle"') || !appScript.includes("THEME_STORA
   process.exit(1);
 }
 
+if (!indexHtml.includes('id="new-item-toast"') || !appScript.includes("showNewItemToast") || !stylesCss.includes(".new-item-toast")) {
+  console.error("bulletin site must show a toast notification when new feed items arrive during live polling");
+  process.exit(1);
+}
+
 const failures = [];
 const sourceAliases = new Map([
   ["ft.com", "FT"],

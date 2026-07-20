@@ -6,6 +6,11 @@ const searchForm = document.querySelector("#search-form");
 const searchInput = document.querySelector("#search-input");
 const signalMetrics = document.querySelector("#signal-metrics");
 const themeToggle = document.querySelector("#theme-toggle");
+const newItemToast = document.querySelector("#new-item-toast");
+const newItemToastTitle = document.querySelector("#new-item-toast-title");
+const newItemToastMeta = document.querySelector("#new-item-toast-meta");
+const newItemToastRead = document.querySelector("#new-item-toast-read");
+const newItemToastClose = document.querySelector("#new-item-toast-close");
 const watchlist = document.querySelector("#watchlist");
 const watchlistHeadline = document.querySelector("#watchlist-headline");
 const watchlistBlurb = document.querySelector("#watchlist-blurb");
@@ -15,6 +20,7 @@ const ITEMS_PER_PAGE = 15;
 const VISIBLE_PAGE_BUTTONS = 8;
 const ARCHIVE_DAYS = 5;
 const FEED_POLL_INTERVAL_MS = 5 * 60 * 1000;
+const NEW_ITEM_TOAST_TIMEOUT_MS = 9000;
 const LOCAL_TIME_ZONE = getLocalTimeZone();
 const THEME_STORAGE_KEY = "atr-bulletin-theme";
 const FEATURED_ITEM_ID = "manual-telegram-2026-07-17-005";
@@ -238,6 +244,8 @@ let currentTagFilter = getRequestedTagFilter();
 let currentSearchQuery = getRequestedSearchQuery();
 let feedPollTimer = null;
 let isFetchingFeed = false;
+let newItemToastTimer = null;
+let pendingToastItem = null;
 
 function getLocalTimeZone() {
   try {
@@ -1198,6 +1206,72 @@ function renderSignal(items) {
   }
 }
 
+function hideNewItemToast() {
+  if (newItemToastTimer) {
+    window.clearTimeout(newItemToastTimer);
+    newItemToastTimer = null;
+  }
+
+  pendingToastItem = null;
+
+  if (newItemToast) {
+    newItemToast.hidden = true;
+  }
+}
+
+function showNewItemToast(item, count = 1) {
+  if (!newItemToast || !newItemToastTitle || !newItemToastMeta) {
+    return;
+  }
+
+  pendingToastItem = item || null;
+  newItemToastTitle.textContent = item?.headline || "New update available";
+  newItemToastMeta.textContent = count > 1
+    ? `${count} new updates · just now`
+    : `${titleCaseTag((item?.tags || []).find((tag) => !isCountryTag(tag)) || "tech")} · just now`;
+  newItemToast.hidden = false;
+
+  if (newItemToastTimer) {
+    window.clearTimeout(newItemToastTimer);
+  }
+
+  newItemToastTimer = window.setTimeout(() => {
+    hideNewItemToast();
+  }, NEW_ITEM_TOAST_TIMEOUT_MS);
+}
+
+function readPendingToastItem() {
+  const target = pendingToastItem;
+  hideNewItemToast();
+
+  currentDateFilter = "";
+  currentTagFilter = "";
+  currentSearchQuery = "";
+  currentPage = 1;
+  renderPage(1);
+
+  window.requestAnimationFrame(() => {
+    if (target) {
+      const key = stableItemKey(target);
+      const firstMatchingItem = [...feed.querySelectorAll(".item")].find((node) => node.dataset.itemKey === key);
+      if (firstMatchingItem) {
+        firstMatchingItem.scrollIntoView({ block: "start", behavior: "smooth" });
+        return;
+      }
+    }
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+}
+
+if (newItemToastRead) {
+  newItemToastRead.addEventListener("click", readPendingToastItem);
+}
+
+if (newItemToastClose) {
+  newItemToastClose.addEventListener("click", hideNewItemToast);
+}
+
 function isFeaturedItem(item) {
   return item.id === FEATURED_ITEM_ID ||
     item.source_url === FEATURED_SOURCE_URL ||
@@ -1471,6 +1545,7 @@ function renderItems(items) {
     const primaryTagLink = itemNode.querySelector(".item-primary-tag");
 
     itemNode.querySelector(".item-time").textContent = formatTime(item.published_at);
+    itemNode.querySelector(".item").dataset.itemKey = stableItemKey(item);
     primaryTagLink.href = `?tag=${encodeURIComponent(primaryTag)}`;
     primaryTagLink.textContent = titleCaseTag(primaryTag);
     itemNode.querySelector(".headline").textContent = item.headline;
@@ -1529,6 +1604,7 @@ function mergeIncomingItems(items) {
   const existingKeys = new Set(allItems.map(stableItemKey));
   const mergedByKey = new Map();
   let newItemCount = 0;
+  const newItems = [];
 
   for (const item of allItems) {
     mergedByKey.set(stableItemKey(item), item);
@@ -1538,12 +1614,16 @@ function mergeIncomingItems(items) {
     const key = stableItemKey(item);
     if (!existingKeys.has(key)) {
       newItemCount += 1;
+      newItems.push(item);
     }
     mergedByKey.set(key, item);
   }
 
   allItems = sortItems([...mergedByKey.values()]);
-  return newItemCount;
+  return {
+    newItemCount,
+    newestItem: sortItems(newItems)[0] || null
+  };
 }
 
 async function fetchFeedItems() {
@@ -1575,12 +1655,14 @@ async function refreshFeed(options = {}) {
       return;
     }
 
-    const newItemCount = mergeIncomingItems(items);
+    const { newItemCount, newestItem } = mergeIncomingItems(items);
     if (newItemCount && isLiveHomepageTop()) {
       renderCurrentView();
+      showNewItemToast(newestItem, newItemCount);
     } else if (newItemCount) {
       renderSignal(allItems);
       setFeedStatus(`${newItemCount} new update${newItemCount === 1 ? "" : "s"} available`);
+      showNewItemToast(newestItem, newItemCount);
     } else {
       renderSignal(allItems);
       setFeedStatus();

@@ -184,6 +184,98 @@ main {
   outline-offset: 2px;
 }
 
+.new-item-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  z-index: 20;
+  width: min(620px, calc(100vw - 32px));
+  padding: 14px 15px 13px;
+  border: 1px solid rgba(120, 181, 146, 0.82);
+  border-radius: 7px;
+  background: rgba(21, 23, 19, 0.78);
+  box-shadow: 0 18px 52px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(12px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  transform: translate(-50%, 0);
+  opacity: 1;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+:root[data-theme="light"] .new-item-toast {
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 18px 52px rgba(21, 23, 19, 0.18);
+}
+
+.new-item-toast[hidden] {
+  display: none;
+}
+
+.new-item-toast-copy {
+  min-width: 0;
+}
+
+.new-item-toast-kicker {
+  margin: 0 0 6px;
+  color: var(--accent);
+  font: 800 11px/1 var(--font-meta);
+  text-transform: uppercase;
+}
+
+.new-item-toast-title {
+  margin: 0;
+  color: var(--text);
+  font: 700 15px/1.3 var(--font-body);
+  overflow-wrap: anywhere;
+}
+
+.new-item-toast-meta {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font: 600 11px/1.35 var(--font-meta);
+}
+
+.new-item-toast-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.new-item-toast-read,
+.new-item-toast-close {
+  height: 31px;
+  border-radius: var(--radius);
+  font: 800 11px/1 var(--font-meta);
+  cursor: pointer;
+}
+
+.new-item-toast-read {
+  padding: 0 10px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--on-text);
+  white-space: nowrap;
+}
+
+.new-item-toast-close {
+  width: 31px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--muted);
+}
+
+.new-item-toast-read:hover,
+.new-item-toast-read:focus,
+.new-item-toast-close:hover,
+.new-item-toast-close:focus {
+  border-color: var(--accent);
+  outline: 1px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .content-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
@@ -552,6 +644,15 @@ footer {
   .topbar-actions {
     align-items: flex-start;
     margin-top: 12px;
+  }
+
+  .new-item-toast {
+    bottom: 14px;
+    grid-template-columns: 1fr;
+  }
+
+  .new-item-toast-actions {
+    justify-content: flex-start;
   }
 
   .content-grid {

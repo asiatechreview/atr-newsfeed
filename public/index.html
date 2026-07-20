@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=20260720-pagination-prev-hidden">
+  <link rel="stylesheet" href="/styles.css?v=20260720-new-item-toast">
 </head>
 <body>
   <div class="page">
@@ -81,6 +81,18 @@
     </main>
   </div>
 
+  <aside id="new-item-toast" class="new-item-toast" aria-live="polite" aria-label="New bulletin update" hidden>
+    <div class="new-item-toast-copy">
+      <p class="new-item-toast-kicker">New update</p>
+      <p id="new-item-toast-title" class="new-item-toast-title"></p>
+      <p id="new-item-toast-meta" class="new-item-toast-meta"></p>
+    </div>
+    <div class="new-item-toast-actions">
+      <button id="new-item-toast-read" class="new-item-toast-read" type="button">Read update</button>
+      <button id="new-item-toast-close" class="new-item-toast-close" type="button" aria-label="Dismiss new update">x</button>
+    </div>
+  </aside>
+
   <template id="date-template">
     <p class="date"></p>
   </template>
@@ -99,6 +111,6 @@
     </article>
   </template>
 
-  <script src="/app.js?v=20260720-pagination-prev-hidden" defer></script>
+  <script src="/app.js?v=20260720-new-item-toast" defer></script>
 </body>
 </html>
