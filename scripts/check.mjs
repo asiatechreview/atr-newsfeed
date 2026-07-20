@@ -29,6 +29,12 @@ for (const column of ["blurb", "source_name", "source_url", "category", "publish
   }
 }
 
+const appScript = readFileSync(join(root, "public/app.js"), "utf8");
+if (!appScript.includes("function renderTags(target, item)") || !appScript.includes("for (const tag of item.tags)")) {
+  console.error("public/app.js must render story tags, not hide the tag container");
+  process.exit(1);
+}
+
 const failures = [];
 const sourceAliases = new Map([
   ["ft.com", "FT"],

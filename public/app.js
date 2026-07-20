@@ -769,9 +769,28 @@ function appendItemText(target, item) {
   target.appendChild(document.createTextNode("]"));
 }
 
-function renderTags(target) {
+function renderTags(target, item) {
   target.textContent = "";
-  target.hidden = true;
+
+  if (!item.tags.length) {
+    target.hidden = true;
+    return;
+  }
+
+  target.hidden = false;
+
+  for (const tag of item.tags) {
+    const link = document.createElement("a");
+    link.href = `?tag=${encodeURIComponent(tag)}`;
+    link.textContent = `#${tag}`;
+
+    if (tag === currentTagFilter) {
+      link.className = "current";
+      link.setAttribute("aria-current", "page");
+    }
+
+    target.appendChild(link);
+  }
 }
 
 function renderArchive() {
