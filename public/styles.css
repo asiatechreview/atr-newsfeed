@@ -324,8 +324,7 @@ main {
   cursor: pointer;
 }
 
-.pagination button:first-child,
-.pagination button:last-child {
+.pagination button.page-nav {
   min-width: 86px;
 }
 

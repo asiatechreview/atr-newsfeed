@@ -1236,9 +1236,12 @@ function createPageButton(label, page, options = {}) {
   button.type = "button";
   button.textContent = label;
   button.disabled = options.disabled || false;
+  if (options.className) {
+    button.className = options.className;
+  }
 
   if (options.current) {
-    button.className = "current";
+    button.classList.add("current");
     button.setAttribute("aria-current", "page");
   }
 
@@ -1266,9 +1269,11 @@ function renderPagination(totalItems) {
   }
 
   pagination.hidden = false;
-  pagination.appendChild(createPageButton("Previous", Math.max(1, currentPage - 1), {
-    disabled: currentPage === 1
-  }));
+  if (currentPage > 1) {
+    pagination.appendChild(createPageButton("Previous", currentPage - 1, {
+      className: "page-nav"
+    }));
+  }
 
   const visiblePages = Math.min(totalPages, VISIBLE_PAGE_BUTTONS);
   const halfWindow = Math.floor(visiblePages / 2);
@@ -1283,6 +1288,7 @@ function renderPagination(totalItems) {
   }
 
   pagination.appendChild(createPageButton("Next", Math.min(totalPages, currentPage + 1), {
+    className: "page-nav",
     disabled: currentPage === totalPages
   }));
 }
