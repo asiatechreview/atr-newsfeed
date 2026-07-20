@@ -107,6 +107,9 @@ function isWeakHeadline(headline) {
   if (/\$[0-9.]+$/.test(value)) return true;
   if (/^(?:Chinese|Indian|Singapore-based|Japanese|South Korean|Taiwanese|Malaysian|Thai|Vietnamese|Philippine|Hong Kong|UAE|US|American)\s+(?:unicorn|startup|company|firm|chipmaker|operator|chain|platform|designer|developer|maker|group|giant|authorities|regulators|lawmaker|ministry|court)\b/i.test(value)) return true;
   if (/^(?:CXMT|SK Hynix Inc|U\.S|US|Global creditors|ShareChat, positioned|Xiaohongshu, known abroad|Dongfang Suanxin, also known|Chinese AI founders|Indian AI startup Rocket)$/i.test(value)) return true;
+  if (/\b(?:is in talks|has held talks|has started preparing|is preparing|plans to file|will show|will debut|are expected|is previewing|is pushing|began auditing|declined to stay|opened an immigration|marked its|launched a nationwide|is building|said residents|begins trading|told staff|plans to spend|approved a manufacturing|has been supplying|has won|raised a \$|targeted a valuation|reported a |closed down|outlined several|are leaning|begins shipping|is shutting|pledged another|will feature|has closed|has told Meta|is expanding|will invest|are leading|is in talks to buy|will begin renting|launched ZCode|has narrowed|has referred|sentenced five|has passed|will pour|has laid out|is nearing|launches investor|has ramped|has stalled|jailed former|announced|has filed|has open-sourced|launched Hong|finalized rules|has accused|has signed|now account|aims to finalize|will tighten|has chosen)\b/i.test(value)) return true;
+  if (/\b(?:inside the story|The Economic Times|surfacing|directs MeitY|front and center)\b/i.test(value)) return true;
+  if (/(?:\$[0-9.]+ billion|[0-9]+ trillion rupees|T\$|HK\$|\bRs\s)/i.test(value)) return true;
 
   return false;
 }
