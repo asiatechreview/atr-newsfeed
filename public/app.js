@@ -39,7 +39,7 @@ const HEADLINE_OVERRIDES = new Map(Object.entries({
   "22": "Rapidus adds Cadence AI tools for chip design",
   "21": "Shein clears Hong Kong IPO review",
   "20": "Kimi K3 shock hits AI chip stocks",
-  "19": "DeepSeek drives China AI price war",
+  "19": "DeepSeek pushes China AI price war into enterprise adoption",
   "18": "India resets chip incentives",
   "17": "CXMT IPO draws huge retail demand",
   "16": "Kioxia hit with $229m patent verdict",
