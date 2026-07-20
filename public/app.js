@@ -4,6 +4,7 @@ const archiveNav = document.querySelector("#archive-nav");
 const pagination = document.querySelector("#pagination");
 const searchForm = document.querySelector("#search-form");
 const searchInput = document.querySelector("#search-input");
+const signalMetrics = document.querySelector("#signal-metrics");
 const dateTemplate = document.querySelector("#date-template");
 const itemTemplate = document.querySelector("#item-template");
 const ITEMS_PER_PAGE = 15;
@@ -139,6 +140,24 @@ function shortDateLabel(value) {
     });
   } catch (error) {
     return fallbackDateLabel(date, false);
+  }
+}
+
+function formatTime(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  try {
+    return date.toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "Asia/Bangkok"
+    });
+  } catch (error) {
+    return `${pad2(date.getHours())}:${pad2(date.getMinutes())}`;
   }
 }
 
@@ -512,6 +531,51 @@ function itemTags(item, blurb) {
   return [...visibleCountries, ...visibleTopics].slice(0, 5);
 }
 
+function titleCaseTag(tag) {
+  return String(tag || "tech")
+    .split("-")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function firstSentence(text) {
+  const match = String(text || "").trim().match(/^(.+?[.!?])\s+/);
+  return match ? match[1] : String(text || "").trim();
+}
+
+function deriveHeadline(blurb) {
+  const sentence = firstSentence(blurb)
+    .replace(/\s+\[[^\]]+\]\s*$/, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!sentence) {
+    return "Asia tech update";
+  }
+
+  const clauses = sentence.split(/,\s+(?:with|as|while|after|amid|according to|marking|making|in a move|where)\b/i);
+  let headline = clauses[0].trim();
+
+  if (headline.length < 44 && clauses[1]) {
+    headline = `${headline}, ${clauses[1].trim()}`;
+  }
+
+  if (headline.length > 92) {
+    const words = headline.split(/\s+/);
+    const kept = [];
+    for (const word of words) {
+      if ([...kept, word].join(" ").length > 88) {
+        break;
+      }
+      kept.push(word);
+    }
+    headline = kept.join(" ").replace(/[,:;.-]+$/, "");
+  }
+
+  return headline;
+}
+
 function normalizeItem(item) {
   const blurb = String(item.Blurb || item.blurb || "").trim();
   if (!blurb) {
@@ -528,6 +592,7 @@ function normalizeItem(item) {
     region: String(item.Region || item.region || item.Category || item.category || "").trim(),
     source_name: String(item.Source || item.source || item.source_name || item.sourceName || "").trim(),
     source_url: isValidLink(sourceUrl) ? sourceUrl : "",
+    headline: String(item.Headline || item.headline || item.title || "").trim() || deriveHeadline(blurb),
     tags: itemTags(item, blurb)
   };
 }
@@ -606,6 +671,54 @@ function renderArchive() {
   }
 }
 
+function setFeedStatus(label = "") {
+  if (!status) {
+    return;
+  }
+
+  if (label) {
+    status.textContent = label;
+    return;
+  }
+
+  status.textContent = `LIVE ${formatTime(new Date())} BKK`;
+}
+
+function renderSignal(items) {
+  if (!signalMetrics) {
+    return;
+  }
+
+  signalMetrics.textContent = "";
+
+  const topicCounts = new Map();
+  for (const item of items) {
+    const topic = (item.tags || []).find((tag) => !isCountryTag(tag)) || "tech";
+    topicCounts.set(topic, (topicCounts.get(topic) || 0) + 1);
+  }
+
+  const metrics = [
+    ["Active stories", String(items.length)],
+    ...[...topicCounts.entries()]
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .slice(0, 4)
+      .map(([tag, count]) => [titleCaseTag(tag), String(count)])
+  ];
+
+  for (const [label, value] of metrics) {
+    const metric = document.createElement("div");
+    metric.className = "metric";
+
+    const labelNode = document.createElement("span");
+    labelNode.textContent = label;
+    const valueNode = document.createElement("span");
+    valueNode.textContent = value;
+
+    metric.append(labelNode, valueNode);
+    signalMetrics.appendChild(metric);
+  }
+}
+
 function createPageButton(label, page, options = {}) {
   const button = document.createElement("button");
   button.type = "button";
@@ -676,7 +789,7 @@ function renderPage(page = currentPage) {
 
   feed.textContent = "";
   archiveNav.textContent = "";
-  status.textContent = "";
+  setFeedStatus();
 
   if (!pageItems.length) {
     const empty = document.createElement("p");
@@ -708,7 +821,7 @@ function renderDate(date, page = currentPage) {
 
   feed.textContent = "";
   archiveNav.textContent = "";
-  status.textContent = "";
+  setFeedStatus();
 
   renderArchive();
 
@@ -741,7 +854,7 @@ function renderTag(tag, page = currentPage) {
 
   feed.textContent = "";
   archiveNav.textContent = "";
-  status.textContent = "";
+  setFeedStatus();
 
   renderArchive();
 
@@ -798,7 +911,7 @@ function renderSearch(query, page = currentPage) {
 
   feed.textContent = "";
   archiveNav.textContent = "";
-  status.textContent = "";
+  setFeedStatus();
 
   renderArchive();
 
@@ -831,6 +944,13 @@ function renderItems(items) {
     }
 
     const itemNode = itemTemplate.content.cloneNode(true);
+    const primaryTag = (item.tags || []).find((tag) => !isCountryTag(tag)) || item.tags[0] || "tech";
+    const primaryTagLink = itemNode.querySelector(".item-primary-tag");
+
+    itemNode.querySelector(".item-time").textContent = formatTime(item.published_at);
+    primaryTagLink.href = `?tag=${encodeURIComponent(primaryTag)}`;
+    primaryTagLink.textContent = titleCaseTag(primaryTag);
+    itemNode.querySelector(".headline").textContent = item.headline;
     appendItemText(itemNode.querySelector(".blurb"), item);
     renderTags(itemNode.querySelector(".tags"), item);
     feed.appendChild(itemNode);
@@ -840,13 +960,14 @@ function renderItems(items) {
 function render(items, options = {}) {
   allItems = sortItems(items.map(normalizeItem).filter(Boolean));
   syncSearchInput();
+  renderSignal(allItems);
 
   if (options.statusText) {
     feed.textContent = "";
     archiveNav.textContent = "";
     pagination.textContent = "";
     pagination.hidden = true;
-    status.textContent = options.statusText;
+    setFeedStatus(options.statusText);
     return;
   }
 

@@ -5,29 +5,58 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Asia Tech Review</title>
   <link rel="icon" href="/favicon.svg?v=20260718" type="image/svg+xml">
-  <link rel="stylesheet" href="/styles.css?v=20260717-amoled-dark">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css?v=20260720-green-bulletin">
 </head>
 <body>
   <div class="page">
-    <header class="masthead">
-      <h1><a href="/" aria-label="Asia Tech Review homepage">Asia Tech Review</a></h1>
-      <p>What's moving in Asia tech, as it happens.</p>
-    </header>
+    <aside class="sidebar">
+      <header class="masthead">
+        <h1><a href="/" aria-label="Asia Tech Review homepage">Asia Tech Review</a></h1>
+        <p>Bulletin</p>
+      </header>
 
-    <main>
       <form id="search-form" class="search" role="search">
         <input id="search-input" name="q" type="search" autocomplete="off" placeholder="Search" aria-label="Search">
       </form>
-      <p id="feed-status" class="status" aria-live="polite">Loading news links...</p>
 
-      <section id="feed-list" class="feed" aria-label="Asia Tech Review feed"></section>
-      <nav id="pagination" class="pagination" aria-label="News link pages"></nav>
-      <nav id="archive-nav" class="archive" aria-label="Recent dates"></nav>
+      <footer>
+        Updated from ATR news links.
+      </footer>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div>
+          <p class="eyebrow">ATR Daily</p>
+          <h2>Latest Asia Tech Signals</h2>
+          <p class="dek">What's moving in Asia tech, as it happens.</p>
+        </div>
+        <p id="feed-status" class="status" aria-live="polite">Loading news links...</p>
+      </div>
+
+      <div class="content-grid">
+        <section class="feed-column" aria-label="Asia Tech Review feed">
+          <h2 class="section-title">Latest Updates</h2>
+          <section id="feed-list" class="feed"></section>
+          <nav id="pagination" class="pagination" aria-label="News link pages"></nav>
+        </section>
+
+        <aside class="rail" aria-label="Bulletin summary">
+          <section class="rail-card">
+            <h2 class="section-title">News Mix</h2>
+            <div id="signal-metrics" class="metrics"></div>
+          </section>
+
+          <section class="rail-card">
+            <h2 class="section-title">Recent Days</h2>
+            <nav id="archive-nav" class="archive" aria-label="Recent dates"></nav>
+          </section>
+        </aside>
+      </div>
     </main>
-
-    <footer>
-      Updated from ATR news links.
-    </footer>
   </div>
 
   <template id="date-template">
@@ -36,11 +65,18 @@
 
   <template id="item-template">
     <article class="item">
-      <p class="blurb"></p>
-      <p class="tags"></p>
+      <div class="meta">
+        <time class="item-time"></time>
+        <a class="item-primary-tag"></a>
+      </div>
+      <div class="item-main">
+        <h3 class="headline"></h3>
+        <p class="blurb"></p>
+        <p class="tags"></p>
+      </div>
     </article>
   </template>
 
-  <script src="/app.js?v=20260718-archive-five-below-pages" defer></script>
+  <script src="/app.js?v=20260720-green-bulletin" defer></script>
 </body>
 </html>
