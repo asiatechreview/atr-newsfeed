@@ -3,6 +3,11 @@ import { STATIC_ITEMS } from "../_data/static-items.js";
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 500;
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1-9bPUuh73mgFWM1gDc_3qlTe_-VNZGrgRfWMApv8yxU/gviz/tq?tqx=out:csv&gid=0&headers=1";
+const HEADLINE_OVERRIDES = new Map(Object.entries({
+  "43": "SK warns AI memory crunch is getting political",
+  "19": "DeepSeek pushes China AI price war into enterprise adoption",
+  "manual-telegram-2026-07-17-005": "DeepSeek pushes China AI price war into enterprise adoption"
+}));
 
 export async function onRequestGet({ env, request }) {
   const url = new URL(request.url);
@@ -37,15 +42,30 @@ export async function onRequestGet({ env, request }) {
 
   if (mergedItems.length) {
     return json({
-      items: mergedItems
+      items: withHeadlines(mergedItems)
     });
   }
 
   const sheetItems = await loadSheetItems({ limit, category, date });
 
   return json({
-    items: sheetItems
+    items: withHeadlines(sheetItems)
   });
+}
+
+function withHeadlines(items) {
+  return items.map((item) => {
+    const headline = clean(item.headline || item.Headline || item.title) || headlineForItem(item);
+    return {
+      ...item,
+      headline
+    };
+  });
+}
+
+function headlineForItem(item) {
+  const id = String(item.id || item.ID || item.ItemID || item.item_id || "").trim();
+  return HEADLINE_OVERRIDES.get(id) || deriveHeadline(item.blurb || item.Blurb || "");
 }
 
 function mergeItems(...groups) {
@@ -221,11 +241,121 @@ export async function onRequestPost({ env, request }) {
     .bind(blurb, sourceName, sourceUrl, category, telegramMessageId || null, publishedAt)
     .first();
 
-  return json({ item: result }, 201);
+  return json({ item: withHeadlines([result])[0] }, 201);
 }
 
 function clean(value) {
   return typeof value === "string" ? value.trim() : "";
+}
+
+function firstSentence(text) {
+  const match = String(text || "").trim().match(/^(.+?[.!?])\s+/);
+  return match ? match[1] : String(text || "").trim();
+}
+
+function stripAttribution(text) {
+  return String(text || "")
+    .replace(/\s+\[[^\]]+\]\s*$/, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function simplifyLeadPhrase(text) {
+  return stripAttribution(text)
+    .replace(/\bhas begun\b/gi, "begins")
+    .replace(/\bhas started\b/gi, "starts")
+    .replace(/\bhas launched\b/gi, "launches")
+    .replace(/\bhas unveiled\b/gi, "unveils")
+    .replace(/\bhas completed\b/gi, "completes")
+    .replace(/\bhas won\b/gi, "wins")
+    .replace(/\bhas rolled out\b/gi, "rolls out")
+    .replace(/\bhas raised\b/gi, "raises")
+    .replace(/\bhas cut\b/gi, "cuts")
+    .replace(/\bhas dismissed\b/gi, "rejects")
+    .replace(/\bis preparing to\b/gi, "plans to")
+    .replace(/\bis planning to\b/gi, "plans to")
+    .replace(/\bis pushing ahead with plans to\b/gi, "plans to")
+    .replace(/\bwill work with\b/gi, "adds")
+    .replace(/\bwill buy\b/gi, "buys")
+    .replace(/\bwould likely set\b/gi, "may set")
+    .replace(/\bappears set to raise\b/gi, "nears")
+    .replace(/\bsaid it will\b/gi, "will")
+    .replace(/\bsaid it would\b/gi, "would")
+    .replace(/\bsaid\b/gi, "says")
+    .replace(/\bannounced\b/gi, "unveiled")
+    .replace(/\s*,\s*(?:the|a|an)\s+(?:Chinese|Indian|South Korean|Singapore-based|Japanese|US|American|UAE|Abu Dhabi|Taiwanese|Indonesian|Malaysian|Thai|Vietnamese|Philippine|Hong Kong)\b[^,]{10,90},\s*/gi, " ")
+    .replace(/\s*,\s*(?:the|a|an)\s+[^,]{12,90},\s*/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function shortMoney(amount, unit) {
+  const normalizedUnit = String(unit || "").toLowerCase();
+  const suffix = normalizedUnit.startsWith("b") ? "bn" : "m";
+  return `$${amount}${suffix}`;
+}
+
+function headlineFromPattern(sentence) {
+  const patterns = [
+    [/^SK Group chairman Chey Tae-won\s+says\s+the global AI memory-chip shortage.*?foreign governments are intervening.*$/i, "SK warns AI memory crunch is getting political"],
+    [/^(.+?)\s+plans to raise pre-IPO funding before a planned Hong Kong listing/i, "$1 lines up Hong Kong IPO push"],
+    [/^(.+?)\s+is on pace for\s+\$?([0-9.]+)\s*(billion|million|mn|m)\s+in annual recurring revenue/i, (match) => `${match[1]} nears ${shortMoney(match[2], match[3])} ARR`],
+    [/^(.+?)\s+has held talks with banks about a potential listing/i, "$1 weighs IPO"],
+    [/^Xi Jinping\s+used .*?World AI Conference.*?to praise\s+China.*$/i, "Xi uses WAIC to pitch China AI"],
+    [/^(.+?)\s+plans to produce India's first semiconductor wafers on ([0-9]+nm).*$/i, "$1 plans India's first $2 wafers"],
+    [/^(.+?)\s+plans to launch (.+?),\s+a\s+([0-9]+tn-[0-9]+tn|[0-9.]+-trillion)[^,]*model/i, "$1 readies $2 model launch"],
+    [/^(.+?)\s+unveiled\s+(.+?),\s+(?:a|an|billed as)/i, "$1 unveils $2"],
+    [/^(.+?)\s+launches?\s+(.+?),\s+(?:a|an|billed as)/i, "$1 launches $2"],
+    [/^(.+?)\s+raises?\s+(?:nearly\s+|more than\s+)?(?:a\s+)?\$?([0-9.]+)\s*(billion|million|mn|m)\b/i, (match) => `${match[1]} raises ${shortMoney(match[2], match[3])}`],
+    [/^(.+?)\s+secured\s+(?:a\s+)?\$?([0-9.]+)\s*(billion|million|mn|m)\b/i, (match) => `${match[1]} secures ${shortMoney(match[2], match[3])}`],
+    [/^Representatives from\s+([0-9]+)\s+countries signed an agreement to establish\s+(?:a\s+)?(?:global\s+)?(.+?)(?:\s+body|\s+headquartered|,|$).*$/i, "$1 countries back $2"],
+    [/^US House China committee chair John Moolenaar urged .*? to ban\s+US companies from buying\s+(.+?)\s+chips.*$/i, "US lawmaker pushes $1 chip ban"]
+  ];
+
+  for (const [pattern, replacement] of patterns) {
+    const match = sentence.match(pattern);
+    if (match) {
+      return typeof replacement === "function" ? replacement(match) : sentence.replace(pattern, replacement);
+    }
+  }
+
+  return "";
+}
+
+function limitHeadline(text, maxLength = 58) {
+  const words = stripAttribution(text)
+    .replace(/\$([0-9.]+)billion\b/gi, "$$$1bn")
+    .replace(/\$([0-9.]+)million\b/gi, "$$$1m")
+    .replace(/\s+(?:that|which|while|warning|after|before|as|with|where|including|using|following)\b.*$/i, "")
+    .replace(/\s+and\s*$/i, "")
+    .replace(/[,:;.-]+$/, "")
+    .split(/\s+/)
+    .filter(Boolean);
+  const kept = [];
+
+  for (const word of words) {
+    const next = [...kept, word].join(" ");
+    if (next.length > maxLength) break;
+    kept.push(word);
+  }
+
+  return (kept.length ? kept.join(" ") : words.slice(0, 8).join(" ")).replace(/[,:;.-]+$/, "");
+}
+
+function deriveHeadline(blurb) {
+  const sentence = simplifyLeadPhrase(firstSentence(blurb));
+
+  if (!sentence) {
+    return "Asia tech update";
+  }
+
+  const patterned = headlineFromPattern(sentence);
+  if (patterned) {
+    return limitHeadline(patterned, 62);
+  }
+
+  const clauses = sentence.split(/,\s+(?:with|as|while|after|amid|according to|marking|making|in a move|where|before|part of)\b/i);
+  return limitHeadline(clauses[0].trim());
 }
 
 async function loadSheetItems({ limit, category, date }) {

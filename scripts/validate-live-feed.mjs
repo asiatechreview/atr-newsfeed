@@ -36,6 +36,8 @@ const failures = [];
 for (const item of items) {
   const label = item.id || item.source_url || item.blurb?.slice(0, 40) || "unknown item";
   if (!item.blurb) failures.push(`${label}: missing blurb`);
+  if (!item.headline) failures.push(`${label}: missing headline`);
+  if (isWeakHeadline(item.headline)) failures.push(`${label}: weak headline "${item.headline}"`);
   if (!item.source_name) failures.push(`${label}: missing source_name`);
   if (!item.source_url) failures.push(`${label}: missing source_url`);
   if (!item.published_at || Number.isNaN(new Date(item.published_at).getTime())) {
@@ -57,3 +59,16 @@ if (failures.length) {
 }
 
 console.log(`OK: live feed validated (${items.length} items).`);
+
+function isWeakHeadline(headline) {
+  const value = String(headline || "").trim();
+
+  if (!value) return true;
+  if (value.length > 72) return true;
+  if (/\b(?:says?|said)\s+(?:the|that)\b/i.test(value)) return true;
+  if (/\b(?:chairman|CEO|founder|president|minister)\s+[A-Z][A-Za-z-]+\s+[A-Z][A-Za-z-]+\s+says?\b/i.test(value)) return true;
+  if (/\b(?:announced|reportedly|according to)\b/i.test(value)) return true;
+  if (/\b(?:that|which|while|warning|after|before|as|with|where|including|following)$/i.test(value)) return true;
+
+  return false;
+}
