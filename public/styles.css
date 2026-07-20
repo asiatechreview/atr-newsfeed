@@ -397,10 +397,7 @@ main {
 }
 
 .newsletter-promo {
-  display: flex;
-  justify-content: space-between;
-  gap: 18px;
-  align-items: center;
+  display: block;
   margin: 0 0 18px;
   padding: 18px;
   border: 1px solid #4f8e6a;
@@ -422,9 +419,8 @@ main {
 }
 
 .newsletter-promo a {
-  flex: 0 0 auto;
-  display: inline-block;
-  margin-top: 1px;
+  display: table;
+  margin: 14px auto 0;
   padding: 9px 11px;
   border: 1px solid var(--accent);
   border-radius: var(--radius);
@@ -492,15 +488,6 @@ footer {
 
   .content-grid {
     grid-template-columns: 1fr;
-  }
-
-  .newsletter-promo {
-    display: block;
-  }
-
-  .newsletter-promo a {
-    display: table;
-    margin: 14px auto 0;
   }
 
   .item {
