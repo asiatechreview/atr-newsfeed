@@ -207,10 +207,11 @@ main {
 }
 
 .watchlist {
-  margin: 0 0 18px;
-  padding: 16px 0 18px;
-  border-top: 1px solid var(--accent);
-  border-bottom: 1px solid var(--border);
+  margin: 18px 0 0;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
 }
 
 .watchlist[hidden] {
@@ -218,17 +219,17 @@ main {
 }
 
 .watchlist h2 {
-  max-width: 780px;
+  max-width: 680px;
   margin: 8px 0 8px;
   color: var(--text);
-  font: 600 27px/1.12 var(--font-body);
+  font: 600 17px/1.25 var(--font-body);
 }
 
 .watchlist-blurb {
-  max-width: 780px;
+  max-width: 680px;
   margin: 0;
   color: var(--text);
-  font: 400 15px/1.6 var(--font-body);
+  font: 400 12px/1.55 var(--font-body);
 }
 
 .watchlist-blurb a {
