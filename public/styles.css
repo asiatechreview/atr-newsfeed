@@ -96,7 +96,7 @@ main {
   display: flex;
   justify-content: space-between;
   gap: 18px;
-  align-items: center;
+  align-items: flex-start;
   border-bottom: 1px solid var(--border);
   padding-bottom: 18px;
   margin-bottom: 18px;
@@ -400,7 +400,7 @@ main {
   display: flex;
   justify-content: space-between;
   gap: 18px;
-  align-items: flex-start;
+  align-items: center;
   margin: 0 0 18px;
   padding: 18px;
   border: 1px solid #4f8e6a;
