@@ -5,6 +5,7 @@ const MAX_LIMIT = 500;
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1-9bPUuh73mgFWM1gDc_3qlTe_-VNZGrgRfWMApv8yxU/gviz/tq?tqx=out:csv&gid=0&headers=1";
 const HEADLINE_OVERRIDES = new Map(Object.entries({
   "43": "SK warns AI memory crunch is getting political",
+  "html-2026-07-16-034": "SoftBank's Son puts AI infra cost at $5tn a year",
   "19": "DeepSeek pushes China AI price war into enterprise adoption",
   "manual-telegram-2026-07-17-005": "DeepSeek pushes China AI price war into enterprise adoption"
 }));
@@ -298,6 +299,7 @@ function shortMoney(amount, unit) {
 function headlineFromPattern(sentence) {
   const patterns = [
     [/^SK Group chairman Chey Tae-won\s+says\s+the global AI memory-chip shortage.*?foreign governments are intervening.*$/i, "SK warns AI memory crunch is getting political"],
+    [/^SoftBank founder Masayoshi Son\s+says?\s+global AI infrastructure will require\s+\$?([0-9.]+)\s*trillion a year/i, (match) => `SoftBank's Son puts AI infra cost at $${match[1]}tn a year`],
     [/^(.+?)\s+plans to raise pre-IPO funding before a planned Hong Kong listing/i, "$1 lines up Hong Kong IPO push"],
     [/^(.+?)\s+is on pace for\s+\$?([0-9.]+)\s*(billion|million|mn|m)\s+in annual recurring revenue/i, (match) => `${match[1]} nears ${shortMoney(match[2], match[3])} ARR`],
     [/^(.+?)\s+has held talks with banks about a potential listing/i, "$1 weighs IPO"],
