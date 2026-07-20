@@ -9,7 +9,17 @@ const HEADLINE_OVERRIDES = new Map(Object.entries({
   "19": "DeepSeek pushes China AI price war into enterprise adoption",
   "manual-telegram-2026-07-17-005": "DeepSeek pushes China AI price war into enterprise adoption",
   "manual-telegram-2026-07-17-004": "Montage faces South Korea competition probe",
-  "manual-telegram-2026-07-16-008": "CXMT and YMTC face US chip ban push"
+  "manual-telegram-2026-07-16-008": "CXMT and YMTC face US chip ban push",
+  "10": "BrainCo shows thought-controlled robots",
+  "5": "Kioxia shares fall as memory rally fades",
+  "6": "Malaysia probe puts Network School under pressure",
+  "manual-telegram-2026-07-17-001": "DeepSeek valuation tops $51bn",
+  "html-2026-07-16-041": "DeepSeek revenue nears $500m run rate",
+  "md-2026-07-12-017": "SK Hynix jumps 13% in Nasdaq debut",
+  "md-2026-07-08-014": "Iluvatar CoreX seeks $850m Hong Kong raise",
+  "md-2026-07-06-015": "Biren seeks $892m for GPU push",
+  "md-2026-07-05-002": "Micron starts $9.3bn Hiroshima expansion",
+  "md-2026-06-30-005": "Japan backs Rakuten low-Earth orbit network"
 }));
 
 export async function onRequestGet({ env, request }) {
