@@ -14,7 +14,9 @@ const ITEMS_PER_PAGE = 15;
 const VISIBLE_PAGE_BUTTONS = 8;
 const ARCHIVE_DAYS = 5;
 const FEATURED_ITEM_ID = "manual-telegram-2026-07-17-005";
+const FEATURED_SOURCE_URL = "https://www.bloomberg.com/news/newsletters/2026-07-17/china-can-still-win-the-ai-race-with-inferior-technology";
 const HEADLINE_OVERRIDES = new Map(Object.entries({
+  "19": "DeepSeek pushes China AI price war into enterprise adoption",
   "manual-telegram-2026-07-17-005": "DeepSeek pushes China AI price war into enterprise adoption",
   "42": "01.ai lines up Hong Kong IPO push",
   "40": "Offline AI device targets Indian language gap",
@@ -835,8 +837,14 @@ function renderSignal(items) {
   }
 }
 
+function isFeaturedItem(item) {
+  return item.id === FEATURED_ITEM_ID ||
+    item.source_url === FEATURED_SOURCE_URL ||
+    /\bDeepSeek\b.*\bAI price war\b.*\benterprise adoption\b/i.test(item.blurb);
+}
+
 function featuredItems() {
-  return allItems.filter((item) => item.id !== FEATURED_ITEM_ID);
+  return allItems.filter((item) => !isFeaturedItem(item));
 }
 
 function renderWatchlist() {
@@ -844,7 +852,7 @@ function renderWatchlist() {
     return;
   }
 
-  const item = allItems.find((candidate) => candidate.id === FEATURED_ITEM_ID);
+  const item = allItems.find(isFeaturedItem);
   if (!item) {
     watchlist.hidden = true;
     return;
