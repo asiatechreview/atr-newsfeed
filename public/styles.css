@@ -396,6 +396,37 @@ main {
   margin-bottom: 14px;
 }
 
+.newsletter-promo {
+  margin-bottom: 14px;
+  padding: 17px;
+  border: 1px solid color-mix(in srgb, var(--accent) 65%, var(--border));
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--accent) 10%, var(--panel));
+}
+
+.newsletter-promo h2 {
+  margin: 9px 0 8px;
+  color: var(--text);
+  font: 600 19px/1.2 var(--font-body);
+}
+
+.newsletter-promo p:not(.eyebrow) {
+  margin: 0;
+  color: var(--muted);
+  font: 400 13px/1.55 var(--font-body);
+}
+
+.newsletter-promo a {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 8px 10px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: var(--on-text);
+  font: 700 12px/1 var(--font-meta);
+}
+
 .metrics {
   margin-top: 2px;
 }
