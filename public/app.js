@@ -13,6 +13,7 @@ const itemTemplate = document.querySelector("#item-template");
 const ITEMS_PER_PAGE = 15;
 const VISIBLE_PAGE_BUTTONS = 8;
 const ARCHIVE_DAYS = 5;
+const FEED_POLL_INTERVAL_MS = 30000;
 const FEATURED_ITEM_ID = "manual-telegram-2026-07-17-005";
 const FEATURED_SOURCE_URL = "https://www.bloomberg.com/news/newsletters/2026-07-17/china-can-still-win-the-ai-race-with-inferior-technology";
 const HEADLINE_OVERRIDES = new Map(Object.entries({
@@ -58,6 +59,8 @@ let currentPage = getRequestedPage();
 let currentDateFilter = getRequestedDateFilter();
 let currentTagFilter = getRequestedTagFilter();
 let currentSearchQuery = getRequestedSearchQuery();
+let feedPollTimer = null;
+let isFetchingFeed = false;
 
 function getRequestedPage() {
   const match = window.location.search.match(/[?&]page=([0-9]+)/);
@@ -746,6 +749,10 @@ function sortItems(items) {
   });
 }
 
+function stableItemKey(item) {
+  return String(item.id || item.source_url || `${item.blurb}-${item.published_at}`).toLowerCase();
+}
+
 function appendItemText(target, item) {
   target.appendChild(document.createTextNode(item.blurb));
 
@@ -1162,25 +1169,114 @@ function render(items, options = {}) {
   }
 }
 
-async function loadFeed() {
+function renderCurrentView() {
+  renderSignal(allItems);
+
+  if (currentSearchQuery) {
+    renderSearch(currentSearchQuery, currentPage);
+  } else if (currentTagFilter) {
+    renderTag(currentTagFilter, currentPage);
+  } else if (currentDateFilter) {
+    renderDate(currentDateFilter, currentPage);
+  } else {
+    renderPage(currentPage);
+  }
+}
+
+function isLiveHomepageTop() {
+  return !currentSearchQuery && !currentTagFilter && !currentDateFilter && currentPage === 1;
+}
+
+function mergeIncomingItems(items) {
+  const normalizedItems = items.map(normalizeItem).filter(Boolean);
+  const existingKeys = new Set(allItems.map(stableItemKey));
+  const mergedByKey = new Map();
+  let newItemCount = 0;
+
+  for (const item of allItems) {
+    mergedByKey.set(stableItemKey(item), item);
+  }
+
+  for (const item of normalizedItems) {
+    const key = stableItemKey(item);
+    if (!existingKeys.has(key)) {
+      newItemCount += 1;
+    }
+    mergedByKey.set(key, item);
+  }
+
+  allItems = sortItems([...mergedByKey.values()]);
+  return newItemCount;
+}
+
+async function fetchFeedItems() {
+  const response = await fetch(`/api/items?limit=500&_=${Date.now()}`, {
+    cache: "no-store",
+    headers: { Accept: "application/json" }
+  });
+
+  if (!response.ok) {
+    throw new Error(`Feed API returned ${response.status}`);
+  }
+
+  const payload = await response.json();
+  return payload.items || [];
+}
+
+async function refreshFeed(options = {}) {
+  if (isFetchingFeed) {
+    return;
+  }
+
+  isFetchingFeed = true;
+
   try {
-    const params = ["limit=500"];
+    const items = await fetchFeedItems();
 
-    const response = await fetch(`/api/items?${params.join("&")}`, {
-      headers: { Accept: "application/json" }
-    });
-
-    if (!response.ok) {
-      throw new Error(`Feed API returned ${response.status}`);
+    if (options.initial) {
+      render(items, { statusText: "" });
+      return;
     }
 
-    const payload = await response.json();
-    render(payload.items || [], { statusText: "" });
+    const newItemCount = mergeIncomingItems(items);
+    if (newItemCount && isLiveHomepageTop()) {
+      renderCurrentView();
+    } else if (newItemCount) {
+      renderSignal(allItems);
+      setFeedStatus(`${newItemCount} new update${newItemCount === 1 ? "" : "s"} available`);
+    } else {
+      renderSignal(allItems);
+      setFeedStatus();
+    }
   } catch (error) {
-    render([], {
-      statusText: "Feed unavailable. Try again shortly."
-    });
+    if (options.initial) {
+      render([], {
+        statusText: "Feed unavailable. Try again shortly."
+      });
+    }
+  } finally {
+    isFetchingFeed = false;
   }
+}
+
+function startFeedPolling() {
+  if (feedPollTimer) {
+    window.clearInterval(feedPollTimer);
+  }
+
+  feedPollTimer = window.setInterval(() => {
+    if (document.visibilityState === "hidden") {
+      return;
+    }
+
+    refreshFeed();
+  }, FEED_POLL_INTERVAL_MS);
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      refreshFeed();
+    }
+  });
 }
 
 function syncSearchInput() {
@@ -1202,4 +1298,5 @@ if (searchForm && searchInput) {
   });
 }
 
-loadFeed();
+refreshFeed({ initial: true });
+startFeedPolling();

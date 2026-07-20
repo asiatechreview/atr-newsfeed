@@ -35,6 +35,11 @@ if (!appScript.includes("function renderTags(target, item)") || !appScript.inclu
   process.exit(1);
 }
 
+if (!appScript.includes("FEED_POLL_INTERVAL_MS") || !appScript.includes("startFeedPolling()") || !appScript.includes("document.visibilityState")) {
+  console.error("public/app.js must poll for new feed items without requiring a full page refresh");
+  process.exit(1);
+}
+
 const failures = [];
 const sourceAliases = new Map([
   ["ft.com", "FT"],
