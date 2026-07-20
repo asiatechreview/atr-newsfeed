@@ -11,36 +11,36 @@ const ITEMS_PER_PAGE = 15;
 const VISIBLE_PAGE_BUTTONS = 8;
 const ARCHIVE_DAYS = 5;
 const HEADLINE_OVERRIDES = new Map(Object.entries({
-  "40": "Suno Sutra brings offline AI to Indian languages",
+  "40": "Offline AI device targets Indian language gap",
   "39": "Upbit operator faces sanctions over $30m hack",
-  "38": "Hugging Face breach tests open-source incident response",
-  "37": "Alibaba claims Qwen3.8 Max closes frontier gap",
-  "36": "G42 spy episode shows UAE's AI power play",
-  "35": "Singapore weighs tax cuts to defend fund hub",
-  "34": "Moonshot seeks Hong Kong listing at $30bn-plus",
-  "33": "Alibaba open-sources stack for Zhenwu AI chips",
-  "32": "ZTE launches agentic phone with Doubao",
-  "31": "Japan backs sovereign AI project with Nvidia Rubin",
-  "30": "China's tech giants turn AI tokens into workplace currency",
-  "29": "Biren uses optics to scale China AI clusters",
-  "28": "China launches space-computing satellite network",
+  "38": "Hugging Face breach tests AI response",
+  "37": "Alibaba says Qwen3.8 Max narrows AI gap",
+  "36": "G42 spy saga shows UAE's AI balancing act",
+  "35": "Singapore weighs tax cuts for fund hub",
+  "34": "Moonshot eyes Hong Kong IPO at $30bn+",
+  "33": "Alibaba opens stack for Zhenwu AI chips",
+  "32": "ZTE launches Doubao-powered AI phone",
+  "31": "Japan backs sovereign AI with Nvidia Rubin",
+  "30": "AI tokens become workplace currency in China",
+  "29": "Biren scales AI clusters with optics",
+  "28": "China starts space-computing satellite network",
   "27": "Open-weight models narrow cyber capability gap",
   "26": "China rejects US model-distillation claims",
-  "24": "SBI completes Coinhako acquisition in Singapore",
-  "23": "Kimi K3 stirs China-stack fears",
+  "24": "SBI completes Coinhako deal in Singapore",
+  "23": "Kimi K3 stirs China-stack debate",
   "22": "Rapidus adds Cadence AI tools for chip design",
   "21": "Shein clears Hong Kong IPO review",
   "20": "Kimi K3 shock hits AI chip stocks",
-  "19": "DeepSeek pushes AI price war into enterprise",
-  "18": "India resets semiconductor incentives",
+  "19": "DeepSeek drives China AI price war",
+  "18": "India resets chip incentives",
   "17": "CXMT IPO draws huge retail demand",
-  "16": "Kioxia ordered to pay Viasat $229m",
-  "15": "India may revive UPI fees for large merchants",
-  "14": "Taiwan jails BitShine ringleader for crypto fraud",
-  "13": "Coupang fine strains US-South Korea tech ties",
-  "12": "Zepto IPO interest cools below peak valuation",
-  "11": "Indonesia copyright rewrite tests AI rules",
-  "10": "BrainCo shows thought-controlled robots at WAIC"
+  "16": "Kioxia hit with $229m patent verdict",
+  "15": "India may revive UPI fees",
+  "14": "BitShine ringleader gets 22 years",
+  "13": "Coupang fine strains US-South Korea ties",
+  "12": "Zepto IPO interest cools below peak",
+  "11": "Indonesia AI copyright rewrite advances",
+  "10": "BrainCo shows thought-controlled robots"
 }));
 
 let allItems = [];
@@ -661,28 +661,9 @@ function appendItemText(target, item) {
   target.appendChild(document.createTextNode("]"));
 }
 
-function renderTags(target, item) {
+function renderTags(target) {
   target.textContent = "";
-
-  if (!item.tags.length) {
-    target.hidden = true;
-    return;
-  }
-
-  target.hidden = false;
-
-  for (const tag of item.tags) {
-    const link = document.createElement("a");
-    link.href = `?tag=${encodeURIComponent(tag)}`;
-    link.textContent = `#${tag}`;
-
-    if (tag === currentTagFilter) {
-      link.className = "current";
-      link.setAttribute("aria-current", "page");
-    }
-
-    target.appendChild(link);
-  }
+  target.hidden = true;
 }
 
 function renderArchive() {
