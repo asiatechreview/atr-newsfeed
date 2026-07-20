@@ -306,9 +306,13 @@ main {
 }
 
 .pagination button {
-  min-width: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 34px;
   min-height: 30px;
-  padding: 0 8px;
+  padding: 0 10px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--panel);
@@ -316,7 +320,13 @@ main {
   font: inherit;
   font-size: 12px;
   line-height: 1;
+  text-align: center;
   cursor: pointer;
+}
+
+.pagination button:first-child,
+.pagination button:last-child {
+  min-width: 86px;
 }
 
 .pagination button.current {
