@@ -1699,6 +1699,10 @@ function startFeedPolling() {
 }
 
 function syncSearchInput() {
+  if (searchInput && document.activeElement === searchInput) {
+    return;
+  }
+
   if (searchInput && searchInput.value !== currentSearchQuery) {
     searchInput.value = currentSearchQuery;
   }
