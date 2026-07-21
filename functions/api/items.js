@@ -410,10 +410,7 @@ function moveBangkokDate(value, targetDate) {
 }
 
 export async function onRequestPost({ env, request }) {
-  const auth = request.headers.get("authorization") || "";
-  const expected = env.FEED_INGEST_TOKEN ? `Bearer ${env.FEED_INGEST_TOKEN}` : "";
-
-  if (!expected || auth !== expected) {
+  if (!isAuthorized(env, request)) {
     return json({ error: "Unauthorized" }, 401);
   }
 
@@ -456,6 +453,66 @@ export async function onRequestPost({ env, request }) {
     .first();
 
   return json({ item: withHeadlines([result])[0] }, 201);
+}
+
+export async function onRequestPatch({ env, request }) {
+  if (!isAuthorized(env, request)) {
+    return json({ error: "Unauthorized" }, 401);
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: "Invalid JSON" }, 400);
+  }
+
+  const id = Number(body.id);
+  if (!Number.isInteger(id) || id <= 0) {
+    return json({ error: "id is required" }, 400);
+  }
+
+  const current = await env.ATR_FEED_DB.prepare(
+    "SELECT id, headline, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at FROM feed_items WHERE id = ? AND status = ?"
+  )
+    .bind(id, "published")
+    .first();
+
+  if (!current) {
+    return json({ error: "item not found" }, 404);
+  }
+
+  const sourceName = body.sourceName || body.source_name;
+  const sourceUrl = body.sourceUrl || body.source_url;
+
+  if (sourceName === undefined && sourceUrl === undefined) {
+    return json({ error: "sourceName or sourceUrl is required" }, 400);
+  }
+
+  const nextSourceName = sourceName === undefined ? current.source_name : clean(sourceName);
+  const nextSourceUrl = sourceUrl === undefined ? current.source_url : clean(sourceUrl);
+
+  if (nextSourceUrl && !/^https?:\/\//i.test(nextSourceUrl)) {
+    return json({ error: "sourceUrl must be an http(s) URL" }, 400);
+  }
+
+  const result = await env.ATR_FEED_DB.prepare(
+    `UPDATE feed_items
+       SET source_name = ?, source_url = ?
+     WHERE id = ? AND status = ?
+     RETURNING id, headline, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at`
+  )
+    .bind(nextSourceName, nextSourceUrl, id, "published")
+    .first();
+
+  return json({ item: withHeadlines([result])[0] });
+}
+
+function isAuthorized(env, request) {
+  const auth = request.headers.get("authorization") || "";
+  const expected = env.FEED_INGEST_TOKEN ? `Bearer ${env.FEED_INGEST_TOKEN}` : "";
+
+  return Boolean(expected && auth === expected);
 }
 
 async function loadD1ItemsWithoutHeadline({ env, category }) {
