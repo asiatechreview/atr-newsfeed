@@ -214,6 +214,10 @@ const HEADLINE_OVERRIDES = new Map(Object.entries({
   "md-2026-06-29-012": "US tightens Chinese tech import ban"
 }));
 
+for (const [id, headline] of HEADLINE_OVERRIDES) {
+  HEADLINE_OVERRIDES.set(id, normalizeHeadlineMoney(headline));
+}
+
 export async function onRequestGet({ env, request }) {
   const url = new URL(request.url);
   const limit = Math.min(Number(url.searchParams.get("limit")) || DEFAULT_LIMIT, MAX_LIMIT);
@@ -261,7 +265,7 @@ export async function onRequestGet({ env, request }) {
 function withHeadlines(items) {
   return items.map((item) => {
     const storedHeadline = clean(item.headline || item.Headline || item.title);
-    const headline = storedHeadline || headlineForItem(item);
+    const headline = normalizeHeadlineMoney(storedHeadline || headlineForItem(item));
     return {
       ...item,
       headline,
@@ -482,15 +486,21 @@ export async function onRequestPatch({ env, request }) {
     return json({ error: "item not found" }, 404);
   }
 
+  const headline = body.headline || body.title;
   const sourceName = body.sourceName || body.source_name;
   const sourceUrl = body.sourceUrl || body.source_url;
 
-  if (sourceName === undefined && sourceUrl === undefined) {
-    return json({ error: "sourceName or sourceUrl is required" }, 400);
+  if (headline === undefined && sourceName === undefined && sourceUrl === undefined) {
+    return json({ error: "headline, sourceName or sourceUrl is required" }, 400);
   }
 
+  const nextHeadline = headline === undefined ? current.headline : clean(headline);
   const nextSourceName = sourceName === undefined ? current.source_name : clean(sourceName);
   const nextSourceUrl = sourceUrl === undefined ? current.source_url : clean(sourceUrl);
+
+  if (nextHeadline && isWeakHeadline(nextHeadline)) {
+    return json({ error: "headline must be a clean ATR-style scan title" }, 400);
+  }
 
   if (nextSourceUrl && !/^https?:\/\//i.test(nextSourceUrl)) {
     return json({ error: "sourceUrl must be an http(s) URL" }, 400);
@@ -498,11 +508,11 @@ export async function onRequestPatch({ env, request }) {
 
   const result = await env.ATR_FEED_DB.prepare(
     `UPDATE feed_items
-       SET source_name = ?, source_url = ?
+       SET headline = ?, source_name = ?, source_url = ?
      WHERE id = ? AND status = ?
      RETURNING id, headline, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at`
   )
-    .bind(nextSourceName, nextSourceUrl, id, "published")
+    .bind(nextHeadline || null, nextSourceName, nextSourceUrl, id, "published")
     .first();
 
   return json({ item: withHeadlines([result])[0] });
@@ -554,6 +564,7 @@ function isWeakHeadline(headline) {
   if (!value) return true;
   if (value.length > 72) return true;
   if (words.length < 4 || words.length > 14) return true;
+  if (/\$[0-9][0-9.,]*(?:\.[0-9]+)?(?:m|bn|tn)\+?\b/.test(value)) return true;
   if (/\b(?:a|an|the|to|for|from|of|in|on|at|by|with|into|as|and|or|but|after|before|while|amid|among|including|through|using|than|more|less|around|roughly|nearly|over|under|about|its|their|his|her|this|that|which|who|what|where|when|why|how|would|will|could|should|has|have|had|is|are|be|was|were|being|been|called|known|also|first|new|world's|yuan|chipmaker|prime minister anwar)\s*$/i.test(value)) return true;
   if (/\$[0-9.]+$/.test(value)) return true;
   if (/\b(?:is in talks|has held talks|has started preparing|is preparing|plans to file|will show|will debut|are expected|are set to be|is previewing|is pushing|began auditing|declined to stay|opened an immigration|marked its|launched a nationwide|is building|said residents|begins trading|told staff|plans to spend|approved a manufacturing|has been supplying|has won|raised a \$|targeted a valuation|reported a |closed down|outlined several|are leaning|begins shipping|is shutting|pledged another|will feature|has closed|has told Meta|is expanding|will invest|are leading|is in talks to buy|will begin renting|launched ZCode|has narrowed|has referred|sentenced five|has passed|will pour|has laid out|is nearing|launches investor|has ramped|has stalled|jailed former|announced|has filed|has open-sourced|launched Hong|finalized rules|has accused|has signed|now account|aims to finalize|will tighten|has chosen)\b/i.test(value)) return true;
@@ -615,8 +626,17 @@ function simplifyLeadPhrase(text) {
 
 function shortMoney(amount, unit) {
   const normalizedUnit = String(unit || "").toLowerCase();
-  const suffix = normalizedUnit.startsWith("b") ? "bn" : "m";
+  const suffix = normalizedUnit.startsWith("t") ? "T" : normalizedUnit.startsWith("b") ? "B" : "M";
   return `$${amount}${suffix}`;
+}
+
+function normalizeHeadlineMoney(value) {
+  return String(value || "")
+    .replace(/\$([0-9][0-9.,]*(?:\.[0-9]+)?)bn\b/gi, "$$$1B")
+    .replace(/-([0-9][0-9.,]*(?:\.[0-9]+)?)bn\b/gi, "-$1B")
+    .replace(/\$([0-9][0-9.,]*(?:\.[0-9]+)?)m\b/gi, "$$$1M")
+    .replace(/-([0-9][0-9.,]*(?:\.[0-9]+)?)m\b/gi, "-$1M")
+    .replace(/\$([0-9][0-9.,]*(?:\.[0-9]+)?)tn\b/gi, "$$$1T");
 }
 
 function headlineFromPattern(sentence) {
