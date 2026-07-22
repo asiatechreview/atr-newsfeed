@@ -387,6 +387,7 @@ main {
 .pagination {
   display: flex;
   flex-wrap: nowrap;
+  justify-content: center;
   gap: 7px;
   margin: 16px 0 0;
   padding-bottom: 15px;
