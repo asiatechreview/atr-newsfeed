@@ -279,9 +279,9 @@ main {
 }
 
 .content-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
-  gap: 18px;
+  display: block;
+  width: min(100%, 840px);
+  margin: 0 auto;
 }
 
 .feed-column,
@@ -550,6 +550,10 @@ main {
   border-radius: var(--radius);
   padding: 16px;
   margin-bottom: 14px;
+}
+
+.archive-card {
+  margin-top: 16px;
 }
 
 .newsletter-promo {

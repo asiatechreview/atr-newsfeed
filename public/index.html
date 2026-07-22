@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=20260720-centered-masthead">
+  <link rel="stylesheet" href="/styles.css?v=20260722-recent-days-flow">
 </head>
 <body>
   <div class="page">
@@ -62,24 +62,17 @@
           <section id="feed-list" class="feed"></section>
           <nav id="pagination" class="pagination" aria-label="News link pages"></nav>
 
+          <section class="rail-card archive-card">
+            <h2 class="section-title">Recent Days</h2>
+            <nav id="archive-nav" class="archive" aria-label="Recent dates"></nav>
+          </section>
+
           <section id="watchlist" class="watchlist" aria-label="Watchlist lead" hidden>
             <p class="eyebrow">Watchlist</p>
             <h2 id="watchlist-headline"></h2>
             <p id="watchlist-blurb" class="watchlist-blurb"></p>
           </section>
         </section>
-
-        <aside class="rail" aria-label="Bulletin summary">
-          <section class="rail-card" hidden>
-            <h2 class="section-title">News Mix</h2>
-            <div id="signal-metrics" class="metrics"></div>
-          </section>
-
-          <section class="rail-card">
-            <h2 class="section-title">Recent Days</h2>
-            <nav id="archive-nav" class="archive" aria-label="Recent dates"></nav>
-          </section>
-        </aside>
       </div>
     </main>
   </div>
