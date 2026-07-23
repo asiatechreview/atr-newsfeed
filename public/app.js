@@ -613,6 +613,7 @@ function explicitTags(item) {
 }
 
 function inferTags(item, blurb) {
+  const categoryTag = normalizeTag(item.Region || item.region || item.Category || item.category);
   const text = [
     blurb,
     item.Region,
@@ -630,6 +631,23 @@ function inferTags(item, blurb) {
       tags.push(tag);
     }
   };
+
+  if (categoryTag === "deals") {
+    add("deals");
+  } else if (categoryTag === "markets") {
+    add("markets");
+  } else if (categoryTag === "ai-and-chips") {
+    add("ai");
+    add("chips");
+  } else if (categoryTag === "venture-capital") {
+    add("venture-capital");
+  } else if (categoryTag === "crypto") {
+    add("crypto");
+  } else if (categoryTag === "fintech") {
+    add("fintech");
+  } else if (categoryTag && !isRegionTag(categoryTag) && categoryTag !== "other-news") {
+    add(categoryTag);
+  }
 
   if (/\b(e-commerce|ecommerce|commerce|marketplace|online retail|retail|b2b e-commerce|b2b ecommerce|udaan|shein|amazon|fast-fashion|warehouses?)\b/.test(text)) {
     add("e-commerce");
