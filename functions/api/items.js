@@ -487,16 +487,22 @@ export async function onRequestPatch({ env, request }) {
   }
 
   const headline = body.headline || body.title;
+  const blurb = body.blurb;
   const sourceName = body.sourceName || body.source_name;
   const sourceUrl = body.sourceUrl || body.source_url;
 
-  if (headline === undefined && sourceName === undefined && sourceUrl === undefined) {
-    return json({ error: "headline, sourceName or sourceUrl is required" }, 400);
+  if (headline === undefined && blurb === undefined && sourceName === undefined && sourceUrl === undefined) {
+    return json({ error: "headline, blurb, sourceName or sourceUrl is required" }, 400);
   }
 
   const nextHeadline = headline === undefined ? current.headline : clean(headline);
+  const nextBlurb = blurb === undefined ? current.blurb : clean(blurb);
   const nextSourceName = sourceName === undefined ? current.source_name : clean(sourceName);
   const nextSourceUrl = sourceUrl === undefined ? current.source_url : clean(sourceUrl);
+
+  if (!nextBlurb) {
+    return json({ error: "blurb is required" }, 400);
+  }
 
   if (nextHeadline && isWeakHeadline(nextHeadline)) {
     return json({ error: "headline must be a clean ATR-style scan title" }, 400);
@@ -508,11 +514,11 @@ export async function onRequestPatch({ env, request }) {
 
   const result = await env.ATR_FEED_DB.prepare(
     `UPDATE feed_items
-       SET headline = ?, source_name = ?, source_url = ?
+       SET headline = ?, blurb = ?, source_name = ?, source_url = ?
      WHERE id = ? AND status = ?
      RETURNING id, headline, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at`
   )
-    .bind(nextHeadline || null, nextSourceName, nextSourceUrl, id, "published")
+    .bind(nextHeadline || null, nextBlurb, nextSourceName, nextSourceUrl, id, "published")
     .first();
 
   return json({ item: withHeadlines([result])[0] });
