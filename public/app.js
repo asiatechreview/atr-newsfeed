@@ -23,6 +23,7 @@ const FEED_POLL_INTERVAL_MS = 5 * 60 * 1000;
 const NEW_ITEM_TOAST_TIMEOUT_MS = 9000;
 const LOCAL_TIME_ZONE = getLocalTimeZone();
 const THEME_STORAGE_KEY = "atr-bulletin-theme";
+const SHOW_WATCHLIST = false;
 const FEATURED_ITEM_ID = "manual-telegram-2026-07-17-005";
 const FEATURED_SOURCE_URL = "https://www.bloomberg.com/news/newsletters/2026-07-17/china-can-still-win-the-ai-race-with-inferior-technology";
 const HEADLINE_OVERRIDES = new Map(Object.entries({
@@ -1279,11 +1280,20 @@ function isFeaturedItem(item) {
 }
 
 function featuredItems() {
+  if (!SHOW_WATCHLIST) {
+    return allItems;
+  }
+
   return allItems.filter((item) => !isFeaturedItem(item));
 }
 
 function renderWatchlist() {
   if (!watchlist || !watchlistHeadline || !watchlistBlurb) {
+    return;
+  }
+
+  if (!SHOW_WATCHLIST) {
+    watchlist.hidden = true;
     return;
   }
 
