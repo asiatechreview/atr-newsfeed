@@ -38,6 +38,16 @@ if (!appScript.includes("function renderTags(target, item)") || !appScript.inclu
   process.exit(1);
 }
 
+if (!appScript.includes("function primaryTopicTag(tags)") || appScript.includes("item.tags[0] || \"tech\"")) {
+  console.error("public/app.js must use a topic tag, not the first/region tag, for the main story badge");
+  process.exit(1);
+}
+
+if (!appScript.includes("\"asia\"") || !appScript.includes("\"southeast-asia\"") || !appScript.includes("function isRegionTag(tag)")) {
+  console.error("public/app.js must classify broad region tags so they cannot become primary story badges");
+  process.exit(1);
+}
+
 if (!appScript.includes("FEED_POLL_INTERVAL_MS") || !appScript.includes("startFeedPolling()") || !appScript.includes("document.visibilityState")) {
   console.error("public/app.js must poll for new feed items without requiring a full page refresh");
   process.exit(1);

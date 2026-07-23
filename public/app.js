@@ -781,30 +781,64 @@ function inferCountryTags(item, blurb) {
   return tags;
 }
 
+const REGION_TAGS = new Set([
+  "africa",
+  "americas",
+  "apac",
+  "asia",
+  "east-asia",
+  "europe",
+  "global",
+  "latin-america",
+  "middle-east",
+  "north-america",
+  "sea",
+  "south-asia",
+  "southeast-asia",
+  "west",
+  "china",
+  "india",
+  "japan",
+  "taiwan",
+  "south-korea",
+  "singapore",
+  "thailand",
+  "malaysia",
+  "vietnam",
+  "pakistan",
+  "bangladesh",
+  "philippines",
+  "saudi-arabia",
+  "israel",
+  "us"
+]);
+
+function isRegionTag(tag) {
+  return REGION_TAGS.has(normalizeTag(tag));
+}
+
 function isCountryTag(tag) {
+  return isRegionTag(tag);
+}
+
+function primaryTopicTag(tags) {
+  return (tags || []).find((tag) => !isRegionTag(tag)) || "tech";
+}
+
+function normalizeTagList(tags) {
   return [
-    "china",
-    "india",
-    "japan",
-    "taiwan",
-    "south-korea",
-    "singapore",
-    "thailand",
-    "malaysia",
-    "vietnam",
-    "pakistan",
-    "bangladesh",
-    "philippines",
-    "saudi-arabia",
-    "israel",
-    "us"
-  ].includes(tag);
+    ...new Set(
+      (tags || [])
+        .map(normalizeTag)
+        .filter(Boolean)
+    )
+  ];
 }
 
 function itemTags(item, blurb) {
-  const explicit = explicitTags(item);
-  const countries = [...new Set([...inferCountryTags(item, blurb), ...explicit.filter(isCountryTag)])];
-  const topics = [...new Set([...explicit, ...inferTags(item, blurb)].filter((tag) => !isCountryTag(tag)))];
+  const explicit = normalizeTagList(explicitTags(item));
+  const countries = normalizeTagList([...inferCountryTags(item, blurb), ...explicit.filter(isRegionTag)]);
+  const topics = normalizeTagList([...explicit, ...inferTags(item, blurb)].filter((tag) => !isRegionTag(tag)));
 
   if (!countries.length) {
     countries.push("asia");
@@ -814,9 +848,9 @@ function itemTags(item, blurb) {
     topics.push("tech");
   }
 
-  const visibleCountries = countries.slice(0, 4);
-  const visibleTopics = topics.slice(0, 5 - visibleCountries.length);
-  return [...visibleCountries, ...visibleTopics].slice(0, 5);
+  const visibleTopics = topics.slice(0, 3);
+  const visibleCountries = countries.slice(0, 5 - visibleTopics.length);
+  return [...visibleTopics, ...visibleCountries].slice(0, 5);
 }
 
 function titleCaseTag(tag) {
@@ -1181,7 +1215,7 @@ function renderSignal(items) {
 
   const topicCounts = new Map();
   for (const item of items) {
-    const topic = (item.tags || []).find((tag) => !isCountryTag(tag)) || "tech";
+    const topic = primaryTopicTag(item.tags);
     topicCounts.set(topic, (topicCounts.get(topic) || 0) + 1);
   }
 
@@ -1229,7 +1263,7 @@ function showNewItemToast(item, count = 1) {
   newItemToastTitle.textContent = item?.headline || "New update available";
   newItemToastMeta.textContent = count > 1
     ? `${count} new updates · just now`
-    : `${titleCaseTag((item?.tags || []).find((tag) => !isCountryTag(tag)) || "tech")} · just now`;
+    : `${titleCaseTag(primaryTopicTag(item?.tags))} · just now`;
   newItemToast.hidden = false;
 
   if (newItemToastTimer) {
@@ -1551,7 +1585,7 @@ function renderItems(items) {
     }
 
     const itemNode = itemTemplate.content.cloneNode(true);
-    const primaryTag = (item.tags || []).find((tag) => !isCountryTag(tag)) || item.tags[0] || "tech";
+    const primaryTag = primaryTopicTag(item.tags);
     const primaryTagLink = itemNode.querySelector(".item-primary-tag");
 
     itemNode.querySelector(".item-time").textContent = formatTime(item.published_at);
