@@ -1535,9 +1535,11 @@ function normalizeSearchQuery(query) {
 
 function searchText(item) {
   return [
+    item.headline,
     item.blurb,
     item.source_name,
     item.source_url,
+    item.category,
     item.published_at,
     formatDate(item.published_at),
     ...(item.tags || [])
