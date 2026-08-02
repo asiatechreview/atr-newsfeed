@@ -39,3 +39,16 @@ ON crawler_access_logs (requested_at DESC);
 
 CREATE INDEX IF NOT EXISTS idx_crawler_access_logs_path
 ON crawler_access_logs (path, requested_at DESC);
+
+CREATE TABLE IF NOT EXISTS market_snapshots (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  fetched_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+  source TEXT NOT NULL,
+  cadence TEXT NOT NULL,
+  status TEXT NOT NULL,
+  market_count INTEGER NOT NULL DEFAULT 0,
+  snapshot_json TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_market_snapshots_fetched_at
+ON market_snapshots (fetched_at DESC);

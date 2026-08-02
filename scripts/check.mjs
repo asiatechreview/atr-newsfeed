@@ -11,6 +11,7 @@ import { onRequestGet as onApiV1CategoriesRequestGet } from "../functions/api/v1
 import { onRequestGet as onApiV1SearchRequestGet } from "../functions/api/v1/search.js";
 import { onRequestGet as onOpenApiRequestGet } from "../functions/api/openapi.json.js";
 import { onRequestGet as onMarketsRequestGet } from "../functions/api/markets.js";
+import { onRequestPost as onMarketsRefreshRequestPost } from "../functions/api/markets/refresh.js";
 import { onRequestGet as onJsonFeedRequestGet } from "../functions/feed.json.js";
 import { onRequestGet as onRssRequestGet } from "../functions/rss.xml.js";
 import { onRequest as onMiddlewareRequest } from "../functions/_middleware.js";
@@ -480,6 +481,110 @@ const marketsConfiguredPayload = await marketsConfiguredResponse.json();
 
 if (marketsConfiguredResponse.status !== 200 || marketsConfiguredPayload.markets?.length !== 2 || marketsConfiguredPayload.markets[0]?.name !== "Nikkei 225") {
   console.error("FAILED: /api/markets must return configured market snapshot rows");
+  process.exit(1);
+}
+
+let marketSnapshotInsert = null;
+const marketSnapshotEnv = {
+  FEED_INGEST_TOKEN: "test-token",
+  ATR_FEED_DB: {
+    prepare(query) {
+      return {
+        bind(...params) {
+          return {
+            async run() {
+              if (query.includes("INSERT INTO market_snapshots")) {
+                marketSnapshotInsert = params;
+              }
+              return { success: true };
+            },
+            async first() {
+              if (query.includes("FROM market_snapshots")) {
+                return marketSnapshotInsert ? {
+                  id: 1,
+                  fetched_at: "2026-08-02T10:30:00Z",
+                  source: marketSnapshotInsert[0],
+                  cadence: marketSnapshotInsert[1],
+                  status: marketSnapshotInsert[2],
+                  market_count: marketSnapshotInsert[3],
+                  snapshot_json: marketSnapshotInsert[4]
+                } : null;
+              }
+              return null;
+            }
+          };
+        },
+        async run() {
+          return { success: true };
+        },
+        async first() {
+          if (query.includes("FROM market_snapshots")) {
+            return marketSnapshotInsert ? {
+              id: 1,
+              fetched_at: "2026-08-02T10:30:00Z",
+              source: marketSnapshotInsert[0],
+              cadence: marketSnapshotInsert[1],
+              status: marketSnapshotInsert[2],
+              market_count: marketSnapshotInsert[3],
+              snapshot_json: marketSnapshotInsert[4]
+            } : null;
+          }
+          return null;
+        }
+      };
+    }
+  }
+};
+
+const marketsRefreshUnauthorizedResponse = await onMarketsRefreshRequestPost({
+  env: marketSnapshotEnv,
+  request: new Request("https://bulletin.asiatechreview.com/api/markets/refresh", { method: "POST" })
+});
+
+if (marketsRefreshUnauthorizedResponse.status !== 401) {
+  console.error("FAILED: /api/markets/refresh must require authorization");
+  process.exit(1);
+}
+
+const marketFetch = globalThis.fetch;
+globalThis.fetch = async () => new Response(JSON.stringify({
+  chart: {
+    result: [{
+      meta: {
+        regularMarketPrice: 40000,
+        chartPreviousClose: 39800,
+        regularMarketTime: 1785664800
+      }
+    }]
+  }
+}), {
+  status: 200,
+  headers: { "content-type": "application/json" }
+});
+
+const marketsRefreshResponse = await onMarketsRefreshRequestPost({
+  env: marketSnapshotEnv,
+  request: new Request("https://bulletin.asiatechreview.com/api/markets/refresh", {
+    method: "POST",
+    headers: { authorization: "Bearer test-token" }
+  })
+});
+const marketsRefreshPayload = await marketsRefreshResponse.json();
+globalThis.fetch = marketFetch;
+
+if (marketsRefreshResponse.status !== 200 || marketsRefreshPayload.status !== "ok" || !marketSnapshotInsert) {
+  console.error("FAILED: /api/markets/refresh must fetch and store a market snapshot");
+  process.exit(1);
+}
+
+const marketsCachedResponse = await onMarketsRequestGet({
+  env: marketSnapshotEnv,
+  request: new Request("https://bulletin.asiatechreview.com/api/markets")
+});
+const marketsCachedPayload = await marketsCachedResponse.json();
+
+if (marketsCachedResponse.status !== 200 || marketsCachedPayload.cadence !== "open_midday_close" || marketsCachedPayload.markets?.length !== 13) {
+  console.error("FAILED: /api/markets must read the latest cached market snapshot");
   process.exit(1);
 }
 

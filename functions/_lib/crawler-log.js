@@ -7,6 +7,7 @@ const LOGGED_PATHS = new Set([
   "/api/v1",
   "/api/v1/categories",
   "/api/v1/search",
+  "/api/markets",
   "/api/openapi.json"
 ]);
 

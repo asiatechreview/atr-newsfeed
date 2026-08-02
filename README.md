@@ -123,6 +123,16 @@ The frontend renders the source as `[TechCrunch]`, with only the outlet name lin
 GET /api/health
 ```
 
+### Asia Markets Snapshot
+
+```http
+GET /api/markets
+POST /api/markets/refresh
+Authorization: Bearer <FEED_INGEST_TOKEN>
+```
+
+The public `GET` endpoint reads the latest cached Asia markets snapshot. The protected refresh endpoint pulls major Asian index data from Yahoo Finance's chart endpoint and stores a D1 snapshot for the desktop-only bulletin widget. The intended cadence is three weekday refreshes: market open, midday and market close.
+
 ### Feeds
 
 - `/feed.json`
