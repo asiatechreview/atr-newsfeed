@@ -1,5 +1,6 @@
 const DEFAULT_URL = "https://bulletin.asiatechreview.com/api/items?limit=500";
 const url = process.argv[2] || DEFAULT_URL;
+const baseUrl = new URL(url).origin;
 
 const sourceAliases = new Map([
   ["ft.com", "FT"],
@@ -58,7 +59,10 @@ if (failures.length) {
   fail(`${failures.length} live feed check(s) failed`, failures);
 }
 
-console.log(`OK: live feed validated (${items.length} items).`);
+await validateJsonFeed(items[0]);
+await validateRssFeed(items[0]);
+
+console.log(`OK: live feed validated (${items.length} API items, RSS/JSON endpoints).`);
 
 function isWeakHeadline(headline) {
   const value = String(headline || "").trim().replace(/\bU\.S\./g, "US");
@@ -79,4 +83,56 @@ function isWeakHeadline(headline) {
   if (/(?:\$[0-9.]+ billion|[0-9]+ trillion rupees|T\$|HK\$|\bRs\s)/i.test(value)) return true;
 
   return false;
+}
+
+async function validateJsonFeed(firstItem) {
+  const response = await fetch(`${baseUrl}/feed.json`, {
+    headers: { accept: "application/feed+json, application/json" }
+  });
+  if (!response.ok) fail(`feed.json returned HTTP ${response.status}`);
+
+  const payload = await response.json();
+  const firstFeedItem = payload.items?.[0];
+  if (payload.version !== "https://jsonfeed.org/version/1.1") {
+    fail("feed.json is not JSON Feed 1.1");
+  }
+  if (!firstFeedItem) {
+    fail("feed.json returned no items");
+  }
+  if (firstFeedItem.title !== firstItem.headline || firstFeedItem.content_text !== firstItem.blurb || firstFeedItem.external_url !== firstItem.source_url) {
+    fail("feed.json first item does not match /api/items first item", [
+      `expected title: ${firstItem.headline}`,
+      `actual title: ${firstFeedItem.title}`,
+      `expected source: ${firstItem.source_url}`,
+      `actual source: ${firstFeedItem.external_url}`
+    ]);
+  }
+}
+
+async function validateRssFeed(firstItem) {
+  const response = await fetch(`${baseUrl}/rss.xml`, {
+    headers: { accept: "application/rss+xml" }
+  });
+  if (!response.ok) fail(`rss.xml returned HTTP ${response.status}`);
+
+  const text = await response.text();
+  if (!text.includes("<rss version=\"2.0\"")) {
+    fail("rss.xml does not look like RSS 2.0");
+  }
+  if (!text.includes(`<title>${escapeXmlForCheck(firstItem.headline)}</title>`) || !text.includes(`<link>${baseUrl}/?item=${firstItem.id}</link>`) || !text.includes(`href="${escapeXmlForCheck(firstItem.source_url)}"`)) {
+    fail("rss.xml first item does not match /api/items first item", [
+      `expected title: ${firstItem.headline}`,
+      `expected bulletin URL: ${baseUrl}/?item=${firstItem.id}`,
+      `expected source: ${firstItem.source_url}`
+    ]);
+  }
+}
+
+function escapeXmlForCheck(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&apos;");
 }

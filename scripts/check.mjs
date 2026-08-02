@@ -2,6 +2,8 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { STATIC_ITEMS } from "../functions/_data/static-items.js";
 import { onRequestGet } from "../functions/api/items.js";
+import { onRequestGet as onJsonFeedRequestGet } from "../functions/feed.json.js";
+import { onRequestGet as onRssRequestGet } from "../functions/rss.xml.js";
 
 const root = new URL("..", import.meta.url).pathname;
 const required = [
@@ -128,7 +130,52 @@ if (headlineFailures.length) {
   process.exit(1);
 }
 
-console.log(`OK: ATR feed checks passed (${STATIC_ITEMS.length} static items, ${generatedItems.length} generated headlines).`);
+const originalFetch = globalThis.fetch;
+globalThis.fetch = async (url) => {
+  if (String(url).includes("/api/items")) {
+    return new Response(JSON.stringify({ items: generatedItems }), {
+      headers: { "content-type": "application/json; charset=utf-8" }
+    });
+  }
+
+  return originalFetch(url);
+};
+
+const jsonFeedResponse = await onJsonFeedRequestGet({
+  request: new Request("https://bulletin.asiatechreview.com/feed.json")
+});
+const jsonFeedPayload = await jsonFeedResponse.json();
+const firstGeneratedItem = generatedItems[0];
+const firstJsonFeedItem = jsonFeedPayload.items?.[0];
+
+if (jsonFeedPayload.version !== "https://jsonfeed.org/version/1.1") {
+  console.error("FAILED: feed.json must use JSON Feed 1.1");
+  process.exit(1);
+}
+
+if (!firstJsonFeedItem || firstJsonFeedItem.title !== firstGeneratedItem.headline || firstJsonFeedItem.content_text !== firstGeneratedItem.blurb || firstJsonFeedItem.external_url !== firstGeneratedItem.source_url) {
+  console.error("FAILED: feed.json must preserve headline, blurb and source URL from /api/items");
+  process.exit(1);
+}
+
+const rssFeedResponse = await onRssRequestGet({
+  request: new Request("https://bulletin.asiatechreview.com/rss.xml")
+});
+const rssFeedText = await rssFeedResponse.text();
+
+if (!rssFeedText.includes(`<title>${escapeXmlForCheck(firstGeneratedItem.headline)}</title>`) || !rssFeedText.includes(`<link>https://bulletin.asiatechreview.com/?item=${firstGeneratedItem.id}</link>`) || !rssFeedText.includes(`href="${escapeXmlForCheck(firstGeneratedItem.source_url)}"`)) {
+  console.error("FAILED: rss.xml must preserve headline, bulletin URL and source URL from /api/items");
+  process.exit(1);
+}
+
+if (!jsonFeedResponse.headers.get("cache-control")?.includes("max-age=300") || !rssFeedResponse.headers.get("cache-control")?.includes("max-age=300")) {
+  console.error("FAILED: feed endpoints must use five-minute cache headers");
+  process.exit(1);
+}
+
+globalThis.fetch = originalFetch;
+
+console.log(`OK: ATR feed checks passed (${STATIC_ITEMS.length} static items, ${generatedItems.length} generated headlines, RSS/JSON feed formatting).`);
 
 function isWeakHeadline(headline) {
   const value = String(headline || "").trim().replace(/\bU\.S\./g, "US");
@@ -145,4 +192,13 @@ function isWeakHeadline(headline) {
   if (/(?:\$[0-9.]+ billion|[0-9]+ trillion rupees|T\$|HK\$|\bRs\s)/i.test(value)) return true;
 
   return false;
+}
+
+function escapeXmlForCheck(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&apos;");
 }
