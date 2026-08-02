@@ -1778,12 +1778,12 @@ function syncSearchInput() {
 
 function formatMarketSnapshotTime(value) {
   if (!value) {
-    return "Snapshot pending";
+    return "Fetching snapshot";
   }
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return "Snapshot pending";
+    return "Fetching snapshot";
   }
 
   return `Updated ${date.toLocaleString(undefined, withLocalTimeZone({
@@ -1815,7 +1815,7 @@ function renderMarketSnapshot(payload) {
   if (!markets.length) {
     const empty = document.createElement("p");
     empty.className = "market-snapshot-empty";
-    empty.textContent = payload?.message || "Market data source pending.";
+    empty.textContent = payload?.message || "Fetching market data.";
     marketSnapshotList.appendChild(empty);
     return;
   }
@@ -1850,16 +1850,29 @@ async function refreshMarketSnapshot() {
   }
 
   try {
-    const response = await fetch(`/api/markets?_=${Date.now()}`, {
+    const response = await fetch(`/api/markets?ts=${Date.now()}`, {
       cache: "no-store",
       headers: { Accept: "application/json" }
     });
+    if (!response.ok) {
+      throw new Error(`Market API returned ${response.status}`);
+    }
     const payload = await response.json();
     renderMarketSnapshot(payload);
   } catch (error) {
-    renderMarketSnapshot({
-      message: "Market snapshot unavailable."
-    });
+    try {
+      const response = await fetch("/api/markets", {
+        headers: { Accept: "application/json" }
+      });
+      if (!response.ok) {
+        throw new Error(`Market API retry returned ${response.status}`);
+      }
+      renderMarketSnapshot(await response.json());
+    } catch {
+      renderMarketSnapshot({
+        message: "Market snapshot unavailable."
+      });
+    }
   }
 }
 
