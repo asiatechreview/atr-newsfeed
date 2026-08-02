@@ -2,8 +2,10 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { STATIC_ITEMS } from "../functions/_data/static-items.js";
 import { onRequestGet, onRequestPost } from "../functions/api/items.js";
+import { onRequestGet as onCrawlerLogsRequestGet } from "../functions/api/crawler-logs.js";
 import { onRequestGet as onJsonFeedRequestGet } from "../functions/feed.json.js";
 import { onRequestGet as onRssRequestGet } from "../functions/rss.xml.js";
+import { onRequest as onMiddlewareRequest } from "../functions/_middleware.js";
 
 const root = new URL("..", import.meta.url).pathname;
 const required = [
@@ -14,6 +16,9 @@ const required = [
   "public/app.js",
   "functions/api/items.js",
   "functions/api/health.js",
+  "functions/api/crawler-logs.js",
+  "functions/_lib/crawler-log.js",
+  "functions/_middleware.js",
   "functions/feed.json.js",
   "functions/rss.xml.js",
   "schema.sql",
@@ -30,6 +35,13 @@ const schema = readFileSync(join(root, "schema.sql"), "utf8");
 for (const column of ["headline", "blurb", "source_name", "source_url", "category", "published_at"]) {
   if (!schema.includes(column)) {
     console.error(`schema.sql missing ${column}`);
+    process.exit(1);
+  }
+}
+
+for (const crawlerLogTerm of ["crawler_access_logs", "user_agent", "bot_name", "country", "colo"]) {
+  if (!schema.includes(crawlerLogTerm)) {
+    console.error(`schema.sql missing crawler log term ${crawlerLogTerm}`);
     process.exit(1);
   }
 }
@@ -241,7 +253,86 @@ if (duplicatePostResponse.status !== 200 || duplicatePostPayload.duplicate !== t
   process.exit(1);
 }
 
-console.log(`OK: ATR feed checks passed (${STATIC_ITEMS.length} static items, ${generatedItems.length} generated headlines, RSS/JSON feed formatting, duplicate POST guard).`);
+let crawlerLogInsert = null;
+const crawlerLogWaits = [];
+const crawlerLogEnv = {
+  FEED_INGEST_TOKEN: "test-token",
+  ATR_FEED_DB: {
+    prepare(query) {
+      return {
+        async run() {},
+        bind(...params) {
+          return {
+            async run() {
+              crawlerLogInsert = { query, params };
+            },
+            async all() {
+              return {
+                results: [
+                  {
+                    id: 1,
+                    requested_at: "2026-08-02T06:45:00Z",
+                    path: "/feed.json",
+                    method: "GET",
+                    status: 200,
+                    user_agent: "GPTBot/1.0",
+                    bot_name: "GPTBot",
+                    country: "US",
+                    colo: "SFO"
+                  }
+                ]
+              };
+            }
+          };
+        }
+      };
+    }
+  }
+};
+
+const crawlerMiddlewareResponse = await onMiddlewareRequest({
+  env: crawlerLogEnv,
+  request: new Request("https://bulletin.asiatechreview.com/feed.json", {
+    headers: { "user-agent": "GPTBot/1.0" }
+  }),
+  async next() {
+    return new Response("{}", { status: 200 });
+  },
+  waitUntil(promise) {
+    crawlerLogWaits.push(promise);
+  }
+});
+await Promise.all(crawlerLogWaits);
+
+if (crawlerMiddlewareResponse.status !== 200 || !crawlerLogInsert || crawlerLogInsert.params[0] !== "/feed.json" || crawlerLogInsert.params[4] !== "GPTBot") {
+  console.error("FAILED: crawler middleware must log feed/robots/llms requests with bot classification");
+  process.exit(1);
+}
+
+const crawlerLogsUnauthorizedResponse = await onCrawlerLogsRequestGet({
+  env: crawlerLogEnv,
+  request: new Request("https://local.test/api/crawler-logs")
+});
+
+if (crawlerLogsUnauthorizedResponse.status !== 401) {
+  console.error("FAILED: crawler log readback must require authorization");
+  process.exit(1);
+}
+
+const crawlerLogsResponse = await onCrawlerLogsRequestGet({
+  env: crawlerLogEnv,
+  request: new Request("https://local.test/api/crawler-logs?limit=10", {
+    headers: { authorization: "Bearer test-token" }
+  })
+});
+const crawlerLogsPayload = await crawlerLogsResponse.json();
+
+if (crawlerLogsResponse.status !== 200 || crawlerLogsPayload.summary?.byBot?.GPTBot !== 1 || crawlerLogsPayload.logs?.[0]?.path !== "/feed.json") {
+  console.error("FAILED: protected crawler log endpoint must return logs and summary");
+  process.exit(1);
+}
+
+console.log(`OK: ATR feed checks passed (${STATIC_ITEMS.length} static items, ${generatedItems.length} generated headlines, RSS/JSON feed formatting, duplicate POST guard, crawler logging).`);
 
 function isWeakHeadline(headline) {
   const value = String(headline || "").trim().replace(/\bU\.S\./g, "US");
