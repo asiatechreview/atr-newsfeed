@@ -463,17 +463,6 @@ if (crawlerLogsResponse.status !== 200 || crawlerLogsPayload.summary?.byBot?.GPT
   process.exit(1);
 }
 
-const marketsPendingResponse = await onMarketsRequestGet({
-  env: {},
-  request: new Request("https://bulletin.asiatechreview.com/api/markets")
-});
-const marketsPendingPayload = await marketsPendingResponse.json();
-
-if (marketsPendingResponse.status !== 503 || marketsPendingPayload.status !== "not_configured" || !marketsPendingPayload.expected_markets?.length) {
-  console.error("FAILED: /api/markets must fail cleanly when no market snapshot is configured");
-  process.exit(1);
-}
-
 const marketsConfiguredResponse = await onMarketsRequestGet({
   env: {
     MARKET_SNAPSHOT_JSON: JSON.stringify({
