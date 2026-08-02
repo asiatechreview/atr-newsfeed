@@ -396,6 +396,48 @@ if (crawlerMiddlewareResponse.status !== 200 || !crawlerLogInsert || crawlerLogI
   process.exit(1);
 }
 
+crawlerLogInsert = null;
+const apiLogWaits = [];
+const apiMiddlewareResponse = await onMiddlewareRequest({
+  env: crawlerLogEnv,
+  request: new Request("https://bulletin.asiatechreview.com/api/v1/items?limit=1", {
+    headers: { "user-agent": "ClaudeBot/1.0" }
+  }),
+  async next() {
+    return new Response("{}", { status: 200 });
+  },
+  waitUntil(promise) {
+    apiLogWaits.push(promise);
+  }
+});
+await Promise.all(apiLogWaits);
+
+if (apiMiddlewareResponse.status !== 200 || !crawlerLogInsert || crawlerLogInsert.params[0] !== "/api/v1/items" || crawlerLogInsert.params[4] !== "ClaudeBot") {
+  console.error("FAILED: crawler middleware must log public API requests with bot classification");
+  process.exit(1);
+}
+
+crawlerLogInsert = null;
+const protectedApiLogWaits = [];
+await onMiddlewareRequest({
+  env: crawlerLogEnv,
+  request: new Request("https://bulletin.asiatechreview.com/api/crawler-logs", {
+    headers: { "user-agent": "GPTBot/1.0" }
+  }),
+  async next() {
+    return new Response("{}", { status: 401 });
+  },
+  waitUntil(promise) {
+    protectedApiLogWaits.push(promise);
+  }
+});
+await Promise.all(protectedApiLogWaits);
+
+if (crawlerLogInsert) {
+  console.error("FAILED: protected crawler log readback endpoint must not log itself");
+  process.exit(1);
+}
+
 const crawlerLogsUnauthorizedResponse = await onCrawlerLogsRequestGet({
   env: crawlerLogEnv,
   request: new Request("https://local.test/api/crawler-logs")
@@ -419,7 +461,7 @@ if (crawlerLogsResponse.status !== 200 || crawlerLogsPayload.summary?.byBot?.GPT
   process.exit(1);
 }
 
-console.log(`OK: ATR feed checks passed (${STATIC_ITEMS.length} static items, ${generatedItems.length} generated headlines, RSS/JSON feed formatting, public API, duplicate POST guard, crawler logging).`);
+console.log(`OK: ATR feed checks passed (${STATIC_ITEMS.length} static items, ${generatedItems.length} generated headlines, RSS/JSON feed formatting, public API, duplicate POST guard, crawler/API logging).`);
 
 function isWeakHeadline(headline) {
   const value = String(headline || "").trim().replace(/\bU\.S\./g, "US");

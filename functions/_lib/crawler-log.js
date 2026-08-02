@@ -2,8 +2,17 @@ const LOGGED_PATHS = new Set([
   "/robots.txt",
   "/llms.txt",
   "/feed.json",
-  "/rss.xml"
+  "/rss.xml",
+  "/api",
+  "/api/v1",
+  "/api/v1/categories",
+  "/api/v1/search",
+  "/api/openapi.json"
 ]);
+
+const LOGGED_PREFIXES = [
+  "/api/v1/items"
+];
 
 const BOT_PATTERNS = [
   ["GPTBot", /GPTBot/i],
@@ -23,7 +32,7 @@ const BOT_PATTERNS = [
 ];
 
 export function shouldLogCrawlerPath(pathname) {
-  return LOGGED_PATHS.has(pathname);
+  return LOGGED_PATHS.has(pathname) || LOGGED_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 }
 
 export function classifyBot(userAgent) {
