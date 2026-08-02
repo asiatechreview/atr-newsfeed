@@ -4,9 +4,6 @@ const archiveNav = document.querySelector("#archive-nav");
 const pagination = document.querySelector("#pagination");
 const searchForm = document.querySelector("#search-form");
 const searchInput = document.querySelector("#search-input");
-const marketSnapshot = document.querySelector("#market-snapshot");
-const marketSnapshotList = document.querySelector("#market-snapshot-list");
-const marketSnapshotUpdated = document.querySelector("#market-snapshot-updated");
 const signalMetrics = document.querySelector("#signal-metrics");
 const themeToggle = document.querySelector("#theme-toggle");
 const newItemToast = document.querySelector("#new-item-toast");
@@ -24,7 +21,6 @@ const VISIBLE_PAGE_BUTTONS = 8;
 const ARCHIVE_DAYS = 5;
 const FEED_POLL_INTERVAL_MS = 5 * 60 * 1000;
 const NEW_ITEM_TOAST_TIMEOUT_MS = 9000;
-const MARKET_SNAPSHOT_POLL_INTERVAL_MS = 60 * 60 * 1000;
 const LOCAL_TIME_ZONE = getLocalTimeZone();
 const THEME_STORAGE_KEY = "atr-bulletin-theme";
 const SHOW_WATCHLIST = false;
@@ -1776,116 +1772,6 @@ function syncSearchInput() {
   }
 }
 
-function formatMarketSnapshotTime(value) {
-  if (!value) {
-    return "Fetching snapshot";
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return "Fetching snapshot";
-  }
-
-  return `Updated ${date.toLocaleString(undefined, withLocalTimeZone({
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit"
-  }))}`;
-}
-
-function formatMarketChange(value) {
-  if (!Number.isFinite(value)) {
-    return "n/a";
-  }
-
-  const sign = value > 0 ? "+" : "";
-  return `${sign}${value.toFixed(2)}%`;
-}
-
-function renderMarketSnapshot(payload) {
-  if (!marketSnapshotList || !marketSnapshotUpdated) {
-    return;
-  }
-
-  const markets = Array.isArray(payload?.markets) ? payload.markets : [];
-  marketSnapshotUpdated.textContent = formatMarketSnapshotTime(payload?.updated_at);
-  marketSnapshotList.replaceChildren();
-
-  if (!markets.length) {
-    const empty = document.createElement("p");
-    empty.className = "market-snapshot-empty";
-    empty.textContent = payload?.message || "Fetching market data.";
-    marketSnapshotList.appendChild(empty);
-    return;
-  }
-
-  for (const market of markets) {
-    const row = document.createElement("div");
-    row.className = "market-snapshot-row";
-
-    const name = document.createElement("span");
-    name.className = "market-snapshot-name";
-    name.textContent = market.name || market.symbol || "Market";
-
-    const change = document.createElement("span");
-    change.className = "market-snapshot-change";
-    const percentChange = Number(market.change_percent);
-    change.textContent = formatMarketChange(percentChange);
-
-    if (percentChange > 0) {
-      change.classList.add("is-up");
-    } else if (percentChange < 0) {
-      change.classList.add("is-down");
-    }
-
-    row.append(name, change);
-    marketSnapshotList.appendChild(row);
-  }
-}
-
-async function refreshMarketSnapshot() {
-  if (!marketSnapshot || !marketSnapshotList) {
-    return;
-  }
-
-  try {
-    const response = await fetch(`/api/markets?ts=${Date.now()}`, {
-      cache: "no-store",
-      headers: { Accept: "application/json" }
-    });
-    if (!response.ok) {
-      throw new Error(`Market API returned ${response.status}`);
-    }
-    const payload = await response.json();
-    renderMarketSnapshot(payload);
-  } catch (error) {
-    try {
-      const response = await fetch("/api/markets", {
-        headers: { Accept: "application/json" }
-      });
-      if (!response.ok) {
-        throw new Error(`Market API retry returned ${response.status}`);
-      }
-      renderMarketSnapshot(await response.json());
-    } catch {
-      renderMarketSnapshot({
-        message: "Market snapshot unavailable."
-      });
-    }
-  }
-}
-
-function startMarketSnapshotPolling() {
-  refreshMarketSnapshot();
-
-  window.setInterval(() => {
-    if (document.visibilityState !== "hidden") {
-      refreshMarketSnapshot();
-    }
-  }, MARKET_SNAPSHOT_POLL_INTERVAL_MS);
-}
-
 if (searchForm && searchInput) {
   searchInput.value = currentSearchQuery;
 
@@ -1900,6 +1786,5 @@ if (searchForm && searchInput) {
 }
 
 initThemeToggle();
-startMarketSnapshotPolling();
 refreshFeed({ initial: true });
 startFeedPolling();
