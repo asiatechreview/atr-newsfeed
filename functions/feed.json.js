@@ -42,7 +42,6 @@ function toJsonFeedItem(item) {
   const id = String(item.id || "").trim();
   const sourceName = clean(item.source_name || "Source");
   const sourceUrl = clean(item.source_url);
-  const bulletinUrl = `${SITE_URL}/?item=${encodeURIComponent(id)}`;
   const tags = clean(item.category) ? [clean(item.category)] : [];
 
   return {
@@ -50,7 +49,7 @@ function toJsonFeedItem(item) {
     title: clean(item.headline || item.title || item.blurb || "Asia tech update"),
     content_text: clean(item.blurb),
     content_html: `${escapeHtml(clean(item.blurb))}<br><br>Source: ${sourceUrl ? `<a href="${escapeHtml(sourceUrl)}">${escapeHtml(sourceName)}</a>` : escapeHtml(sourceName)}`,
-    url: bulletinUrl,
+    url: sourceUrl || undefined,
     external_url: sourceUrl || undefined,
     date_published: validDate(item.published_at),
     tags

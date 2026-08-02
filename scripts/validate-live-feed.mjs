@@ -99,12 +99,18 @@ async function validateJsonFeed(firstItem) {
   if (!firstFeedItem) {
     fail("feed.json returned no items");
   }
-  if (firstFeedItem.title !== firstItem.headline || firstFeedItem.content_text !== firstItem.blurb || firstFeedItem.external_url !== firstItem.source_url) {
+  if (firstFeedItem.title !== firstItem.headline || firstFeedItem.content_text !== firstItem.blurb || firstFeedItem.url !== firstItem.source_url || firstFeedItem.external_url !== firstItem.source_url) {
     fail("feed.json first item does not match /api/items first item", [
       `expected title: ${firstItem.headline}`,
       `actual title: ${firstFeedItem.title}`,
       `expected source: ${firstItem.source_url}`,
-      `actual source: ${firstFeedItem.external_url}`
+      `actual url: ${firstFeedItem.url}`,
+      `actual external_url: ${firstFeedItem.external_url}`
+    ]);
+  }
+  if (firstFeedItem.url?.startsWith(`${baseUrl}/?item=`)) {
+    fail("feed.json exposes bulletin permalink as the primary public URL", [
+      `actual url: ${firstFeedItem.url}`
     ]);
   }
 }
@@ -119,11 +125,15 @@ async function validateRssFeed(firstItem) {
   if (!text.includes("<rss version=\"2.0\"")) {
     fail("rss.xml does not look like RSS 2.0");
   }
-  if (!text.includes(`<title>${escapeXmlForCheck(firstItem.headline)}</title>`) || !text.includes(`<link>${baseUrl}/?item=${firstItem.id}</link>`) || !text.includes(`href="${escapeXmlForCheck(firstItem.source_url)}"`)) {
+  if (!text.includes(`<title>${escapeXmlForCheck(firstItem.headline)}</title>`) || !text.includes(`<link>${escapeXmlForCheck(firstItem.source_url)}</link>`) || !text.includes(`href="${escapeXmlForCheck(firstItem.source_url)}"`)) {
     fail("rss.xml first item does not match /api/items first item", [
       `expected title: ${firstItem.headline}`,
-      `expected bulletin URL: ${baseUrl}/?item=${firstItem.id}`,
       `expected source: ${firstItem.source_url}`
+    ]);
+  }
+  if (text.includes(`<link>${baseUrl}/?item=${firstItem.id}</link>`)) {
+    fail("rss.xml exposes bulletin permalink as the primary public link", [
+      `unexpected link: ${baseUrl}/?item=${firstItem.id}`
     ]);
   }
 }

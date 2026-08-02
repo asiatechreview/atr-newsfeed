@@ -153,7 +153,7 @@ if (jsonFeedPayload.version !== "https://jsonfeed.org/version/1.1") {
   process.exit(1);
 }
 
-if (!firstJsonFeedItem || firstJsonFeedItem.title !== firstGeneratedItem.headline || firstJsonFeedItem.content_text !== firstGeneratedItem.blurb || firstJsonFeedItem.external_url !== firstGeneratedItem.source_url) {
+if (!firstJsonFeedItem || firstJsonFeedItem.title !== firstGeneratedItem.headline || firstJsonFeedItem.content_text !== firstGeneratedItem.blurb || firstJsonFeedItem.url !== firstGeneratedItem.source_url || firstJsonFeedItem.external_url !== firstGeneratedItem.source_url) {
   console.error("FAILED: feed.json must preserve headline, blurb and source URL from /api/items");
   process.exit(1);
 }
@@ -163,8 +163,13 @@ const rssFeedResponse = await onRssRequestGet({
 });
 const rssFeedText = await rssFeedResponse.text();
 
-if (!rssFeedText.includes(`<title>${escapeXmlForCheck(firstGeneratedItem.headline)}</title>`) || !rssFeedText.includes(`<link>https://bulletin.asiatechreview.com/?item=${firstGeneratedItem.id}</link>`) || !rssFeedText.includes(`href="${escapeXmlForCheck(firstGeneratedItem.source_url)}"`)) {
-  console.error("FAILED: rss.xml must preserve headline, bulletin URL and source URL from /api/items");
+if (!rssFeedText.includes(`<title>${escapeXmlForCheck(firstGeneratedItem.headline)}</title>`) || !rssFeedText.includes(`<link>${escapeXmlForCheck(firstGeneratedItem.source_url)}</link>`) || !rssFeedText.includes(`href="${escapeXmlForCheck(firstGeneratedItem.source_url)}"`)) {
+  console.error("FAILED: rss.xml must preserve headline and source URL from /api/items");
+  process.exit(1);
+}
+
+if (rssFeedText.includes(`<link>https://bulletin.asiatechreview.com/?item=${firstGeneratedItem.id}</link>`) || firstJsonFeedItem.url?.startsWith("https://bulletin.asiatechreview.com/?item=")) {
+  console.error("FAILED: feed items must use the source article as the primary public link");
   process.exit(1);
 }
 

@@ -48,7 +48,6 @@ function toRssItem(item) {
   const blurb = clean(item.blurb);
   const sourceName = clean(item.source_name || "Source");
   const sourceUrl = clean(item.source_url);
-  const bulletinUrl = `${SITE_URL}/?item=${encodeURIComponent(id)}`;
   const publishedAt = parseDate(item.published_at);
   const description = `${escapeHtml(blurb)}<br><br>Source: ${sourceUrl ? `<a href="${escapeHtml(sourceUrl)}">${escapeHtml(sourceName)}</a>` : escapeHtml(sourceName)}`;
 
@@ -56,7 +55,7 @@ function toRssItem(item) {
     "<item>",
     `<title>${escapeXml(title)}</title>`,
     `<description><![CDATA[${escapeCdata(description)}]]></description>`,
-    `<link>${escapeXml(bulletinUrl)}</link>`,
+    sourceUrl ? `<link>${escapeXml(sourceUrl)}</link>` : "",
     `<guid isPermaLink="false">bulletin-${escapeXml(id)}</guid>`,
     `<pubDate>${publishedAt.toUTCString()}</pubDate>`,
     clean(item.category) ? `<category>${escapeXml(clean(item.category))}</category>` : "",
