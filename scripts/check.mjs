@@ -10,6 +10,7 @@ import { onRequestGet as onApiV1ItemRequestGet } from "../functions/api/v1/items
 import { onRequestGet as onApiV1CategoriesRequestGet } from "../functions/api/v1/categories.js";
 import { onRequestGet as onApiV1SearchRequestGet } from "../functions/api/v1/search.js";
 import { onRequestGet as onOpenApiRequestGet } from "../functions/api/openapi.json.js";
+import { onRequestGet as onMarketsRequestGet } from "../functions/api/markets.js";
 import { onRequestGet as onJsonFeedRequestGet } from "../functions/feed.json.js";
 import { onRequestGet as onRssRequestGet } from "../functions/rss.xml.js";
 import { onRequest as onMiddlewareRequest } from "../functions/_middleware.js";
@@ -25,6 +26,7 @@ const required = [
   "functions/api/health.js",
   "functions/api/crawler-logs.js",
   "functions/api/index.js",
+  "functions/api/markets.js",
   "functions/api/openapi.json.js",
   "functions/api/v1/index.js",
   "functions/api/v1/items.js",
@@ -461,7 +463,38 @@ if (crawlerLogsResponse.status !== 200 || crawlerLogsPayload.summary?.byBot?.GPT
   process.exit(1);
 }
 
-console.log(`OK: ATR feed checks passed (${STATIC_ITEMS.length} static items, ${generatedItems.length} generated headlines, RSS/JSON feed formatting, public API, duplicate POST guard, crawler/API logging).`);
+const marketsPendingResponse = await onMarketsRequestGet({
+  env: {},
+  request: new Request("https://bulletin.asiatechreview.com/api/markets")
+});
+const marketsPendingPayload = await marketsPendingResponse.json();
+
+if (marketsPendingResponse.status !== 503 || marketsPendingPayload.status !== "not_configured" || !marketsPendingPayload.expected_markets?.length) {
+  console.error("FAILED: /api/markets must fail cleanly when no market snapshot is configured");
+  process.exit(1);
+}
+
+const marketsConfiguredResponse = await onMarketsRequestGet({
+  env: {
+    MARKET_SNAPSHOT_JSON: JSON.stringify({
+      source: "Check fixture",
+      updated_at: "2026-08-02T09:45:00Z",
+      markets: [
+        { name: "Nikkei 225", change_percent: 0.42 },
+        { name: "KOSPI", change_percent: -0.18 }
+      ]
+    })
+  },
+  request: new Request("https://bulletin.asiatechreview.com/api/markets")
+});
+const marketsConfiguredPayload = await marketsConfiguredResponse.json();
+
+if (marketsConfiguredResponse.status !== 200 || marketsConfiguredPayload.markets?.length !== 2 || marketsConfiguredPayload.markets[0]?.name !== "Nikkei 225") {
+  console.error("FAILED: /api/markets must return configured market snapshot rows");
+  process.exit(1);
+}
+
+console.log(`OK: ATR feed checks passed (${STATIC_ITEMS.length} static items, ${generatedItems.length} generated headlines, RSS/JSON feed formatting, public API, duplicate POST guard, crawler/API logging, market snapshot endpoint).`);
 
 function isWeakHeadline(headline) {
   const value = String(headline || "").trim().replace(/\bU\.S\./g, "US");

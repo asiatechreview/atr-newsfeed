@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=20260802-rss-link">
+  <link rel="stylesheet" href="/styles.css?v=20260802-markets">
 </head>
 <body>
   <div class="page">
@@ -33,6 +33,16 @@
       <form id="search-form" class="search" role="search">
         <input id="search-input" name="q" type="search" autocomplete="off" placeholder="Search" aria-label="Search">
       </form>
+
+      <section id="market-snapshot" class="market-snapshot" aria-label="Asia markets snapshot">
+        <div class="market-snapshot-header">
+          <p class="eyebrow">Asia markets</p>
+          <p id="market-snapshot-updated" class="market-snapshot-updated">Snapshot pending</p>
+        </div>
+        <div id="market-snapshot-list" class="market-snapshot-list">
+          <p class="market-snapshot-empty">Market data source pending.</p>
+        </div>
+      </section>
 
     </aside>
 
@@ -120,6 +130,6 @@
     </article>
   </template>
 
-  <script src="/app.js?v=20260731-search-headlines" defer></script>
+  <script src="/app.js?v=20260802-markets" defer></script>
 </body>
 </html>
