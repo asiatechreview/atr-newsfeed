@@ -157,6 +157,37 @@ main {
   white-space: nowrap;
 }
 
+.rss-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--accent);
+  font: 700 11px/1 var(--font-meta);
+  text-transform: uppercase;
+}
+
+.rss-link:hover,
+.rss-link:focus {
+  border-color: var(--accent);
+  color: var(--text);
+  outline: 1px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.rss-link-icon {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.3;
+  stroke-linecap: round;
+}
+
 .topbar-actions {
   display: flex;
   flex-direction: column;
