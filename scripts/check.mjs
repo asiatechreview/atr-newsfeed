@@ -8,6 +8,8 @@ import { onRequestGet as onRssRequestGet } from "../functions/rss.xml.js";
 const root = new URL("..", import.meta.url).pathname;
 const required = [
   "public/index.html",
+  "public/llms.txt",
+  "public/robots.txt",
   "public/styles.css",
   "public/app.js",
   "functions/api/items.js",

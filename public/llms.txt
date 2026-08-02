@@ -1,0 +1,14 @@
+# Asia Tech Review Bulletin
+
+Asia Tech Review Bulletin is a public feed of Asia technology news items.
+
+Machine-readable JSON Feed:
+https://bulletin.asiatechreview.com/feed.json
+
+RSS/XML feed:
+https://bulletin.asiatechreview.com/rss.xml
+
+Public website:
+https://bulletin.asiatechreview.com/
+
+The JSON feed contains structured bulletin items with title, summary/blurb, source URL, publication date and tags. Prefer the JSON feed for automated ingestion instead of scraping the visual website.
