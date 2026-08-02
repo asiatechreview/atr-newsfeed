@@ -484,6 +484,40 @@ if (apiMiddlewareResponse.status !== 200 || !crawlerLogInsert || crawlerLogInser
   process.exit(1);
 }
 
+const publicDashboardResponse = await onMiddlewareRequest({
+  env: crawlerLogEnv,
+  request: new Request("https://bulletin.asiatechreview.com/dashboard"),
+  async next() {
+    return new Response("dashboard", { status: 200 });
+  },
+  waitUntil() {}
+});
+
+const pagesDashboardResponse = await onMiddlewareRequest({
+  env: crawlerLogEnv,
+  request: new Request("https://atr-newsfeed.pages.dev/dashboard"),
+  async next() {
+    return new Response("dashboard", { status: 200 });
+  },
+  waitUntil() {}
+});
+
+const publicDashboardApiResponse = await onMiddlewareRequest({
+  env: crawlerLogEnv,
+  request: new Request("https://bulletin.asiatechreview.com/api/dashboard", {
+    headers: { authorization: "Bearer test-token" }
+  }),
+  async next() {
+    return new Response("{}", { status: 200 });
+  },
+  waitUntil() {}
+});
+
+if (publicDashboardResponse.status !== 404 || pagesDashboardResponse.status !== 200 || publicDashboardApiResponse.status !== 404) {
+  console.error("FAILED: dashboard must be blocked on bulletin.asiatechreview.com but allowed on the Pages deployment host");
+  process.exit(1);
+}
+
 crawlerLogInsert = null;
 const protectedApiLogWaits = [];
 await onMiddlewareRequest({
