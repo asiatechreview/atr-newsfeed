@@ -1,6 +1,6 @@
 const feed = document.querySelector("#feed-list");
 const status = document.querySelector("#feed-status");
-const archiveNav = document.querySelector("#archive-nav");
+const archiveNav = document.querySelector("#archive-nav") || document.createElement("nav");
 const pagination = document.querySelector("#pagination");
 const searchForm = document.querySelector("#search-form");
 const searchInput = document.querySelector("#search-input");
