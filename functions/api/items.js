@@ -447,16 +447,47 @@ export async function onRequestPost({ env, request }) {
 
   await ensureHeadlineColumn(env);
 
-  const result = await env.ATR_FEED_DB.prepare(
-    `INSERT INTO feed_items
-      (headline, blurb, source_name, source_url, category, telegram_message_id, published_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)
-     RETURNING id, headline, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at`
-  )
-    .bind(headline || null, blurb, sourceName, sourceUrl, category, telegramMessageId || null, publishedAt)
-    .first();
+  let result;
+  let status = 201;
 
-  return json({ item: withHeadlines([result])[0] }, 201);
+  if (sourceUrl) {
+    result = await env.ATR_FEED_DB.prepare(
+      `INSERT INTO feed_items
+        (headline, blurb, source_name, source_url, category, telegram_message_id, published_at)
+       SELECT ?, ?, ?, ?, ?, ?, ?
+       WHERE NOT EXISTS (
+         SELECT 1 FROM feed_items
+         WHERE lower(source_url) = lower(?) AND status = ?
+       )
+       RETURNING id, headline, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at`
+    )
+      .bind(headline || null, blurb, sourceName, sourceUrl, category, telegramMessageId || null, publishedAt, sourceUrl, "published")
+      .first();
+
+    if (!result) {
+      result = await env.ATR_FEED_DB.prepare(
+        `SELECT id, headline, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at
+         FROM feed_items
+         WHERE lower(source_url) = lower(?) AND status = ?
+         ORDER BY published_at DESC, id DESC
+         LIMIT 1`
+      )
+        .bind(sourceUrl, "published")
+        .first();
+      status = 200;
+    }
+  } else {
+    result = await env.ATR_FEED_DB.prepare(
+      `INSERT INTO feed_items
+        (headline, blurb, source_name, source_url, category, telegram_message_id, published_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)
+       RETURNING id, headline, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at`
+    )
+      .bind(headline || null, blurb, sourceName, sourceUrl, category, telegramMessageId || null, publishedAt)
+      .first();
+  }
+
+  return json({ item: withHeadlines([result])[0], duplicate: status === 200 }, status);
 }
 
 export async function onRequestPatch({ env, request }) {

@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { STATIC_ITEMS } from "../functions/_data/static-items.js";
-import { onRequestGet } from "../functions/api/items.js";
+import { onRequestGet, onRequestPost } from "../functions/api/items.js";
 import { onRequestGet as onJsonFeedRequestGet } from "../functions/feed.json.js";
 import { onRequestGet as onRssRequestGet } from "../functions/rss.xml.js";
 
@@ -180,7 +180,66 @@ if (!jsonFeedResponse.headers.get("cache-control")?.includes("max-age=300") || !
 
 globalThis.fetch = originalFetch;
 
-console.log(`OK: ATR feed checks passed (${STATIC_ITEMS.length} static items, ${generatedItems.length} generated headlines, RSS/JSON feed formatting).`);
+const existingPostItem = {
+  id: 999,
+  headline: "Existing duplicate guard item",
+  blurb: "Existing item that should be returned instead of duplicated.",
+  source_name: "FT",
+  source_url: "https://www.ft.com/content/duplicate-guard-test",
+  category: "Markets",
+  telegram_message_id: "existing-message",
+  published_at: "2026-08-02T06:00:00Z",
+  created_at: "2026-08-02T06:00:00Z"
+};
+let insertAttempts = 0;
+const duplicatePostResponse = await onRequestPost({
+  env: {
+    FEED_INGEST_TOKEN: "test-token",
+    ATR_FEED_DB: {
+      prepare(query) {
+        return {
+          bind() {
+            return {
+              async run() {},
+              async first() {
+                if (query.includes("INSERT INTO feed_items")) {
+                  insertAttempts += 1;
+                  return null;
+                }
+                if (query.includes("WHERE lower(source_url) = lower(?)")) {
+                  return existingPostItem;
+                }
+                throw new Error(`Unexpected duplicate guard query: ${query}`);
+              }
+            };
+          }
+        };
+      }
+    }
+  },
+  request: new Request("https://local.test/api/items", {
+    method: "POST",
+    headers: {
+      authorization: "Bearer test-token",
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      headline: "Replay duplicate guard item",
+      blurb: "Replay item that should not create a duplicate.",
+      sourceName: "FT",
+      sourceUrl: existingPostItem.source_url,
+      category: "Markets"
+    })
+  })
+});
+const duplicatePostPayload = await duplicatePostResponse.json();
+
+if (duplicatePostResponse.status !== 200 || duplicatePostPayload.duplicate !== true || duplicatePostPayload.item?.id !== existingPostItem.id || insertAttempts !== 1) {
+  console.error("FAILED: duplicate source URL POST must return the existing item without creating a duplicate");
+  process.exit(1);
+}
+
+console.log(`OK: ATR feed checks passed (${STATIC_ITEMS.length} static items, ${generatedItems.length} generated headlines, RSS/JSON feed formatting, duplicate POST guard).`);
 
 function isWeakHeadline(headline) {
   const value = String(headline || "").trim().replace(/\bU\.S\./g, "US");

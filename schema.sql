@@ -17,3 +17,7 @@ ON feed_items (status, published_at DESC, id DESC);
 
 CREATE INDEX IF NOT EXISTS idx_feed_items_category
 ON feed_items (category);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_feed_items_published_source_url_unique
+ON feed_items (lower(source_url))
+WHERE status = 'published' AND source_url != '';
