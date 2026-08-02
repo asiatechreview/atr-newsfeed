@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { STATIC_ITEMS } from "../functions/_data/static-items.js";
-import { onRequestGet, onRequestPost } from "../functions/api/items.js";
+import { onRequestDelete, onRequestGet, onRequestPost } from "../functions/api/items.js";
 import { onRequestGet as onCrawlerLogsRequestGet } from "../functions/api/crawler-logs.js";
 import { onRequestGet as onApiIndexRequestGet } from "../functions/api/index.js";
 import { onRequestGet as onApiV1IndexRequestGet } from "../functions/api/v1/index.js";
@@ -340,6 +340,45 @@ const duplicatePostPayload = await duplicatePostResponse.json();
 
 if (duplicatePostResponse.status !== 200 || duplicatePostPayload.duplicate !== true || duplicatePostPayload.item?.id !== existingPostItem.id || insertAttempts !== 1) {
   console.error("FAILED: duplicate source URL POST must return the existing item without creating a duplicate");
+  process.exit(1);
+}
+
+let deleteQuery = null;
+let deleteParams = null;
+const deleteResponse = await onRequestDelete({
+  env: {
+    FEED_INGEST_TOKEN: "test-token",
+    ATR_FEED_DB: {
+      prepare(query) {
+        deleteQuery = query;
+        return {
+          bind(...params) {
+            deleteParams = params;
+            return {
+              async first() {
+                return existingPostItem;
+              }
+            };
+          }
+        };
+      }
+    }
+  },
+  request: new Request("https://local.test/api/items", {
+    method: "DELETE",
+    headers: {
+      authorization: "Bearer test-token",
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      id: existingPostItem.id
+    })
+  })
+});
+const deletePayload = await deleteResponse.json();
+
+if (deleteResponse.status !== 200 || deletePayload.status !== "removed" || deletePayload.item?.id !== existingPostItem.id || !deleteQuery.includes("SET status = ?") || deleteParams?.[0] !== "removed") {
+  console.error("FAILED: DELETE /api/items must mark a published item as removed");
   process.exit(1);
 }
 

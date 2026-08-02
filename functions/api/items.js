@@ -561,6 +561,52 @@ export async function onRequestPatch({ env, request }) {
   return json({ item: withHeadlines([result])[0] });
 }
 
+export async function onRequestDelete({ env, request }) {
+  if (!isAuthorized(env, request)) {
+    return json({ error: "Unauthorized" }, 401);
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    body = {};
+  }
+
+  const url = new URL(request.url);
+  const id = Number(body.id || url.searchParams.get("id"));
+  const sourceUrl = clean(body.sourceUrl || body.source_url || url.searchParams.get("source_url"));
+  const headline = clean(body.headline || body.title || url.searchParams.get("headline"));
+
+  if (!Number.isInteger(id) && !sourceUrl && !headline) {
+    return json({ error: "id, sourceUrl or headline is required" }, 400);
+  }
+
+  let query = "UPDATE feed_items SET status = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now') WHERE status = ?";
+  const params = ["removed", "published"];
+
+  if (Number.isInteger(id) && id > 0) {
+    query += " AND id = ?";
+    params.push(id);
+  } else if (sourceUrl) {
+    query += " AND lower(source_url) = lower(?)";
+    params.push(sourceUrl);
+  } else {
+    query += " AND lower(headline) = lower(?)";
+    params.push(headline);
+  }
+
+  query += " RETURNING id, headline, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at";
+
+  const result = await env.ATR_FEED_DB.prepare(query).bind(...params).first();
+
+  if (!result) {
+    return json({ error: "item not found" }, 404);
+  }
+
+  return json({ item: withHeadlines([result])[0], status: "removed" });
+}
+
 function isAuthorized(env, request) {
   const auth = request.headers.get("authorization") || "";
   const expected = env.FEED_INGEST_TOKEN ? `Bearer ${env.FEED_INGEST_TOKEN}` : "";
