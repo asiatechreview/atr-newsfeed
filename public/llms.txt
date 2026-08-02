@@ -11,4 +11,16 @@ https://bulletin.asiatechreview.com/rss.xml
 Public website:
 https://bulletin.asiatechreview.com/
 
-The JSON feed contains structured bulletin items with title, summary/blurb, source URL, publication date and tags. Prefer the JSON feed for automated ingestion instead of scraping the visual website.
+Public API index:
+https://bulletin.asiatechreview.com/api
+
+Versioned API:
+https://bulletin.asiatechreview.com/api/v1
+
+Latest structured bulletin items:
+https://bulletin.asiatechreview.com/api/v1/items
+
+OpenAPI schema:
+https://bulletin.asiatechreview.com/api/openapi.json
+
+The JSON feed contains recent structured bulletin items for simple ingestion. Prefer the API for stable machine-readable fields, item lookup, categories and search. Use source_url as the primary citation for each bulletin item instead of scraping the visual website.

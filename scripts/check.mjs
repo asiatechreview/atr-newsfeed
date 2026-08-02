@@ -3,6 +3,13 @@ import { join } from "node:path";
 import { STATIC_ITEMS } from "../functions/_data/static-items.js";
 import { onRequestGet, onRequestPost } from "../functions/api/items.js";
 import { onRequestGet as onCrawlerLogsRequestGet } from "../functions/api/crawler-logs.js";
+import { onRequestGet as onApiIndexRequestGet } from "../functions/api/index.js";
+import { onRequestGet as onApiV1IndexRequestGet } from "../functions/api/v1/index.js";
+import { onRequestGet as onApiV1ItemsRequestGet } from "../functions/api/v1/items.js";
+import { onRequestGet as onApiV1ItemRequestGet } from "../functions/api/v1/items/[id].js";
+import { onRequestGet as onApiV1CategoriesRequestGet } from "../functions/api/v1/categories.js";
+import { onRequestGet as onApiV1SearchRequestGet } from "../functions/api/v1/search.js";
+import { onRequestGet as onOpenApiRequestGet } from "../functions/api/openapi.json.js";
 import { onRequestGet as onJsonFeedRequestGet } from "../functions/feed.json.js";
 import { onRequestGet as onRssRequestGet } from "../functions/rss.xml.js";
 import { onRequest as onMiddlewareRequest } from "../functions/_middleware.js";
@@ -17,6 +24,14 @@ const required = [
   "functions/api/items.js",
   "functions/api/health.js",
   "functions/api/crawler-logs.js",
+  "functions/api/index.js",
+  "functions/api/openapi.json.js",
+  "functions/api/v1/index.js",
+  "functions/api/v1/items.js",
+  "functions/api/v1/items/[id].js",
+  "functions/api/v1/categories.js",
+  "functions/api/v1/search.js",
+  "functions/_lib/public-api.js",
   "functions/_lib/crawler-log.js",
   "functions/_middleware.js",
   "functions/feed.json.js",
@@ -192,6 +207,78 @@ if (!jsonFeedResponse.headers.get("cache-control")?.includes("max-age=300") || !
   process.exit(1);
 }
 
+const apiIndexResponse = await onApiIndexRequestGet({
+  request: new Request("https://bulletin.asiatechreview.com/api")
+});
+const apiIndexPayload = await apiIndexResponse.json();
+
+if (apiIndexResponse.status !== 200 || !apiIndexPayload.endpoints?.items?.includes("/api/v1/items") || !apiIndexPayload.endpoints?.openapi?.includes("/api/openapi.json")) {
+  console.error("FAILED: /api must expose a machine-readable API index");
+  process.exit(1);
+}
+
+const apiV1IndexResponse = await onApiV1IndexRequestGet({
+  request: new Request("https://bulletin.asiatechreview.com/api/v1")
+});
+const apiV1IndexPayload = await apiV1IndexResponse.json();
+
+if (apiV1IndexResponse.status !== 200 || !apiV1IndexPayload.schema?.fields?.includes("source_url")) {
+  console.error("FAILED: /api/v1 must expose the public item schema fields");
+  process.exit(1);
+}
+
+const apiItemsResponse = await onApiV1ItemsRequestGet({
+  request: new Request("https://bulletin.asiatechreview.com/api/v1/items?limit=5")
+});
+const apiItemsPayload = await apiItemsResponse.json();
+const firstApiItem = apiItemsPayload.items?.[0];
+
+if (apiItemsResponse.status !== 200 || apiItemsPayload.type !== "bulletin_item_collection" || apiItemsPayload.items?.length !== 5 || firstApiItem?.type !== "bulletin_item" || firstApiItem.title !== firstGeneratedItem.headline || firstApiItem.blurb !== firstGeneratedItem.blurb || firstApiItem.source_url !== firstGeneratedItem.source_url || !firstApiItem.id?.startsWith("bulletin-")) {
+  console.error("FAILED: /api/v1/items must return stable machine-readable bulletin items");
+  process.exit(1);
+}
+
+const apiItemResponse = await onApiV1ItemRequestGet({
+  params: { id: firstApiItem.id },
+  request: new Request(`https://bulletin.asiatechreview.com/api/v1/items/${firstApiItem.id}`)
+});
+const apiItemPayload = await apiItemResponse.json();
+
+if (apiItemResponse.status !== 200 || apiItemPayload.id !== firstApiItem.id || apiItemPayload.source_url !== firstApiItem.source_url) {
+  console.error("FAILED: /api/v1/items/{id} must return one matching item");
+  process.exit(1);
+}
+
+const apiCategoriesResponse = await onApiV1CategoriesRequestGet({
+  request: new Request("https://bulletin.asiatechreview.com/api/v1/categories")
+});
+const apiCategoriesPayload = await apiCategoriesResponse.json();
+
+if (apiCategoriesResponse.status !== 200 || apiCategoriesPayload.type !== "bulletin_category_collection" || !apiCategoriesPayload.categories?.length) {
+  console.error("FAILED: /api/v1/categories must return category metadata");
+  process.exit(1);
+}
+
+const apiSearchResponse = await onApiV1SearchRequestGet({
+  request: new Request(`https://bulletin.asiatechreview.com/api/v1/search?q=${encodeURIComponent(firstGeneratedItem.headline.split(/\s+/)[0])}`)
+});
+const apiSearchPayload = await apiSearchResponse.json();
+
+if (apiSearchResponse.status !== 200 || apiSearchPayload.type !== "bulletin_item_collection" || !apiSearchPayload.items?.length) {
+  console.error("FAILED: /api/v1/search must return matching bulletin items");
+  process.exit(1);
+}
+
+const openApiResponse = await onOpenApiRequestGet({
+  request: new Request("https://bulletin.asiatechreview.com/api/openapi.json")
+});
+const openApiPayload = await openApiResponse.json();
+
+if (openApiResponse.status !== 200 || openApiPayload.openapi !== "3.1.0" || !openApiPayload.paths?.["/items"] || !openApiPayload.components?.schemas?.BulletinItem) {
+  console.error("FAILED: /api/openapi.json must expose OpenAPI schema for machine readers");
+  process.exit(1);
+}
+
 globalThis.fetch = originalFetch;
 
 const existingPostItem = {
@@ -332,7 +419,7 @@ if (crawlerLogsResponse.status !== 200 || crawlerLogsPayload.summary?.byBot?.GPT
   process.exit(1);
 }
 
-console.log(`OK: ATR feed checks passed (${STATIC_ITEMS.length} static items, ${generatedItems.length} generated headlines, RSS/JSON feed formatting, duplicate POST guard, crawler logging).`);
+console.log(`OK: ATR feed checks passed (${STATIC_ITEMS.length} static items, ${generatedItems.length} generated headlines, RSS/JSON feed formatting, public API, duplicate POST guard, crawler logging).`);
 
 function isWeakHeadline(headline) {
   const value = String(headline || "").trim().replace(/\bU\.S\./g, "US");

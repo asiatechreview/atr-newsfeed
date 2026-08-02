@@ -52,6 +52,42 @@ npx wrangler d1 execute atr-feed-db --file=./schema.sql
 
 ## API
 
+### Public API Index
+
+```http
+GET /api
+```
+
+Returns a machine-readable index of public endpoints, feeds, `llms.txt` and usage guidance.
+
+### Public API v1
+
+```http
+GET /api/v1
+GET /api/v1/items?limit=100
+GET /api/v1/items/{id}
+GET /api/v1/categories
+GET /api/v1/search?q=AI
+GET /api/openapi.json
+```
+
+The v1 API is public, read-only and generated from the same published bulletin records as the site and feeds. It returns stable `bulletin_item` objects for agents and automation:
+
+```json
+{
+  "type": "bulletin_item",
+  "id": "bulletin-247",
+  "title": "US races China on open AI models",
+  "blurb": "Silicon Valley and Washington are increasingly worried...",
+  "source_name": "WSJ",
+  "source_url": "https://www.wsj.com/...",
+  "category": "AI",
+  "published_at": "2026-08-02T02:18:00.000Z"
+}
+```
+
+Use `source_url` as the primary citation. Protected crawler logs are not exposed in the public API.
+
 ### List Items
 
 ```http
