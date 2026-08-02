@@ -52,3 +52,30 @@ CREATE TABLE IF NOT EXISTS market_snapshots (
 
 CREATE INDEX IF NOT EXISTS idx_market_snapshots_fetched_at
 ON market_snapshots (fetched_at DESC);
+
+CREATE TABLE IF NOT EXISTS operational_events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  occurred_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+  workflow TEXT NOT NULL,
+  action TEXT NOT NULL,
+  status TEXT NOT NULL,
+  severity TEXT NOT NULL DEFAULT 'info',
+  http_status INTEGER,
+  item_id TEXT,
+  source_name TEXT,
+  source_url TEXT,
+  message TEXT NOT NULL DEFAULT '',
+  details_json TEXT NOT NULL DEFAULT '{}',
+  user_agent TEXT NOT NULL DEFAULT '',
+  country TEXT,
+  colo TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_operational_events_occurred_at
+ON operational_events (occurred_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_operational_events_status
+ON operational_events (status, occurred_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_operational_events_workflow
+ON operational_events (workflow, occurred_at DESC);

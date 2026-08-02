@@ -12,6 +12,7 @@ import { onRequestGet as onApiV1SearchRequestGet } from "../functions/api/v1/sea
 import { onRequestGet as onOpenApiRequestGet } from "../functions/api/openapi.json.js";
 import { onRequestGet as onMarketsRequestGet } from "../functions/api/markets.js";
 import { onRequestPost as onMarketsRefreshRequestPost } from "../functions/api/markets/refresh.js";
+import { onRequestGet as onDashboardRequestGet } from "../functions/api/dashboard.js";
 import { onRequestGet as onJsonFeedRequestGet } from "../functions/feed.json.js";
 import { onRequestGet as onRssRequestGet } from "../functions/rss.xml.js";
 import { onRequest as onMiddlewareRequest } from "../functions/_middleware.js";
@@ -23,9 +24,13 @@ const required = [
   "public/robots.txt",
   "public/styles.css",
   "public/app.js",
+  "public/dashboard.html",
+  "public/dashboard.css",
+  "public/dashboard.js",
   "functions/api/items.js",
   "functions/api/health.js",
   "functions/api/crawler-logs.js",
+  "functions/api/dashboard.js",
   "functions/api/index.js",
   "functions/api/markets.js",
   "functions/api/openapi.json.js",
@@ -36,6 +41,7 @@ const required = [
   "functions/api/v1/search.js",
   "functions/_lib/public-api.js",
   "functions/_lib/crawler-log.js",
+  "functions/_lib/operational-log.js",
   "functions/_middleware.js",
   "functions/feed.json.js",
   "functions/rss.xml.js",
@@ -64,9 +70,24 @@ for (const crawlerLogTerm of ["crawler_access_logs", "user_agent", "bot_name", "
   }
 }
 
+for (const operationalLogTerm of ["operational_events", "workflow", "action", "severity", "details_json"]) {
+  if (!schema.includes(operationalLogTerm)) {
+    console.error(`schema.sql missing operational log term ${operationalLogTerm}`);
+    process.exit(1);
+  }
+}
+
 const appScript = readFileSync(join(root, "public/app.js"), "utf8");
 const indexHtml = readFileSync(join(root, "public/index.html"), "utf8");
 const stylesCss = readFileSync(join(root, "public/styles.css"), "utf8");
+const dashboardHtml = readFileSync(join(root, "public/dashboard.html"), "utf8");
+const dashboardScript = readFileSync(join(root, "public/dashboard.js"), "utf8");
+const dashboardCss = readFileSync(join(root, "public/dashboard.css"), "utf8");
+
+if (!dashboardHtml.includes("/dashboard.js") || !dashboardScript.includes("/api/dashboard") || !dashboardCss.includes(".status-strip")) {
+  console.error("dashboard assets must expose a protected operational dashboard UI");
+  process.exit(1);
+}
 if (!appScript.includes("function renderTags(target, item)") || !appScript.includes("for (const tag of item.tags)")) {
   console.error("public/app.js must render story tags, not hide the tag container");
   process.exit(1);
@@ -350,10 +371,14 @@ const deleteResponse = await onRequestDelete({
     FEED_INGEST_TOKEN: "test-token",
     ATR_FEED_DB: {
       prepare(query) {
-        deleteQuery = query;
+        if (query.includes("UPDATE feed_items SET status = ?")) {
+          deleteQuery = query;
+        }
         return {
           bind(...params) {
-            deleteParams = params;
+            if (query.includes("UPDATE feed_items SET status = ?")) {
+              deleteParams = params;
+            }
             return {
               async first() {
                 return existingPostItem;

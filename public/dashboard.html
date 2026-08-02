@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ATR Bulletin Dashboard</title>
+  <link rel="icon" href="/favicon.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/dashboard.css?v=20260802-dashboard">
+</head>
+<body>
+  <main class="dashboard-shell">
+    <header class="dashboard-header">
+      <div>
+        <p class="eyebrow">Asia Tech Review</p>
+        <h1>Bulletin Ops</h1>
+      </div>
+      <div class="toolbar">
+        <select id="window-select" aria-label="Metrics window">
+          <option value="6">6h</option>
+          <option value="24" selected>24h</option>
+          <option value="72">72h</option>
+          <option value="168">7d</option>
+        </select>
+        <button id="refresh-button" type="button">Refresh</button>
+        <button id="token-button" type="button">Token</button>
+      </div>
+    </header>
+
+    <section id="auth-panel" class="auth-panel">
+      <label for="token-input">Dashboard token</label>
+      <div class="token-row">
+        <input id="token-input" type="password" autocomplete="current-password" placeholder="Bearer token">
+        <button id="save-token-button" type="button">Unlock</button>
+      </div>
+      <p id="auth-message" class="muted"></p>
+    </section>
+
+    <section id="status-strip" class="status-strip" aria-live="polite">
+      <article class="metric">
+        <span class="metric-label">Status</span>
+        <strong id="overall-status">Locked</strong>
+        <span id="overall-detail" class="metric-detail">Enter token</span>
+      </article>
+      <article class="metric">
+        <span class="metric-label">Public Items</span>
+        <strong id="public-items">-</strong>
+        <span id="latest-item" class="metric-detail">-</span>
+      </article>
+      <article class="metric">
+        <span class="metric-label">API/Feed Hits</span>
+        <strong id="api-hits">-</strong>
+        <span id="hit-errors" class="metric-detail">-</span>
+      </article>
+      <article class="metric">
+        <span class="metric-label">Posting Errors</span>
+        <strong id="posting-errors">-</strong>
+        <span id="posting-total" class="metric-detail">-</span>
+      </article>
+      <article class="metric">
+        <span class="metric-label">Markets</span>
+        <strong id="market-status">-</strong>
+        <span id="market-detail" class="metric-detail">-</span>
+      </article>
+    </section>
+
+    <section class="grid">
+      <article class="panel">
+        <div class="panel-head">
+          <h2>Endpoint Traffic</h2>
+          <span id="traffic-total" class="pill">-</span>
+        </div>
+        <div id="traffic-breakdown" class="breakdown"></div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head">
+          <h2>Bot/User Agents</h2>
+          <span id="bot-total" class="pill">-</span>
+        </div>
+        <div id="bot-breakdown" class="breakdown"></div>
+      </article>
+
+      <article class="panel wide">
+        <div class="panel-head">
+          <h2>Recent Operational Events</h2>
+          <span id="events-total" class="pill">-</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Severity</th>
+                <th>Workflow</th>
+                <th>Action</th>
+                <th>Status</th>
+                <th>Message</th>
+                <th>Source</th>
+              </tr>
+            </thead>
+            <tbody id="events-body"></tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="panel wide">
+        <div class="panel-head">
+          <h2>Recent API, Feed And Crawler Hits</h2>
+          <span id="logs-total" class="pill">-</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Path</th>
+                <th>Status</th>
+                <th>Bot</th>
+                <th>Country</th>
+                <th>User Agent</th>
+              </tr>
+            </thead>
+            <tbody id="logs-body"></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script src="/dashboard.js?v=20260802-dashboard" defer></script>
+</body>
+</html>

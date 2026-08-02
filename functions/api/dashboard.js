@@ -1,0 +1,298 @@
+import { ensureCrawlerAccessLogTable } from "../_lib/crawler-log.js";
+import { ensureMarketSnapshotTable } from "../_lib/markets.js";
+import { ensureOperationalEventsTable, summarizeOperationalEvents } from "../_lib/operational-log.js";
+
+const DEFAULT_LIMIT = 80;
+const MAX_LIMIT = 300;
+
+export async function onRequestGet({ env, request }) {
+  if (!isAuthorized(env, request)) {
+    return json({ error: "Unauthorized" }, 401);
+  }
+
+  const url = new URL(request.url);
+  const limit = Math.min(Number(url.searchParams.get("limit")) || DEFAULT_LIMIT, MAX_LIMIT);
+  const since = clean(url.searchParams.get("since")) || hoursAgoIso(24);
+
+  await Promise.all([
+    ensureCrawlerAccessLogTable(env),
+    ensureMarketSnapshotTable(env),
+    ensureOperationalEventsTable(env)
+  ]);
+
+  const [
+    itemSummary,
+    crawlerLogs,
+    crawlerTotals,
+    operationalEvents,
+    operationalTotals,
+    latestMarketSnapshot
+  ] = await Promise.all([
+    readItemSummary(env, request),
+    readCrawlerLogs(env, { since, limit }),
+    readCrawlerTotals(env, { since }),
+    readOperationalEvents(env, { since, limit }),
+    readOperationalTotals(env, { since }),
+    readLatestMarketSnapshotRow(env)
+  ]);
+
+  return json({
+    type: "atr_bulletin_dashboard",
+    generated_at: new Date().toISOString(),
+    window: { since },
+    status: buildStatus({ itemSummary, crawlerTotals, operationalTotals, latestMarketSnapshot }),
+    items: itemSummary,
+    traffic: {
+      logs: crawlerLogs,
+      summary: summarizeCrawlerLogs(crawlerLogs),
+      totals: crawlerTotals
+    },
+    operations: {
+      events: operationalEvents,
+      summary: summarizeOperationalEvents(operationalEvents),
+      totals: operationalTotals
+    },
+    markets: latestMarketSnapshot
+  });
+}
+
+async function readItemSummary(env, request) {
+  const counts = await env.ATR_FEED_DB.prepare(
+    `SELECT status, COUNT(*) AS count
+     FROM feed_items
+     GROUP BY status`
+  ).all();
+
+  const latest = await env.ATR_FEED_DB.prepare(
+    `SELECT id, headline, blurb, source_name, source_url, category, published_at, created_at
+     FROM feed_items
+     WHERE status = ?
+     ORDER BY published_at DESC, id DESC
+     LIMIT 1`
+  ).bind("published").first();
+
+  const latestRemoved = await env.ATR_FEED_DB.prepare(
+    `SELECT id, headline, source_name, source_url, updated_at
+     FROM feed_items
+     WHERE status = ?
+     ORDER BY updated_at DESC, id DESC
+     LIMIT 1`
+  ).bind("removed").first();
+
+  const publicItems = await readPublicItems(request);
+
+  return {
+    public_count: publicItems.length,
+    d1_counts: Object.fromEntries((counts.results || []).map((row) => [row.status, row.count])),
+    latest_published: publicItems[0] || latest || null,
+    latest_removed: latestRemoved || null
+  };
+}
+
+async function readPublicItems(request) {
+  try {
+    const url = new URL("/api/items?limit=500", request.url);
+    const response = await fetch(url, { headers: { accept: "application/json" } });
+    if (!response.ok) return [];
+    const payload = await response.json();
+    return Array.isArray(payload.items) ? payload.items : [];
+  } catch {
+    return [];
+  }
+}
+
+async function readCrawlerLogs(env, { since, limit }) {
+  const result = await env.ATR_FEED_DB.prepare(
+    `SELECT id, requested_at, path, method, status, user_agent, bot_name, country, colo
+     FROM crawler_access_logs
+     WHERE requested_at >= ?
+     ORDER BY requested_at DESC, id DESC
+     LIMIT ?`
+  ).bind(since, limit).all();
+
+  return result.results || [];
+}
+
+async function readCrawlerTotals(env, { since }) {
+  const [total, byPath, byBot, errorTotal] = await Promise.all([
+    env.ATR_FEED_DB.prepare(
+      "SELECT COUNT(*) AS count FROM crawler_access_logs WHERE requested_at >= ?"
+    ).bind(since).first(),
+    env.ATR_FEED_DB.prepare(
+      `SELECT path, COUNT(*) AS count
+       FROM crawler_access_logs
+       WHERE requested_at >= ?
+       GROUP BY path
+       ORDER BY count DESC, path ASC`
+    ).bind(since).all(),
+    env.ATR_FEED_DB.prepare(
+      `SELECT COALESCE(bot_name, 'Unclassified') AS bot_name, COUNT(*) AS count
+       FROM crawler_access_logs
+       WHERE requested_at >= ?
+       GROUP BY COALESCE(bot_name, 'Unclassified')
+       ORDER BY count DESC, bot_name ASC`
+    ).bind(since).all(),
+    env.ATR_FEED_DB.prepare(
+      `SELECT COUNT(*) AS count
+       FROM crawler_access_logs
+       WHERE requested_at >= ? AND (status IS NULL OR status >= 400)`
+    ).bind(since).first()
+  ]);
+
+  return {
+    total: total?.count || 0,
+    errors: errorTotal?.count || 0,
+    byPath: rowsToObject(byPath.results, "path"),
+    byBot: rowsToObject(byBot.results, "bot_name")
+  };
+}
+
+async function readOperationalEvents(env, { since, limit }) {
+  const result = await env.ATR_FEED_DB.prepare(
+    `SELECT id, occurred_at, workflow, action, status, severity, http_status, item_id, source_name, source_url, message, details_json, user_agent, country, colo
+     FROM operational_events
+     WHERE occurred_at >= ?
+     ORDER BY occurred_at DESC, id DESC
+     LIMIT ?`
+  ).bind(since, limit).all();
+
+  return (result.results || []).map((event) => ({
+    ...event,
+    details: parseJson(event.details_json)
+  }));
+}
+
+async function readOperationalTotals(env, { since }) {
+  const [total, errors, byStatus, byWorkflow] = await Promise.all([
+    env.ATR_FEED_DB.prepare(
+      "SELECT COUNT(*) AS count FROM operational_events WHERE occurred_at >= ?"
+    ).bind(since).first(),
+    env.ATR_FEED_DB.prepare(
+      `SELECT COUNT(*) AS count
+       FROM operational_events
+       WHERE occurred_at >= ? AND severity IN ('error', 'critical')`
+    ).bind(since).first(),
+    env.ATR_FEED_DB.prepare(
+      `SELECT status, COUNT(*) AS count
+       FROM operational_events
+       WHERE occurred_at >= ?
+       GROUP BY status
+       ORDER BY count DESC, status ASC`
+    ).bind(since).all(),
+    env.ATR_FEED_DB.prepare(
+      `SELECT workflow, COUNT(*) AS count
+       FROM operational_events
+       WHERE occurred_at >= ?
+       GROUP BY workflow
+       ORDER BY count DESC, workflow ASC`
+    ).bind(since).all()
+  ]);
+
+  return {
+    total: total?.count || 0,
+    errors: errors?.count || 0,
+    byStatus: rowsToObject(byStatus.results, "status"),
+    byWorkflow: rowsToObject(byWorkflow.results, "workflow")
+  };
+}
+
+async function readLatestMarketSnapshotRow(env) {
+  const row = await env.ATR_FEED_DB.prepare(
+    `SELECT id, fetched_at, source, cadence, status, market_count, snapshot_json
+     FROM market_snapshots
+     ORDER BY fetched_at DESC, id DESC
+     LIMIT 1`
+  ).first();
+
+  if (!row) return null;
+
+  const snapshot = parseJson(row.snapshot_json);
+  return {
+    id: row.id,
+    fetched_at: row.fetched_at,
+    source: row.source,
+    cadence: row.cadence,
+    status: row.status,
+    market_count: row.market_count,
+    updated_at: snapshot.updated_at || null
+  };
+}
+
+function buildStatus({ itemSummary, crawlerTotals, operationalTotals, latestMarketSnapshot }) {
+  const publishedItems = Number(itemSummary?.public_count || itemSummary?.d1_counts?.published || 0);
+  const recentErrors = Number(operationalTotals?.errors || 0) + Number(crawlerTotals?.errors || 0);
+  const marketAgeHours = latestMarketSnapshot?.fetched_at ? hoursBetween(latestMarketSnapshot.fetched_at, new Date().toISOString()) : null;
+
+  return {
+    overall: recentErrors ? "attention" : "ok",
+    public_items: publishedItems,
+    recent_errors: recentErrors,
+    api_hits: crawlerTotals?.total || 0,
+    latest_item_at: itemSummary?.latest_published?.published_at || null,
+    latest_market_refresh_at: latestMarketSnapshot?.fetched_at || null,
+    market_snapshot_stale: marketAgeHours === null ? true : marketAgeHours > 36
+  };
+}
+
+function summarizeCrawlerLogs(logs) {
+  const byPath = {};
+  const byBot = {};
+  const byStatus = {};
+
+  for (const log of logs) {
+    byPath[log.path] = (byPath[log.path] || 0) + 1;
+    byBot[log.bot_name || "Unclassified"] = (byBot[log.bot_name || "Unclassified"] || 0) + 1;
+    byStatus[log.status || "unknown"] = (byStatus[log.status || "unknown"] || 0) + 1;
+  }
+
+  return {
+    total: logs.length,
+    byPath,
+    byBot,
+    byStatus
+  };
+}
+
+function rowsToObject(rows = [], key) {
+  return Object.fromEntries((rows || []).map((row) => [row[key] || "Unclassified", row.count]));
+}
+
+function isAuthorized(env, request) {
+  const auth = request.headers.get("authorization") || "";
+  const expected = env.FEED_INGEST_TOKEN ? `Bearer ${env.FEED_INGEST_TOKEN}` : "";
+
+  return Boolean(expected && auth === expected);
+}
+
+function parseJson(value) {
+  try {
+    return JSON.parse(value || "{}");
+  } catch {
+    return {};
+  }
+}
+
+function hoursAgoIso(hours) {
+  return new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
+}
+
+function hoursBetween(start, end) {
+  const a = Date.parse(start);
+  const b = Date.parse(end);
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return null;
+  return Math.max(0, (b - a) / 36e5);
+}
+
+function clean(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function json(payload, status = 200) {
+  return new Response(JSON.stringify(payload, null, 2), {
+    status,
+    headers: {
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store"
+    }
+  });
+}

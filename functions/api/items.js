@@ -1,4 +1,5 @@
 import { STATIC_ITEMS } from "../_data/static-items.js";
+import { writeOperationalEvent } from "../_lib/operational-log.js";
 
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 500;
@@ -415,6 +416,14 @@ function moveBangkokDate(value, targetDate) {
 
 export async function onRequestPost({ env, request }) {
   if (!isAuthorized(env, request)) {
+    await writeOperationalEvent(env, request, {
+      workflow: "bulletin_ingest",
+      action: "create_item",
+      status: "unauthorized",
+      severity: "warning",
+      http_status: 401,
+      message: "Unauthorized bulletin item create attempt."
+    });
     return json({ error: "Unauthorized" }, 401);
   }
 
@@ -422,6 +431,14 @@ export async function onRequestPost({ env, request }) {
   try {
     body = await request.json();
   } catch {
+    await writeOperationalEvent(env, request, {
+      workflow: "bulletin_ingest",
+      action: "create_item",
+      status: "error",
+      severity: "error",
+      http_status: 400,
+      message: "Invalid JSON in bulletin item create request."
+    });
     return json({ error: "Invalid JSON" }, 400);
   }
 
@@ -434,64 +451,148 @@ export async function onRequestPost({ env, request }) {
   const publishedAt = clean(body.publishedAt || body.published_at) || new Date().toISOString();
 
   if (!blurb) {
+    await writeOperationalEvent(env, request, {
+      workflow: "bulletin_ingest",
+      action: "create_item",
+      status: "error",
+      severity: "error",
+      http_status: 400,
+      source_name: sourceName,
+      source_url: sourceUrl,
+      message: "Bulletin item create failed: blurb is required.",
+      details: { category, headline }
+    });
     return json({ error: "blurb is required" }, 400);
   }
 
   if (sourceUrl && !/^https?:\/\//i.test(sourceUrl)) {
+    await writeOperationalEvent(env, request, {
+      workflow: "bulletin_ingest",
+      action: "create_item",
+      status: "error",
+      severity: "error",
+      http_status: 400,
+      source_name: sourceName,
+      source_url: sourceUrl,
+      message: "Bulletin item create failed: sourceUrl must be an http(s) URL.",
+      details: { category, headline }
+    });
     return json({ error: "sourceUrl must be an http(s) URL" }, 400);
   }
 
   if (headline && isWeakHeadline(headline)) {
+    await writeOperationalEvent(env, request, {
+      workflow: "bulletin_ingest",
+      action: "create_item",
+      status: "error",
+      severity: "error",
+      http_status: 400,
+      source_name: sourceName,
+      source_url: sourceUrl,
+      message: "Bulletin item create failed: headline guard rejected the title.",
+      details: { category, headline }
+    });
     return json({ error: "headline must be a clean ATR-style scan title" }, 400);
   }
 
-  await ensureHeadlineColumn(env);
+  try {
+    await ensureHeadlineColumn(env);
+  } catch (error) {
+    await writeOperationalEvent(env, request, {
+      workflow: "bulletin_ingest",
+      action: "create_item",
+      status: "error",
+      severity: "error",
+      http_status: 500,
+      source_name: sourceName,
+      source_url: sourceUrl,
+      message: "Bulletin item create failed while preparing the database.",
+      details: { error: error.message }
+    });
+    return json({ error: "database setup failed" }, 500);
+  }
 
   let result;
   let status = 201;
 
-  if (sourceUrl) {
-    result = await env.ATR_FEED_DB.prepare(
-      `INSERT INTO feed_items
-        (headline, blurb, source_name, source_url, category, telegram_message_id, published_at)
-       SELECT ?, ?, ?, ?, ?, ?, ?
-       WHERE NOT EXISTS (
-         SELECT 1 FROM feed_items
-         WHERE lower(source_url) = lower(?) AND status = ?
-       )
-       RETURNING id, headline, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at`
-    )
-      .bind(headline || null, blurb, sourceName, sourceUrl, category, telegramMessageId || null, publishedAt, sourceUrl, "published")
-      .first();
-
-    if (!result) {
+  try {
+    if (sourceUrl) {
       result = await env.ATR_FEED_DB.prepare(
-        `SELECT id, headline, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at
-         FROM feed_items
-         WHERE lower(source_url) = lower(?) AND status = ?
-         ORDER BY published_at DESC, id DESC
-         LIMIT 1`
+        `INSERT INTO feed_items
+          (headline, blurb, source_name, source_url, category, telegram_message_id, published_at)
+         SELECT ?, ?, ?, ?, ?, ?, ?
+         WHERE NOT EXISTS (
+           SELECT 1 FROM feed_items
+           WHERE lower(source_url) = lower(?) AND status = ?
+         )
+         RETURNING id, headline, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at`
       )
-        .bind(sourceUrl, "published")
+        .bind(headline || null, blurb, sourceName, sourceUrl, category, telegramMessageId || null, publishedAt, sourceUrl, "published")
         .first();
-      status = 200;
+
+      if (!result) {
+        result = await env.ATR_FEED_DB.prepare(
+          `SELECT id, headline, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at
+           FROM feed_items
+           WHERE lower(source_url) = lower(?) AND status = ?
+           ORDER BY published_at DESC, id DESC
+           LIMIT 1`
+        )
+          .bind(sourceUrl, "published")
+          .first();
+        status = 200;
+      }
+    } else {
+      result = await env.ATR_FEED_DB.prepare(
+        `INSERT INTO feed_items
+          (headline, blurb, source_name, source_url, category, telegram_message_id, published_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?)
+         RETURNING id, headline, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at`
+      )
+        .bind(headline || null, blurb, sourceName, sourceUrl, category, telegramMessageId || null, publishedAt)
+        .first();
     }
-  } else {
-    result = await env.ATR_FEED_DB.prepare(
-      `INSERT INTO feed_items
-        (headline, blurb, source_name, source_url, category, telegram_message_id, published_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)
-       RETURNING id, headline, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at`
-    )
-      .bind(headline || null, blurb, sourceName, sourceUrl, category, telegramMessageId || null, publishedAt)
-      .first();
+  } catch (error) {
+    await writeOperationalEvent(env, request, {
+      workflow: "bulletin_ingest",
+      action: "create_item",
+      status: "error",
+      severity: "error",
+      http_status: 500,
+      source_name: sourceName,
+      source_url: sourceUrl,
+      message: "Bulletin item create failed during database write.",
+      details: { error: error.message, category, headline }
+    });
+    return json({ error: "database write failed" }, 500);
   }
+
+  await writeOperationalEvent(env, request, {
+    workflow: "bulletin_ingest",
+    action: "create_item",
+    status: status === 200 ? "duplicate" : "success",
+    severity: "info",
+    http_status: status,
+    item_id: result?.id,
+    source_name: result?.source_name || sourceName,
+    source_url: result?.source_url || sourceUrl,
+    message: status === 200 ? "Duplicate source URL returned existing bulletin item." : "Bulletin item created.",
+    details: { category: result?.category || category, headline: result?.headline || headline }
+  });
 
   return json({ item: withHeadlines([result])[0], duplicate: status === 200 }, status);
 }
 
 export async function onRequestPatch({ env, request }) {
   if (!isAuthorized(env, request)) {
+    await writeOperationalEvent(env, request, {
+      workflow: "bulletin_ingest",
+      action: "update_item",
+      status: "unauthorized",
+      severity: "warning",
+      http_status: 401,
+      message: "Unauthorized bulletin item update attempt."
+    });
     return json({ error: "Unauthorized" }, 401);
   }
 
@@ -499,6 +600,14 @@ export async function onRequestPatch({ env, request }) {
   try {
     body = await request.json();
   } catch {
+    await writeOperationalEvent(env, request, {
+      workflow: "bulletin_ingest",
+      action: "update_item",
+      status: "error",
+      severity: "error",
+      http_status: 400,
+      message: "Invalid JSON in bulletin item update request."
+    });
     return json({ error: "Invalid JSON" }, 400);
   }
 
@@ -558,11 +667,32 @@ export async function onRequestPatch({ env, request }) {
     .bind(nextHeadline || null, nextBlurb, nextSourceName, nextSourceUrl, nextCategory, id, "published")
     .first();
 
+  await writeOperationalEvent(env, request, {
+    workflow: "bulletin_ingest",
+    action: "update_item",
+    status: "success",
+    severity: "info",
+    http_status: 200,
+    item_id: result?.id,
+    source_name: result?.source_name,
+    source_url: result?.source_url,
+    message: "Bulletin item updated.",
+    details: { category: result?.category, headline: result?.headline }
+  });
+
   return json({ item: withHeadlines([result])[0] });
 }
 
 export async function onRequestDelete({ env, request }) {
   if (!isAuthorized(env, request)) {
+    await writeOperationalEvent(env, request, {
+      workflow: "bulletin_ingest",
+      action: "remove_item",
+      status: "unauthorized",
+      severity: "warning",
+      http_status: 401,
+      message: "Unauthorized bulletin item removal attempt."
+    });
     return json({ error: "Unauthorized" }, 401);
   }
 
@@ -579,6 +709,16 @@ export async function onRequestDelete({ env, request }) {
   const headline = clean(body.headline || body.title || url.searchParams.get("headline"));
 
   if (!Number.isInteger(id) && !sourceUrl && !headline) {
+    await writeOperationalEvent(env, request, {
+      workflow: "bulletin_ingest",
+      action: "remove_item",
+      status: "error",
+      severity: "error",
+      http_status: 400,
+      source_url: sourceUrl,
+      message: "Bulletin item removal failed: id, sourceUrl or headline is required.",
+      details: { id, headline }
+    });
     return json({ error: "id, sourceUrl or headline is required" }, 400);
   }
 
@@ -601,8 +741,31 @@ export async function onRequestDelete({ env, request }) {
   const result = await env.ATR_FEED_DB.prepare(query).bind(...params).first();
 
   if (!result) {
+    await writeOperationalEvent(env, request, {
+      workflow: "bulletin_ingest",
+      action: "remove_item",
+      status: "error",
+      severity: "error",
+      http_status: 404,
+      source_url: sourceUrl,
+      message: "Bulletin item removal failed: item not found.",
+      details: { id, headline }
+    });
     return json({ error: "item not found" }, 404);
   }
+
+  await writeOperationalEvent(env, request, {
+    workflow: "bulletin_ingest",
+    action: "remove_item",
+    status: "success",
+    severity: "info",
+    http_status: 200,
+    item_id: result.id,
+    source_name: result.source_name,
+    source_url: result.source_url,
+    message: "Bulletin item removed.",
+    details: { category: result.category, headline: result.headline }
+  });
 
   return json({ item: withHeadlines([result])[0], status: "removed" });
 }
