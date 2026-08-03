@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ATR Bulletin Admin</title>
+  <link rel="icon" href="/favicon.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/admin.css?v=20260803-admin">
+</head>
+<body>
+  <main class="admin-shell">
+    <header class="admin-header">
+      <div>
+        <p class="eyebrow">Asia Tech Review</p>
+        <h1>Bulletin Admin</h1>
+      </div>
+      <nav class="toolbar" aria-label="Admin actions">
+        <a href="/dashboard">Ops</a>
+        <a href="/">Site</a>
+        <button id="new-button" type="button">New Item</button>
+        <button id="refresh-button" type="button">Refresh</button>
+        <button id="token-button" type="button">Token</button>
+      </nav>
+    </header>
+
+    <section id="auth-panel" class="auth-panel">
+      <label for="token-input">Admin token</label>
+      <div class="token-row">
+        <input id="token-input" type="password" autocomplete="current-password" placeholder="Bearer token">
+        <button id="save-token-button" type="button">Unlock</button>
+      </div>
+      <p id="auth-message" class="muted"></p>
+    </section>
+
+    <section class="status-strip" aria-live="polite">
+      <article class="metric">
+        <span class="metric-label">Status</span>
+        <strong id="status-title">Locked</strong>
+        <span id="status-detail" class="metric-detail">Enter token</span>
+      </article>
+      <article class="metric">
+        <span class="metric-label">Loaded Items</span>
+        <strong id="loaded-count">-</strong>
+        <span id="filtered-count" class="metric-detail">-</span>
+      </article>
+      <article class="metric">
+        <span class="metric-label">Selected</span>
+        <strong id="selected-id">-</strong>
+        <span id="selected-detail" class="metric-detail">-</span>
+      </article>
+    </section>
+
+    <section class="admin-grid">
+      <aside class="panel item-panel">
+        <div class="panel-head">
+          <h2>Live Items</h2>
+          <span id="list-count" class="pill">-</span>
+        </div>
+        <label class="field-label" for="search-input">Search URL, title, blurb or source</label>
+        <input id="search-input" class="search-input" type="search" placeholder="Bloomberg, Qwen, item id...">
+        <div id="item-list" class="item-list"></div>
+      </aside>
+
+      <section class="panel editor-panel">
+        <div class="panel-head">
+          <h2 id="editor-title">Edit Item</h2>
+          <span id="editor-mode" class="pill">No item</span>
+        </div>
+
+        <form id="item-form">
+          <div class="form-grid">
+            <label>
+              <span>Item ID</span>
+              <input id="item-id" type="text" readonly>
+            </label>
+            <label>
+              <span>Category</span>
+              <input id="category-input" type="text" required>
+            </label>
+          </div>
+
+          <label>
+            <span>Headline</span>
+            <input id="headline-input" type="text" maxlength="120" placeholder="Clean ATR-style scan title">
+          </label>
+
+          <label>
+            <span>Blurb</span>
+            <textarea id="blurb-input" rows="8" required placeholder="Bulletin blurb"></textarea>
+          </label>
+
+          <div class="form-grid">
+            <label>
+              <span>Source Name</span>
+              <input id="source-name-input" type="text" required>
+            </label>
+            <label>
+              <span>Published At</span>
+              <input id="published-at-input" type="datetime-local">
+            </label>
+          </div>
+
+          <label>
+            <span>Source URL</span>
+            <input id="source-url-input" type="url" required>
+          </label>
+
+          <div class="actions">
+            <button id="save-button" type="submit">Save</button>
+            <button id="remove-button" class="danger" type="button">Remove</button>
+            <button id="reset-button" type="button">Reset</button>
+          </div>
+        </form>
+
+        <section class="panel nested-panel">
+          <div class="panel-head">
+            <h2>Readback</h2>
+            <span id="readback-status" class="pill">Idle</span>
+          </div>
+          <pre id="readback-output">Select an item to edit.</pre>
+        </section>
+      </section>
+    </section>
+  </main>
+
+  <script src="/admin.js?v=20260803-admin" defer></script>
+</body>
+</html>

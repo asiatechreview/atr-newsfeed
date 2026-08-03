@@ -7,6 +7,11 @@ const DASHBOARD_PATHS = new Set([
   "/dashboard.html",
   "/dashboard.css",
   "/dashboard.js",
+  "/admin",
+  "/admin/",
+  "/admin.html",
+  "/admin.css",
+  "/admin.js",
   "/api/dashboard"
 ]);
 

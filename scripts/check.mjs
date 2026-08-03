@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { STATIC_ITEMS } from "../functions/_data/static-items.js";
-import { onRequestDelete, onRequestGet, onRequestPost } from "../functions/api/items.js";
+import { onRequestDelete, onRequestGet, onRequestPatch, onRequestPost } from "../functions/api/items.js";
 import { onRequestGet as onCrawlerLogsRequestGet } from "../functions/api/crawler-logs.js";
 import { onRequestGet as onApiIndexRequestGet } from "../functions/api/index.js";
 import { onRequestGet as onApiV1IndexRequestGet } from "../functions/api/v1/index.js";
@@ -27,6 +27,9 @@ const required = [
   "public/dashboard.html",
   "public/dashboard.css",
   "public/dashboard.js",
+  "public/admin.html",
+  "public/admin.css",
+  "public/admin.js",
   "functions/api/items.js",
   "functions/api/health.js",
   "functions/api/crawler-logs.js",
@@ -83,9 +86,17 @@ const stylesCss = readFileSync(join(root, "public/styles.css"), "utf8");
 const dashboardHtml = readFileSync(join(root, "public/dashboard.html"), "utf8");
 const dashboardScript = readFileSync(join(root, "public/dashboard.js"), "utf8");
 const dashboardCss = readFileSync(join(root, "public/dashboard.css"), "utf8");
+const adminHtml = readFileSync(join(root, "public/admin.html"), "utf8");
+const adminScript = readFileSync(join(root, "public/admin.js"), "utf8");
+const adminCss = readFileSync(join(root, "public/admin.css"), "utf8");
 
 if (!dashboardHtml.includes("/dashboard.js") || !dashboardScript.includes("/api/dashboard") || !dashboardCss.includes(".status-strip")) {
   console.error("dashboard assets must expose a protected operational dashboard UI");
+  process.exit(1);
+}
+
+if (!adminHtml.includes("/admin.js") || !adminScript.includes("PATCH") || !adminScript.includes("DELETE") || !adminScript.includes("/api/items") || !adminCss.includes(".admin-grid")) {
+  console.error("admin assets must expose a protected bulletin item editor UI");
   process.exit(1);
 }
 if (!appScript.includes("function renderTags(target, item)") || !appScript.includes("for (const tag of item.tags)")) {
@@ -364,6 +375,58 @@ if (duplicatePostResponse.status !== 200 || duplicatePostPayload.duplicate !== t
   process.exit(1);
 }
 
+let patchUpdateParams = null;
+const patchResponse = await onRequestPatch({
+  env: {
+    FEED_INGEST_TOKEN: "test-token",
+    ATR_FEED_DB: {
+      prepare(query) {
+        return {
+          bind(...params) {
+            if (query.includes("UPDATE feed_items")) {
+              patchUpdateParams = params;
+            }
+            return {
+              async first() {
+                if (query.includes("SELECT id, headline")) {
+                  return existingPostItem;
+                }
+                if (query.includes("UPDATE feed_items")) {
+                  return {
+                    ...existingPostItem,
+                    blurb: params[1],
+                    category: params[4]
+                  };
+                }
+                return {};
+              },
+              async run() {}
+            };
+          }
+        };
+      }
+    }
+  },
+  request: new Request("https://local.test/api/items", {
+    method: "PATCH",
+    headers: {
+      authorization: "Bearer test-token",
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      id: existingPostItem.id,
+      blurb: "Edited item from the custom bulletin admin.",
+      category: "AI and Chips"
+    })
+  })
+});
+const patchPayload = await patchResponse.json();
+
+if (patchResponse.status !== 200 || patchPayload.item?.blurb !== "Edited item from the custom bulletin admin." || patchUpdateParams?.[5] !== existingPostItem.id) {
+  console.error("FAILED: PATCH /api/items must update an existing bulletin item for the admin UI");
+  process.exit(1);
+}
+
 let deleteQuery = null;
 let deleteParams = null;
 const deleteResponse = await onRequestDelete({
@@ -502,6 +565,24 @@ const pagesDashboardResponse = await onMiddlewareRequest({
   waitUntil() {}
 });
 
+const publicAdminResponse = await onMiddlewareRequest({
+  env: crawlerLogEnv,
+  request: new Request("https://bulletin.asiatechreview.com/admin"),
+  async next() {
+    return new Response("admin", { status: 200 });
+  },
+  waitUntil() {}
+});
+
+const pagesAdminResponse = await onMiddlewareRequest({
+  env: crawlerLogEnv,
+  request: new Request("https://atr-newsfeed.pages.dev/admin"),
+  async next() {
+    return new Response("admin", { status: 200 });
+  },
+  waitUntil() {}
+});
+
 const publicDashboardApiResponse = await onMiddlewareRequest({
   env: crawlerLogEnv,
   request: new Request("https://bulletin.asiatechreview.com/api/dashboard", {
@@ -513,8 +594,8 @@ const publicDashboardApiResponse = await onMiddlewareRequest({
   waitUntil() {}
 });
 
-if (publicDashboardResponse.status !== 404 || pagesDashboardResponse.status !== 200 || publicDashboardApiResponse.status !== 404) {
-  console.error("FAILED: dashboard must be blocked on bulletin.asiatechreview.com but allowed on the Pages deployment host");
+if (publicDashboardResponse.status !== 404 || pagesDashboardResponse.status !== 200 || publicAdminResponse.status !== 404 || pagesAdminResponse.status !== 200 || publicDashboardApiResponse.status !== 404) {
+  console.error("FAILED: dashboard/admin must be blocked on bulletin.asiatechreview.com but allowed on the Pages deployment host");
   process.exit(1);
 }
 
