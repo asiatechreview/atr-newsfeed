@@ -26,22 +26,28 @@ export async function onRequestGet({ env, request }) {
     crawlerTotals,
     operationalEvents,
     operationalTotals,
-    latestMarketSnapshot
+    latestMarketSnapshot,
+    ingestFailures,
+    deployInfo
   ] = await Promise.all([
     readItemSummary(env, request),
     readCrawlerLogs(env, { since, limit }),
     readCrawlerTotals(env, { since }),
     readOperationalEvents(env, { since, limit }),
     readOperationalTotals(env, { since }),
-    readLatestMarketSnapshotRow(env)
+    readLatestMarketSnapshotRow(env),
+    readIngestFailures(env, { since, limit: 25 }),
+    readDeployInfo(env)
   ]);
 
   return json({
     type: "atr_bulletin_dashboard",
     generated_at: new Date().toISOString(),
     window: { since },
-    status: buildStatus({ itemSummary, crawlerTotals, operationalTotals, latestMarketSnapshot }),
+    status: buildStatus({ itemSummary, crawlerTotals, operationalTotals, latestMarketSnapshot, ingestFailures }),
     items: itemSummary,
+    ingest: ingestFailures,
+    deploy: deployInfo,
     traffic: {
       logs: crawlerLogs,
       summary: summarizeCrawlerLogs(crawlerLogs),
@@ -54,6 +60,105 @@ export async function onRequestGet({ env, request }) {
     },
     markets: latestMarketSnapshot
   });
+}
+
+async function readIngestFailures(env, { since, limit }) {
+  const result = await env.ATR_FEED_DB.prepare(
+    `SELECT id, occurred_at, workflow, action, status, severity, http_status, item_id, source_name, source_url, message, details_json
+     FROM operational_events
+     WHERE workflow = 'bulletin_ingest'
+       AND status IN ('unauthorized', 'error', 'failed')
+       AND occurred_at >= ?
+     ORDER BY occurred_at DESC, id DESC
+     LIMIT ?`
+  ).bind(since, limit).all();
+
+  const failures = (result.results || []).map((event) => ({
+    occurred_at: event.occurred_at,
+    action: event.action,
+    status: event.status,
+    http_status: event.http_status,
+    item_id: event.item_id,
+    source_name: event.source_name,
+    source_url: event.source_url,
+    message: event.message,
+    details: parseJson(event.details_json)
+  }));
+
+  const posted = await markPostedUrls(env, failures);
+  const withPosted = failures.map((failure) => ({
+    ...failure,
+    posted: failure.source_url ? posted.has(failure.source_url) : null
+  }));
+
+  const count = await env.ATR_FEED_DB.prepare(
+    `SELECT COUNT(*) AS count
+     FROM operational_events
+     WHERE workflow = 'bulletin_ingest'
+       AND status IN ('unauthorized', 'error', 'failed')
+       AND occurred_at >= ?`
+  ).bind(since).first();
+
+  return {
+    failure_count: count?.count || 0,
+    failures: withPosted,
+    stranded: withPosted.filter((f) => f.posted === false)
+  };
+}
+
+async function markPostedUrls(env, failures) {
+  const urls = [...new Set(failures.map((f) => f.source_url).filter(Boolean))].slice(0, 50);
+  if (!urls.length) return new Set();
+  const placeholders = urls.map(() => "?").join(",");
+  const result = await env.ATR_FEED_DB.prepare(
+    `SELECT DISTINCT source_url FROM feed_items WHERE source_url IN (${placeholders})`
+  ).bind(...urls).all();
+  return new Set((result.results || []).map((row) => row.source_url));
+}
+
+async function ensureDeployStateTable(env) {
+  if (!env?.ATR_FEED_DB) return;
+  await env.ATR_FEED_DB.prepare(
+    `CREATE TABLE IF NOT EXISTS deploy_state (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      commit_sha TEXT NOT NULL DEFAULT '',
+      branch TEXT NOT NULL DEFAULT '',
+      deployment_id TEXT NOT NULL DEFAULT '',
+      seen_at TEXT NOT NULL
+    )`
+  ).run();
+}
+
+async function readDeployInfo(env) {
+  const sha = env?.CF_PAGES_COMMIT_SHA || null;
+  const branch = env?.CF_PAGES_BRANCH || null;
+  const deploymentId = env?.CF_PAGES_DEPLOYMENT_ID || null;
+  const now = new Date().toISOString();
+
+  if (!env?.ATR_FEED_DB) {
+    return { commit_sha: sha, branch, deployment_id: deploymentId, deployed_at: null };
+  }
+
+  await ensureDeployStateTable(env);
+  const row = await env.ATR_FEED_DB.prepare(
+    `SELECT commit_sha, branch, deployment_id, seen_at FROM deploy_state WHERE id = 1`
+  ).first();
+
+  if (!row) {
+    await env.ATR_FEED_DB.prepare(
+      `INSERT INTO deploy_state (id, commit_sha, branch, deployment_id, seen_at) VALUES (1, ?, ?, ?, ?)`
+    ).bind(sha || "", branch || "", deploymentId || "", now).run();
+    return { commit_sha: sha, branch, deployment_id: deploymentId, deployed_at: now };
+  }
+
+  if (row.commit_sha !== (sha || "")) {
+    await env.ATR_FEED_DB.prepare(
+      `UPDATE deploy_state SET commit_sha = ?, branch = ?, deployment_id = ?, seen_at = ? WHERE id = 1`
+    ).bind(sha || "", branch || "", deploymentId || "", now).run();
+    return { commit_sha: sha, branch, deployment_id: deploymentId, deployed_at: now };
+  }
+
+  return { commit_sha: sha, branch, deployment_id: deploymentId, deployed_at: row.seen_at };
 }
 
 async function readItemSummary(env, request) {
@@ -221,15 +326,19 @@ async function readLatestMarketSnapshotRow(env) {
   };
 }
 
-function buildStatus({ itemSummary, crawlerTotals, operationalTotals, latestMarketSnapshot }) {
+function buildStatus({ itemSummary, crawlerTotals, operationalTotals, latestMarketSnapshot, ingestFailures }) {
   const publishedItems = Number(itemSummary?.public_count || itemSummary?.d1_counts?.published || 0);
   const recentErrors = Number(operationalTotals?.errors || 0) + Number(crawlerTotals?.errors || 0);
+  const ingestFailuresCount = Number(ingestFailures?.failure_count || 0);
+  const strandedCount = Number(ingestFailures?.stranded?.length || 0);
   const marketAgeHours = latestMarketSnapshot?.fetched_at ? hoursBetween(latestMarketSnapshot.fetched_at, new Date().toISOString()) : null;
 
   return {
-    overall: recentErrors ? "attention" : "ok",
+    overall: (recentErrors || ingestFailuresCount) ? "attention" : "ok",
     public_items: publishedItems,
     recent_errors: recentErrors,
+    ingest_failures: ingestFailuresCount,
+    stranded_items: strandedCount,
     api_hits: crawlerTotals?.total || 0,
     latest_item_at: itemSummary?.latest_published?.published_at || null,
     latest_market_refresh_at: latestMarketSnapshot?.fetched_at || null,
