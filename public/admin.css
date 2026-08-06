@@ -406,3 +406,14 @@ tbody tr:last-child td {
 .status-ok {
   color: #51cf66;
 }
+
+.tab-button {
+  opacity: 0.75;
+}
+
+.tab-button.active {
+  opacity: 1;
+  background: var(--panel-2);
+  border-color: var(--border);
+  color: var(--text);
+}

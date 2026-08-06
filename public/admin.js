@@ -45,8 +45,20 @@ const els = {
   ingestFailures: document.querySelector("#ingest-failures"),
   strandedDetail: document.querySelector("#stranded-detail"),
   opsCount: document.querySelector("#ops-count"),
-  opsBody: document.querySelector("#ops-body")
+  opsBody: document.querySelector("#ops-body"),
+  tabPublish: document.querySelector("#tab-publish"),
+  tabOps: document.querySelector("#tab-ops"),
+  publishView: document.querySelector("#publish-view"),
+  opsView: document.querySelector("#ops-view")
 };
+
+function switchTab(name) {
+  const publish = name === "publish";
+  els.publishView.hidden = !publish;
+  els.opsView.hidden = publish;
+  els.tabPublish.classList.toggle("active", publish);
+  els.tabOps.classList.toggle("active", !publish);
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   const savedToken = readToken();
@@ -75,6 +87,9 @@ els.tokenButton.addEventListener("click", () => {
   els.authPanel.hidden = !els.authPanel.hidden;
   els.tokenInput.focus();
 });
+
+els.tabPublish.addEventListener("click", () => switchTab("publish"));
+els.tabOps.addEventListener("click", () => switchTab("ops"));
 
 els.refreshButton.addEventListener("click", () => {
   loadItems();
