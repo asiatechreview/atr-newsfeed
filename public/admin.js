@@ -39,7 +39,13 @@ const els = {
   removeButton: document.querySelector("#remove-button"),
   resetButton: document.querySelector("#reset-button"),
   readbackStatus: document.querySelector("#readback-status"),
-  readbackOutput: document.querySelector("#readback-output")
+  readbackOutput: document.querySelector("#readback-output"),
+  deploySha: document.querySelector("#deploy-sha"),
+  deployDetail: document.querySelector("#deploy-detail"),
+  ingestFailures: document.querySelector("#ingest-failures"),
+  strandedDetail: document.querySelector("#stranded-detail"),
+  opsCount: document.querySelector("#ops-count"),
+  opsBody: document.querySelector("#ops-body")
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -48,6 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
     els.tokenInput.value = savedToken;
     els.authPanel.hidden = true;
     loadItems();
+    loadOps();
   }
 });
 
@@ -61,6 +68,7 @@ els.saveTokenButton.addEventListener("click", () => {
   localStorage.setItem(TOKEN_KEY, token);
   els.authPanel.hidden = true;
   loadItems();
+  loadOps();
 });
 
 els.tokenButton.addEventListener("click", () => {
@@ -68,7 +76,10 @@ els.tokenButton.addEventListener("click", () => {
   els.tokenInput.focus();
 });
 
-els.refreshButton.addEventListener("click", loadItems);
+els.refreshButton.addEventListener("click", () => {
+  loadItems();
+  loadOps();
+});
 els.searchInput.addEventListener("input", filterItems);
 els.newButton.addEventListener("click", startNewItem);
 els.resetButton.addEventListener("click", () => {
@@ -135,6 +146,71 @@ async function loadItems() {
   } catch (error) {
     setStatus("Error", error.message);
   }
+}
+
+async function loadOps() {
+  if (!readToken()) return;
+
+  try {
+    const since = new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString();
+    const response = await fetch(`/api/dashboard?since=${encodeURIComponent(since)}&limit=50`, {
+      headers: { authorization: authHeader(), accept: "application/json" }
+    });
+    if (!response.ok) throw new Error(`/api/dashboard returned ${response.status}`);
+    const payload = await response.json();
+    renderOps(payload);
+  } catch (error) {
+    els.deployDetail.textContent = error.message;
+  }
+}
+
+function renderOps(payload) {
+  const deploy = payload.deploy || {};
+  const ingest = payload.ingest || {};
+  const status = payload.status || {};
+
+  els.deploySha.textContent = deploy.commit_sha ? deploy.commit_sha.slice(0, 7) : "-";
+  els.deployDetail.textContent = deploy.deployed_at
+    ? `${deploy.branch || "main"} / ${formatTime(deploy.deployed_at)}`
+    : "No deploy recorded";
+
+  els.ingestFailures.textContent = formatNumber(ingest.failure_count != null ? ingest.failure_count : status.ingest_failures || 0);
+  const stranded = ingest.stranded != null ? ingest.stranded : status.stranded_items;
+  els.strandedDetail.textContent = `${formatNumber(stranded || 0)} draft-but-not-posted`;
+
+  const failures = Array.isArray(ingest.failures) ? ingest.failures : [];
+  els.opsCount.textContent = `${failures.length} shown`;
+  els.opsBody.replaceChildren();
+
+  if (!failures.length) {
+    const tr = document.createElement("tr");
+    const td = document.createElement("td");
+    td.colSpan = 7;
+    td.className = "muted";
+    td.textContent = "No ingest failures in this window.";
+    tr.append(td);
+    els.opsBody.append(tr);
+    return;
+  }
+
+  for (const failure of failures) {
+    const tr = document.createElement("tr");
+    tr.append(cell(formatTime(failure.occurred_at), "nowrap"));
+    tr.append(cell(failure.action || "-"));
+    tr.append(cell(failure.status || "-", `status-${failure.status || ""}`));
+    tr.append(cell(failure.http_status != null ? String(failure.http_status) : "-", Number(failure.http_status) >= 400 ? "status-error" : "status-ok"));
+    tr.append(cell(failure.message || "-", "truncate"));
+    tr.append(cell(failure.source_name || failure.source_url || "-", "truncate"));
+    tr.append(cell(failure.posted === true ? "yes" : failure.posted === false ? "no" : "-"));
+    els.opsBody.append(tr);
+  }
+}
+
+function cell(value, className = "") {
+  const td = document.createElement("td");
+  td.textContent = value;
+  if (className) td.className = className;
+  return td;
 }
 
 function filterItems() {
