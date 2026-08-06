@@ -20,8 +20,10 @@ export async function loadBulletinItems(request, options = {}) {
   const origin = new URL(request.url).origin;
   const sourceUrl = new URL(`${origin}/api/items`);
   const limit = clampLimit(options.limit ?? MAX_LIMIT);
+  const offset = Math.max(0, Number(options.offset) || 0);
 
   sourceUrl.searchParams.set("limit", String(limit));
+  if (offset) sourceUrl.searchParams.set("offset", String(offset));
   if (options.category) sourceUrl.searchParams.set("category", options.category);
   if (options.date) sourceUrl.searchParams.set("date", options.date);
 
@@ -34,7 +36,27 @@ export async function loadBulletinItems(request, options = {}) {
   }
 
   const payload = await response.json();
-  return Array.isArray(payload.items) ? payload.items : [];
+  const items = Array.isArray(payload.items) ? payload.items : [];
+  const total = Number.isFinite(Number(payload.total)) ? Number(payload.total) : items.length;
+
+  return { items, total };
+}
+
+export async function loadAllBulletinItems(request, options = {}) {
+  const allItems = [];
+  const pageSize = MAX_LIMIT;
+  let offset = 0;
+  let total = Infinity;
+
+  while (allItems.length < total) {
+    const page = await loadBulletinItems(request, { ...options, limit: pageSize, offset });
+    allItems.push(...page.items);
+    total = page.total;
+    if (page.items.length < pageSize) break;
+    offset += pageSize;
+  }
+
+  return { items: allItems, total };
 }
 
 export function toPublicItem(item) {
@@ -100,13 +122,15 @@ export function filterItems(items, options = {}) {
   });
 }
 
-export function summarizeCollection(items, request, limit) {
+export function summarizeCollection(items, request, limit, total = items.length, offset = 0) {
   const url = new URL(request.url);
 
   return {
     type: "bulletin_item_collection",
     count: items.length,
+    total,
     limit,
+    offset,
     generated_at: new Date().toISOString(),
     self: `${url.origin}${url.pathname}${url.search}`,
     items

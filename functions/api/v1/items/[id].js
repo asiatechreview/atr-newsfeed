@@ -1,9 +1,9 @@
-import { json, loadBulletinItems, publicId, stripPublicId, toPublicItem } from "../../../_lib/public-api.js";
+import { json, loadAllBulletinItems, publicId, stripPublicId, toPublicItem } from "../../../_lib/public-api.js";
 
 export async function onRequestGet({ params, request }) {
   const requestedId = stripPublicId(params.id);
-  const items = await loadBulletinItems(request, { limit: 500 });
-  const item = items
+  const source = await loadAllBulletinItems(request);
+  const item = source.items
     .map(toPublicItem)
     .find((candidate) => stripPublicId(candidate.id) === requestedId || stripPublicId(candidate.raw_id) === requestedId || candidate.id === publicId(requestedId));
 

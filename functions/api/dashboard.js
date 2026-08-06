@@ -82,22 +82,25 @@ async function readItemSummary(env, request) {
   const publicItems = await readPublicItems(request);
 
   return {
-    public_count: publicItems.length,
+    public_count: publicItems.total,
     d1_counts: Object.fromEntries((counts.results || []).map((row) => [row.status, row.count])),
-    latest_published: publicItems[0] || latest || null,
+    latest_published: publicItems.items[0] || latest || null,
     latest_removed: latestRemoved || null
   };
 }
 
 async function readPublicItems(request) {
   try {
-    const url = new URL("/api/items?limit=500", request.url);
+    const url = new URL("/api/items?limit=500&offset=0", request.url);
     const response = await fetch(url, { headers: { accept: "application/json" } });
-    if (!response.ok) return [];
+    if (!response.ok) return { items: [], total: 0 };
     const payload = await response.json();
-    return Array.isArray(payload.items) ? payload.items : [];
+    return {
+      items: Array.isArray(payload.items) ? payload.items : [],
+      total: Number.isFinite(Number(payload.total)) ? Number(payload.total) : (Array.isArray(payload.items) ? payload.items.length : 0)
+    };
   } catch {
-    return [];
+    return { items: [], total: 0 };
   }
 }
 

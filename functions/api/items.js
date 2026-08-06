@@ -3,6 +3,7 @@ import { writeOperationalEvent } from "../_lib/operational-log.js";
 
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 500;
+const INTERNAL_FETCH_LIMIT = 10000;
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1-9bPUuh73mgFWM1gDc_3qlTe_-VNZGrgRfWMApv8yxU/gviz/tq?tqx=out:csv&gid=0&headers=1";
 const HEADLINE_OVERRIDES = new Map(Object.entries({
   "43": "SK warns AI memory crunch is getting political",
@@ -222,6 +223,7 @@ for (const [id, headline] of HEADLINE_OVERRIDES) {
 export async function onRequestGet({ env, request }) {
   const url = new URL(request.url);
   const limit = Math.min(Number(url.searchParams.get("limit")) || DEFAULT_LIMIT, MAX_LIMIT);
+  const offset = Math.max(0, Number(url.searchParams.get("offset")) || 0);
   const category = url.searchParams.get("category");
   const date = parseDateParam(url.searchParams.get("date"));
 
@@ -234,7 +236,7 @@ export async function onRequestGet({ env, request }) {
   }
 
   query += " ORDER BY published_at DESC, id DESC LIMIT ?";
-  params.push(MAX_LIMIT);
+  params.push(INTERNAL_FETCH_LIMIT);
 
   let d1Items = [];
 
@@ -245,21 +247,23 @@ export async function onRequestGet({ env, request }) {
     d1Items = await loadD1ItemsWithoutHeadline({ env, category });
   }
 
-  const staticItems = loadStaticItems({ limit: MAX_LIMIT, category });
+  const staticItems = loadStaticItems({ limit: INTERNAL_FETCH_LIMIT, category });
   const mergedItems = balanceArchiveDates(rebalanceJulyArchiveDates(mergeItems(d1Items, staticItems)))
-    .filter((item) => !date || dateKey(item.published_at) === date)
-    .slice(0, limit);
+    .filter((item) => !date || dateKey(item.published_at) === date);
+  const total = mergedItems.length;
 
   if (mergedItems.length) {
     return json({
-      items: withHeadlines(mergedItems)
+      items: withHeadlines(mergedItems.slice(offset, offset + limit)),
+      total
     });
   }
 
-  const sheetItems = await loadSheetItems({ limit, category, date });
+  const sheetItems = await loadSheetItems({ category, date });
 
   return json({
-    items: withHeadlines(sheetItems)
+    items: withHeadlines(sheetItems.slice(offset, offset + limit)),
+    total: sheetItems.length
   });
 }
 
@@ -787,7 +791,7 @@ async function loadD1ItemsWithoutHeadline({ env, category }) {
   }
 
   query += " ORDER BY published_at DESC, id DESC LIMIT ?";
-  params.push(MAX_LIMIT);
+  params.push(INTERNAL_FETCH_LIMIT);
 
   try {
     const result = await env.ATR_FEED_DB.prepare(query).bind(...params).all();
@@ -1037,7 +1041,7 @@ function deriveHeadline(blurb) {
   return limitHeadline(clauses[0].trim());
 }
 
-async function loadSheetItems({ limit, category, date }) {
+async function loadSheetItems({ category, date }) {
   const response = await fetch(SHEET_CSV_URL);
   if (!response.ok) {
     throw new Error(`Feed sheet returned ${response.status}`);
@@ -1050,8 +1054,7 @@ async function loadSheetItems({ limit, category, date }) {
       const aTime = new Date(a.published_at).getTime() || 0;
       const bTime = new Date(b.published_at).getTime() || 0;
       return bTime - aTime;
-    })
-    .slice(0, limit);
+    });
 }
 
 function parseCsv(text) {

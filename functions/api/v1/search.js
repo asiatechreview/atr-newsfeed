@@ -1,10 +1,11 @@
-import { clampLimit, filterItems, json, loadBulletinItems, summarizeCollection, toPublicItem } from "../../_lib/public-api.js";
+import { clampLimit, filterItems, json, loadAllBulletinItems, summarizeCollection, toPublicItem } from "../../_lib/public-api.js";
 
 export async function onRequestGet({ request }) {
   const url = new URL(request.url);
   const query = url.searchParams.get("q");
   const category = url.searchParams.get("category");
   const limit = clampLimit(url.searchParams.get("limit"));
+  const offset = Math.max(0, Number(url.searchParams.get("offset")) || 0);
 
   if (!query) {
     return json({
@@ -13,13 +14,14 @@ export async function onRequestGet({ request }) {
     }, 400, 60);
   }
 
-  const items = filterItems((await loadBulletinItems(request, { limit: 500 })).map(toPublicItem), {
+  const source = await loadAllBulletinItems(request, { category });
+  const filtered = filterItems(source.items.map(toPublicItem), {
     query,
     category
-  }).slice(0, limit);
+  });
 
   return json({
-    ...summarizeCollection(items, request, limit),
+    ...summarizeCollection(filtered.slice(offset, offset + limit), request, limit, filtered.length, offset),
     query
   });
 }
