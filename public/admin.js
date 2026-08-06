@@ -113,12 +113,22 @@ async function loadItems() {
   setStatus("Loading", "Fetching live D1 items");
 
   try {
-    const response = await fetch(`/api/items?limit=500&_=${Date.now()}`, {
-      headers: { accept: "application/json", "cache-control": "no-cache" }
-    });
-    if (!response.ok) throw new Error(`/api/items returned ${response.status}`);
-    const payload = await response.json();
-    state.items = Array.isArray(payload.items) ? payload.items : [];
+    const pageSize = 500;
+    const allItems = [];
+    let offset = 0;
+    for (;;) {
+      const response = await fetch(`/api/items?limit=${pageSize}&offset=${offset}&_=${Date.now()}`, {
+        headers: { accept: "application/json", "cache-control": "no-cache" }
+      });
+      if (!response.ok) throw new Error(`/api/items returned ${response.status}`);
+      const payload = await response.json();
+      const page = Array.isArray(payload.items) ? payload.items : [];
+      allItems.push(...page);
+      const total = payload.total != null ? payload.total : allItems.length;
+      if (!page.length || allItems.length >= total) break;
+      offset += pageSize;
+    }
+    state.items = allItems;
     filterItems();
     setStatus("Ready", `Loaded ${state.items.length} public items`);
     if (!state.selected && state.filtered[0]) selectItem(state.filtered[0].id);
