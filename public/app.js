@@ -1402,7 +1402,7 @@ function setFeedStatus(label = "") {
     return;
   }
 
-  status.textContent = `Live · ${formatTime(new Date())} ${localTzAbbr()}`;
+  status.textContent = `Live · ${formatTime(new Date())} ${localTzAbbr()} · ${formatDayDate(new Date())}`;
 }
 
 function renderSignal(items) {
@@ -1789,7 +1789,7 @@ function renderItems(items) {
     const primaryTag = primaryTopicTag(item.tags);
     const primaryTagLink = itemNode.querySelector(".item-primary-tag");
 
-    itemNode.querySelector(".item-time").textContent = `${formatTime(item.published_at)} · ${formatDayDate(item.published_at)}`;
+    itemNode.querySelector(".item-time").textContent = formatTime(item.published_at);
     itemNode.querySelector(".item").dataset.itemKey = stableItemKey(item);
     primaryTagLink.href = `?tag=${encodeURIComponent(primaryTag)}`;
     primaryTagLink.textContent = titleCaseTag(primaryTag);

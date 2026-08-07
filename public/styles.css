@@ -888,6 +888,7 @@ footer {
 
   .status {
     text-align: left;
+    white-space: normal;
   }
 
   .topbar-actions {
