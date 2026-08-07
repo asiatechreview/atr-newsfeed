@@ -488,16 +488,97 @@ const TZ_ABBR = {
   "GMT": "GMT"
 };
 
+function normalizeTzName(tz) {
+  if (!tz) {
+    return "";
+  }
+  const ALIASES = {
+    "Asia/Calcutta": "Asia/Kolkata",
+    "Asia/Katmandu": "Asia/Kathmandu",
+    "Asia/Saigon": "Asia/Ho_Chi_Minh",
+    "Asia/Rangoon": "Asia/Yangon",
+    "Asia/Chongqing": "Asia/Shanghai",
+    "Asia/Chungking": "Asia/Shanghai",
+    "Asia/Ujung_Pandang": "Asia/Makassar",
+    "Asia/Dacca": "Asia/Dhaka",
+    "Asia/Ashkhabad": "Asia/Ashgabat",
+    "Asia/Thimbu": "Asia/Thimphu",
+    "Asia/Phnom_Penh": "Asia/Phnom_Penh",
+    "Asia/Calcutta": "Asia/Kolkata"
+  };
+  return ALIASES[tz] || tz;
+}
+
+// Long-name -> abbreviation fallback for zones whose short name resolves
+// to a GMT offset in some engines (e.g. Asia/Kolkata -> "India Standard Time").
+const TZ_LONG_ABBR = {
+  "India Standard Time": "IST",
+  "Sri Lanka Standard Time": "IST",
+  "Nepal Time": "NPT",
+  "Singapore Time": "SGT",
+  "Malaysia Time": "MYT",
+  "Indochina Time": "ICT",
+  "Western Indonesia Time": "WIB",
+  "Central Indonesia Time": "WITA",
+  "Eastern Indonesia Time": "WIT",
+  "China Standard Time": "CST",
+  "Hong Kong Time": "HKT",
+  "Japan Standard Time": "JST",
+  "Korea Standard Time": "KST",
+  "Philippine Time": "PHT",
+  "Pakistan Standard Time": "PKT",
+  "Bangladesh Standard Time": "BST",
+  "Myanmar Time": "MMT",
+  "Gulf Standard Time": "GST",
+  "Arabia Standard Time": "AST",
+  "Israel Standard Time": "IST",
+  "Iran Standard Time": "IRST",
+  "Ulaanbaatar Time": "ULAT",
+  "Brunei Darussalam Time": "BNT",
+  "East Timor Time": "TLT",
+  "Georgia Standard Time": "GET",
+  "Azerbaijan Time": "AZT",
+  "East Kazakhstan Time": "ALMT",
+  "Novosibirsk Standard Time": "NOVT",
+  "Vladivostok Standard Time": "VLAT",
+  "Magadan Standard Time": "MAGT",
+  "Petropavlovsk-Kamchatski Time": "PETT",
+  "Australian Western Standard Time": "AWST",
+  "Australian Central Standard Time": "ACST",
+  "Australian Eastern Standard Time": "AEST",
+  "New Zealand Standard Time": "NZST",
+  "Chamorro Standard Time": "ChST",
+  "Papua New Guinea Time": "PGT",
+  "Greenwich Mean Time": "GMT",
+  "Central European Time": "CET",
+  "Eastern Standard Time": "EST",
+  "Central Standard Time": "CST",
+  "Mountain Standard Time": "MST",
+  "Pacific Standard Time": "PST",
+  "Brasilia Time": "BRT",
+  "Coordinated Universal Time": "UTC"
+};
+
 function localTzAbbr() {
   try {
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const tz = normalizeTzName(Intl.DateTimeFormat().resolvedOptions().timeZone);
     if (TZ_ABBR[tz]) {
       return TZ_ABBR[tz];
+    }
+    const longPart = new Intl.DateTimeFormat("en-US", { timeZoneName: "long" })
+      .formatToParts(new Date())
+      .find((p) => p.type === "timeZoneName");
+    if (longPart && TZ_LONG_ABBR[longPart.value]) {
+      return TZ_LONG_ABBR[longPart.value];
     }
     const part = new Intl.DateTimeFormat("en-US", { timeZoneName: "short" })
       .formatToParts(new Date())
       .find((p) => p.type === "timeZoneName");
-    return (part && part.value) || "local";
+    const value = (part && part.value) || "";
+    if (value && !/^GMT[+-]/.test(value)) {
+      return value;
+    }
+    return "local";
   } catch (error) {
     return "local";
   }
