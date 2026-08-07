@@ -428,6 +428,81 @@ function shortDateLabel(value) {
   }
 }
 
+const TZ_ABBR = {
+  "Asia/Kolkata": "IST",
+  "Asia/Colombo": "IST",
+  "Asia/Kathmandu": "NPT",
+  "Asia/Singapore": "SGT",
+  "Asia/Kuala_Lumpur": "MYT",
+  "Asia/Bangkok": "ICT",
+  "Asia/Ho_Chi_Minh": "ICT",
+  "Asia/Phnom_Penh": "ICT",
+  "Asia/Vientiane": "ICT",
+  "Asia/Jakarta": "WIB",
+  "Asia/Makassar": "WITA",
+  "Asia/Jayapura": "WIT",
+  "Asia/Shanghai": "CST",
+  "Asia/Hong_Kong": "HKT",
+  "Asia/Taipei": "CST",
+  "Asia/Tokyo": "JST",
+  "Asia/Seoul": "KST",
+  "Asia/Manila": "PHT",
+  "Asia/Karachi": "PKT",
+  "Asia/Dhaka": "BST",
+  "Asia/Yangon": "MMT",
+  "Asia/Dubai": "GST",
+  "Asia/Riyadh": "AST",
+  "Asia/Jerusalem": "IST",
+  "Asia/Tehran": "IRST",
+  "Asia/Ulaanbaatar": "ULAT",
+  "Asia/Brunei": "BNT",
+  "Asia/Dili": "TLT",
+  "Asia/Tbilisi": "GET",
+  "Asia/Baku": "AZT",
+  "Asia/Almaty": "ALMT",
+  "Asia/Novosibirsk": "NOVT",
+  "Asia/Vladivostok": "VLAT",
+  "Asia/Magadan": "MAGT",
+  "Asia/Kamchatka": "PETT",
+  "Australia/Perth": "AWST",
+  "Australia/Adelaide": "ACST",
+  "Australia/Darwin": "ACST",
+  "Australia/Brisbane": "AEST",
+  "Australia/Sydney": "AEST",
+  "Australia/Melbourne": "AEST",
+  "Pacific/Auckland": "NZST",
+  "Pacific/Guam": "ChST",
+  "Pacific/Port_Moresby": "PGT",
+  "Europe/London": "GMT",
+  "Europe/Paris": "CET",
+  "Europe/Berlin": "CET",
+  "America/New_York": "EST",
+  "America/Chicago": "CST",
+  "America/Denver": "MST",
+  "America/Los_Angeles": "PST",
+  "America/Toronto": "EST",
+  "America/Vancouver": "PST",
+  "America/Sao_Paulo": "BRT",
+  "UTC": "UTC",
+  "Etc/UTC": "UTC",
+  "GMT": "GMT"
+};
+
+function localTzAbbr() {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (TZ_ABBR[tz]) {
+      return TZ_ABBR[tz];
+    }
+    const part = new Intl.DateTimeFormat("en-US", { timeZoneName: "short" })
+      .formatToParts(new Date())
+      .find((p) => p.type === "timeZoneName");
+    return (part && part.value) || "local";
+  } catch (error) {
+    return "local";
+  }
+}
+
 function formatTime(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
@@ -1221,7 +1296,7 @@ function setFeedStatus(label = "") {
     return;
   }
 
-  status.textContent = `Live · ${formatTime(new Date())} local`;
+  status.textContent = `Live · ${formatTime(new Date())} ${localTzAbbr()}`;
 }
 
 function renderSignal(items) {
