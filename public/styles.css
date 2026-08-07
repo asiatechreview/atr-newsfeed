@@ -1,5 +1,14 @@
+@font-face {
+  font-family: "Archivo Black";
+  src: url("/fonts/archivo-black-latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   color-scheme: dark;
+  --font-masthead: "Archivo Black", "Berkeley Mono", "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
   --bg: #0d0e0c;
   --panel: #151713;
   --panel-2: #1b1d18;
@@ -109,6 +118,30 @@ h1 {
 h1 a {
   color: inherit;
   text-decoration: none;
+}
+
+.site-masthead {
+  padding: 28px 22px 26px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.site-masthead h1 {
+  margin: 0;
+  font-family: var(--font-masthead);
+  font-weight: 400;
+  font-size: clamp(28px, 5vw, 44px);
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.site-masthead .masthead-sub {
+  margin: 14px 0 0;
+  color: var(--accent);
+  font: 500 clamp(18px, 3.2vw, 30px)/1 var(--font-meta);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .masthead p {
