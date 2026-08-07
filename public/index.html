@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Asia Tech Review</title>
-  <link rel="icon" href="/favicon.png?v=20260807-fontscale" type="image/png">
-  <link rel="shortcut icon" href="/favicon.ico?v=20260807-fontscale">
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=20260807-fontscale">
-  <link rel="manifest" href="/manifest.webmanifest?v=20260807-fontscale">
+  <link rel="icon" href="/favicon.png?v=20260807-desktop" type="image/png">
+  <link rel="shortcut icon" href="/favicon.ico?v=20260807-desktop">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=20260807-desktop">
+  <link rel="manifest" href="/manifest.webmanifest?v=20260807-desktop">
   <link rel="alternate" type="application/rss+xml" title="Asia Tech Review Bulletin RSS" href="/rss.xml">
   <link rel="alternate" type="application/feed+json" title="Asia Tech Review Bulletin JSON Feed" href="/feed.json">
   <script>
@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=20260807-fontscale">
+  <link rel="stylesheet" href="/styles.css?v=20260807-desktop">
 </head>
 <body>
   <header class="site-masthead">
@@ -29,13 +29,6 @@
   </header>
 
   <div class="page">
-    <aside class="sidebar">
-      <form id="search-form" class="search" role="search">
-        <input id="search-input" name="q" type="search" autocomplete="off" placeholder="Search" aria-label="Search">
-      </form>
-
-    </aside>
-
     <main>
       <div class="topbar">
         <div>
@@ -49,6 +42,9 @@
             <span id="feed-status">Loading news links...</span>
           </p>
           <div class="topbar-button-row">
+            <form id="search-form" class="search search-inline" role="search">
+              <input id="search-input" name="q" type="search" autocomplete="off" placeholder="Search" aria-label="Search">
+            </form>
             <a class="rss-link" href="/rss.xml" aria-label="Subscribe to Asia Tech Review Bulletin RSS feed">
               <svg class="rss-link-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                 <path d="M5 5.5c7.5 0 13.5 6 13.5 13.5"></path>
@@ -79,7 +75,7 @@
           <a class="newsletter-image-link" href="https://www.asiatechreview.com/p/grab-bets-on-fintech-to-reinforce" target="_blank" rel="noopener">
             <img src="https://substackcdn.com/image/fetch/$s_!PMQo!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F5db78b08-9f8e-4b8f-9ba1-bcdb75abfb84_1672x941.png" alt="Grab bets on fintech to reinforce its tech story">
           </a>
-          <div>
+          <div class="newsletter-copy">
             <h3>Grab bets on fintech to reinforce its tech story</h3>
             <p>The company's bid to become a fintech heavyweight is about to face its first major test</p>
           </div>
@@ -133,6 +129,6 @@
     </article>
   </template>
 
-  <script src="/app.js?v=20260807-fontscale" defer></script>
+  <script src="/app.js?v=20260807-desktop" defer></script>
 </body>
 </html>
