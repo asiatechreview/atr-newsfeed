@@ -654,10 +654,8 @@ export async function onRequestPatch({ env, request }) {
     return json({ error: "category is required" }, 400);
   }
 
-  if (nextHeadline && isWeakHeadline(nextHeadline)) {
-    return json({ error: "headline must be a clean ATR-style scan title" }, 400);
-  }
-
+  // Manual edits (PATCH) accept any headline the operator chooses.
+  // The weak-headline guard stays on POST (automated ingest) only.
   if (nextSourceUrl && !/^https?:\/\//i.test(nextSourceUrl)) {
     return json({ error: "sourceUrl must be an http(s) URL" }, 400);
   }
