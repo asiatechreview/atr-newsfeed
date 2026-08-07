@@ -781,6 +781,18 @@ footer {
     grid-template-columns: 1fr;
   }
 
+  .site-masthead {
+    padding: 24px 16px 20px;
+  }
+
+  .site-masthead h1 {
+    font-size: clamp(28px, 9.5vw, 44px);
+  }
+
+  .site-masthead .masthead-sub {
+    font-size: clamp(16px, 6vw, 30px);
+  }
+
   .sidebar {
     min-height: auto;
     position: static;
