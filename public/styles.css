@@ -803,6 +803,10 @@ main {
     text-align: center;
   }
 
+  .newsletter-promo p:not(.eyebrow) {
+    text-align: center;
+  }
+
   .newsletter-image-link {
     grid-area: auto;
     grid-row: auto;
