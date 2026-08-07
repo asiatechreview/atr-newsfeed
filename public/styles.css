@@ -799,6 +799,10 @@ main {
     gap: 16px 18px;
   }
 
+  .newsletter-promo h3 {
+    text-align: center;
+  }
+
   .newsletter-image-link {
     grid-area: auto;
     grid-row: auto;
