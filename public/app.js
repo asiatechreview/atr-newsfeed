@@ -1221,7 +1221,7 @@ function setFeedStatus(label = "") {
     return;
   }
 
-  status.textContent = `LIVE ${formatTime(new Date())} LOCAL`;
+  status.textContent = `Live · ${formatTime(new Date())} local`;
 }
 
 function renderSignal(items) {
