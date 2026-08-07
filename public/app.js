@@ -19,7 +19,7 @@ const itemTemplate = document.querySelector("#item-template");
 const ITEMS_PER_PAGE = 15;
 const VISIBLE_PAGE_BUTTONS = 8;
 const ARCHIVE_DAYS = 5;
-const FEED_POLL_INTERVAL_MS = 5 * 60 * 1000;
+const FEED_POLL_INTERVAL_MS = 10 * 60 * 1000;
 const NEW_ITEM_TOAST_TIMEOUT_MS = 9000;
 const LOCAL_TIME_ZONE = getLocalTimeZone();
 const THEME_STORAGE_KEY = "atr-bulletin-theme";
@@ -262,10 +262,15 @@ function localTimeOptions(options = {}) {
 
 function getStoredTheme() {
   try {
-    return window.localStorage.getItem(THEME_STORAGE_KEY) === "light" ? "light" : "dark";
+    const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+    if (stored === "light" || stored === "dark") {
+      return stored;
+    }
   } catch (error) {
-    return "dark";
+    // localStorage unavailable; fall through to system preference.
   }
+  // First visit: respect the reader's system theme instead of defaulting to dark.
+  return window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
 }
 
 function setStoredTheme(theme) {
@@ -1823,6 +1828,104 @@ function renderSearch(query, page = currentPage) {
   renderPagination(searchItems.length);
 }
 
+function itemShareUrl(item) {
+  return item.source_url || window.location.href;
+}
+
+function openItemShareMenu(itemNode, item) {
+  const menu = itemNode.querySelector(".item-share-menu");
+  const button = itemNode.querySelector(".item-share-button");
+  if (!menu || !button) {
+    return;
+  }
+
+  const url = itemShareUrl(item);
+  const text = `${item.headline} — ${item.source_name || "Asia Tech Review"}`;
+
+  const whatsapp = menu.querySelector('[data-share="whatsapp"]');
+  const telegram = menu.querySelector('[data-share="telegram"]');
+  if (whatsapp) {
+    whatsapp.href = `https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`;
+  }
+  if (telegram) {
+    telegram.href = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+  }
+
+  const wasHidden = menu.hidden;
+  closeAllShareMenus();
+  if (wasHidden) {
+    menu.hidden = false;
+    button.setAttribute("aria-expanded", "true");
+  }
+}
+
+function closeAllShareMenus() {
+  document.querySelectorAll(".item-share-menu").forEach((menu) => {
+    menu.hidden = true;
+    const button = menu.closest(".item")?.querySelector(".item-share-button");
+    button?.setAttribute("aria-expanded", "false");
+  });
+}
+
+function copyItemLink(item) {
+  const url = itemShareUrl(item);
+  const text = `${item.headline} — ${item.source_name || "Asia Tech Review"} ${url}`;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).catch(() => {});
+  } else {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      document.execCommand("copy");
+    } catch (error) {
+      // Clipboard blocked; nothing else to try.
+    }
+    textarea.remove();
+  }
+}
+
+function shareItem(item) {
+  const isTouch = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+  if (navigator.share && isTouch) {
+    navigator.share({
+      title: item.headline,
+      text: `${item.headline} — ${item.source_name || "Asia Tech Review"}`,
+      url: itemShareUrl(item)
+    }).catch(() => {});
+    return true;
+  }
+  return false;
+}
+
+function initItemShareMenus() {
+  document.addEventListener("click", (event) => {
+    const copyButton = event.target.closest('[data-share="copy"]');
+    if (copyButton) {
+      const menu = copyButton.closest(".item-share-menu");
+      const itemNode = menu?.closest(".item");
+      const key = itemNode?.dataset.itemKey;
+      const item = allItems.find((entry) => stableItemKey(entry) === key);
+      if (item) {
+        copyItemLink(item);
+      }
+      closeAllShareMenus();
+      return;
+    }
+
+    if (!event.target.closest(".item-share")) {
+      closeAllShareMenus();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeAllShareMenus();
+    }
+  });
+}
+
 function renderItems(items) {
   let currentDate = "";
 
@@ -1849,6 +1952,18 @@ function renderItems(items) {
     itemNode.querySelector(".headline").textContent = item.headline;
     appendItemText(itemNode.querySelector(".blurb"), item);
     renderTags(itemNode.querySelector(".tags"), item);
+
+    const shareButton = itemNode.querySelector(".item-share-button");
+    if (shareButton) {
+      shareButton.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (!shareItem(item)) {
+          openItemShareMenu(itemNode, item);
+        }
+      });
+    }
+
     feed.appendChild(itemNode);
   }
 }
@@ -2050,5 +2165,6 @@ if (searchToggle && mobileSearchForm && mobileSearchInput) {
 
 initThemeToggle();
 initFontScale();
+initItemShareMenus();
 refreshFeed({ initial: true });
 startFeedPolling();
