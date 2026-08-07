@@ -621,13 +621,16 @@ main {
   margin-top: 16px;
 }
 
+.newsletter-block {
+  width: min(100%, 840px);
+  margin: 0 auto 18px;
+}
+
 .newsletter-promo {
   display: grid;
   grid-template-columns: minmax(0, 240px) minmax(0, 1fr);
   align-items: center;
   gap: 16px 18px;
-  width: min(100%, 840px);
-  margin: 0 auto 18px;
   padding: 18px 22px 20px;
   border: 1px solid var(--newsletter-border);
   border-radius: var(--radius);
@@ -656,9 +659,9 @@ main {
   object-fit: cover;
 }
 
-.newsletter-promo h2 {
+.newsletter-promo h3 {
   max-width: 760px;
-  margin: 8px 0 8px;
+  margin: 0 0 8px;
   color: var(--text);
   font: 600 19px/1.25 var(--font-body);
 }
