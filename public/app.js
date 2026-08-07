@@ -1951,6 +1951,10 @@ function syncSearchInput() {
   if (searchInput && searchInput.value !== currentSearchQuery) {
     searchInput.value = currentSearchQuery;
   }
+
+  if (mobileSearchInput && document.activeElement !== mobileSearchInput && mobileSearchInput.value !== currentSearchQuery) {
+    mobileSearchInput.value = currentSearchQuery;
+  }
 }
 
 if (searchForm && searchInput) {
@@ -1963,6 +1967,31 @@ if (searchForm && searchInput) {
 
   searchInput.addEventListener("input", () => {
     renderSearch(searchInput.value, 1);
+  });
+}
+
+const searchToggle = document.querySelector("#search-toggle");
+const mobileSearchForm = document.querySelector("#mobile-search-form");
+const mobileSearchInput = document.querySelector("#mobile-search-input");
+
+if (searchToggle && mobileSearchForm && mobileSearchInput) {
+  mobileSearchInput.value = currentSearchQuery;
+
+  searchToggle.addEventListener("click", () => {
+    const open = mobileSearchForm.classList.toggle("open");
+    searchToggle.setAttribute("aria-expanded", open ? "true" : "false");
+    if (open) {
+      mobileSearchInput.focus();
+    }
+  });
+
+  mobileSearchForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    renderSearch(mobileSearchInput.value, 1);
+  });
+
+  mobileSearchInput.addEventListener("input", () => {
+    renderSearch(mobileSearchInput.value, 1);
   });
 }
 

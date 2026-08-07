@@ -285,6 +285,23 @@ main {
   outline-offset: 2px;
 }
 
+.search-toggle {
+  display: none;
+}
+
+.search-toggle-icon {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.3;
+  stroke-linecap: round;
+}
+
+.mobile-search {
+  display: none;
+}
+
 .new-item-toast {
   position: fixed;
   left: 50%;
@@ -779,6 +796,67 @@ footer {
 @media (max-width: 840px) {
   .page {
     grid-template-columns: 1fr;
+  }
+
+  .sidebar .search {
+    display: none;
+  }
+
+  .search-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    padding: 0 9px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--panel);
+    color: var(--muted);
+    font: 600 11px/1 var(--font-meta);
+    cursor: pointer;
+  }
+
+  .search-toggle:hover,
+  .search-toggle:focus {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  .search-toggle:focus {
+    outline: 1px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .mobile-search {
+    display: block;
+    max-width: 0;
+    overflow: hidden;
+    transition: max-width 0.25s ease;
+  }
+
+  .mobile-search.open {
+    max-width: 170px;
+  }
+
+  .mobile-search input {
+    display: block;
+    width: 160px;
+    height: 28px;
+    margin: 0;
+    padding: 0 9px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--panel);
+    color: var(--text);
+    font: inherit;
+    font-size: 12px;
+    line-height: 1;
+  }
+
+  .mobile-search input:focus {
+    border-color: var(--accent);
+    outline: 1px solid var(--accent);
+    outline-offset: 0;
   }
 
   .site-masthead {

@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Asia Tech Review</title>
-  <link rel="icon" href="/favicon.png?v=20260807-masthead-mobile" type="image/png">
-  <link rel="shortcut icon" href="/favicon.ico?v=20260807-masthead-mobile">
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=20260807-masthead-mobile">
-  <link rel="manifest" href="/manifest.webmanifest?v=20260807-masthead-mobile">
+  <link rel="icon" href="/favicon.png?v=20260807-mobile-search" type="image/png">
+  <link rel="shortcut icon" href="/favicon.ico?v=20260807-mobile-search">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=20260807-mobile-search">
+  <link rel="manifest" href="/manifest.webmanifest?v=20260807-mobile-search">
   <link rel="alternate" type="application/rss+xml" title="Asia Tech Review Bulletin RSS" href="/rss.xml">
   <link rel="alternate" type="application/feed+json" title="Asia Tech Review Bulletin JSON Feed" href="/feed.json">
   <script>
@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=20260807-masthead-mobile">
+  <link rel="stylesheet" href="/styles.css?v=20260807-mobile-search">
 </head>
 <body>
   <header class="site-masthead">
@@ -49,6 +49,15 @@
             <span id="feed-status">Loading news links...</span>
           </p>
           <div class="topbar-button-row">
+            <button id="search-toggle" class="search-toggle" type="button" aria-label="Search" aria-expanded="false">
+              <svg class="search-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <circle cx="11" cy="11" r="7"></circle>
+                <path d="M16.5 16.5 21 21"></path>
+              </svg>
+            </button>
+            <form id="mobile-search-form" class="mobile-search" role="search">
+              <input id="mobile-search-input" name="q" type="search" autocomplete="off" placeholder="Search" aria-label="Search">
+            </form>
             <a class="rss-link" href="/rss.xml" aria-label="Subscribe to Asia Tech Review Bulletin RSS feed">
               <svg class="rss-link-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                 <path d="M5 5.5c7.5 0 13.5 6 13.5 13.5"></path>
@@ -122,6 +131,6 @@
     </article>
   </template>
 
-  <script src="/app.js?v=20260807-masthead-mobile" defer></script>
+  <script src="/app.js?v=20260807-mobile-search" defer></script>
 </body>
 </html>
