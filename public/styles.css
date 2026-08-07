@@ -285,6 +285,32 @@ main {
   outline-offset: 2px;
 }
 
+.font-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  min-width: 28px;
+  padding: 0 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--muted);
+  font: 600 11px/1 var(--font-meta);
+  cursor: pointer;
+}
+
+.font-toggle:hover,
+.font-toggle:focus {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.font-toggle:focus {
+  outline: 1px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .search-toggle {
   display: none;
 }
@@ -1140,3 +1166,19 @@ footer {
     font-size: 16px;
   }
 }
+
+/* Font size controls: scale reading text via --font-scale (set by JS) */
+.headline { font-size: calc(18px * var(--font-scale, 1)); }
+.blurb { font-size: calc(14px * var(--font-scale, 1)); }
+.meta { font-size: calc(12px * var(--font-scale, 1)); }
+.tags { font-size: calc(10px * var(--font-scale, 1)); }
+.item-primary-tag { font-size: calc(12px * var(--font-scale, 1)); }
+.section-title, .eyebrow { font-size: calc(12px * var(--font-scale, 1)); }
+.dek { font-size: calc(14px * var(--font-scale, 1)); }
+.status { font-size: calc(12px * var(--font-scale, 1)); }
+.date { font-size: calc(12px * var(--font-scale, 1)); }
+.topbar h2 { font-size: calc(24px * var(--font-scale, 1)); }
+.newsletter-promo h3 { font-size: calc(19px * var(--font-scale, 1)); }
+.newsletter-promo p:not(.eyebrow) { font-size: calc(14px * var(--font-scale, 1)); }
+.watchlist h2 { font-size: calc(17px * var(--font-scale, 1)); }
+.watchlist-blurb { font-size: calc(12px * var(--font-scale, 1)); }

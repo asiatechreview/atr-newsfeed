@@ -304,6 +304,59 @@ function initThemeToggle() {
   });
 }
 
+const FONT_SCALE_KEY = "atr-bulletin-font-scale";
+const FONT_SCALE_MIN = 0.85;
+const FONT_SCALE_MAX = 1.3;
+const FONT_SCALE_STEP = 0.05;
+
+function getStoredFontScale() {
+  try {
+    const raw = window.localStorage.getItem(FONT_SCALE_KEY);
+    const value = raw ? Number(raw) : 1;
+    if (Number.isFinite(value)) {
+      return Math.min(Math.max(value, FONT_SCALE_MIN), FONT_SCALE_MAX);
+    }
+  } catch (error) {
+    // ignore
+  }
+  return 1;
+}
+
+function setStoredFontScale(value) {
+  try {
+    window.localStorage.setItem(FONT_SCALE_KEY, String(value));
+  } catch (error) {
+    // ignore
+  }
+}
+
+function applyFontScale(value) {
+  document.documentElement.style.setProperty("--font-scale", String(value));
+}
+
+function initFontScale() {
+  applyFontScale(getStoredFontScale());
+
+  const decrease = document.querySelector("#font-decrease");
+  const increase = document.querySelector("#font-increase");
+
+  if (decrease) {
+    decrease.addEventListener("click", () => {
+      const next = Math.max(FONT_SCALE_MIN, Math.round((getStoredFontScale() - FONT_SCALE_STEP) * 100) / 100);
+      setStoredFontScale(next);
+      applyFontScale(next);
+    });
+  }
+
+  if (increase) {
+    increase.addEventListener("click", () => {
+      const next = Math.min(FONT_SCALE_MAX, Math.round((getStoredFontScale() + FONT_SCALE_STEP) * 100) / 100);
+      setStoredFontScale(next);
+      applyFontScale(next);
+    });
+  }
+}
+
 function getRequestedPage() {
   const match = window.location.search.match(/[?&]page=([0-9]+)/);
   const page = match ? Number(match[1]) : 1;
@@ -1996,5 +2049,6 @@ if (searchToggle && mobileSearchForm && mobileSearchInput) {
 }
 
 initThemeToggle();
+initFontScale();
 refreshFeed({ initial: true });
 startFeedPolling();
