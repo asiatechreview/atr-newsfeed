@@ -410,6 +410,31 @@ function formatDate(value) {
   }
 }
 
+function formatDayDate(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value || "Undated";
+  }
+
+  try {
+    const weekday = date.toLocaleDateString("en-US", {
+      ...localTimeOptions({ weekday: "long" })
+    });
+    const month = date.toLocaleDateString("en-US", {
+      ...localTimeOptions({ month: "long" })
+    });
+    const day = Number(date.toLocaleDateString("en-US", {
+      ...localTimeOptions({ day: "numeric" })
+    }));
+    const year = date.toLocaleDateString("en-US", {
+      ...localTimeOptions({ year: "numeric" })
+    });
+    return `${weekday}, ${month} ${day}${ordinalSuffix(day)} ${year}`;
+  } catch (error) {
+    return fallbackDateLabel(date, true);
+  }
+}
+
 function shortDateLabel(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
@@ -1764,7 +1789,7 @@ function renderItems(items) {
     const primaryTag = primaryTopicTag(item.tags);
     const primaryTagLink = itemNode.querySelector(".item-primary-tag");
 
-    itemNode.querySelector(".item-time").textContent = formatTime(item.published_at);
+    itemNode.querySelector(".item-time").textContent = `${formatTime(item.published_at)} · ${formatDayDate(item.published_at)}`;
     itemNode.querySelector(".item").dataset.itemKey = stableItemKey(item);
     primaryTagLink.href = `?tag=${encodeURIComponent(primaryTag)}`;
     primaryTagLink.textContent = titleCaseTag(primaryTag);
