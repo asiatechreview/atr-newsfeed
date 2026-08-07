@@ -556,6 +556,10 @@ main {
   text-decoration: none;
 }
 
+.blurb a:visited {
+  color: var(--muted);
+}
+
 .tags {
   display: flex;
   flex-wrap: wrap;
