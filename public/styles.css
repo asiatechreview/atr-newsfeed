@@ -15,6 +15,7 @@
   --quiet: #777267;
   --accent: #78b592;
   --accent-2: #ddad55;
+  --accent-dim: #486a56;
   --on-text: #0d0e0c;
   --red: #e47058;
   --text: #ece8dd;
@@ -40,6 +41,7 @@
   --quiet: #858b80;
   --accent: #2f6f50;
   --accent-2: #8f641c;
+  --accent-dim: #89ad9a;
   --on-text: #ffffff;
   --red: #b23f2c;
   --text: #151713;
@@ -557,7 +559,7 @@ main {
 }
 
 .blurb a:visited {
-  color: var(--muted);
+  color: var(--accent-dim);
 }
 
 .tags {
