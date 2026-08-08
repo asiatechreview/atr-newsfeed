@@ -3,6 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>
+    try {
+      if (localStorage.getItem("atr-bulletin-theme") === "light") {
+        document.documentElement.dataset.theme = "light";
+      }
+    } catch (error) {}
+  </script>
   <title>Longform | Asia Tech Review Bulletin</title>
   <meta name="description" content="Longform stories from Asia Tech Review.">
   <link rel="icon" href="/favicon.png?v=20260721" type="image/png">
@@ -11,13 +18,18 @@
   <link rel="manifest" href="/manifest.webmanifest?v=20260721b">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=20260808-longform-title">
+  <link href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css?v=20260808-longform-ui">
 </head>
 <body>
+  <header class="site-masthead">
+    <h1><a href="/" aria-label="Asia Tech Review homepage">Asia Tech Review</a></h1>
+    <p class="masthead-sub">Bulletin</p>
+  </header>
   <main class="page longform-index">
     <header class="longform-header">
       <p class="longform-site"><a href="/">Asia Tech Review Bulletin</a></p>
+      <p class="eyebrow">ATR Daily · Longform</p>
       <h1>Longform</h1>
       <p class="longform-dek">Longer reads from Asia Tech Review.</p>
     </header>
