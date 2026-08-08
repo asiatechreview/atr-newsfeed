@@ -1175,6 +1175,25 @@ footer {
   line-height: 1.45;
 }
 
+@media (min-width: 641px) and (max-width: 1024px) {
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 18px;
+  }
+
+  .status {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .topbar-actions {
+    align-items: flex-end;
+    margin-top: 0;
+  }
+}
+
 @media (max-width: 520px) {
   .longform-page,
   .longform-index {
