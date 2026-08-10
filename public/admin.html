@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/admin.css?v=20260810-mobile-menu">
+  <link rel="stylesheet" href="/admin.css?v=20260810-mobile-overhaul">
 </head>
 <body class="logged-out">
   <main class="admin-shell">
@@ -81,7 +81,10 @@
         <aside class="panel item-panel">
           <div class="panel-head">
             <h2>Live Items</h2>
-            <span id="list-count" class="pill">-</span>
+            <div class="panel-head-actions">
+              <span id="list-count" class="pill">-</span>
+              <button id="items-toggle" class="items-toggle" type="button" aria-expanded="true">Hide list</button>
+            </div>
           </div>
           <label class="field-label" for="search-input">Search URL, title, blurb or source</label>
           <input id="search-input" class="search-input" type="search" placeholder="Bloomberg, Qwen, item id...">
@@ -285,8 +288,13 @@
         </div>
       </section>
     </section>
+
+    <nav id="mobile-action-bar" class="mobile-action-bar" aria-label="Quick actions">
+      <button id="mobile-new-button" type="button">New Item</button>
+      <button id="mobile-refresh-button" type="button">Refresh</button>
+    </nav>
   </main>
 
-  <script src="/admin.js?v=20260810-mobile-menu" defer></script>
+  <script src="/admin.js?v=20260810-mobile-overhaul" defer></script>
 </body>
 </html>

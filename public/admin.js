@@ -176,6 +176,31 @@ els.refreshButton.addEventListener("click", () => {
   loadOps();
   loadAnalytics();
 });
+
+const mobileRefreshButton = document.querySelector("#mobile-refresh-button");
+const mobileNewButton = document.querySelector("#mobile-new-button");
+const itemsToggle = document.querySelector("#items-toggle");
+const itemPanel = document.querySelector(".item-panel");
+
+if (mobileRefreshButton) {
+  mobileRefreshButton.addEventListener("click", () => {
+    loadItems();
+    loadOps();
+    loadAnalytics();
+  });
+}
+
+if (mobileNewButton) {
+  mobileNewButton.addEventListener("click", startNewItem);
+}
+
+if (itemsToggle && itemPanel) {
+  itemsToggle.addEventListener("click", () => {
+    const open = itemPanel.classList.toggle("open");
+    itemsToggle.textContent = open ? "Hide list" : "Show list";
+    itemsToggle.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+}
 els.analyticsWindowSelect.addEventListener("change", () => loadAnalytics());
 els.searchInput.addEventListener("input", filterItems);
 els.newButton.addEventListener("click", startNewItem);
@@ -350,21 +375,22 @@ function renderOps(payload) {
 
   for (const failure of failures) {
     const tr = document.createElement("tr");
-    tr.append(cell(formatTime(failure.occurred_at), "nowrap"));
-    tr.append(cell(failure.action || "-"));
-    tr.append(cell(failure.status || "-", `status-${failure.status || ""}`));
-    tr.append(cell(failure.http_status != null ? String(failure.http_status) : "-", Number(failure.http_status) >= 400 ? "status-error" : "status-ok"));
-    tr.append(cell(failure.message || "-", "truncate"));
-    tr.append(cell(failure.source_name || failure.source_url || "-", "truncate"));
-    tr.append(cell(failure.posted === true ? "yes" : failure.posted === false ? "no" : "-"));
+    tr.append(cell(formatTime(failure.occurred_at), "nowrap", "Time"));
+    tr.append(cell(failure.action || "-", "", "Action"));
+    tr.append(cell(failure.status || "-", `status-${failure.status || ""}`, "Status"));
+    tr.append(cell(failure.http_status != null ? String(failure.http_status) : "-", Number(failure.http_status) >= 400 ? "status-error" : "status-ok", "HTTP"));
+    tr.append(cell(failure.message || "-", "truncate", "Message"));
+    tr.append(cell(failure.source_name || failure.source_url || "-", "truncate", "Source"));
+    tr.append(cell(failure.posted === true ? "yes" : failure.posted === false ? "no" : "-", "", "Posted"));
     els.opsBody.append(tr);
   }
 }
 
-function cell(value, className = "") {
+function cell(value, className = "", label = "") {
   const td = document.createElement("td");
   td.textContent = value;
   if (className) td.className = className;
+  if (label) td.dataset.label = label;
   return td;
 }
 

@@ -549,6 +549,160 @@ pre {
   }
 }
 
+/* Mobile-first admin improvements */
+.mobile-action-bar {
+  display: none;
+}
+
+@media (max-width: 880px) {
+  .status-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .metric {
+    min-height: 72px;
+    padding: 10px;
+  }
+
+  .metric strong {
+    font-size: 18px;
+  }
+
+  .table-wrap {
+    overflow: visible;
+    border: 0;
+  }
+
+  table,
+  thead,
+  tbody,
+  tr,
+  th,
+  td {
+    display: block;
+    width: 100%;
+  }
+
+  thead {
+    display: none;
+  }
+
+  table {
+    min-width: 0;
+  }
+
+  tbody {
+    display: grid;
+    gap: 10px;
+  }
+
+  tbody tr {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    background: var(--panel);
+  }
+
+  td {
+    border: 0;
+    padding: 3px 0;
+    font-size: 12px;
+  }
+
+  td::before {
+    content: attr(data-label);
+    display: block;
+    color: var(--muted);
+    font: 700 10px/1.2 var(--font);
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+
+  .truncate {
+    max-width: none;
+    white-space: normal;
+  }
+
+  form input,
+  form textarea,
+  .search-input,
+  .token-row input {
+    font-size: 16px;
+  }
+
+  button,
+  .toolbar a,
+  .toolbar button {
+    min-height: 44px;
+  }
+
+  .admin-shell {
+    padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .mobile-action-bar {
+    display: flex;
+    gap: 8px;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+  }
+
+  .mobile-action-bar button {
+    flex: 1;
+    min-height: 44px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--panel-2);
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  .mobile-action-bar button:first-child {
+    background: var(--accent);
+    color: var(--on-text);
+    font-weight: 700;
+  }
+
+  body.logged-out .mobile-action-bar {
+    display: none;
+  }
+
+  .item-panel {
+    display: none;
+  }
+
+  .item-panel.open {
+    display: block;
+  }
+
+  .items-toggle {
+    min-height: 32px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--panel-2);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 11px;
+  }
+
+  h1 {
+    font-size: 22px;
+  }
+
+  .panel {
+    padding: 12px;
+  }
+}
+
 .table-wrap {
   overflow: auto;
   border: 1px solid var(--border);
