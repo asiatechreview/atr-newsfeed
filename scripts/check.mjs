@@ -39,7 +39,9 @@ const required = [
   "functions/api/auth/logout.js",
   "functions/api/auth/me.js",
   "functions/api/auth/users.js",
+  "functions/api/site-content.js",
   "functions/_lib/admin-auth.js",
+  "functions/_lib/site-content.js",
   "functions/api/index.js",
   "functions/api/markets.js",
   "functions/api/openapi.json.js",
@@ -109,16 +111,24 @@ if (!adminHtml.includes("analytics-view") || !adminScript.includes("/api/analyti
   console.error("admin assets must expose a protected Cloudflare Web Analytics view");
   process.exit(1);
 }
-if (!adminHtml.includes("username-input") || !adminHtml.includes("password-input") || !adminScript.includes("/api/auth/login") || !adminScript.includes("/api/auth/me")) {
-  console.error("admin assets must use username/password session login");
+if (!adminHtml.includes('action="/api/auth/login"') || !adminHtml.includes('name="username"') || !adminHtml.includes('name="password"') || !adminScript.includes("/api/auth/me")) {
+  console.error("admin assets must use a native username/password login form");
   process.exit(1);
 }
 if (!adminHtml.includes('class="logged-out"') || !adminScript.includes('classList.remove("logged-out")')) {
   console.error("admin assets must show only the login splash while logged out");
   process.exit(1);
 }
-if (!dashboardHtml.includes("username-input") || !dashboardScript.includes("/api/auth/login") || !dashboardScript.includes("details?.actor")) {
-  console.error("dashboard assets must use username/password session login and show the actor column");
+if (!adminHtml.includes("newsletter-view") || !adminHtml.includes("sponsors-view") || !adminScript.includes("/api/site-content")) {
+  console.error("admin assets must expose Newsletter and Sponsors tabs backed by /api/site-content");
+  process.exit(1);
+}
+if (!dashboardHtml.includes('action="/api/auth/login"') || !dashboardScript.includes("details?.actor")) {
+  console.error("dashboard assets must use a native username/password login form and show the actor column");
+  process.exit(1);
+}
+if (!appScript.includes("loadNewsletterCard") || !appScript.includes("/api/site-content")) {
+  console.error("public app must render the newsletter card from /api/site-content");
   process.exit(1);
 }
 if (!appScript.includes("function renderTags(target, item)") || !appScript.includes("for (const tag of item.tags)")) {

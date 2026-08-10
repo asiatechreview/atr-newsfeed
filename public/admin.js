@@ -4,7 +4,8 @@ const state = {
   items: [],
   filtered: [],
   selected: null,
-  mode: "edit"
+  mode: "edit",
+  sponsors: []
 };
 
 const els = {
@@ -50,9 +51,13 @@ const els = {
   tabPublish: document.querySelector("#tab-publish"),
   tabOps: document.querySelector("#tab-ops"),
   tabAnalytics: document.querySelector("#tab-analytics"),
+  tabNewsletter: document.querySelector("#tab-newsletter"),
+  tabSponsors: document.querySelector("#tab-sponsors"),
   publishView: document.querySelector("#publish-view"),
   opsView: document.querySelector("#ops-view"),
   analyticsView: document.querySelector("#analytics-view"),
+  newsletterView: document.querySelector("#newsletter-view"),
+  sponsorsView: document.querySelector("#sponsors-view"),
   analyticsVisits: document.querySelector("#analytics-visits"),
   analyticsWindow: document.querySelector("#analytics-window"),
   analyticsPageviews: document.querySelector("#analytics-pageviews"),
@@ -61,19 +66,40 @@ const els = {
   analyticsSinceDetail: document.querySelector("#analytics-since-detail"),
   analyticsDays: document.querySelector("#analytics-days"),
   analyticsBreakdown: document.querySelector("#analytics-breakdown"),
-  analyticsWindowSelect: document.querySelector("#analytics-window-select")
+  analyticsWindowSelect: document.querySelector("#analytics-window-select"),
+  newsletterStatus: document.querySelector("#newsletter-status"),
+  newsletterForm: document.querySelector("#newsletter-form"),
+  newsletterTitle: document.querySelector("#newsletter-title"),
+  newsletterBlurb: document.querySelector("#newsletter-blurb"),
+  newsletterUrl: document.querySelector("#newsletter-url"),
+  newsletterImage: document.querySelector("#newsletter-image"),
+  newsletterSave: document.querySelector("#newsletter-save"),
+  newsletterReload: document.querySelector("#newsletter-reload"),
+  newsletterReadbackStatus: document.querySelector("#newsletter-readback-status"),
+  newsletterReadbackOutput: document.querySelector("#newsletter-readback-output"),
+  sponsorsList: document.querySelector("#sponsors-list"),
+  sponsorAdd: document.querySelector("#sponsor-add"),
+  sponsorsSave: document.querySelector("#sponsors-save"),
+  sponsorsReadbackStatus: document.querySelector("#sponsors-readback-status"),
+  sponsorsReadbackOutput: document.querySelector("#sponsors-readback-output")
 };
 
 function switchTab(name) {
   const publish = name === "publish";
   const ops = name === "ops";
   const analytics = name === "analytics";
+  const newsletter = name === "newsletter";
+  const sponsors = name === "sponsors";
   els.publishView.hidden = !publish;
   els.opsView.hidden = !ops;
   els.analyticsView.hidden = !analytics;
+  els.newsletterView.hidden = !newsletter;
+  els.sponsorsView.hidden = !sponsors;
   els.tabPublish.classList.toggle("active", publish);
   els.tabOps.classList.toggle("active", ops);
   els.tabAnalytics.classList.toggle("active", analytics);
+  els.tabNewsletter.classList.toggle("active", newsletter);
+  els.tabSponsors.classList.toggle("active", sponsors);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -81,18 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 els.saveTokenButton.addEventListener("click", () => {
-  const username = els.usernameInput.value.trim();
-  const password = els.passwordInput.value;
-  if (!username || !password) {
-    setAuthMessage("Username and password required.");
-    return;
-  }
-
-  login(username, password);
-});
-
-els.passwordInput.addEventListener("keydown", (event) => {
-  if (event.key === "Enter") els.saveTokenButton.click();
+  // Native form submit handles login; nothing else needed.
 });
 
 async function checkSession() {
@@ -107,6 +122,7 @@ async function checkSession() {
       loadItems();
       loadOps();
       loadAnalytics();
+      loadSiteContent();
       return;
     }
   } catch {
@@ -116,40 +132,8 @@ async function checkSession() {
   document.body.classList.add("logged-out");
   els.authPanel.hidden = false;
   els.usernameInput.focus();
-  setAuthMessage("Sign in with your admin account.");
-}
-
-async function login(username, password) {
-  els.saveTokenButton.disabled = true;
-  setAuthMessage("Signing in...");
-
-  try {
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      credentials: "same-origin",
-      headers: { "content-type": "application/json", accept: "application/json" },
-      body: JSON.stringify({ username, password })
-    });
-
-    const payload = await response.json().catch(() => ({}));
-    if (response.status === 200) {
-      document.body.classList.remove("logged-out");
-      els.whoami.textContent = payload.username || username;
-      els.whoami.hidden = false;
-      els.authPanel.hidden = true;
-      setAuthMessage("");
-      loadItems();
-      loadOps();
-      loadAnalytics();
-      return;
-    }
-
-    setAuthMessage(payload.error || "Sign in failed.");
-  } catch (error) {
-    setAuthMessage(error.message || "Sign in failed.");
-  } finally {
-    els.saveTokenButton.disabled = false;
-  }
+  const errorParam = new URLSearchParams(window.location.search).get("error");
+  setAuthMessage(errorParam ? "Invalid username or password." : "Sign in with your admin account.");
 }
 
 async function logout() {
@@ -173,6 +157,19 @@ els.tokenButton.addEventListener("click", () => {
 els.tabPublish.addEventListener("click", () => switchTab("publish"));
 els.tabOps.addEventListener("click", () => switchTab("ops"));
 els.tabAnalytics.addEventListener("click", () => switchTab("analytics"));
+els.tabNewsletter.addEventListener("click", () => switchTab("newsletter"));
+els.tabSponsors.addEventListener("click", () => switchTab("sponsors"));
+
+els.newsletterForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  saveNewsletter();
+});
+els.newsletterReload.addEventListener("click", loadLatestSubstackPost);
+els.sponsorAdd.addEventListener("click", () => {
+  state.sponsors.push({ name: "", blurb: "", url: "", logo: "", enabled: false });
+  renderSponsors();
+});
+els.sponsorsSave.addEventListener("click", saveSponsors);
 
 els.refreshButton.addEventListener("click", () => {
   loadItems();
@@ -263,8 +260,7 @@ async function loadAnalytics() {
     const response = await fetch(`/api/analytics?days=${days}&_=${Date.now()}`, {
       headers: { accept: "application/json" },
       credentials: "same-origin"
-    });
-    if (!response.ok) throw new Error(`/api/analytics returned ${response.status}`);
+    });    if (!response.ok) throw new Error(`/api/analytics returned ${response.status}`);
     const payload = await response.json();
     renderAnalytics(payload);
   } catch (error) {
@@ -273,8 +269,7 @@ async function loadAnalytics() {
   }
 }
 
-function renderAnalytics(payload) {
-  const totals = payload.totals || {};
+function renderAnalytics(payload) {  const totals = payload.totals || {};
   const daily = Array.isArray(payload.daily) ? payload.daily : [];
   const window = payload.window || {};
 
@@ -523,8 +518,189 @@ function renderCounts() {
   els.selectedDetail.textContent = state.selected ? `${state.selected.source_name || "Source"} / ${state.selected.category || DEFAULT_CATEGORY}` : state.mode === "new" ? "Unsaved item" : "-";
 }
 
-function setStatus(title, detail) {
-  els.statusTitle.textContent = title;
+async function loadSiteContent() {
+  try {
+    const response = await fetch("/api/site-content", { credentials: "same-origin" });
+    if (!response.ok) throw new Error(`/api/site-content returned ${response.status}`);
+    const content = await response.json();
+    fillNewsletterForm(content.newsletter || {});
+    state.sponsors = Array.isArray(content.sponsors) ? content.sponsors.map((s) => ({ ...s })) : [];
+    renderSponsors();
+  } catch (error) {
+    els.newsletterStatus.textContent = "Error";
+    els.newsletterStatus.title = error.message;
+  }
+}
+
+function fillNewsletterForm(newsletter) {
+  els.newsletterTitle.value = newsletter.title || "";
+  els.newsletterBlurb.value = newsletter.blurb || "";
+  els.newsletterUrl.value = newsletter.url || "";
+  els.newsletterImage.value = newsletter.image || "";
+  els.newsletterStatus.textContent = "Loaded";
+}
+
+async function saveNewsletter() {
+  const payload = {
+    newsletter: {
+      title: els.newsletterTitle.value.trim(),
+      blurb: els.newsletterBlurb.value.trim(),
+      url: els.newsletterUrl.value.trim(),
+      image: els.newsletterImage.value.trim()
+    }
+  };
+
+  els.newsletterReadbackStatus.textContent = "Saving";
+  try {
+    const response = await fetch("/api/site-content", {
+      method: "PUT",
+      credentials: "same-origin",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || `PUT returned ${response.status}`);
+    els.newsletterReadbackStatus.textContent = "Saved";
+    els.newsletterReadbackOutput.textContent = JSON.stringify(result.newsletter || payload.newsletter, null, 2);
+  } catch (error) {
+    els.newsletterReadbackStatus.textContent = "Error";
+    els.newsletterReadbackOutput.textContent = error.message;
+  }
+}
+
+async function loadLatestSubstackPost() {
+  els.newsletterStatus.textContent = "Fetching";
+  try {
+    const feedResponse = await fetch("https://www.asiatechreview.com/feed", { headers: { accept: "application/xml" } });
+    if (!feedResponse.ok) throw new Error(`Feed returned ${feedResponse.status}`);
+    const xml = await feedResponse.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xml, "text/xml");
+    const items = doc.querySelectorAll("item");
+    const first = items[0];
+    if (!first) throw new Error("No items in feed");
+    const title = first.querySelector("title")?.textContent?.trim() || "";
+    const link = first.querySelector("link")?.textContent?.trim() || "";
+    const description = first.querySelector("description")?.textContent?.trim() || "";
+    const image = first.querySelector("enclosure")?.getAttribute("url") || "";
+    fillNewsletterForm({ title, blurb: description, url: link, image });
+    els.newsletterStatus.textContent = "Loaded latest";
+    els.newsletterReadbackStatus.textContent = "Fetched";
+    els.newsletterReadbackOutput.textContent = JSON.stringify({ title, url: link, description, image }, null, 2);
+  } catch (error) {
+    els.newsletterStatus.textContent = "Fetch failed";
+    els.newsletterReadbackStatus.textContent = "Error";
+    els.newsletterReadbackOutput.textContent = error.message;
+  }
+}
+
+function renderSponsors() {
+  els.sponsorsList.replaceChildren();
+  if (!state.sponsors.length) {
+    const empty = document.createElement("p");
+    empty.className = "muted";
+    empty.textContent = "No sponsors yet. Add one to draft a blurb.";
+    els.sponsorsList.append(empty);
+    return;
+  }
+
+  state.sponsors.forEach((sponsor, index) => {
+    const card = document.createElement("div");
+    card.className = "sponsor-card";
+
+    const nameLabel = document.createElement("label");
+    nameLabel.append("Sponsor name");
+    const nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.value = sponsor.name || "";
+    nameInput.placeholder = "Banxa";
+    nameInput.addEventListener("input", () => { sponsor.name = nameInput.value; });
+    nameLabel.append(nameInput);
+    card.append(nameLabel);
+
+    const blurbLabel = document.createElement("label");
+    blurbLabel.append("Blurb");
+    const blurbInput = document.createElement("textarea");
+    blurbInput.rows = 3;
+    blurbInput.value = sponsor.blurb || "";
+    blurbInput.placeholder = "What the sponsor does";
+    blurbInput.addEventListener("input", () => { sponsor.blurb = blurbInput.value; });
+    blurbLabel.append(blurbInput);
+    card.append(blurbLabel);
+
+    const urlLabel = document.createElement("label");
+    urlLabel.append("Link");
+    const urlInput = document.createElement("input");
+    urlInput.type = "url";
+    urlInput.value = sponsor.url || "";
+    urlInput.placeholder = "https://...";
+    urlInput.addEventListener("input", () => { sponsor.url = urlInput.value; });
+    urlLabel.append(urlInput);
+    card.append(urlLabel);
+
+    const logoLabel = document.createElement("label");
+    logoLabel.append("Logo URL");
+    const logoInput = document.createElement("input");
+    logoInput.type = "url";
+    logoInput.value = sponsor.logo || "";
+    logoInput.placeholder = "https://... (optional)";
+    logoInput.addEventListener("input", () => { sponsor.logo = logoInput.value; });
+    logoLabel.append(logoInput);
+    card.append(logoLabel);
+
+    const enabledLabel = document.createElement("label");
+    enabledLabel.className = "checkbox-label";
+    const enabledInput = document.createElement("input");
+    enabledInput.type = "checkbox";
+    enabledInput.checked = Boolean(sponsor.enabled);
+    enabledInput.addEventListener("change", () => { sponsor.enabled = enabledInput.checked; });
+    enabledLabel.append(enabledInput, " Show on site (not live yet)");
+    card.append(enabledLabel);
+
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "danger";
+    removeButton.textContent = "Remove";
+    removeButton.addEventListener("click", () => {
+      state.sponsors.splice(index, 1);
+      renderSponsors();
+    });
+    card.append(removeButton);
+
+    els.sponsorsList.append(card);
+  });
+}
+
+async function saveSponsors() {
+  const payload = {
+    sponsors: state.sponsors.map((sponsor) => ({
+      name: sponsor.name || "",
+      blurb: sponsor.blurb || "",
+      url: sponsor.url || "",
+      logo: sponsor.logo || "",
+      enabled: Boolean(sponsor.enabled)
+    }))
+  };
+
+  els.sponsorsReadbackStatus.textContent = "Saving";
+  try {
+    const response = await fetch("/api/site-content", {
+      method: "PUT",
+      credentials: "same-origin",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || `PUT returned ${response.status}`);
+    els.sponsorsReadbackStatus.textContent = "Saved";
+    els.sponsorsReadbackOutput.textContent = JSON.stringify(result.sponsors || payload.sponsors, null, 2);
+  } catch (error) {
+    els.sponsorsReadbackStatus.textContent = "Error";
+    els.sponsorsReadbackOutput.textContent = error.message;
+  }
+}
+
+function setStatus(title, detail) {  els.statusTitle.textContent = title;
   els.statusDetail.textContent = detail;
 }
 

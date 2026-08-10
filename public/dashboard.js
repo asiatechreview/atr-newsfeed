@@ -33,18 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 els.saveTokenButton.addEventListener("click", () => {
-  const username = els.usernameInput.value.trim();
-  const password = els.passwordInput.value;
-  if (!username || !password) {
-    setAuthMessage("Username and password required.");
-    return;
-  }
-
-  login(username, password);
-});
-
-els.passwordInput.addEventListener("keydown", (event) => {
-  if (event.key === "Enter") els.saveTokenButton.click();
+  // Native form submit handles login; nothing else needed.
 });
 
 async function checkSession() {
@@ -66,38 +55,8 @@ async function checkSession() {
   document.body.classList.add("logged-out");
   els.authPanel.hidden = false;
   els.usernameInput.focus();
-  setAuthMessage("Sign in with your admin account.");
-}
-
-async function login(username, password) {
-  els.saveTokenButton.disabled = true;
-  setAuthMessage("Signing in...");
-
-  try {
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      credentials: "same-origin",
-      headers: { "content-type": "application/json", accept: "application/json" },
-      body: JSON.stringify({ username, password })
-    });
-
-    const payload = await response.json().catch(() => ({}));
-    if (response.status === 200) {
-      document.body.classList.remove("logged-out");
-      els.whoami.textContent = payload.username || username;
-      els.whoami.hidden = false;
-      els.authPanel.hidden = true;
-      setAuthMessage("");
-      loadDashboard();
-      return;
-    }
-
-    setAuthMessage(payload.error || "Sign in failed.");
-  } catch (error) {
-    setAuthMessage(error.message || "Sign in failed.");
-  } finally {
-    els.saveTokenButton.disabled = false;
-  }
+  const errorParam = new URLSearchParams(window.location.search).get("error");
+  setAuthMessage(errorParam ? "Invalid username or password." : "Sign in with your admin account.");
 }
 
 async function logout() {

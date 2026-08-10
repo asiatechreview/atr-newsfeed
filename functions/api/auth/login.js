@@ -1,18 +1,34 @@
 import { ensureAuthTables, verifyPassword, createSession, sessionCookieHeader } from "../../_lib/admin-auth.js";
 import { writeOperationalEvent } from "../../_lib/operational-log.js";
 
+// Accepts native form posts (application/x-www-form-urlencoded) so browsers
+// offer to save the username and password, and JSON for API callers.
+// On success it redirects to the requested page with the session cookie set.
+
 export async function onRequestPost({ env, request }) {
+  const contentType = request.headers.get("content-type") || "";
   let body;
-  try {
-    body = await request.json();
-  } catch {
-    return json({ error: "Invalid JSON" }, 400);
+  if (contentType.includes("application/json")) {
+    body = await request.json().catch(() => ({}));
+  } else {
+    const form = await request.formData().catch(() => new FormData());
+    body = Object.fromEntries(form.entries());
   }
 
   const username = clean(body.username);
   const password = String(body.password || "");
+  const next = normalizeNext(body.next);
+
   if (!username || !password) {
-    return json({ error: "Username and password required" }, 400);
+    await writeOperationalEvent(env, request, {
+      workflow: "admin_auth",
+      action: "login",
+      status: "unauthorized",
+      severity: "warning",
+      http_status: 401,
+      message: "Admin login failed: username or password missing."
+    });
+    return redirectWithError(next);
   }
 
   await ensureAuthTables(env);
@@ -31,7 +47,7 @@ export async function onRequestPost({ env, request }) {
       message: `Admin login failed for unknown user ${username}.`,
       details: { username }
     });
-    return json({ error: "Invalid username or password" }, 401);
+    return redirectWithError(next);
   }
 
   const ok = await verifyPassword(password, user.password_hash);
@@ -45,7 +61,7 @@ export async function onRequestPost({ env, request }) {
       message: `Admin login failed for ${username}: bad password.`,
       details: { username }
     });
-    return json({ error: "Invalid username or password" }, 401);
+    return redirectWithError(next);
   }
 
   const token = await createSession(env, user.username);
@@ -60,26 +76,35 @@ export async function onRequestPost({ env, request }) {
     details: { username: user.username, role: user.role || "super_admin" }
   });
 
-  return new Response(JSON.stringify({ ok: true, username: user.username, role: user.role || "super_admin" }), {
-    status: 200,
+  return new Response(null, {
+    status: 302,
     headers: {
-      "content-type": "application/json; charset=utf-8",
+      location: next,
       "set-cookie": sessionCookieHeader(token),
       "cache-control": "no-store"
     }
   });
 }
 
-function clean(value) {
-  return typeof value === "string" ? value.trim().toLowerCase() : "";
-}
-
-function json(payload, status = 200) {
-  return new Response(JSON.stringify(payload), {
-    status,
+function redirectWithError(next) {
+  const separator = next.includes("?") ? "&" : "?";
+  return new Response(null, {
+    status: 302,
     headers: {
-      "content-type": "application/json; charset=utf-8",
+      location: `${next}${separator}error=1`,
       "cache-control": "no-store"
     }
   });
+}
+
+function normalizeNext(value) {
+  const candidate = clean(value);
+  if (candidate.startsWith("/") && !candidate.startsWith("//")) {
+    return candidate;
+  }
+  return "/admin";
+}
+
+function clean(value) {
+  return typeof value === "string" ? value.trim().toLowerCase() : "";
 }

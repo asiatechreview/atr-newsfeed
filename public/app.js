@@ -2054,7 +2054,35 @@ if (searchToggle && mobileSearchForm && mobileSearchInput) {
   });
 }
 
+async function loadNewsletterCard() {
+  try {
+    const response = await fetch("/api/site-content", { cache: "no-store" });
+    if (!response.ok) return;
+    const content = await response.json();
+    const newsletter = content.newsletter || {};
+    const promo = document.querySelector("#newsletter-promo");
+    if (!promo) return;
+
+    const title = document.querySelector("#newsletter-title");
+    const blurb = document.querySelector("#newsletter-blurb");
+    const imageLink = document.querySelector("#newsletter-image-link");
+    const image = document.querySelector("#newsletter-image");
+    const readLink = document.querySelector("#newsletter-read-link");
+
+    if (newsletter.url) {
+      if (imageLink) imageLink.href = newsletter.url;
+      if (readLink) readLink.href = newsletter.url;
+    }
+    if (newsletter.image && image) image.src = newsletter.image;
+    if (title && newsletter.title) title.textContent = newsletter.title;
+    if (blurb && newsletter.blurb) blurb.textContent = newsletter.blurb;
+  } catch {
+    // Keep the static fallback card.
+  }
+}
+
 initThemeToggle();
 initFontScale();
 refreshFeed({ initial: true });
 startFeedPolling();
+loadNewsletterCard();

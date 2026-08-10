@@ -561,3 +561,57 @@ tbody tr:last-child td {
   border-color: var(--border);
   color: var(--text);
 }
+
+/* Newsletter + sponsors tabs */
+.newsletter-form {
+  display: grid;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.newsletter-form label,
+.sponsor-card label {
+  display: block;
+}
+
+.newsletter-form label > span,
+.sponsor-card label > span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font: 700 11px/1 var(--font);
+  text-transform: uppercase;
+}
+
+.newsletter-form textarea {
+  min-height: 90px;
+}
+
+.sponsors-list {
+  display: grid;
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.sponsor-card {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+
+.sponsor-card .checkbox-label {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: none;
+}
+
+.sponsor-card .checkbox-label input {
+  width: auto;
+  min-height: 0;
+}

@@ -95,3 +95,10 @@ CREATE TABLE IF NOT EXISTS admin_sessions (
 
 CREATE INDEX IF NOT EXISTS idx_admin_sessions_expires
 ON admin_sessions (expires_at);
+
+CREATE TABLE IF NOT EXISTS site_content (
+  content_key TEXT PRIMARY KEY,
+  value_json TEXT NOT NULL DEFAULT '{}',
+  updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+  updated_by TEXT
+);
