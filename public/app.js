@@ -269,8 +269,8 @@ function getStoredTheme() {
   } catch (error) {
     // localStorage unavailable; fall through to system preference.
   }
-  // First visit: respect the reader's system theme instead of defaulting to dark.
-  return window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  // First visit: default to dark regardless of the reader's system theme.
+  return "dark";
 }
 
 function setStoredTheme(theme) {
