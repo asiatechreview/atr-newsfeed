@@ -1780,6 +1780,8 @@ function parseSearchQuery(query) {
     if (term.startsWith("tag:")) {
       const tag = term.slice(4);
       if (tag) tagTerms.push(tag);
+    } else if (term.startsWith("#") && term.length > 1) {
+      tagTerms.push(term.slice(1));
     } else {
       textTerms.push(term);
     }
