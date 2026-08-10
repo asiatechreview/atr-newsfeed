@@ -72,9 +72,17 @@ export async function onRequestGet({ request }) {
             {
               name: "q",
               in: "query",
-              required: true,
+              required: false,
               schema: { type: "string" },
               example: "AI"
+            },
+            {
+              name: "tag",
+              in: "query",
+              required: false,
+              schema: { type: "string" },
+              description: "Filter by tag; matches items whose tags include this value",
+              example: "chips"
             },
             limitParam(),
             categoryParam()

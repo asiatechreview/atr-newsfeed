@@ -1772,6 +1772,26 @@ function normalizeSearchQuery(query) {
   return String(query || "").trim().replace(/\s+/g, " ");
 }
 
+function parseSearchQuery(query) {
+  const terms = String(query || "").toLowerCase().split(/\s+/).filter(Boolean);
+  const tagTerms = [];
+  const textTerms = [];
+  for (const term of terms) {
+    if (term.startsWith("tag:")) {
+      const tag = term.slice(4);
+      if (tag) tagTerms.push(tag);
+    } else {
+      textTerms.push(term);
+    }
+  }
+  return { tagTerms, textTerms };
+}
+
+function itemMatchesTags(item, tagTerms) {
+  const itemTags = (item.tags || []).map((tag) => String(tag).toLowerCase());
+  return tagTerms.every((term) => itemTags.some((tag) => tag.includes(term)));
+}
+
 function searchText(item) {
   return [
     item.headline,
@@ -1796,10 +1816,12 @@ function renderSearch(query, page = currentPage) {
     return;
   }
 
-  const terms = currentSearchQuery.toLowerCase().split(/\s+/).filter(Boolean);
+  const { tagTerms, textTerms } = parseSearchQuery(currentSearchQuery);
   const searchItems = allItems.filter((item) => {
+    if (!itemMatchesTags(item, tagTerms)) return false;
+    if (!textTerms.length) return true;
     const text = searchText(item);
-    return terms.every((term) => text.includes(term));
+    return textTerms.every((term) => text.includes(term));
   });
   const totalPages = Math.max(1, Math.ceil(searchItems.length / ITEMS_PER_PAGE));
   currentPage = Math.min(Math.max(1, page), totalPages);

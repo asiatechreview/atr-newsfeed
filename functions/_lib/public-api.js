@@ -106,9 +106,13 @@ export function stripPublicId(id) {
 export function filterItems(items, options = {}) {
   const query = clean(options.query).toLowerCase();
   const category = clean(options.category).toLowerCase();
+  const tag = clean(options.tag).toLowerCase();
 
   return items.filter((item) => {
     if (category && clean(item.category).toLowerCase() !== category) return false;
+
+    const itemTags = (Array.isArray(item.tags) ? item.tags : []).map((value) => clean(value).toLowerCase());
+    if (tag && !itemTags.some((value) => value.includes(tag))) return false;
     if (!query) return true;
 
     return [
@@ -117,7 +121,7 @@ export function filterItems(items, options = {}) {
       item.source_name,
       item.source_url,
       item.category,
-      ...(Array.isArray(item.tags) ? item.tags : [])
+      ...itemTags
     ].some((value) => clean(value).toLowerCase().includes(query));
   });
 }

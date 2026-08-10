@@ -155,6 +155,10 @@ if (!appScript.includes("function searchText(item)") || !appScript.includes("ite
   console.error("public/app.js search must include item headlines, not only blurbs and metadata");
   process.exit(1);
 }
+if (!appScript.includes("function parseSearchQuery") || !appScript.includes("tagTerms") || !appScript.includes("tag:")) {
+  console.error("public/app.js search must support the tag: operator");
+  process.exit(1);
+}
 
 if (!appScript.includes("Intl.DateTimeFormat().resolvedOptions().timeZone") || appScript.includes('timeZone: "Asia/Bangkok"') || appScript.includes("LIVE ${formatTime(new Date())} BKK")) {
   console.error("public/app.js must render feed timestamps with the reader's browser timezone, not a fixed Bangkok timezone");
