@@ -113,6 +113,10 @@ if (!adminHtml.includes("username-input") || !adminHtml.includes("password-input
   console.error("admin assets must use username/password session login");
   process.exit(1);
 }
+if (!adminHtml.includes('class="logged-out"') || !adminScript.includes('classList.remove("logged-out")')) {
+  console.error("admin assets must show only the login splash while logged out");
+  process.exit(1);
+}
 if (!dashboardHtml.includes("username-input") || !dashboardScript.includes("/api/auth/login") || !dashboardScript.includes("details?.actor")) {
   console.error("dashboard assets must use username/password session login and show the actor column");
   process.exit(1);

@@ -116,6 +116,28 @@ h2 {
   background: var(--panel);
 }
 
+/* Splash: while logged out, show only the login card. */
+body.logged-out .dashboard-header,
+body.logged-out #status-strip,
+body.logged-out .grid {
+  display: none;
+}
+
+body.logged-out .dashboard-shell {
+  width: min(460px, calc(100% - 32px));
+  padding-top: 10vh;
+}
+
+body.logged-out .auth-panel {
+  margin-top: 0;
+  padding: 22px;
+}
+
+.auth-title {
+  margin: 6px 0 18px;
+  font: 700 22px/1.1 var(--font);
+}
+
 .auth-panel[hidden] {
   display: none;
 }

@@ -52,6 +52,7 @@ async function checkSession() {
     const response = await fetch("/api/auth/me", { credentials: "same-origin" });
     if (response.status === 200) {
       const payload = await response.json();
+      document.body.classList.remove("logged-out");
       els.whoami.textContent = payload.username || "";
       els.whoami.hidden = false;
       els.authPanel.hidden = true;
@@ -62,6 +63,7 @@ async function checkSession() {
     // Fall through to the login panel.
   }
 
+  document.body.classList.add("logged-out");
   els.authPanel.hidden = false;
   els.usernameInput.focus();
   setAuthMessage("Sign in with your admin account.");
@@ -81,6 +83,7 @@ async function login(username, password) {
 
     const payload = await response.json().catch(() => ({}));
     if (response.status === 200) {
+      document.body.classList.remove("logged-out");
       els.whoami.textContent = payload.username || username;
       els.whoami.hidden = false;
       els.authPanel.hidden = true;
@@ -103,6 +106,7 @@ async function logout() {
   } catch {
     // Best effort; the panel shows either way.
   }
+  document.body.classList.add("logged-out");
   els.whoami.hidden = true;
   els.whoami.textContent = "";
   els.authPanel.hidden = false;
