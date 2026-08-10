@@ -542,7 +542,7 @@ export const STATIC_ITEMS = [
   {
     "id": "html-2026-07-16-044",
     "blurb": "Viettel's planned $1.3 billion semiconductor fab helped Hanoi attract $588.2 million in high-tech investment in the first half of 2026, with Japan's Meiko adding $190 million to its local semiconductor-electronics operations",
-    "source_name": "TNGlobal",
+    "source_name": "TechNode",
     "source_url": "https://technode.global/2026/07/15/viettels-1-3b-chip-factory-helps-hanoi-attract-588m-in-high-tech-investment/",
     "category": "AI and Chips",
     "telegram_message_id": null,
@@ -1172,7 +1172,7 @@ export const STATIC_ITEMS = [
   {
     "id": "md-2026-07-09-016",
     "blurb": "Thailand has approved nine major investment projects worth a combined $1.99 billion across artificial intelligence (AI), advanced electronics, aviation, clean energy, and food, as global manufacturers reposition supply chains across Southeast Asia. In a statement on Wednesday, the Thailand Board of Investment (BOI) said the approvals were given at a recent meeting chaired by Deputy Prime Minister and Finance Minister Ekniti Nitithanprapas.",
-    "source_name": "TNGlobal",
+    "source_name": "TechNode",
     "source_url": "https://technode.global/2026/07/09/thailand-to-invest-1-99b-in-ai-electronics-aviation-clean-energy-amid-supply-chain-updates/",
     "category": "AI and Chips",
     "telegram_message_id": null,
@@ -1272,7 +1272,7 @@ export const STATIC_ITEMS = [
   {
     "id": "md-2026-07-08-006",
     "blurb": "Malaysia’s Zetrix AI Berhad group will establish as the underlying protocol for the Philippines’ public blockchain infrastructure, marking the second country after Malaysia to adopt Zetrix as a sovereign-grade blockchain platform.",
-    "source_name": "TNGlobal",
+    "source_name": "TechNode",
     "source_url": "https://technode.global/2026/07/08/malaysias-zetrix-blockchain-to-build-philippines-national-blockchain-infrastructure/",
     "category": "Crypto",
     "telegram_message_id": null,
@@ -1372,7 +1372,7 @@ export const STATIC_ITEMS = [
   {
     "id": "md-2026-07-08-016",
     "blurb": "Xendit, Indonesian payments infrastructure company, announced Wednesday the integration of Dragonpay Corporation, the Philippines’ alternative payments platform.",
-    "source_name": "TNGlobal",
+    "source_name": "TechNode",
     "source_url": "https://technode.global/2026/07/08/indonesias-xendit-integrates-with-philippines-dragonpay/",
     "category": "Fintech",
     "telegram_message_id": null,
@@ -1632,7 +1632,7 @@ export const STATIC_ITEMS = [
   {
     "id": "md-2026-07-06-012",
     "blurb": "Southeast Asia's tech companies raised $7.4 billion in the first half of 2026, more than double the $3.2 billion raised a year earlier, even as the number of funding rounds and first-time funded companies both fell, Tracxn said Friday. Enterprise infrastructure, enterprise applications and fintech led the pack, buoyed by a handful of mega-rounds including DayOne's $4.5 billion in combined Series C funding for data center expansion. The region logged 127 rounds in the first half, down from 153 a year earlier, but saw 12 deals of $100 million or more, up sharply from four in the second half of 2025, underscoring how a few large checks drove the overall surge.",
-    "source_name": "TNGlobal",
+    "source_name": "TechNode",
     "source_url": "https://technode.global/2026/07/06/sea-tech-funding-records-2-times-growth-reaching-7-4b-in-first-half/",
     "category": "Fintech",
     "telegram_message_id": null,
@@ -1862,7 +1862,7 @@ export const STATIC_ITEMS = [
   {
     "id": "md-2026-07-04-012",
     "blurb": "Temasek-backed Azalea Investment Management Pte. Ltd. announced Friday the successful launch of Azalea All Access, its first private equity (PE) evergreen fund, with $350 million in initial commitments from a select group of anchor investors.",
-    "source_name": "TNGlobal",
+    "source_name": "TechNode",
     "source_url": "https://technode.global/2026/07/03/temasek-backed-azalea-launches-first-private-equity-evergreen-fund-with-350m-investment/",
     "category": "Venture Capital",
     "telegram_message_id": null,
@@ -2202,7 +2202,7 @@ export const STATIC_ITEMS = [
   {
     "id": "md-2026-07-01-013",
     "blurb": "Vietnam’s G-Group Technology Corporation will build its G-Campus Hoa Lac, a high-tech center and Tier III data center complex specializing in artificial intelligence and high-performance computing, with total investment of VND7,600 billion ($300 million). In a statement on Tuesday, G-Group said it received an investment certificate for the project at Hanoi’s investment promotion conference a day earlier.",
-    "source_name": "TNGlobal",
+    "source_name": "TechNode",
     "source_url": "https://technode.global/2026/07/01/vietnams-g-group-to-invest-300m-in-building-ai-data-center-campus-in-hanoi/",
     "category": "AI and Chips",
     "telegram_message_id": null,
@@ -2212,7 +2212,7 @@ export const STATIC_ITEMS = [
   {
     "id": "md-2026-07-01-014",
     "blurb": "Singapore-headquartered Ant International opened its Global Development Center (GDC) in Kuala Lumpur, located within Malaysia’s international financial center TRX. In a statement on Wednesday, Ant International said the center builds on its existing workforce in Malaysia, featuring 1,500 fintech roles, with more than 50 percent serving in technology positions. Around half of its tech team are recent graduates from more than 30 Malaysian universities. Ant International will deepen collaboration with the Ministry of Higher Education to co-develop FinAI talent through hackathons, training, and curated curricula.",
-    "source_name": "TNGlobal",
+    "source_name": "TechNode",
     "source_url": "https://technode.global/2026/07/01/ant-international-opens-global-development-centre-in-kuala-lumpur-backed-by-1500-fintech-roles/",
     "category": "Fintech",
     "telegram_message_id": null,
@@ -2252,7 +2252,7 @@ export const STATIC_ITEMS = [
   {
     "id": "md-2026-07-01-018",
     "blurb": "Acti, a Singapore-based company describing itself as the world’s first agentic keyboard, has raised $5.3 million in a seed round led by the United States-based BITKRAFT Ventures. In a statement on Tuesday, Acti said it can transform the keyboard into an AI-powered context layer that works across every application a user opens. The funding will go toward engineering and AI hiring, deepening Acti’s on-device intelligence, and growing its Skill ecosystem and developer community.",
-    "source_name": "TNGlobal",
+    "source_name": "TechNode",
     "source_url": "https://technode.global/2026/07/01/singapores-acti-raises-5-3m-seed-round-to-build-ai-powered-keyboard-as-personal-context-layer/",
     "category": "AI and Chips",
     "telegram_message_id": null,
@@ -2402,7 +2402,7 @@ export const STATIC_ITEMS = [
   {
     "id": "md-2026-06-30-008",
     "blurb": "Singapore's Qashier raises $6.1M Series A+ to expand merchant operating system across Southeast Asia",
-    "source_name": "TNGlobal",
+    "source_name": "TechNode",
     "source_url": "https://technode.global/2026/06/30/singapores-qashier-raises-6-1m-series-a-to-expand-merchant-operating-system-across-southeast-asia/",
     "category": "Fintech",
     "telegram_message_id": null,
@@ -2412,7 +2412,7 @@ export const STATIC_ITEMS = [
   {
     "id": "md-2026-06-30-009",
     "blurb": "Singapore-based AI startup Akro raises $700,000 Pre-Seed led by Amigos Venture Capital",
-    "source_name": "TNGlobal",
+    "source_name": "TechNode",
     "source_url": "https://technode.global/2026/06/30/singapore-based-ai-startup-akro-raises-700000-pre-seed-led-by-amigos-venture-capital/",
     "category": "AI and Chips",
     "telegram_message_id": null,

@@ -180,7 +180,7 @@ const sourceAliases = new Map([
   ["ft.com", "FT"],
   ["wsj.com", "WSJ"],
   ["scmp.com", "SCMP"],
-  ["technode.global", "TNGlobal"]
+  ["technode.global", "TechNode"]
 ]);
 
 STATIC_ITEMS.forEach((item, index) => {
