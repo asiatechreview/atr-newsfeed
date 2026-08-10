@@ -48,16 +48,31 @@ const els = {
   opsBody: document.querySelector("#ops-body"),
   tabPublish: document.querySelector("#tab-publish"),
   tabOps: document.querySelector("#tab-ops"),
+  tabAnalytics: document.querySelector("#tab-analytics"),
   publishView: document.querySelector("#publish-view"),
-  opsView: document.querySelector("#ops-view")
+  opsView: document.querySelector("#ops-view"),
+  analyticsView: document.querySelector("#analytics-view"),
+  analyticsVisits: document.querySelector("#analytics-visits"),
+  analyticsWindow: document.querySelector("#analytics-window"),
+  analyticsPageviews: document.querySelector("#analytics-pageviews"),
+  analyticsPvDetail: document.querySelector("#analytics-pv-detail"),
+  analyticsSince: document.querySelector("#analytics-since"),
+  analyticsSinceDetail: document.querySelector("#analytics-since-detail"),
+  analyticsDays: document.querySelector("#analytics-days"),
+  analyticsBreakdown: document.querySelector("#analytics-breakdown"),
+  analyticsWindowSelect: document.querySelector("#analytics-window-select")
 };
 
 function switchTab(name) {
   const publish = name === "publish";
+  const ops = name === "ops";
+  const analytics = name === "analytics";
   els.publishView.hidden = !publish;
-  els.opsView.hidden = publish;
+  els.opsView.hidden = !ops;
+  els.analyticsView.hidden = !analytics;
   els.tabPublish.classList.toggle("active", publish);
-  els.tabOps.classList.toggle("active", !publish);
+  els.tabOps.classList.toggle("active", ops);
+  els.tabAnalytics.classList.toggle("active", analytics);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -67,6 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
     els.authPanel.hidden = true;
     loadItems();
     loadOps();
+    loadAnalytics();
   }
 });
 
@@ -90,11 +106,14 @@ els.tokenButton.addEventListener("click", () => {
 
 els.tabPublish.addEventListener("click", () => switchTab("publish"));
 els.tabOps.addEventListener("click", () => switchTab("ops"));
+els.tabAnalytics.addEventListener("click", () => switchTab("analytics"));
 
 els.refreshButton.addEventListener("click", () => {
   loadItems();
   loadOps();
+  loadAnalytics();
 });
+els.analyticsWindowSelect.addEventListener("change", () => loadAnalytics());
 els.searchInput.addEventListener("input", filterItems);
 els.newButton.addEventListener("click", startNewItem);
 els.resetButton.addEventListener("click", () => {
@@ -176,6 +195,74 @@ async function loadOps() {
     renderOps(payload);
   } catch (error) {
     els.deployDetail.textContent = error.message;
+  }
+}
+
+async function loadAnalytics() {
+  if (!readToken()) return;
+
+  try {
+    const days = els.analyticsWindowSelect.value || "7";
+    const response = await fetch(`/api/analytics?days=${days}&_=${Date.now()}`, {
+      headers: { authorization: authHeader(), accept: "application/json" }
+    });
+    if (!response.ok) throw new Error(`/api/analytics returned ${response.status}`);
+    const payload = await response.json();
+    renderAnalytics(payload);
+  } catch (error) {
+    els.analyticsVisits.textContent = "Error";
+    els.analyticsWindow.textContent = error.message;
+  }
+}
+
+function renderAnalytics(payload) {
+  const totals = payload.totals || {};
+  const daily = Array.isArray(payload.daily) ? payload.daily : [];
+  const window = payload.window || {};
+
+  els.analyticsVisits.textContent = formatNumber(totals.visits);
+  els.analyticsWindow.textContent = `${window.days || 7} day window`;
+  els.analyticsPageviews.textContent = formatNumber(totals.pageViews);
+  els.analyticsPvDetail.textContent = `${daily.length} days with data`;
+
+  const firstDate = daily.find((day) => day.visits > 0);
+  const lastDate = daily.length ? daily[daily.length - 1].date : null;
+  els.analyticsSince.textContent = firstDate ? firstDate.date : "-";
+  els.analyticsSinceDetail.textContent = lastDate ? `through ${lastDate}` : "No traffic yet";
+
+  els.analyticsDays.textContent = `${daily.length} days shown`;
+  els.analyticsBreakdown.replaceChildren();
+
+  if (!daily.length) {
+    const empty = document.createElement("p");
+    empty.className = "muted";
+    empty.textContent = "No analytics data yet. The beacon went live today, so check back in a day or two.";
+    els.analyticsBreakdown.append(empty);
+    return;
+  }
+
+  const max = Math.max(...daily.map((day) => day.visits), 1);
+  for (const day of daily) {
+    const row = document.createElement("div");
+    row.className = "bar-row";
+
+    const label = document.createElement("span");
+    label.textContent = day.date || "-";
+    row.append(label);
+
+    const track = document.createElement("div");
+    track.className = "bar-track";
+    const fill = document.createElement("div");
+    fill.className = "bar-fill";
+    fill.style.width = `${Math.max(4, (day.visits / max) * 100)}%`;
+    track.append(fill);
+    row.append(track);
+
+    const value = document.createElement("span");
+    value.className = "bar-value";
+    value.textContent = `${formatNumber(day.visits)} visits / ${formatNumber(day.pageViews)} views`;
+    row.append(value);
+    els.analyticsBreakdown.append(row);
   }
 }
 

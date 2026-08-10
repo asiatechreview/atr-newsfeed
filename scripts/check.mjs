@@ -34,6 +34,7 @@ const required = [
   "functions/api/health.js",
   "functions/api/crawler-logs.js",
   "functions/api/dashboard.js",
+  "functions/api/analytics.js",
   "functions/api/index.js",
   "functions/api/markets.js",
   "functions/api/openapi.json.js",
@@ -97,6 +98,10 @@ if (!dashboardHtml.includes("/dashboard.js") || !dashboardScript.includes("/api/
 
 if (!adminHtml.includes("/admin.js") || !adminScript.includes("PATCH") || !adminScript.includes("DELETE") || !adminScript.includes("/api/items") || !adminCss.includes(".admin-grid")) {
   console.error("admin assets must expose a protected bulletin item editor UI");
+  process.exit(1);
+}
+if (!adminHtml.includes("analytics-view") || !adminScript.includes("/api/analytics") || !adminCss.includes(".bar-fill")) {
+  console.error("admin assets must expose a protected Cloudflare Web Analytics view");
   process.exit(1);
 }
 if (!appScript.includes("function renderTags(target, item)") || !appScript.includes("for (const tag of item.tags)")) {
