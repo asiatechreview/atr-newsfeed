@@ -9,16 +9,19 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/admin.css?v=20260806-admin">
+  <link rel="stylesheet" href="/admin.css?v=20260810-mobile-menu">
 </head>
 <body class="logged-out">
   <main class="admin-shell">
     <header class="admin-header">
-      <div>
+      <div class="admin-heading">
         <p class="eyebrow">Asia Tech Review</p>
         <h1>Bulletin Admin</h1>
       </div>
-      <nav class="toolbar" aria-label="Admin actions">
+      <button id="menu-toggle" class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="admin-toolbar" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <nav id="admin-toolbar" class="toolbar" aria-label="Admin actions">
         <a href="/dashboard">Ops</a>
         <a href="/">Site</a>
         <button id="tab-publish" class="tab-button active" type="button">Publish</button>
@@ -284,6 +287,6 @@
     </section>
   </main>
 
-  <script src="/admin.js?v=20260806-admin" defer></script>
+  <script src="/admin.js?v=20260810-mobile-menu" defer></script>
 </body>
 </html>

@@ -129,8 +129,9 @@ h2 {
   background: var(--panel);
 }
 
-/* Splash: while logged out, show only the login card. */
-body.logged-out .admin-header,
+.menu-toggle {
+  display: none;
+}
 body.logged-out #publish-view,
 body.logged-out #ops-view,
 body.logged-out #analytics-view {
@@ -416,11 +417,63 @@ pre {
 }
 
 @media (max-width: 880px) {
-  .admin-header,
+  .admin-header {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
   .toolbar,
   .token-row {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--panel);
+    color: var(--text);
+    cursor: pointer;
+    margin-left: auto;
+  }
+
+  .menu-toggle svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+
+  .toolbar {
+    display: none;
+    width: 100%;
+    order: 10;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  body.menu-open .toolbar {
+    display: flex;
+  }
+
+  .toolbar a,
+  .toolbar button {
+    min-height: 44px;
+    text-align: left;
+    justify-content: flex-start;
+  }
+
+  .toolbar .pill {
+    margin-left: 4px;
   }
 
   .status-strip,

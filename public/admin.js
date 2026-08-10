@@ -749,3 +749,22 @@ function firstWords(value, maxWords) {
     .slice(0, maxWords)
     .join(" ");
 }
+
+const menuToggle = document.querySelector("#menu-toggle");
+const adminToolbar = document.querySelector("#admin-toolbar");
+
+if (menuToggle && adminToolbar) {
+  menuToggle.addEventListener("click", () => {
+    const open = document.body.classList.toggle("menu-open");
+    menuToggle.setAttribute("aria-expanded", open ? "true" : "false");
+    menuToggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+  });
+
+  adminToolbar.addEventListener("click", (event) => {
+    if (event.target.closest("a, button")) {
+      document.body.classList.remove("menu-open");
+      menuToggle.setAttribute("aria-expanded", "false");
+      menuToggle.setAttribute("aria-label", "Open menu");
+    }
+  });
+}
