@@ -889,7 +889,6 @@ footer {
 
   .mobile-search {
     display: block;
-    margin: 0 0 18px;
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.25s ease;
@@ -897,6 +896,7 @@ footer {
 
   .mobile-search.open {
     max-height: 46px;
+    margin-bottom: 18px;
   }
 
   .mobile-search input {
