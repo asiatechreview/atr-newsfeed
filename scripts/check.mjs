@@ -35,6 +35,11 @@ const required = [
   "functions/api/crawler-logs.js",
   "functions/api/dashboard.js",
   "functions/api/analytics.js",
+  "functions/api/auth/login.js",
+  "functions/api/auth/logout.js",
+  "functions/api/auth/me.js",
+  "functions/api/auth/users.js",
+  "functions/_lib/admin-auth.js",
   "functions/api/index.js",
   "functions/api/markets.js",
   "functions/api/openapi.json.js",
@@ -102,6 +107,14 @@ if (!adminHtml.includes("/admin.js") || !adminScript.includes("PATCH") || !admin
 }
 if (!adminHtml.includes("analytics-view") || !adminScript.includes("/api/analytics") || !adminCss.includes(".bar-fill")) {
   console.error("admin assets must expose a protected Cloudflare Web Analytics view");
+  process.exit(1);
+}
+if (!adminHtml.includes("username-input") || !adminHtml.includes("password-input") || !adminScript.includes("/api/auth/login") || !adminScript.includes("/api/auth/me")) {
+  console.error("admin assets must use username/password session login");
+  process.exit(1);
+}
+if (!dashboardHtml.includes("username-input") || !dashboardScript.includes("/api/auth/login") || !dashboardScript.includes("details?.actor")) {
+  console.error("dashboard assets must use username/password session login and show the actor column");
   process.exit(1);
 }
 if (!appScript.includes("function renderTags(target, item)") || !appScript.includes("for (const tag of item.tags)")) {

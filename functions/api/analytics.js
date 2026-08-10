@@ -1,3 +1,5 @@
+import { isAdmin } from "../_lib/admin-auth.js";
+
 const CF_GRAPHQL = "https://api.cloudflare.com/client/v4/graphql";
 const DEFAULT_ACCOUNT_ID = "3e7885d961646e313d2e1a50ec33d62d";
 const DEFAULT_SITE_TAG = "70c51d1d7a294d70af9aa1512f678135";
@@ -86,10 +88,7 @@ export async function onRequestGet({ env, request }) {
 }
 
 function isAuthorized(env, request) {
-  const auth = request.headers.get("authorization") || "";
-  const expected = env.FEED_INGEST_TOKEN ? `Bearer ${env.FEED_INGEST_TOKEN}` : "";
-
-  return Boolean(expected && auth === expected);
+  return isAdmin(env, request);
 }
 
 function json(payload, status = 200) {

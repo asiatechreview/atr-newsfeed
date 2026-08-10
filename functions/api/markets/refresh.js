@@ -1,5 +1,6 @@
 import { refreshMarketSnapshot } from "../../_lib/markets.js";
 import { writeOperationalEvent } from "../../_lib/operational-log.js";
+import { isAdmin } from "../../_lib/admin-auth.js";
 
 export async function onRequestPost({ env, request }) {
   if (!isAuthorized(env, request)) {
@@ -52,10 +53,7 @@ export async function onRequestPost({ env, request }) {
 }
 
 function isAuthorized(env, request) {
-  const auth = request.headers.get("authorization") || "";
-  const expected = env.FEED_INGEST_TOKEN ? `Bearer ${env.FEED_INGEST_TOKEN}` : "";
-
-  return Boolean(expected && auth === expected);
+  return isAdmin(env, request);
 }
 
 function json(payload, status = 200) {

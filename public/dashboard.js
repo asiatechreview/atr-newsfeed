@@ -29,29 +29,89 @@ const els = {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-  const savedToken = readToken();
-  if (savedToken) {
-    els.tokenInput.value = savedToken;
-    els.authPanel.hidden = true;
-    loadDashboard();
-  }
+  checkSession();
 });
 
 els.saveTokenButton.addEventListener("click", () => {
-  const token = els.tokenInput.value.trim();
-  if (!token) {
-    setAuthMessage("Token required.");
+  const username = els.usernameInput.value.trim();
+  const password = els.passwordInput.value;
+  if (!username || !password) {
+    setAuthMessage("Username and password required.");
     return;
   }
 
-  localStorage.setItem(TOKEN_KEY, token);
-  els.authPanel.hidden = true;
-  loadDashboard();
+  login(username, password);
 });
 
+els.passwordInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") els.saveTokenButton.click();
+});
+
+async function checkSession() {
+  try {
+    const response = await fetch("/api/auth/me", { credentials: "same-origin" });
+    if (response.status === 200) {
+      const payload = await response.json();
+      els.whoami.textContent = payload.username || "";
+      els.whoami.hidden = false;
+      els.authPanel.hidden = true;
+      loadDashboard();
+      return;
+    }
+  } catch {
+    // Fall through to the login panel.
+  }
+
+  els.authPanel.hidden = false;
+  els.usernameInput.focus();
+  setAuthMessage("Sign in with your admin account.");
+}
+
+async function login(username, password) {
+  els.saveTokenButton.disabled = true;
+  setAuthMessage("Signing in...");
+
+  try {
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({ username, password })
+    });
+
+    const payload = await response.json().catch(() => ({}));
+    if (response.status === 200) {
+      els.whoami.textContent = payload.username || username;
+      els.whoami.hidden = false;
+      els.authPanel.hidden = true;
+      setAuthMessage("");
+      loadDashboard();
+      return;
+    }
+
+    setAuthMessage(payload.error || "Sign in failed.");
+  } catch (error) {
+    setAuthMessage(error.message || "Sign in failed.");
+  } finally {
+    els.saveTokenButton.disabled = false;
+  }
+}
+
+async function logout() {
+  try {
+    await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" });
+  } catch {
+    // Best effort; the panel shows either way.
+  }
+  els.whoami.hidden = true;
+  els.whoami.textContent = "";
+  els.authPanel.hidden = false;
+  els.usernameInput.focus();
+  setAuthMessage("Signed out.");
+}
+
 els.tokenButton.addEventListener("click", () => {
-  els.authPanel.hidden = !els.authPanel.hidden;
-  els.tokenInput.focus();
+  logout();
 });
 
 els.refreshButton.addEventListener("click", () => {
@@ -63,24 +123,17 @@ els.windowSelect.addEventListener("change", () => {
 });
 
 async function loadDashboard() {
-  const token = readToken();
-  if (!token) {
-    els.authPanel.hidden = false;
-    setAuthMessage("Token required.");
-    return;
-  }
-
   setLoading();
   const since = new Date(Date.now() - Number(els.windowSelect.value) * 60 * 60 * 1000).toISOString();
 
   try {
     const response = await fetch(`/api/dashboard?since=${encodeURIComponent(since)}&limit=120`, {
-      headers: { authorization: token.toLowerCase().startsWith("bearer ") ? token : `Bearer ${token}` }
+      credentials: "same-origin"
     });
 
     if (response.status === 401) {
       els.authPanel.hidden = false;
-      setAuthMessage("Token rejected.");
+      setAuthMessage("Session expired, sign in again.");
       return;
     }
 
@@ -161,7 +214,7 @@ function renderBreakdown(target, values) {
 function renderEvents(events) {
   els.eventsBody.replaceChildren();
   if (!events.length) {
-    els.eventsBody.append(emptyTableRow(7, "No operational events in this window."));
+    els.eventsBody.append(emptyTableRow(8, "No operational events in this window."));
     return;
   }
 
@@ -172,6 +225,7 @@ function renderEvents(events) {
     row.append(cell(event.workflow || "-"));
     row.append(cell(event.action || "-"));
     row.append(cell(event.status || "-", `status-${event.status || ""}`));
+    row.append(cell(event.details?.actor || "-"));
     row.append(cell(event.message || "-", "truncate"));
     row.append(cell(event.source_name || event.source_url || "-", "truncate"));
     els.eventsBody.append(row);
@@ -204,10 +258,6 @@ function setLoading() {
 
 function setAuthMessage(message) {
   els.authMessage.textContent = message;
-}
-
-function readToken() {
-  return localStorage.getItem(TOKEN_KEY) || "";
 }
 
 function textSpan(value) {

@@ -26,15 +26,18 @@
           <option value="168">7d</option>
         </select>
         <button id="refresh-button" type="button">Refresh</button>
-        <button id="token-button" type="button">Token</button>
+        <span id="whoami" class="pill" hidden></span>
+        <button id="token-button" type="button">Sign out</button>
       </div>
     </header>
 
     <section id="auth-panel" class="auth-panel">
-      <label for="token-input">Dashboard token</label>
+      <label for="username-input">Username</label>
+      <input id="username-input" type="text" autocomplete="username" placeholder="sai or jon">
+      <label for="password-input">Password</label>
       <div class="token-row">
-        <input id="token-input" type="password" autocomplete="current-password" placeholder="Bearer token">
-        <button id="save-token-button" type="button">Unlock</button>
+        <input id="password-input" type="password" autocomplete="current-password" placeholder="Password">
+        <button id="save-token-button" type="button">Sign in</button>
       </div>
       <p id="auth-message" class="muted"></p>
     </section>
@@ -98,6 +101,7 @@
                 <th>Workflow</th>
                 <th>Action</th>
                 <th>Status</th>
+                <th>Actor</th>
                 <th>Message</th>
                 <th>Source</th>
               </tr>

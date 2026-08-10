@@ -1,4 +1,3 @@
-const TOKEN_KEY = "atr-bulletin-admin-token";
 const DEFAULT_CATEGORY = "Other news";
 
 const state = {
@@ -11,9 +10,11 @@ const state = {
 const els = {
   authPanel: document.querySelector("#auth-panel"),
   authMessage: document.querySelector("#auth-message"),
-  tokenInput: document.querySelector("#token-input"),
+  usernameInput: document.querySelector("#username-input"),
+  passwordInput: document.querySelector("#password-input"),
   saveTokenButton: document.querySelector("#save-token-button"),
   tokenButton: document.querySelector("#token-button"),
+  whoami: document.querySelector("#whoami"),
   refreshButton: document.querySelector("#refresh-button"),
   newButton: document.querySelector("#new-button"),
   statusTitle: document.querySelector("#status-title"),
@@ -76,32 +77,93 @@ function switchTab(name) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  const savedToken = readToken();
-  if (savedToken) {
-    els.tokenInput.value = savedToken;
-    els.authPanel.hidden = true;
-    loadItems();
-    loadOps();
-    loadAnalytics();
-  }
+  checkSession();
 });
 
 els.saveTokenButton.addEventListener("click", () => {
-  const token = els.tokenInput.value.trim();
-  if (!token) {
-    setAuthMessage("Token required.");
+  const username = els.usernameInput.value.trim();
+  const password = els.passwordInput.value;
+  if (!username || !password) {
+    setAuthMessage("Username and password required.");
     return;
   }
 
-  localStorage.setItem(TOKEN_KEY, token);
-  els.authPanel.hidden = true;
-  loadItems();
-  loadOps();
+  login(username, password);
 });
 
+els.passwordInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") els.saveTokenButton.click();
+});
+
+async function checkSession() {
+  try {
+    const response = await fetch("/api/auth/me", { credentials: "same-origin" });
+    if (response.status === 200) {
+      const payload = await response.json();
+      els.whoami.textContent = payload.username || "";
+      els.whoami.hidden = false;
+      els.authPanel.hidden = true;
+      loadItems();
+      loadOps();
+      loadAnalytics();
+      return;
+    }
+  } catch {
+    // Fall through to the login panel.
+  }
+
+  els.authPanel.hidden = false;
+  els.usernameInput.focus();
+  setAuthMessage("Sign in with your admin account.");
+}
+
+async function login(username, password) {
+  els.saveTokenButton.disabled = true;
+  setAuthMessage("Signing in...");
+
+  try {
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({ username, password })
+    });
+
+    const payload = await response.json().catch(() => ({}));
+    if (response.status === 200) {
+      els.whoami.textContent = payload.username || username;
+      els.whoami.hidden = false;
+      els.authPanel.hidden = true;
+      setAuthMessage("");
+      loadItems();
+      loadOps();
+      loadAnalytics();
+      return;
+    }
+
+    setAuthMessage(payload.error || "Sign in failed.");
+  } catch (error) {
+    setAuthMessage(error.message || "Sign in failed.");
+  } finally {
+    els.saveTokenButton.disabled = false;
+  }
+}
+
+async function logout() {
+  try {
+    await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" });
+  } catch {
+    // Best effort; the panel shows either way.
+  }
+  els.whoami.hidden = true;
+  els.whoami.textContent = "";
+  els.authPanel.hidden = false;
+  els.usernameInput.focus();
+  setAuthMessage("Signed out.");
+}
+
 els.tokenButton.addEventListener("click", () => {
-  els.authPanel.hidden = !els.authPanel.hidden;
-  els.tokenInput.focus();
+  logout();
 });
 
 els.tabPublish.addEventListener("click", () => switchTab("publish"));
@@ -149,12 +211,6 @@ els.form.addEventListener("submit", async (event) => {
 });
 
 async function loadItems() {
-  if (!readToken()) {
-    els.authPanel.hidden = false;
-    setAuthMessage("Token required.");
-    return;
-  }
-
   setStatus("Loading", "Fetching live D1 items");
 
   try {
@@ -183,12 +239,11 @@ async function loadItems() {
 }
 
 async function loadOps() {
-  if (!readToken()) return;
-
   try {
     const since = new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString();
     const response = await fetch(`/api/dashboard?since=${encodeURIComponent(since)}&limit=50`, {
-      headers: { authorization: authHeader(), accept: "application/json" }
+      headers: { accept: "application/json" },
+      credentials: "same-origin"
     });
     if (!response.ok) throw new Error(`/api/dashboard returned ${response.status}`);
     const payload = await response.json();
@@ -199,12 +254,11 @@ async function loadOps() {
 }
 
 async function loadAnalytics() {
-  if (!readToken()) return;
-
   try {
     const days = els.analyticsWindowSelect.value || "7";
     const response = await fetch(`/api/analytics?days=${days}&_=${Date.now()}`, {
-      headers: { authorization: authHeader(), accept: "application/json" }
+      headers: { accept: "application/json" },
+      credentials: "same-origin"
     });
     if (!response.ok) throw new Error(`/api/analytics returned ${response.status}`);
     const payload = await response.json();
@@ -430,8 +484,8 @@ async function mutateItem(method, payload, successLabel) {
   try {
     const response = await fetch("/api/items", {
       method,
+      credentials: "same-origin",
       headers: {
-        authorization: authHeader(),
         "content-type": "application/json",
         accept: "application/json"
       },
@@ -477,15 +531,6 @@ function setReadback(status, value) {
 
 function setAuthMessage(message) {
   els.authMessage.textContent = message;
-}
-
-function readToken() {
-  return localStorage.getItem(TOKEN_KEY) || "";
-}
-
-function authHeader() {
-  const token = readToken();
-  return token.toLowerCase().startsWith("bearer ") ? token : `Bearer ${token}`;
 }
 
 function formatNumber(value) {

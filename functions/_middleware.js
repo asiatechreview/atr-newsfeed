@@ -13,7 +13,11 @@ const DASHBOARD_PATHS = new Set([
   "/admin.css",
   "/admin.js",
   "/api/dashboard",
-  "/api/analytics"
+  "/api/analytics",
+  "/api/auth/login",
+  "/api/auth/logout",
+  "/api/auth/me",
+  "/api/auth/users"
 ]);
 
 export async function onRequest(context) {

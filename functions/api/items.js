@@ -1,4 +1,5 @@
 import { STATIC_ITEMS } from "../_data/static-items.js";
+import { isAdmin } from "../_lib/admin-auth.js";
 import { writeOperationalEvent } from "../_lib/operational-log.js";
 
 const DEFAULT_LIMIT = 50;
@@ -773,10 +774,7 @@ export async function onRequestDelete({ env, request }) {
 }
 
 function isAuthorized(env, request) {
-  const auth = request.headers.get("authorization") || "";
-  const expected = env.FEED_INGEST_TOKEN ? `Bearer ${env.FEED_INGEST_TOKEN}` : "";
-
-  return Boolean(expected && auth === expected);
+  return isAdmin(env, request);
 }
 
 async function loadD1ItemsWithoutHeadline({ env, category }) {

@@ -1,3 +1,5 @@
+import { getActor } from "./admin-auth.js";
+
 export async function ensureOperationalEventsTable(env) {
   if (!env?.ATR_FEED_DB) return;
 
@@ -40,6 +42,9 @@ export async function writeOperationalEvent(env, request, event = {}) {
   try {
     await ensureOperationalEventsTable(env);
     const cf = request?.cf || {};
+    const actor = request ? await getActor(env, request).catch(() => null) : null;
+    const details = { ...(event.details || {}) };
+    if (actor) details.actor = actor;
     await env.ATR_FEED_DB.prepare(
       `INSERT INTO operational_events
         (workflow, action, status, severity, http_status, item_id, source_name, source_url, message, details_json, user_agent, country, colo)
@@ -55,7 +60,7 @@ export async function writeOperationalEvent(env, request, event = {}) {
         clean(event.source_name) || null,
         clean(event.source_url) || null,
         clean(event.message).slice(0, 800),
-        safeDetails(event.details),
+        safeDetails(details),
         (request?.headers?.get("user-agent") || "").slice(0, 500),
         typeof cf.country === "string" ? cf.country : null,
         typeof cf.colo === "string" ? cf.colo : null

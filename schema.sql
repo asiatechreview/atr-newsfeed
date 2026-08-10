@@ -79,3 +79,19 @@ ON operational_events (status, occurred_at DESC);
 
 CREATE INDEX IF NOT EXISTS idx_operational_events_workflow
 ON operational_events (workflow, occurred_at DESC);
+
+CREATE TABLE IF NOT EXISTS admin_users (
+  username TEXT PRIMARY KEY,
+  password_hash TEXT NOT NULL,
+  role TEXT NOT NULL DEFAULT 'super_admin',
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
+);
+
+CREATE TABLE IF NOT EXISTS admin_sessions (
+  token TEXT PRIMARY KEY,
+  username TEXT NOT NULL,
+  expires_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_admin_sessions_expires
+ON admin_sessions (expires_at);

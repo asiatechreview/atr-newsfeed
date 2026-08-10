@@ -1,4 +1,5 @@
 import { classifyBot, ensureCrawlerAccessLogTable } from "../_lib/crawler-log.js";
+import { isAdmin } from "../_lib/admin-auth.js";
 
 const DEFAULT_LIMIT = 100;
 const MAX_LIMIT = 500;
@@ -67,10 +68,7 @@ function summarize(logs) {
 }
 
 function isAuthorized(env, request) {
-  const auth = request.headers.get("authorization") || "";
-  const expected = env.FEED_INGEST_TOKEN ? `Bearer ${env.FEED_INGEST_TOKEN}` : "";
-
-  return Boolean(expected && auth === expected);
+  return isAdmin(env, request);
 }
 
 function clean(value) {

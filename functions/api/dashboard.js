@@ -1,3 +1,4 @@
+import { isAdmin } from "../_lib/admin-auth.js";
 import { ensureCrawlerAccessLogTable } from "../_lib/crawler-log.js";
 import { ensureMarketSnapshotTable } from "../_lib/markets.js";
 import { ensureOperationalEventsTable, summarizeOperationalEvents } from "../_lib/operational-log.js";
@@ -370,10 +371,7 @@ function rowsToObject(rows = [], key) {
 }
 
 function isAuthorized(env, request) {
-  const auth = request.headers.get("authorization") || "";
-  const expected = env.FEED_INGEST_TOKEN ? `Bearer ${env.FEED_INGEST_TOKEN}` : "";
-
-  return Boolean(expected && auth === expected);
+  return isAdmin(env, request);
 }
 
 function parseJson(value) {
