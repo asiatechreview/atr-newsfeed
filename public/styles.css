@@ -1290,16 +1290,16 @@ footer {
 
 /* iPad/tablet (641-1024px): slightly larger default reading text */
 @media (min-width: 641px) and (max-width: 1024px) {
-  .headline { font-size: calc(20px * var(--font-scale, 1)); }
-  .blurb { font-size: calc(16px * var(--font-scale, 1)); }
-  .meta { font-size: calc(13px * var(--font-scale, 1)); }
-  .tags { font-size: calc(11px * var(--font-scale, 1)); }
-  .item-primary-tag { font-size: calc(13px * var(--font-scale, 1)); }
-  .section-title, .eyebrow { font-size: calc(13px * var(--font-scale, 1)); }
-  .dek { font-size: calc(16px * var(--font-scale, 1)); }
-  .status { font-size: calc(13px * var(--font-scale, 1)); }
-  .date { font-size: calc(13px * var(--font-scale, 1)); }
-  .topbar h2 { font-size: calc(26px * var(--font-scale, 1)); }
-  .newsletter-promo h3 { font-size: calc(21px * var(--font-scale, 1)); }
-  .newsletter-promo p:not(.eyebrow) { font-size: calc(16px * var(--font-scale, 1)); }
+  .headline { font-size: calc(21px * var(--font-scale, 1)); }
+  .blurb { font-size: calc(17px * var(--font-scale, 1)); }
+  .meta { font-size: calc(14px * var(--font-scale, 1)); }
+  .tags { font-size: calc(12px * var(--font-scale, 1)); }
+  .item-primary-tag { font-size: calc(14px * var(--font-scale, 1)); }
+  .section-title, .eyebrow { font-size: calc(14px * var(--font-scale, 1)); }
+  .dek { font-size: calc(17px * var(--font-scale, 1)); }
+  .status { font-size: calc(14px * var(--font-scale, 1)); }
+  .date { font-size: calc(14px * var(--font-scale, 1)); }
+  .topbar h2 { font-size: calc(27px * var(--font-scale, 1)); }
+  .newsletter-promo h3 { font-size: calc(22px * var(--font-scale, 1)); }
+  .newsletter-promo p:not(.eyebrow) { font-size: calc(17px * var(--font-scale, 1)); }
 }
