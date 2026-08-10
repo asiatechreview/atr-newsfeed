@@ -1,11 +1,11 @@
-const TOKEN_KEY = "atr-bulletin-dashboard-token";
-
 const els = {
   authPanel: document.querySelector("#auth-panel"),
   authMessage: document.querySelector("#auth-message"),
-  tokenInput: document.querySelector("#token-input"),
+  usernameInput: document.querySelector("#username-input"),
+  passwordInput: document.querySelector("#password-input"),
   saveTokenButton: document.querySelector("#save-token-button"),
   tokenButton: document.querySelector("#token-button"),
+  whoami: document.querySelector("#whoami"),
   refreshButton: document.querySelector("#refresh-button"),
   windowSelect: document.querySelector("#window-select"),
   overallStatus: document.querySelector("#overall-status"),
