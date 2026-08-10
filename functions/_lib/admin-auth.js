@@ -67,9 +67,21 @@ export async function sessionUser(env, request) {
   const token = sessionTokenFromRequest(request);
   if (!token || !env?.ATR_FEED_DB) return null;
   const row = await env.ATR_FEED_DB.prepare(
-    "SELECT username, role, expires_at FROM admin_sessions WHERE token = ? AND expires_at > ?"
+    "SELECT username, expires_at FROM admin_sessions WHERE token = ? AND expires_at > ?"
   ).bind(token, new Date().toISOString()).first();
-  return row?.username ? { username: row.username, role: row.role || "super_admin" } : null;
+  if (!row?.username) return null;
+
+  let role = "super_admin";
+  try {
+    const user = await env.ATR_FEED_DB.prepare(
+      "SELECT role FROM admin_users WHERE username = ?"
+    ).bind(row.username).first();
+    if (user?.role) role = user.role;
+  } catch {
+    // Role lookup must never break session validation.
+  }
+
+  return { username: row.username, role };
 }
 
 // Returns the acting identity: username for a valid session,
