@@ -132,9 +132,13 @@ h2 {
 .menu-toggle {
   display: none;
 }
+
+body.logged-out .admin-header,
 body.logged-out #publish-view,
 body.logged-out #ops-view,
-body.logged-out #analytics-view {
+body.logged-out #analytics-view,
+body.logged-out #newsletter-view,
+body.logged-out #sponsors-view {
   display: none;
 }
 
