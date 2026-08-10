@@ -179,7 +179,8 @@ const failures = [];
 const sourceAliases = new Map([
   ["ft.com", "FT"],
   ["wsj.com", "WSJ"],
-  ["scmp.com", "SCMP"]
+  ["scmp.com", "SCMP"],
+  ["technode.global", "TNGlobal"]
 ]);
 
 STATIC_ITEMS.forEach((item, index) => {
