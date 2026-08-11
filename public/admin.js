@@ -49,11 +49,13 @@ const els = {
   opsCount: document.querySelector("#ops-count"),
   opsBody: document.querySelector("#ops-body"),
   tabPublish: document.querySelector("#tab-publish"),
+  tabLive: document.querySelector("#tab-live"),
   tabOps: document.querySelector("#tab-ops"),
   tabAnalytics: document.querySelector("#tab-analytics"),
   tabNewsletter: document.querySelector("#tab-newsletter"),
   tabSponsors: document.querySelector("#tab-sponsors"),
   publishView: document.querySelector("#publish-view"),
+  liveView: document.querySelector("#live-view"),
   opsView: document.querySelector("#ops-view"),
   analyticsView: document.querySelector("#analytics-view"),
   newsletterView: document.querySelector("#newsletter-view"),
@@ -86,16 +88,19 @@ const els = {
 
 function switchTab(name) {
   const publish = name === "publish";
+  const live = name === "live";
   const ops = name === "ops";
   const analytics = name === "analytics";
   const newsletter = name === "newsletter";
   const sponsors = name === "sponsors";
   els.publishView.hidden = !publish;
+  els.liveView.hidden = !live;
   els.opsView.hidden = !ops;
   els.analyticsView.hidden = !analytics;
   els.newsletterView.hidden = !newsletter;
   els.sponsorsView.hidden = !sponsors;
   els.tabPublish.classList.toggle("active", publish);
+  els.tabLive.classList.toggle("active", live);
   els.tabOps.classList.toggle("active", ops);
   els.tabAnalytics.classList.toggle("active", analytics);
   els.tabNewsletter.classList.toggle("active", newsletter);
@@ -103,6 +108,7 @@ function switchTab(name) {
 
   const pageTitles = {
     publish: ["Publish", "Create and manage bulletin items"],
+    live: ["Live Items", "Browse and search published items"],
     ops: ["Ingest Log", "Automation and manual runs"],
     analytics: ["Analytics", "Traffic and engagement"],
     newsletter: ["Newsletter", "Homepage latest-post card"],
@@ -169,6 +175,7 @@ els.tokenButton.addEventListener("click", () => {
 });
 
 els.tabPublish.addEventListener("click", () => switchTab("publish"));
+els.tabLive.addEventListener("click", () => switchTab("live"));
 els.tabOps.addEventListener("click", () => switchTab("ops"));
 els.tabAnalytics.addEventListener("click", () => switchTab("analytics"));
 els.tabNewsletter.addEventListener("click", () => switchTab("newsletter"));
@@ -194,7 +201,7 @@ els.refreshButton.addEventListener("click", () => {
 const mobileRefreshButton = document.querySelector("#mobile-refresh-button");
 const mobileNewButton = document.querySelector("#mobile-new-button");
 const itemsToggle = document.querySelector("#items-toggle");
-const itemPanel = document.querySelector("#publish-view .card");
+const itemPanel = document.querySelector("#live-view .card");
 
 if (mobileRefreshButton) {
   mobileRefreshButton.addEventListener("click", () => {
@@ -205,7 +212,10 @@ if (mobileRefreshButton) {
 }
 
 if (mobileNewButton) {
-  mobileNewButton.addEventListener("click", startNewItem);
+  mobileNewButton.addEventListener("click", () => {
+    startNewItem();
+    switchTab("publish");
+  });
 }
 
 if (itemsToggle && itemPanel) {
@@ -219,7 +229,10 @@ if (itemsToggle && itemPanel) {
 }
 els.analyticsWindowSelect.addEventListener("change", () => loadAnalytics());
 els.searchInput.addEventListener("input", filterItems);
-els.newButton.addEventListener("click", startNewItem);
+els.newButton.addEventListener("click", () => {
+  startNewItem();
+  switchTab("publish");
+});
 els.resetButton.addEventListener("click", () => {
   if (state.mode === "new") startNewItem();
   else if (state.selected) selectItem(state.selected.id);
@@ -447,7 +460,10 @@ function renderList() {
     button.type = "button";
     button.className = `item-button${state.selected?.id === item.id ? " active" : ""}`;
     button.dataset.id = item.id;
-    button.addEventListener("click", () => selectItem(item.id));
+    button.addEventListener("click", () => {
+      selectItem(item.id);
+      switchTab("publish");
+    });
 
     const title = document.createElement("strong");
     title.textContent = item.headline || item.title || firstWords(item.blurb, 12);

@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/admin.css?v=20260811-redesign">
+  <link rel="stylesheet" href="/admin.css?v=20260811-live-section">
 </head>
 <body class="logged-out">
   <div class="app">
@@ -25,6 +25,10 @@
         <button id="tab-publish" class="nav-item active" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
           Publish
+        </button>
+        <button id="tab-live" class="nav-item" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
+          Live Items
         </button>
         <button id="tab-newsletter" class="nav-item" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
@@ -138,17 +142,7 @@
             </article>
           </div>
 
-          <div class="grid-2">
-            <div class="card">
-              <div class="card-head">
-                <div class="card-title">Live Items <small id="list-count">-</small></div>
-                <button id="items-toggle" class="btn btn-ghost" style="padding:6px 10px;font-size:12px" type="button" aria-expanded="true">Hide list</button>
-              </div>
-              <input id="search-input" class="input" type="search" placeholder="Search URL, title, blurb or source">
-              <div id="item-list" class="item-list"></div>
-            </div>
-
-            <div class="card">
+          <div class="card">
               <div class="card-head">
                 <div class="card-title" id="editor-title">Edit Item <small id="editor-mode">No item</small></div>
               </div>
@@ -202,7 +196,18 @@
                 <summary>Readback <span id="readback-status" class="pill">Idle</span></summary>
                 <pre id="readback-output">Select an item to edit.</pre>
               </details>
+          </div>
+        </section>
+
+        <!-- ============ LIVE ITEMS ============ -->
+        <section id="live-view" hidden>
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">Live Items <small id="list-count">-</small></div>
+              <button id="items-toggle" class="btn btn-ghost" style="padding:6px 10px;font-size:12px" type="button" aria-expanded="true">Hide list</button>
             </div>
+            <input id="search-input" class="input" type="search" placeholder="Search URL, title, blurb or source">
+            <div id="item-list" class="item-list"></div>
           </div>
         </section>
 
@@ -343,6 +348,6 @@
     <button id="mobile-refresh-button" type="button">Refresh</button>
   </nav>
 
-  <script src="/admin.js?v=20260811-no-tags" defer></script>
+  <script src="/admin.js?v=20260811-live-section" defer></script>
 </body>
 </html>
