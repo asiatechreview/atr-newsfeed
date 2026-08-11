@@ -44,7 +44,7 @@ const SOURCE_NAME_MAP = {
   "bloomberg.com": "Bloomberg",
   "nytimes.com": "NYTimes",
   "wsj.com": "WSJ",
-  "ft.com": "Financial Times",
+  "ft.com": "FT",
   "techcrunch.com": "TechCrunch",
   "techmeme.com": "Techmeme",
   "economist.com": "The Economist",
