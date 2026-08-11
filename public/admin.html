@@ -9,292 +9,345 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/admin.css?v=20260810-splash-fix">
+  <link rel="stylesheet" href="/admin.css?v=20260811-redesign">
 </head>
 <body class="logged-out">
-  <main class="admin-shell">
-    <header class="admin-header">
-      <div class="admin-heading">
-        <p class="eyebrow">Asia Tech Review</p>
-        <h1>Bulletin Admin</h1>
+  <div class="app">
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-eyebrow">Asia Tech Review</div>
+        <div class="brand-name">Bulletin Admin</div>
       </div>
-      <button id="menu-toggle" class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="admin-toolbar" hidden>
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
-      </button>
-      <nav id="admin-toolbar" class="toolbar" aria-label="Admin actions">
-        <a href="/dashboard">Ops</a>
-        <a href="/">Site</a>
-        <button id="tab-publish" class="tab-button active" type="button">Publish</button>
-        <button id="tab-ops" class="tab-button" type="button">Ingest Log</button>
-        <button id="tab-analytics" class="tab-button" type="button">Analytics</button>
-        <button id="tab-newsletter" class="tab-button" type="button">Newsletter</button>
-        <button id="tab-sponsors" class="tab-button" type="button">Sponsors</button>
-        <button id="new-button" type="button">New Item</button>
-        <button id="refresh-button" type="button">Refresh</button>
-        <span id="whoami" class="pill" hidden></span>
-        <button id="token-button" type="button">Sign out</button>
-      </nav>
-    </header>
 
-    <section id="auth-panel" class="auth-panel">
-      <div class="splash-card">
-        <p class="eyebrow">Asia Tech Review</p>
-        <h1 class="auth-title">Sign in</h1>
-        <form id="login-form" method="post" action="/api/auth/login">
-          <input type="hidden" name="next" value="/admin">
-          <div class="login-fields">
-            <div class="input-wrap">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              <input id="username-input" name="username" type="text" autocomplete="username" placeholder="Username" required>
-            </div>
-            <div class="input-wrap">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
-              <input id="password-input" name="password" type="password" autocomplete="current-password" placeholder="Password" required>
-            </div>
-          </div>
-          <button id="save-token-button" class="login-button" type="submit">Sign in</button>
-        </form>
-        <p id="auth-message" class="muted"></p>
+      <div class="nav-group">
+        <div class="nav-label">Content</div>
+        <button id="tab-publish" class="nav-item active" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          Publish
+        </button>
+        <button id="tab-newsletter" class="nav-item" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+          Newsletter
+        </button>
+        <button id="tab-sponsors" class="nav-item" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Sponsors
+        </button>
       </div>
-    </section>
 
-    <section id="publish-view">
-      <section class="status-strip" aria-live="polite">
-        <article class="metric">
-          <span class="metric-label">Status</span>
-          <strong id="status-title">Locked</strong>
-          <span id="status-detail" class="metric-detail">Enter token</span>
-        </article>
-        <article class="metric">
-          <span class="metric-label">Loaded Items</span>
-          <strong id="loaded-count">-</strong>
-          <span id="filtered-count" class="metric-detail">-</span>
-        </article>
-        <article class="metric">
-          <span class="metric-label">Selected</span>
-          <strong id="selected-id">-</strong>
-          <span id="selected-detail" class="metric-detail">-</span>
-        </article>
-      </section>
+      <div class="nav-group">
+        <div class="nav-label">Insights</div>
+        <button id="tab-analytics" class="nav-item" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-6"/></svg>
+          Analytics
+        </button>
+        <button id="tab-ops" class="nav-item" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="m7 13 3 3 3-3"/></svg>
+          Ingest Log
+        </button>
+        <a class="nav-item" href="/dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>
+          Ops
+        </a>
+        <a class="nav-item" href="/" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>
+          View site
+        </a>
+      </div>
 
-      <section class="admin-grid">
-        <aside class="panel item-panel">
-          <div class="panel-head">
-            <h2>Live Items</h2>
-            <div class="panel-head-actions">
-              <span id="list-count" class="pill">-</span>
-              <button id="items-toggle" class="items-toggle" type="button" aria-expanded="true">Hide list</button>
-            </div>
+      <div class="sidebar-foot">
+        <div class="user">
+          <div class="avatar" id="whoami-avatar" hidden>?</div>
+          <div class="user-meta">
+            <div class="user-name" id="whoami" hidden>sai</div>
+            <div class="user-role">Super admin</div>
           </div>
-          <label class="field-label" for="search-input">Search URL, title, blurb or source</label>
-          <input id="search-input" class="search-input" type="search" placeholder="Bloomberg, Qwen, item id...">
-          <div id="item-list" class="item-list"></div>
-        </aside>
+        </div>
+        <button id="token-button" class="signout" type="button">Sign out</button>
+      </div>
+    </aside>
+    <div class="scrim" id="scrim" hidden></div>
 
-        <section class="panel editor-panel">
-          <div class="panel-head">
-            <h2 id="editor-title">Edit Item</h2>
-            <span id="editor-mode" class="pill">No item</span>
+    <!-- ============ MAIN ============ -->
+    <div class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="hamburger" id="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="sidebar">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+          </button>
+          <div>
+            <h1 id="page-title">Publish</h1>
+            <div class="topbar-sub" id="page-sub">Create and manage bulletin items</div>
           </div>
+        </div>
+        <div class="topbar-actions">
+          <button id="refresh-button" class="btn btn-ghost" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+            <span>Refresh</span>
+          </button>
+          <button id="new-button" class="btn btn-primary" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            New Item
+          </button>
+        </div>
+      </header>
 
-          <form id="item-form">
-            <div class="form-grid">
-              <label>
-                <span>Item ID</span>
-                <input id="item-id" type="text" readonly>
-              </label>
-              <label>
-                <span>Category</span>
-                <input id="category-input" type="text" required>
-              </label>
-            </div>
+      <main class="content">
 
-            <label>
-              <span>Headline</span>
-              <input id="headline-input" type="text" maxlength="120" placeholder="Clean ATR-style scan title">
-            </label>
-
-            <label>
-              <span>Blurb</span>
-              <textarea id="blurb-input" rows="8" required placeholder="Bulletin blurb"></textarea>
-            </label>
-
-            <div class="form-grid">
-              <label>
-                <span>Source Name</span>
-                <input id="source-name-input" type="text" required>
-              </label>
-              <label>
-                <span>Published At</span>
-                <input id="published-at-input" type="datetime-local">
-              </label>
-            </div>
-
-            <label>
-              <span>Source URL</span>
-              <input id="source-url-input" type="url" required>
-            </label>
-
-            <div class="actions">
-              <button id="save-button" type="submit">Save</button>
-              <button id="remove-button" class="danger" type="button">Remove</button>
-              <button id="reset-button" type="button">Reset</button>
-            </div>
-          </form>
-
-          <section class="panel nested-panel">
-            <div class="panel-head">
-              <h2>Readback</h2>
-              <span id="readback-status" class="pill">Idle</span>
-            </div>
-            <pre id="readback-output">Select an item to edit.</pre>
-          </section>
+        <!-- ============ LOGIN SPLASH ============ -->
+        <section id="auth-panel" class="auth-panel">
+          <div class="splash-card">
+            <p class="eyebrow">Asia Tech Review</p>
+            <h1 class="auth-title">Sign in</h1>
+            <form id="login-form" method="post" action="/api/auth/login">
+              <input type="hidden" name="next" value="/admin">
+              <div class="login-fields">
+                <div class="input-wrap">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  <input id="username-input" name="username" type="text" autocomplete="username" placeholder="Username" required>
+                </div>
+                <div class="input-wrap">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+                  <input id="password-input" name="password" type="password" autocomplete="current-password" placeholder="Password" required>
+                </div>
+              </div>
+              <button id="save-token-button" class="login-button" type="submit">Sign in</button>
+            </form>
+            <p id="auth-message" class="muted"></p>
+          </div>
         </section>
-      </section>
-    </section>
 
-    <section id="analytics-view" hidden>
-      <section class="status-strip" aria-live="polite">
-        <article class="metric">
-          <span class="metric-label">Visits</span>
-          <strong id="analytics-visits">-</strong>
-          <span id="analytics-window" class="metric-detail">-</span>
-        </article>
-        <article class="metric">
-          <span class="metric-label">Page Views</span>
-          <strong id="analytics-pageviews">-</strong>
-          <span id="analytics-pv-detail" class="metric-detail">-</span>
-        </article>
-        <article class="metric">
-          <span class="metric-label">Data Since</span>
-          <strong id="analytics-since">-</strong>
-          <span id="analytics-since-detail" class="metric-detail">-</span>
-        </article>
-      </section>
+        <!-- ============ PUBLISH ============ -->
+        <section id="publish-view">
+          <div class="stats">
+            <article class="stat">
+              <span class="stat-label">Status</span>
+              <strong id="status-title" class="stat-value stat-ok">Locked</strong>
+              <span id="status-detail" class="stat-note">Enter token</span>
+            </article>
+            <article class="stat">
+              <span class="stat-label">Loaded Items</span>
+              <strong id="loaded-count" class="stat-value">-</strong>
+              <span id="filtered-count" class="stat-note">-</span>
+            </article>
+            <article class="stat">
+              <span class="stat-label">Selected</span>
+              <strong id="selected-id" class="stat-value">-</strong>
+              <span id="selected-detail" class="stat-note">-</span>
+            </article>
+          </div>
 
-      <section class="panel ops-panel">
-        <div class="panel-head">
-          <h2>Daily Traffic</h2>
-          <span id="analytics-days" class="pill">-</span>
-        </div>
-        <div class="window-row">
-          <label class="field-label" for="analytics-window-select">Window</label>
-          <select id="analytics-window-select">
-            <option value="7">7 days</option>
-            <option value="14">14 days</option>
-            <option value="30">30 days</option>
-          </select>
-        </div>
-        <div id="analytics-breakdown" class="breakdown"></div>
-      </section>
-    </section>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head">
+                <div class="card-title">Live Items <small id="list-count">-</small></div>
+                <button id="items-toggle" class="btn btn-ghost" style="padding:6px 10px;font-size:12px" type="button" aria-expanded="true">Hide list</button>
+              </div>
+              <input id="search-input" class="input" type="search" placeholder="Search URL, title, blurb or source">
+              <div id="item-list" class="item-list"></div>
+            </div>
 
-    <section id="newsletter-view" hidden>
-      <section class="panel ops-panel">
-        <div class="panel-head">
-          <h2>Latest Newsletter Card</h2>
-          <span id="newsletter-status" class="pill">Not loaded</span>
-        </div>
-        <form id="newsletter-form" class="newsletter-form">
-          <label>
-            <span>Headline</span>
-            <input id="newsletter-title" type="text" maxlength="120" placeholder="Latest Substack post title">
-          </label>
-          <label>
-            <span>Blurb</span>
-            <textarea id="newsletter-blurb" rows="4" placeholder="Short summary shown on the homepage card"></textarea>
-          </label>
-          <div class="form-grid">
-            <label>
-              <span>Post URL</span>
-              <input id="newsletter-url" type="url" placeholder="https://www.asiatechreview.com/p/...">
-            </label>
-            <label>
-              <span>Image URL</span>
-              <input id="newsletter-image" type="url" placeholder="https://substackcdn.com/...">
-            </label>
+            <div class="card">
+              <div class="card-head">
+                <div class="card-title" id="editor-title">Edit Item <small id="editor-mode">No item</small></div>
+              </div>
+
+              <form id="item-form">
+                <div class="row">
+                  <div class="field">
+                    <label for="item-id">Item ID</label>
+                    <input id="item-id" class="input" type="text" readonly>
+                  </div>
+                  <div class="field">
+                    <label for="category-input">Category</label>
+                    <input id="category-input" class="input" type="text" required placeholder="e.g. Markets, AI, Crypto">
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label for="headline-input">Headline</label>
+                  <input id="headline-input" class="input" type="text" maxlength="120" placeholder="Clean ATR-style scan title">
+                </div>
+
+                <div class="field">
+                  <label for="blurb-input">Blurb</label>
+                  <textarea id="blurb-input" class="textarea" rows="8" required placeholder="Bulletin blurb"></textarea>
+                </div>
+
+                <div class="row">
+                  <div class="field">
+                    <label for="source-name-input">Source name</label>
+                    <input id="source-name-input" class="input" type="text" required>
+                  </div>
+                  <div class="field">
+                    <label for="published-at-input">Published at</label>
+                    <input id="published-at-input" class="input" type="datetime-local">
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label for="source-url-input">Source URL</label>
+                  <input id="source-url-input" class="input" type="url" required>
+                </div>
+
+                <div class="field">
+                  <label for="tags-input">Tags</label>
+                  <input id="tags-input" class="input" type="text" placeholder="Comma-separated tags">
+                </div>
+
+                <div class="form-actions">
+                  <button id="save-button" class="btn btn-ghost" type="submit">Save</button>
+                  <button id="remove-button" class="btn btn-danger" type="button">Remove</button>
+                  <button id="reset-button" class="btn btn-ghost" type="button">Reset</button>
+                </div>
+              </form>
+
+              <details class="readback">
+                <summary>Readback <span id="readback-status" class="pill">Idle</span></summary>
+                <pre id="readback-output">Select an item to edit.</pre>
+              </details>
+            </div>
           </div>
-          <div class="actions">
-            <button id="newsletter-save" type="submit">Save card</button>
-            <button id="newsletter-reload" type="button">Reload from Substack</button>
-          </div>
-        </form>
-        <section class="panel nested-panel">
-          <div class="panel-head">
-            <h2>Readback</h2>
-            <span id="newsletter-readback-status" class="pill">Idle</span>
-          </div>
-          <pre id="newsletter-readback-output">Load the newsletter card to edit it.</pre>
         </section>
-      </section>
-    </section>
 
-    <section id="sponsors-view" hidden>
-      <section class="panel ops-panel">
-        <div class="panel-head">
-          <h2>Sponsors</h2>
-          <span class="pill">Placeholder, not live</span>
-        </div>
-        <p class="muted">Sponsor blurbs are saved here but not shown on the public site yet.</p>
-        <div id="sponsors-list" class="sponsors-list"></div>
-        <div class="actions">
-          <button id="sponsor-add" type="button">Add sponsor</button>
-          <button id="sponsors-save" type="button">Save sponsors</button>
-        </div>
-        <section class="panel nested-panel">
-          <div class="panel-head">
-            <h2>Readback</h2>
-            <span id="sponsors-readback-status" class="pill">Idle</span>
+        <!-- ============ ANALYTICS ============ -->
+        <section id="analytics-view" hidden>
+          <div class="stats">
+            <article class="stat">
+              <span class="stat-label">Visits</span>
+              <strong id="analytics-visits" class="stat-value">-</strong>
+              <span id="analytics-window" class="stat-note">-</span>
+            </article>
+            <article class="stat">
+              <span class="stat-label">Page Views</span>
+              <strong id="analytics-pageviews" class="stat-value">-</strong>
+              <span id="analytics-pv-detail" class="stat-note">-</span>
+            </article>
+            <article class="stat">
+              <span class="stat-label">Data Since</span>
+              <strong id="analytics-since" class="stat-value">-</strong>
+              <span id="analytics-since-detail" class="stat-note">-</span>
+            </article>
           </div>
-          <pre id="sponsors-readback-output">Load sponsors to edit them.</pre>
+
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">Daily Traffic <small id="analytics-days">-</small></div>
+              <select id="analytics-window-select" class="input" style="width:auto">
+                <option value="7">7 days</option>
+                <option value="14">14 days</option>
+                <option value="30">30 days</option>
+              </select>
+            </div>
+            <div id="analytics-breakdown" class="breakdown"></div>
+          </div>
         </section>
-      </section>
-    </section>
 
-    <section id="ops-view" hidden>
-      <section class="status-strip" aria-live="polite">
-        <article class="metric">
-          <span class="metric-label">Deploy</span>
-          <strong id="deploy-sha">-</strong>
-          <span id="deploy-detail" class="metric-detail">-</span>
-        </article>
-        <article class="metric">
-          <span class="metric-label">Ingest Failures</span>
-          <strong id="ingest-failures">-</strong>
-          <span id="stranded-detail" class="metric-detail">-</span>
-        </article>
-      </section>
+        <!-- ============ NEWSLETTER ============ -->
+        <section id="newsletter-view" hidden>
+          <div class="card" style="max-width:760px">
+            <div class="card-head">
+              <div class="card-title">Latest Newsletter Card <small>shown on the bulletin homepage</small></div>
+              <span id="newsletter-status" class="pill">Not loaded</span>
+            </div>
+            <form id="newsletter-form" class="newsletter-form">
+              <div class="field">
+                <label for="newsletter-title">Headline</label>
+                <input id="newsletter-title" class="input" type="text" maxlength="120" placeholder="Latest Substack post title">
+              </div>
+              <div class="field">
+                <label for="newsletter-blurb">Blurb</label>
+                <textarea id="newsletter-blurb" class="textarea" rows="4" placeholder="Short summary shown on the homepage card"></textarea>
+              </div>
+              <div class="row">
+                <div class="field">
+                  <label for="newsletter-url">Post URL</label>
+                  <input id="newsletter-url" class="input" type="url" placeholder="https://www.asiatechreview.com/p/...">
+                </div>
+                <div class="field">
+                  <label for="newsletter-image">Image URL</label>
+                  <input id="newsletter-image" class="input" type="url" placeholder="https://substackcdn.com/...">
+                </div>
+              </div>
+              <div class="form-actions">
+                <button id="newsletter-save" class="btn btn-primary" type="submit">Save card</button>
+                <button id="newsletter-reload" class="btn btn-ghost" type="button">Reload from Substack</button>
+              </div>
+            </form>
+            <details class="readback">
+              <summary>Readback <span id="newsletter-readback-status" class="pill">Idle</span></summary>
+              <pre id="newsletter-readback-output">Load the newsletter card to edit it.</pre>
+            </details>
+          </div>
+        </section>
 
-      <section class="panel ops-panel">
-        <div class="panel-head">
-          <h2>Ingest Failure Log</h2>
-          <span id="ops-count" class="pill">-</span>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Time</th>
-                <th>Action</th>
-                <th>Status</th>
-                <th>HTTP</th>
-                <th>Message</th>
-                <th>Source</th>
-                <th>Posted</th>
-              </tr>
-            </thead>
-            <tbody id="ops-body"></tbody>
-          </table>
-        </div>
-      </section>
-    </section>
+        <!-- ============ SPONSORS ============ -->
+        <section id="sponsors-view" hidden>
+          <div class="card" style="max-width:760px">
+            <div class="card-head">
+              <div class="card-title">Sponsors <small>Placeholder, not live</small></div>
+              <button id="sponsor-add" class="btn btn-ghost" style="padding:6px 10px;font-size:12px" type="button">Add sponsor</button>
+            </div>
+            <p class="muted">Sponsor blurbs are saved here but not shown on the public site yet.</p>
+            <div id="sponsors-list" class="sponsors-list"></div>
+            <div class="form-actions">
+              <button id="sponsors-save" class="btn btn-primary" type="button">Save sponsors</button>
+            </div>
+            <details class="readback">
+              <summary>Readback <span id="sponsors-readback-status" class="pill">Idle</span></summary>
+              <pre id="sponsors-readback-output">Load sponsors to edit them.</pre>
+            </details>
+          </div>
+        </section>
 
-    <nav id="mobile-action-bar" class="mobile-action-bar" aria-label="Quick actions">
-      <button id="mobile-new-button" type="button">New Item</button>
-      <button id="mobile-refresh-button" type="button">Refresh</button>
-    </nav>
-  </main>
+        <!-- ============ OPS / INGEST LOG ============ -->
+        <section id="ops-view" hidden>
+          <div class="stats">
+            <article class="stat">
+              <span class="stat-label">Deploy</span>
+              <strong id="deploy-sha" class="stat-value">-</strong>
+              <span id="deploy-detail" class="stat-note">-</span>
+            </article>
+            <article class="stat">
+              <span class="stat-label">Ingest Failures</span>
+              <strong id="ingest-failures" class="stat-value">-</strong>
+              <span id="stranded-detail" class="stat-note">-</span>
+            </article>
+          </div>
 
-  <script src="/admin.js?v=20260810-mobile-overhaul" defer></script>
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">Ingest Failure Log <small id="ops-count">-</small></div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Action</th>
+                    <th>Status</th>
+                    <th>HTTP</th>
+                    <th>Message</th>
+                    <th>Source</th>
+                    <th>Posted</th>
+                  </tr>
+                </thead>
+                <tbody id="ops-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <nav id="mobile-action-bar" class="mobile-action-bar" aria-label="Quick actions">
+    <button id="mobile-new-button" type="button">New Item</button>
+    <button id="mobile-refresh-button" type="button">Refresh</button>
+  </nav>
+
+  <script src="/admin.js?v=20260811-redesign" defer></script>
 </body>
 </html>

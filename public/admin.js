@@ -36,6 +36,7 @@ const els = {
   blurb: document.querySelector("#blurb-input"),
   sourceName: document.querySelector("#source-name-input"),
   sourceUrl: document.querySelector("#source-url-input"),
+  tags: document.querySelector("#tags-input"),
   publishedAt: document.querySelector("#published-at-input"),
   saveButton: document.querySelector("#save-button"),
   removeButton: document.querySelector("#remove-button"),
@@ -100,6 +101,20 @@ function switchTab(name) {
   els.tabAnalytics.classList.toggle("active", analytics);
   els.tabNewsletter.classList.toggle("active", newsletter);
   els.tabSponsors.classList.toggle("active", sponsors);
+
+  const pageTitles = {
+    publish: ["Publish", "Create and manage bulletin items"],
+    ops: ["Ingest Log", "Automation and manual runs"],
+    analytics: ["Analytics", "Traffic and engagement"],
+    newsletter: ["Newsletter", "Homepage latest-post card"],
+    sponsors: ["Sponsors", "Sponsor blurbs and placements"]
+  };
+  const pageTitle = document.querySelector("#page-title");
+  const pageSub = document.querySelector("#page-sub");
+  if (pageTitle) pageTitle.textContent = pageTitles[name][0];
+  if (pageSub) pageSub.textContent = pageTitles[name][1];
+
+  closeSidebar();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -180,7 +195,7 @@ els.refreshButton.addEventListener("click", () => {
 const mobileRefreshButton = document.querySelector("#mobile-refresh-button");
 const mobileNewButton = document.querySelector("#mobile-new-button");
 const itemsToggle = document.querySelector("#items-toggle");
-const itemPanel = document.querySelector(".item-panel");
+const itemPanel = document.querySelector("#publish-view .card");
 
 if (mobileRefreshButton) {
   mobileRefreshButton.addEventListener("click", () => {
@@ -196,9 +211,11 @@ if (mobileNewButton) {
 
 if (itemsToggle && itemPanel) {
   itemsToggle.addEventListener("click", () => {
-    const open = itemPanel.classList.toggle("open");
-    itemsToggle.textContent = open ? "Hide list" : "Show list";
-    itemsToggle.setAttribute("aria-expanded", open ? "true" : "false");
+    const list = document.querySelector("#item-list");
+    const open = list ? !list.hidden : true;
+    if (list) list.hidden = open;
+    itemsToggle.textContent = open ? "Show list" : "Hide list";
+    itemsToggle.setAttribute("aria-expanded", open ? "false" : "true");
   });
 }
 els.analyticsWindowSelect.addEventListener("change", () => loadAnalytics());
@@ -483,6 +500,7 @@ function fillForm(item) {
   els.blurb.value = item.blurb || "";
   els.sourceName.value = item.source_name || "";
   els.sourceUrl.value = item.source_url || "";
+  els.tags.value = Array.isArray(item.tags) ? item.tags.join(", ") : (item.tags || "");
   els.publishedAt.value = toLocalDateTime(item.published_at);
   els.removeButton.disabled = state.mode === "new";
 }
@@ -493,7 +511,8 @@ function collectForm() {
     blurb: els.blurb.value.trim(),
     sourceName: els.sourceName.value.trim(),
     sourceUrl: els.sourceUrl.value.trim(),
-    category: els.category.value.trim() || DEFAULT_CATEGORY
+    category: els.category.value.trim() || DEFAULT_CATEGORY,
+    tags: els.tags.value.split(",").map((tag) => tag.trim()).filter(Boolean)
   };
 
   const publishedAt = fromLocalDateTime(els.publishedAt.value);
@@ -777,20 +796,33 @@ function firstWords(value, maxWords) {
 }
 
 const menuToggle = document.querySelector("#menu-toggle");
-const adminToolbar = document.querySelector("#admin-toolbar");
+const sidebar = document.querySelector("#sidebar");
+const scrim = document.querySelector("#scrim");
 
-if (menuToggle && adminToolbar) {
+function closeSidebar() {
+  if (!sidebar) return;
+  sidebar.classList.remove("open");
+  if (scrim) scrim.hidden = true;
+  if (menuToggle) {
+    menuToggle.setAttribute("aria-expanded", "false");
+    menuToggle.setAttribute("aria-label", "Open menu");
+  }
+}
+
+if (menuToggle && sidebar) {
   menuToggle.addEventListener("click", () => {
-    const open = document.body.classList.toggle("menu-open");
+    const open = sidebar.classList.toggle("open");
     menuToggle.setAttribute("aria-expanded", open ? "true" : "false");
     menuToggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
-  });
-
-  adminToolbar.addEventListener("click", (event) => {
-    if (event.target.closest("a, button")) {
-      document.body.classList.remove("menu-open");
-      menuToggle.setAttribute("aria-expanded", "false");
-      menuToggle.setAttribute("aria-label", "Open menu");
-    }
+    if (scrim) scrim.hidden = !open;
   });
 }
+
+if (scrim) {
+  scrim.addEventListener("click", closeSidebar);
+}
+
+document.querySelectorAll(".nav-item[data-close]");
+sidebar?.addEventListener("click", (event) => {
+  if (event.target.closest("a, button")) closeSidebar();
+});

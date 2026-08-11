@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS feed_items (
   category TEXT NOT NULL DEFAULT 'Other news',
   status TEXT NOT NULL DEFAULT 'published',
   telegram_message_id TEXT,
+  tags TEXT,
   published_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
   updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))

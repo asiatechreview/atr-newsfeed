@@ -228,7 +228,7 @@ export async function onRequestGet({ env, request }) {
   const category = url.searchParams.get("category");
   const date = parseDateParam(url.searchParams.get("date"));
 
-  let query = "SELECT id, headline, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at FROM feed_items WHERE status = ?";
+  let query = "SELECT id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at FROM feed_items WHERE status = ?";
   const params = ["published"];
 
   if (category) {
@@ -452,6 +452,7 @@ export async function onRequestPost({ env, request }) {
   const sourceName = clean(body.sourceName || body.source_name);
   const sourceUrl = clean(body.sourceUrl || body.source_url);
   const category = clean(body.region || body.category) || "Other news";
+  const tags = normalizeTagsInput(body.tags);
   const telegramMessageId = clean(body.telegramMessageId || body.telegram_message_id);
   const publishedAt = clean(body.publishedAt || body.published_at) || new Date().toISOString();
 
@@ -502,6 +503,7 @@ export async function onRequestPost({ env, request }) {
 
   try {
     await ensureHeadlineColumn(env);
+    await ensureTagsColumn(env);
   } catch (error) {
     await writeOperationalEvent(env, request, {
       workflow: "bulletin_ingest",
@@ -524,20 +526,20 @@ export async function onRequestPost({ env, request }) {
     if (sourceUrl) {
       result = await env.ATR_FEED_DB.prepare(
         `INSERT INTO feed_items
-          (headline, blurb, source_name, source_url, category, telegram_message_id, published_at)
-         SELECT ?, ?, ?, ?, ?, ?, ?
+          (headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at)
+         SELECT ?, ?, ?, ?, ?, ?, ?, ?
          WHERE NOT EXISTS (
            SELECT 1 FROM feed_items
            WHERE lower(source_url) = lower(?) AND status = ?
          )
-         RETURNING id, headline, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at`
+         RETURNING id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at`
       )
-        .bind(headline || null, blurb, sourceName, sourceUrl, category, telegramMessageId || null, publishedAt, sourceUrl, "published")
+        .bind(headline || null, blurb, sourceName, sourceUrl, category, tags, telegramMessageId || null, publishedAt, sourceUrl, "published")
         .first();
 
       if (!result) {
         result = await env.ATR_FEED_DB.prepare(
-          `SELECT id, headline, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at
+          `SELECT id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at
            FROM feed_items
            WHERE lower(source_url) = lower(?) AND status = ?
            ORDER BY published_at DESC, id DESC
@@ -550,11 +552,11 @@ export async function onRequestPost({ env, request }) {
     } else {
       result = await env.ATR_FEED_DB.prepare(
         `INSERT INTO feed_items
-          (headline, blurb, source_name, source_url, category, telegram_message_id, published_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?)
-         RETURNING id, headline, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at`
+          (headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+         RETURNING id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at`
       )
-        .bind(headline || null, blurb, sourceName, sourceUrl, category, telegramMessageId || null, publishedAt)
+        .bind(headline || null, blurb, sourceName, sourceUrl, category, tags, telegramMessageId || null, publishedAt)
         .first();
     }
   } catch (error) {
@@ -622,7 +624,7 @@ export async function onRequestPatch({ env, request }) {
   }
 
   const current = await env.ATR_FEED_DB.prepare(
-    "SELECT id, headline, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at FROM feed_items WHERE id = ? AND status = ?"
+    "SELECT id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at FROM feed_items WHERE id = ? AND status = ?"
   )
     .bind(id, "published")
     .first();
@@ -636,9 +638,10 @@ export async function onRequestPatch({ env, request }) {
   const sourceName = body.sourceName || body.source_name;
   const sourceUrl = body.sourceUrl || body.source_url;
   const category = body.category || body.region;
+  const tags = body.tags === undefined ? undefined : normalizeTagsInput(body.tags);
 
-  if (headline === undefined && blurb === undefined && sourceName === undefined && sourceUrl === undefined && category === undefined) {
-    return json({ error: "headline, blurb, sourceName, sourceUrl or category is required" }, 400);
+  if (headline === undefined && blurb === undefined && sourceName === undefined && sourceUrl === undefined && category === undefined && tags === undefined) {
+    return json({ error: "headline, blurb, sourceName, sourceUrl, category or tags is required" }, 400);
   }
 
   const nextHeadline = headline === undefined ? current.headline : clean(headline);
@@ -646,6 +649,7 @@ export async function onRequestPatch({ env, request }) {
   const nextSourceName = sourceName === undefined ? current.source_name : clean(sourceName);
   const nextSourceUrl = sourceUrl === undefined ? current.source_url : clean(sourceUrl);
   const nextCategory = category === undefined ? current.category : clean(category);
+  const nextTags = tags === undefined ? current.tags : tags;
 
   if (!nextBlurb) {
     return json({ error: "blurb is required" }, 400);
@@ -663,11 +667,11 @@ export async function onRequestPatch({ env, request }) {
 
   const result = await env.ATR_FEED_DB.prepare(
     `UPDATE feed_items
-       SET headline = ?, blurb = ?, source_name = ?, source_url = ?, category = ?
+       SET headline = ?, blurb = ?, source_name = ?, source_url = ?, category = ?, tags = ?
      WHERE id = ? AND status = ?
-     RETURNING id, headline, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at`
+     RETURNING id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at`
   )
-    .bind(nextHeadline || null, nextBlurb, nextSourceName, nextSourceUrl, nextCategory, id, "published")
+    .bind(nextHeadline || null, nextBlurb, nextSourceName, nextSourceUrl, nextCategory, nextTags, id, "published")
     .first();
 
   await writeOperationalEvent(env, request, {
@@ -803,6 +807,24 @@ async function ensureHeadlineColumn(env) {
   } catch {
     // D1 throws once the column already exists. The POST insert/readback below is the real verification.
   }
+}
+
+async function ensureTagsColumn(env) {
+  try {
+    await env.ATR_FEED_DB.prepare("ALTER TABLE feed_items ADD COLUMN tags TEXT").run();
+  } catch {
+    // D1 throws once the column already exists.
+  }
+}
+
+function normalizeTagsInput(value) {
+  if (Array.isArray(value)) {
+    return value.map((tag) => clean(tag)).filter(Boolean).join(", ");
+  }
+  if (typeof value === "string") {
+    return value.split(",").map((tag) => clean(tag)).filter(Boolean).join(", ");
+  }
+  return "";
 }
 
 function clean(value) {
