@@ -58,6 +58,8 @@ export async function onRequestGet({ env, request }) {
     },
     operations: {
       events: operationalEvents,
+      publishing: operationalEvents.filter((event) => event.workflow === "bulletin_ingest"),
+      other: operationalEvents.filter((event) => event.workflow !== "bulletin_ingest"),
       summary: summarizeOperationalEvents(operationalEvents),
       totals: operationalTotals
     }

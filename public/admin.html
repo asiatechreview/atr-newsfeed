@@ -432,7 +432,7 @@
 
           <div class="card">
             <div class="card-head">
-              <div class="card-title">Recent Operational Events <small id="events-total">-</small></div>
+              <div class="card-title">Publishing Events <small id="publishing-events-total">-</small></div>
             </div>
             <div class="table-wrap">
               <table>
@@ -448,7 +448,30 @@
                     <th>Source</th>
                   </tr>
                 </thead>
-                <tbody id="events-body"></tbody>
+                <tbody id="publishing-events-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">Other Events <small id="other-events-total">-</small></div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Severity</th>
+                    <th>Workflow</th>
+                    <th>Action</th>
+                    <th>Status</th>
+                    <th>Actor</th>
+                    <th>Message</th>
+                    <th>Source</th>
+                  </tr>
+                </thead>
+                <tbody id="other-events-body"></tbody>
               </table>
             </div>
           </div>
@@ -542,6 +565,6 @@
     <button id="mobile-refresh-button" type="button">Refresh</button>
   </nav>
 
-  <script src="/admin.js?v=20260811-theme" defer></script>
+  <script src="/admin.js?v=20260811-events-split" defer></script>
 </body>
 </html>

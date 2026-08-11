@@ -242,8 +242,10 @@ const els = {
   trafficBreakdown: document.querySelector("#traffic-breakdown"),
   botTotal: document.querySelector("#bot-total"),
   botBreakdown: document.querySelector("#bot-breakdown"),
-  eventsTotal: document.querySelector("#events-total"),
-  eventsBody: document.querySelector("#events-body"),
+  eventsTotal: document.querySelector("#publishing-events-total"),
+  eventsBody: document.querySelector("#publishing-events-body"),
+  otherEventsTotal: document.querySelector("#other-events-total"),
+  otherEventsBody: document.querySelector("#other-events-body"),
   logsTotal: document.querySelector("#logs-total"),
   logsBody: document.querySelector("#logs-body"),
   analyticsVisits: document.querySelector("#analytics-visits"),
@@ -694,12 +696,14 @@ function renderDashboard(payload) {
 
   els.trafficTotal.textContent = `${formatNumber(traffic.totals?.total || 0)} hits`;
   els.botTotal.textContent = `${formatNumber(traffic.totals?.total || 0)} hits`;
-  els.eventsTotal.textContent = `${formatNumber(operations.events?.length || 0)} shown`;
+  els.eventsTotal.textContent = `${formatNumber(operations.publishing?.length || 0)} shown`;
+  els.otherEventsTotal.textContent = `${formatNumber(operations.other?.length || 0)} shown`;
   els.logsTotal.textContent = `${formatNumber(traffic.logs?.length || 0)} shown`;
 
   renderBreakdown(els.trafficBreakdown, traffic.totals?.byPath || {});
   renderBreakdown(els.botBreakdown, traffic.totals?.byBot || {});
-  renderEvents(operations.events || []);
+  renderEvents(operations.publishing || [], els.eventsBody);
+  renderEvents(operations.other || [], els.otherEventsBody);
   renderLogs(traffic.logs || []);
 }
 
@@ -740,10 +744,10 @@ function renderBreakdown(target, values) {
   }
 }
 
-function renderEvents(events) {
-  els.eventsBody.replaceChildren();
+function renderEvents(events, body) {
+  body.replaceChildren();
   if (!events.length) {
-    els.eventsBody.append(emptyTableRow(8, "No operational events in this window."));
+    body.append(emptyTableRow(8, "No events in this window."));
     return;
   }
   for (const event of events) {
@@ -756,7 +760,7 @@ function renderEvents(events) {
     tr.append(cell(event.details?.actor || "-", "", "Actor"));
     tr.append(cell(event.message || "-", "truncate", "Message"));
     tr.append(cell(event.source_name || event.source_url || "-", "truncate", "Source"));
-    els.eventsBody.append(tr);
+    body.append(tr);
   }
 }
 
