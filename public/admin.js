@@ -169,6 +169,7 @@ async function checkSession() {
       els.whoami.hidden = false;
       els.authPanel.hidden = true;
       loadItems();
+      startNewItem();
       loadOps();
       loadAnalytics();
       loadSiteContent();
@@ -321,7 +322,6 @@ async function loadItems() {
     state.items = allItems;
     filterItems();
     setStatus("Ready", `Loaded ${state.items.length} public items`);
-    if (!state.selected && state.filtered[0]) selectItem(state.filtered[0].id);
   } catch (error) {
     setStatus("Error", error.message);
   }
