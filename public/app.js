@@ -247,6 +247,7 @@ let feedPollTimer = null;
 let isFetchingFeed = false;
 let newItemToastTimer = null;
 let pendingToastItem = null;
+let requestedItemId = getRequestedItemParam();
 
 function getLocalTimeZone() {
   try {
@@ -381,6 +382,11 @@ function getRequestedTagFilter() {
 function getRequestedSearchQuery() {
   const match = window.location.search.match(/[?&]q=([^&]+)/);
   return match ? decodeURIComponent(match[1].replace(/\+/g, " ")).trim() : "";
+}
+
+function getRequestedItemParam() {
+  const value = new URLSearchParams(window.location.search).get("item");
+  return value ? String(value).trim() : "";
 }
 
 function updateFeedUrl(options = {}) {
@@ -1556,6 +1562,42 @@ function readPendingToastItem() {
   });
 }
 
+function handleRequestedItem() {
+  const itemId = requestedItemId;
+  if (!itemId) return;
+
+  const item = allItems.find((candidate) => String(candidate.id) === String(itemId));
+  if (!item) return;
+
+  const key = stableItemKey(item);
+  let node = [...feed.querySelectorAll(".item")].find((el) => el.dataset.itemKey === key);
+  if (node) {
+    flashItem(node);
+    return;
+  }
+
+  const targetDate = dateKey(item.published_at);
+  const dateItems = allItems.filter((candidate) => dateKey(candidate.published_at) === targetDate);
+  const index = dateItems.findIndex((candidate) => String(candidate.id) === String(itemId));
+  const page = index >= 0 ? Math.floor(index / ITEMS_PER_PAGE) + 1 : 1;
+
+  currentDateFilter = targetDate;
+  currentTagFilter = "";
+  currentSearchQuery = "";
+  renderDate(targetDate, page);
+
+  window.requestAnimationFrame(() => {
+    const found = [...feed.querySelectorAll(".item")].find((el) => el.dataset.itemKey === key);
+    if (found) flashItem(found);
+  });
+}
+
+function flashItem(node) {
+  node.scrollIntoView({ block: "start", behavior: "smooth" });
+  node.classList.add("item-flash");
+  window.setTimeout(() => node.classList.remove("item-flash"), 3200);
+}
+
 if (newItemToastRead) {
   newItemToastRead.addEventListener("click", readPendingToastItem);
 }
@@ -1980,6 +2022,7 @@ async function refreshFeed(options = {}) {
 
     if (options.initial) {
       render(items, { statusText: "" });
+      handleRequestedItem();
       return;
     }
 

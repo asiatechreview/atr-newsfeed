@@ -598,6 +598,15 @@ main {
   display: block;
 }
 
+.item-flash {
+  animation: item-flash 3.2s ease-out;
+}
+
+@keyframes item-flash {
+  0% { background: var(--accent-dim); }
+  100% { background: transparent; }
+}
+
 .date + .item {
   border-top: 0;
 }
