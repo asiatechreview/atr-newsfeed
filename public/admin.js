@@ -60,6 +60,7 @@ const SOURCE_NAME_MAP = {
   "cointelegraph.com": "CoinTelegraph",
   "technode.global": "TNGlobal",
   "techinasia.com": "Tech in Asia",
+  "news.nus.edu.sg": "NUS",
   "dealstreetasia.com": "DealStreetAsia",
   "thehindu.com": "The Hindu",
   "livemint.com": "Mint",
