@@ -114,7 +114,7 @@ export async function onRequestGet({ env, request }) {
     const values = {};
     for (const row of rows) {
       const label = row.dimensions?.[field];
-      const value = row.sum?.visits ?? row.count ?? 0;
+      const value = row.sum?.visits || row.count || 0;
       if (label) values[label] = (values[label] || 0) + value;
     }
     breakdowns[key] = values;

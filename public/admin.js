@@ -561,7 +561,11 @@ function renderAnalytics(payload) {  const totals = payload.totals || {};
   els.analyticsBreakdown.replaceChildren();
 
   const breakdowns = payload.breakdowns || {};
-  renderAnalyticsBreakdown(breakdowns.countries, els.analyticsCountries, els.analyticsCountriesTotal);
+  const countries = {};
+  for (const [code, count] of Object.entries(breakdowns.countries || {})) {
+    countries[COUNTRY_NAMES[code] || code] = count;
+  }
+  renderAnalyticsBreakdown(countries, els.analyticsCountries, els.analyticsCountriesTotal);
   renderAnalyticsBreakdown(breakdowns.referrers, els.analyticsReferrers, els.analyticsReferrersTotal);
   renderAnalyticsBreakdown(breakdowns.pages, els.analyticsPages, els.analyticsPagesTotal);
   renderAnalyticsBreakdown(breakdowns.devices, els.analyticsDevices, els.analyticsDevicesTotal);
@@ -795,6 +799,15 @@ function renderLogs(logs) {
     els.logsBody.append(tr);
   }
 }
+
+const COUNTRY_NAMES = {
+  IN: "India", TH: "Thailand", US: "United States", GB: "United Kingdom", SG: "Singapore",
+  JP: "Japan", CN: "China", KR: "South Korea", ID: "Indonesia", MY: "Malaysia",
+  PH: "Philippines", VN: "Vietnam", TW: "Taiwan", HK: "Hong Kong", AU: "Australia",
+  DE: "Germany", FR: "France", NL: "Netherlands", AE: "UAE", SA: "Saudi Arabia",
+  CA: "Canada", BR: "Brazil", MX: "Mexico", NZ: "New Zealand", PK: "Pakistan",
+  BD: "Bangladesh", LK: "Sri Lanka", MM: "Myanmar", KH: "Cambodia", LA: "Laos"
+};
 
 function renderAnalyticsBreakdown(values, target, countEl) {
   const entries = Object.entries(values || {});
