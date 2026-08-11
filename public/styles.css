@@ -608,6 +608,7 @@ main {
 }
 
 .item-copy-link {
+  display: none; /* hidden pending hash-link redesign (Aug 11, 2026) */
   margin-left: auto;
   background: none;
   border: 1px solid var(--border);
