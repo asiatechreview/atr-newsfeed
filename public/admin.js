@@ -464,6 +464,7 @@ function renderList() {
   for (const label of ["ID", "Title", "Publisher", "Category", "Tags", "Published"]) {
     const th = document.createElement("th");
     th.textContent = label;
+    if (label === "ID") th.className = "id-cell";
     headRow.append(th);
   }
   thead.append(headRow);
@@ -478,7 +479,7 @@ function renderList() {
       selectItem(item.id);
       switchTab("publish");
     });
-    tr.append(cell(String(item.id), "nowrap", "ID"));
+    tr.append(cell(String(item.id), "nowrap id-cell", "ID"));
     tr.append(cell(item.headline || item.title || firstWords(item.blurb, 12), "truncate", "Title"));
     tr.append(cell(item.source_name || "Source", "truncate", "Publisher"));
     tr.append(cell(item.category || "Other news", "", "Category"));
