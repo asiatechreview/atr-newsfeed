@@ -36,7 +36,6 @@ const els = {
   blurb: document.querySelector("#blurb-input"),
   sourceName: document.querySelector("#source-name-input"),
   sourceUrl: document.querySelector("#source-url-input"),
-  tags: document.querySelector("#tags-input"),
   publishedAt: document.querySelector("#published-at-input"),
   saveButton: document.querySelector("#save-button"),
   removeButton: document.querySelector("#remove-button"),
@@ -500,7 +499,6 @@ function fillForm(item) {
   els.blurb.value = item.blurb || "";
   els.sourceName.value = item.source_name || "";
   els.sourceUrl.value = item.source_url || "";
-  els.tags.value = Array.isArray(item.tags) ? item.tags.join(", ") : (item.tags || "");
   els.publishedAt.value = toLocalDateTime(item.published_at);
   els.removeButton.disabled = state.mode === "new";
 }
@@ -512,7 +510,6 @@ function collectForm() {
     sourceName: els.sourceName.value.trim(),
     sourceUrl: els.sourceUrl.value.trim(),
     category: els.category.value.trim() || DEFAULT_CATEGORY,
-    tags: els.tags.value.split(",").map((tag) => tag.trim()).filter(Boolean)
   };
 
   const publishedAt = fromLocalDateTime(els.publishedAt.value);
