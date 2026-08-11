@@ -257,6 +257,14 @@ const els = {
   analyticsDays: document.querySelector("#analytics-days"),
   analyticsBreakdown: document.querySelector("#analytics-breakdown"),
   analyticsWindowSelect: document.querySelector("#analytics-window-select"),
+  analyticsCountries: document.querySelector("#analytics-countries"),
+  analyticsCountriesTotal: document.querySelector("#analytics-countries-total"),
+  analyticsReferrers: document.querySelector("#analytics-referrers"),
+  analyticsReferrersTotal: document.querySelector("#analytics-referrers-total"),
+  analyticsPages: document.querySelector("#analytics-pages"),
+  analyticsPagesTotal: document.querySelector("#analytics-pages-total"),
+  analyticsDevices: document.querySelector("#analytics-devices"),
+  analyticsDevicesTotal: document.querySelector("#analytics-devices-total"),
   newsletterStatus: document.querySelector("#newsletter-status"),
   newsletterForm: document.querySelector("#newsletter-form"),
   newsletterTitle: document.querySelector("#newsletter-title"),
@@ -552,6 +560,12 @@ function renderAnalytics(payload) {  const totals = payload.totals || {};
   els.analyticsDays.textContent = `${daily.length} days shown`;
   els.analyticsBreakdown.replaceChildren();
 
+  const breakdowns = payload.breakdowns || {};
+  renderAnalyticsBreakdown(breakdowns.countries, els.analyticsCountries, els.analyticsCountriesTotal);
+  renderAnalyticsBreakdown(breakdowns.referrers, els.analyticsReferrers, els.analyticsReferrersTotal);
+  renderAnalyticsBreakdown(breakdowns.pages, els.analyticsPages, els.analyticsPagesTotal);
+  renderAnalyticsBreakdown(breakdowns.devices, els.analyticsDevices, els.analyticsDevicesTotal);
+
   if (!daily.length) {
     const empty = document.createElement("p");
     empty.className = "muted";
@@ -707,7 +721,7 @@ function renderDashboard(payload) {
   renderLogs(traffic.logs || []);
 }
 
-function renderBreakdown(target, values) {
+function renderBreakdown(target, values, emptyMessage = "No hits in this window.") {
   target.replaceChildren();
   const entries = Object.entries(values).sort((a, b) => b[1] - a[1]).slice(0, 10);
   const max = Math.max(...entries.map(([, count]) => count), 1);
@@ -715,7 +729,7 @@ function renderBreakdown(target, values) {
   if (!entries.length) {
     const empty = document.createElement("p");
     empty.className = "muted";
-    empty.textContent = "No hits in this window.";
+    empty.textContent = emptyMessage;
     target.append(empty);
     return;
   }
@@ -780,6 +794,12 @@ function renderLogs(logs) {
     tr.append(cell(log.user_agent || "-", "truncate", "User Agent"));
     els.logsBody.append(tr);
   }
+}
+
+function renderAnalyticsBreakdown(values, target, countEl) {
+  const entries = Object.entries(values || {});
+  countEl.textContent = `${formatNumber(entries.length)} shown`;
+  renderBreakdown(target, values || {}, "No data in this window.");
 }
 
 function emptyTableRow(colspan, message) {

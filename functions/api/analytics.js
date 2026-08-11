@@ -26,7 +26,7 @@ export async function onRequestGet({ env, request }) {
   const dateFrom = new Date(dateTo.getTime() - days * 864e5);
   const iso = (d) => d.toISOString().slice(0, 10);
 
-  const query = `query {
+  const dailyQuery = `query {
     viewer {
       accounts(filter: { accountTag: "${accountId}" }) {
         rumPageloadEventsAdaptiveGroups(
@@ -42,28 +42,57 @@ export async function onRequestGet({ env, request }) {
     }
   }`;
 
-  let payload;
-  try {
-    const response = await fetch(CF_GRAPHQL, {
-      method: "POST",
-      headers: {
-        authorization: `Bearer ${token}`,
-        "content-type": "application/json"
-      },
-      body: JSON.stringify({ query })
-    });
-    payload = await response.json();
-    if (!response.ok || payload.errors?.length) {
-      return json({
-        error: "Cloudflare analytics request failed",
-        detail: payload.errors?.[0]?.message || `HTTP ${response.status}`
-      }, 502);
+  const DIMENSIONS = [
+    { key: "countries", field: "countryName" },
+    { key: "referrers", field: "refererHost" },
+    { key: "pages", field: "path" },
+    { key: "devices", field: "deviceType" }
+  ];
+
+  const dimensionQueries = DIMENSIONS.map(({ field }) => `query {
+    viewer {
+      accounts(filter: { accountTag: "${accountId}" }) {
+        rumPageloadEventsAdaptiveGroups(
+          limit: 10
+          filter: { date_geq: "${iso(dateFrom)}", date_leq: "${iso(dateTo)}", siteTag: "${siteTag}" }
+          orderBy: [count_DESC]
+        ) {
+          count
+          dimensions { ${field} }
+          sum { visits }
+        }
+      }
     }
+  }`);
+
+  const allQueries = [dailyQuery, ...dimensionQueries];
+
+  let payloads;
+  try {
+    const responses = await Promise.all(allQueries.map((q) =>
+      fetch(CF_GRAPHQL, {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${token}`,
+          "content-type": "application/json"
+        },
+        body: JSON.stringify({ query: q })
+      })
+    ));
+    payloads = await Promise.all(responses.map((response) => response.json()));
   } catch (error) {
     return json({ error: "Cloudflare analytics request failed", detail: error.message }, 502);
   }
 
-  const groups = payload.data?.viewer?.accounts?.[0]?.rumPageloadEventsAdaptiveGroups || [];
+  const dailyPayload = payloads[0];
+  if (dailyPayload.errors?.length) {
+    return json({
+      error: "Cloudflare analytics request failed",
+      detail: dailyPayload.errors[0].message
+    }, 502);
+  }
+
+  const groups = dailyPayload.data?.viewer?.accounts?.[0]?.rumPageloadEventsAdaptiveGroups || [];
   const daily = groups.map((group) => ({
     date: group.dimensions?.date || null,
     visits: group.sum?.visits || 0,
@@ -78,12 +107,26 @@ export async function onRequestGet({ env, request }) {
     { visits: 0, pageViews: 0 }
   );
 
+  const breakdowns = {};
+  DIMENSIONS.forEach(({ key, field }, index) => {
+    const dimPayload = payloads[index + 1];
+    const rows = dimPayload?.data?.viewer?.accounts?.[0]?.rumPageloadEventsAdaptiveGroups || [];
+    const values = {};
+    for (const row of rows) {
+      const label = row.dimensions?.[field];
+      const value = row.sum?.visits ?? row.count ?? 0;
+      if (label) values[label] = (values[label] || 0) + value;
+    }
+    breakdowns[key] = values;
+  });
+
   return json({
     type: "atr_bulletin_analytics",
     generated_at: new Date().toISOString(),
     window: { days, from: iso(dateFrom), to: iso(dateTo) },
     totals,
-    daily
+    daily,
+    breakdowns
   });
 }
 
