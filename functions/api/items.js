@@ -1,5 +1,6 @@
 import { STATIC_ITEMS } from "../_data/static-items.js";
 import { isAdmin } from "../_lib/admin-auth.js";
+import { ensureLinkKeyColumn, linkKeyFor } from "../_lib/link-key.js";
 import { writeOperationalEvent } from "../_lib/operational-log.js";
 
 const DEFAULT_LIMIT = 50;
@@ -826,27 +827,6 @@ async function ensureTagsColumn(env) {
     await env.ATR_FEED_DB.prepare("ALTER TABLE feed_items ADD COLUMN tags TEXT").run();
   } catch {
     // D1 throws once the column already exists.
-  }
-}
-
-async function ensureLinkKeyColumn(env) {
-  try {
-    await env.ATR_FEED_DB.prepare("ALTER TABLE feed_items ADD COLUMN link_key TEXT").run();
-  } catch {
-    // D1 throws once the column already exists.
-  }
-}
-
-// Public deep-link key: first 10 hex chars of sha256(source_url).
-// Case-insensitive, collision odds ~1 in a trillion, no volume leakage.
-async function linkKeyFor(url) {
-  const value = clean(url);
-  if (!value) return null;
-  try {
-    const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
-    return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("").slice(0, 10);
-  } catch {
-    return null;
   }
 }
 
