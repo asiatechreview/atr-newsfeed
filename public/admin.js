@@ -1,5 +1,43 @@
 const DEFAULT_CATEGORY = "Other news";
 
+// Category inference for manual entries (mirrors the public site's tag inference,
+// mapped to the category labels ATR actually uses). Pure client-side, no LLM.
+const CATEGORY_RULES = [
+  { label: "WAIC 2026", pattern: /\bwaic\b/ },
+  { label: "AI and Chips", pattern: /\b(ai|artificial intelligence|llm|multimodal|foundation model|claude|openai|anthropic|deepseek|minimax|moonshot|agentic|nvidia|distillation|chip|chips|chipmaker|chipmaking|semiconductor|semiconductors|integrated circuit|tsmc|sk hynix|hynix|cxmt|silicon|photonics|fab|foundry|packaging|hbm|gpu|memory chips?)\b/ },
+  { label: "Crypto", pattern: /\b(crypto|bitcoin|stablecoin|stablecoins|blockchain|onchain|token|digital asset|solana)\b/ },
+  { label: "Fintech", pattern: /\b(bank|banking|fintech|financial|payments?|qr payment|insurance|lending|digital bank|coinhako)\b/ },
+  { label: "Deals", pattern: /\b(fund|funding|raised|raise|secured|series [a-z]|seed|stake|acquisition|buy|bought|deal|invest|investment|grant|equity|debt|convertible|restructuring)\b/ },
+  { label: "Markets", pattern: /\b(markets?|shares?|stock|trading|revenue|profit|sales|yield|price|ipo|listing|public listing|investors?|balance sheet|tax)\b/ },
+  { label: "Policy", pattern: /\b(regulator|regulators|regulation|regulations|policy|government|ministry|customs|approval|approved|audit|probe|immigration|law|rules|compliance|incentives|public sector|sanctions|tariff|tariffs)\b/ },
+  { label: "Cybersecurity", pattern: /\b(cybersecurity|security|hack|hacked|breach|ransomware|data leak|critical infrastructure|export controls?|export-restricted|illicit finance)\b/ },
+  { label: "Mobility", pattern: /\b(mobility|electric vehicle|electric vehicles|evs?|ride-hailing|ride hailing|grab|gojek|go-jek|autonomous|self-driving|self driving|carmaker|carmakers|scooters?)\b/ },
+  { label: "Gaming", pattern: /\b(gaming|games|esports|e-sports|famitsu)\b/ },
+  { label: "Telecommunications", pattern: /\b(telecom|telecommunications|5g|6g|network operator|spectrum|broadband)\b/ }
+];
+
+function inferCategory(text) {
+  const lower = String(text || "").toLowerCase();
+  for (const rule of CATEGORY_RULES) {
+    if (rule.pattern.test(lower)) return rule.label;
+  }
+  return "";
+}
+
+let lastAutoCategory = "";
+
+function maybeAutoFillCategory() {
+  if (state.mode !== "new") return;
+  const current = els.category.value.trim();
+  const untouched = current === "" || current === DEFAULT_CATEGORY || current === lastAutoCategory;
+  if (!untouched) return;
+  const text = [els.blurb.value, els.headline.value, els.sourceName.value].join(" ");
+  const inferred = inferCategory(text);
+  if (!inferred) return;
+  lastAutoCategory = inferred;
+  els.category.value = inferred;
+}
+
 const state = {
   items: [],
   filtered: [],
@@ -264,6 +302,9 @@ if (itemsToggle && itemPanel) {
 els.analyticsWindowSelect.addEventListener("change", () => loadAnalytics());
 els.dashboardWindow.addEventListener("change", () => loadDashboard());
 els.searchInput.addEventListener("input", filterItems);
+els.blurb.addEventListener("input", maybeAutoFillCategory);
+els.headline.addEventListener("input", maybeAutoFillCategory);
+els.sourceName.addEventListener("input", maybeAutoFillCategory);
 els.newButton.addEventListener("click", () => {
   startNewItem();
   switchTab("publish");
@@ -741,6 +782,7 @@ function selectItem(id) {
 function startNewItem() {
   state.mode = "new";
   state.selected = null;
+  lastAutoCategory = "";
   els.editorTitle.textContent = "New Item";
   els.editorMode.textContent = "Draft";
   fillForm({
