@@ -172,6 +172,8 @@ h1, h2, h3 { font-weight: 700; }
 .item-row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .id-cell { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .view-toolbar { display: flex; justify-content: flex-end; margin-bottom: 14px; }
+.label-hint { color: var(--faint); font-weight: 500; }
+.input:disabled { opacity: .55; cursor: not-allowed; }
 .stat-attention { color: var(--amber); }
 .severity-error, .status-error, .status-failed, .status-unauthorized { color: var(--red); }
 .severity-warning, .status-warning, .status-duplicate { color: var(--amber); }
