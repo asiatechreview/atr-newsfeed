@@ -1340,6 +1340,28 @@ if (scrim) {
   scrim.addEventListener("click", closeSidebar);
 }
 
+const themeToggle = document.querySelector("#theme-toggle");
+const themeLabel = document.querySelector("#theme-label");
+
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  try {
+    localStorage.setItem("atr-admin-theme", theme);
+  } catch (error) {}
+  if (themeLabel) themeLabel.textContent = theme === "light" ? "Dark mode" : "Light mode";
+}
+
+if (themeToggle) {
+  themeToggle.addEventListener("click", () => {
+    const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+    applyTheme(next);
+  });
+}
+
+if (themeLabel) {
+  themeLabel.textContent = document.documentElement.dataset.theme === "light" ? "Dark mode" : "Light mode";
+}
+
 document.querySelectorAll(".nav-item[data-close]");
 sidebar?.addEventListener("click", (event) => {
   if (event.target.closest("a, button")) closeSidebar();

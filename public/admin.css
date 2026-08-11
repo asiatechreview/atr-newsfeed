@@ -24,6 +24,7 @@
   --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --mono: "IBM Plex Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --sidebar-w: 232px;
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -99,7 +100,6 @@ h1, h2, h3 { font-weight: 700; }
 .signout:hover { color: var(--red); background: var(--red-dim); }
 
 .scrim { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 30; }
-
 /* ============ Main / Topbar ============ */
 .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .topbar {
@@ -361,4 +361,24 @@ body.logged-out .auth-panel { min-height: calc(100vh - 48px); }
   }
   .mobile-action-bar button + button { background: var(--panel-2); color: var(--text); border: 1px solid var(--border-2); }
   body.logged-out .mobile-action-bar { display: none; }
+}
+
+/* ============ Light theme ============ */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f4f5f7;
+  --panel: #ffffff;
+  --panel-2: #eef0f3;
+  --border: #d9dde3;
+  --border-2: #c9cfd7;
+  --text: #1b2027;
+  --muted: #5a6572;
+  --faint: #8b94a1;
+  --accent: #4a7ba8;
+  --accent-strong: #2f5d87;
+  --accent-dim: rgba(74,123,168,.12);
+  --amber: #a5711d;
+  --amber-dim: rgba(165,113,29,.12);
+  --red: #b84a3a;
+  --red-dim: rgba(184,74,58,.12);
 }
