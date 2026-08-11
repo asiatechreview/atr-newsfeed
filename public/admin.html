@@ -314,6 +314,11 @@
               <strong id="ingest-failures" class="stat-value">-</strong>
               <span id="stranded-detail" class="stat-note">-</span>
             </article>
+            <article class="stat">
+              <span class="stat-label">Ingest Successes</span>
+              <strong id="ingest-successes" class="stat-value">-</strong>
+              <span id="success-detail" class="stat-note">-</span>
+            </article>
           </div>
 
           <div class="card">
@@ -337,6 +342,28 @@
               </table>
             </div>
           </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">Ingest Success Log <small id="ops-success-count">-</small></div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Action</th>
+                    <th>Status</th>
+                    <th>HTTP</th>
+                    <th>Message</th>
+                    <th>Source</th>
+                    <th>Posted</th>
+                  </tr>
+                </thead>
+                <tbody id="ops-success-body"></tbody>
+              </table>
+            </div>
+          </div>
         </section>
 
       </main>
@@ -348,6 +375,6 @@
     <button id="mobile-refresh-button" type="button">Refresh</button>
   </nav>
 
-  <script src="/admin.js?v=20260811-id-width" defer></script>
+  <script src="/admin.js?v=20260811-ingest-success" defer></script>
 </body>
 </html>

@@ -29,6 +29,7 @@ export async function onRequestGet({ env, request }) {
     operationalTotals,
     latestMarketSnapshot,
     ingestFailures,
+    ingestSuccesses,
     deployInfo
   ] = await Promise.all([
     readItemSummary(env, request),
@@ -38,6 +39,7 @@ export async function onRequestGet({ env, request }) {
     readOperationalTotals(env, { since }),
     readLatestMarketSnapshotRow(env),
     readIngestFailures(env, { since, limit: 25 }),
+    readIngestSuccesses(env, { since, limit: 25 }),
     readDeployInfo(env)
   ]);
 
@@ -47,7 +49,11 @@ export async function onRequestGet({ env, request }) {
     window: { since },
     status: buildStatus({ itemSummary, crawlerTotals, operationalTotals, latestMarketSnapshot, ingestFailures }),
     items: itemSummary,
-    ingest: ingestFailures,
+    ingest: {
+      ...ingestFailures,
+      success_count: ingestSuccesses.success_count,
+      successes: ingestSuccesses.successes
+    },
     deploy: deployInfo,
     traffic: {
       logs: crawlerLogs,
@@ -104,6 +110,49 @@ async function readIngestFailures(env, { since, limit }) {
     failure_count: count?.count || 0,
     failures: withPosted,
     stranded: withPosted.filter((f) => f.posted === false)
+  };
+}
+
+async function readIngestSuccesses(env, { since, limit }) {
+  const result = await env.ATR_FEED_DB.prepare(
+    `SELECT id, occurred_at, workflow, action, status, severity, http_status, item_id, source_name, source_url, message, details_json
+     FROM operational_events
+     WHERE workflow = 'bulletin_ingest'
+       AND status NOT IN ('unauthorized', 'error', 'failed')
+       AND occurred_at >= ?
+     ORDER BY occurred_at DESC, id DESC
+     LIMIT ?`
+  ).bind(since, limit).all();
+
+  const successes = (result.results || []).map((event) => ({
+    occurred_at: event.occurred_at,
+    action: event.action,
+    status: event.status,
+    http_status: event.http_status,
+    item_id: event.item_id,
+    source_name: event.source_name,
+    source_url: event.source_url,
+    message: event.message,
+    details: parseJson(event.details_json)
+  }));
+
+  const posted = await markPostedUrls(env, successes);
+  const withPosted = successes.map((event) => ({
+    ...event,
+    posted: event.source_url ? posted.has(event.source_url) : null
+  }));
+
+  const count = await env.ATR_FEED_DB.prepare(
+    `SELECT COUNT(*) AS count
+     FROM operational_events
+     WHERE workflow = 'bulletin_ingest'
+       AND status NOT IN ('unauthorized', 'error', 'failed')
+       AND occurred_at >= ?`
+  ).bind(since).first();
+
+  return {
+    success_count: count?.count || 0,
+    successes: withPosted
   };
 }
 

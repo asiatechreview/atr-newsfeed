@@ -46,8 +46,12 @@ const els = {
   deployDetail: document.querySelector("#deploy-detail"),
   ingestFailures: document.querySelector("#ingest-failures"),
   strandedDetail: document.querySelector("#stranded-detail"),
+  ingestSuccesses: document.querySelector("#ingest-successes"),
+  successDetail: document.querySelector("#success-detail"),
   opsCount: document.querySelector("#ops-count"),
   opsBody: document.querySelector("#ops-body"),
+  opsSuccessCount: document.querySelector("#ops-success-count"),
+  opsSuccessBody: document.querySelector("#ops-success-body"),
   tabPublish: document.querySelector("#tab-publish"),
   tabLive: document.querySelector("#tab-live"),
   tabOps: document.querySelector("#tab-ops"),
@@ -399,19 +403,46 @@ function renderOps(payload) {
     td.textContent = "No ingest failures in this window.";
     tr.append(td);
     els.opsBody.append(tr);
-    return;
+  } else {
+    for (const failure of failures) {
+      const tr = document.createElement("tr");
+      tr.append(cell(formatTime(failure.occurred_at), "nowrap", "Time"));
+      tr.append(cell(failure.action || "-", "", "Action"));
+      tr.append(cell(failure.status || "-", `status-${failure.status || ""}`, "Status"));
+      tr.append(cell(failure.http_status != null ? String(failure.http_status) : "-", Number(failure.http_status) >= 400 ? "status-error" : "status-ok", "HTTP"));
+      tr.append(cell(failure.message || "-", "truncate", "Message"));
+      tr.append(cell(failure.source_name || failure.source_url || "-", "truncate", "Source"));
+      tr.append(cell(failure.posted === true ? "yes" : failure.posted === false ? "no" : "-", "", "Posted"));
+      els.opsBody.append(tr);
+    }
   }
 
-  for (const failure of failures) {
+  els.ingestSuccesses.textContent = formatNumber(ingest.success_count != null ? ingest.success_count : 0);
+  const successes = Array.isArray(ingest.successes) ? ingest.successes : [];
+  els.successDetail.textContent = `${successes.length} latest events`;
+  els.opsSuccessCount.textContent = `${successes.length} shown`;
+  els.opsSuccessBody.replaceChildren();
+
+  if (!successes.length) {
     const tr = document.createElement("tr");
-    tr.append(cell(formatTime(failure.occurred_at), "nowrap", "Time"));
-    tr.append(cell(failure.action || "-", "", "Action"));
-    tr.append(cell(failure.status || "-", `status-${failure.status || ""}`, "Status"));
-    tr.append(cell(failure.http_status != null ? String(failure.http_status) : "-", Number(failure.http_status) >= 400 ? "status-error" : "status-ok", "HTTP"));
-    tr.append(cell(failure.message || "-", "truncate", "Message"));
-    tr.append(cell(failure.source_name || failure.source_url || "-", "truncate", "Source"));
-    tr.append(cell(failure.posted === true ? "yes" : failure.posted === false ? "no" : "-", "", "Posted"));
-    els.opsBody.append(tr);
+    const td = document.createElement("td");
+    td.colSpan = 7;
+    td.className = "muted";
+    td.textContent = "No successful ingest events in this window.";
+    tr.append(td);
+    els.opsSuccessBody.append(tr);
+  } else {
+    for (const event of successes) {
+      const tr = document.createElement("tr");
+      tr.append(cell(formatTime(event.occurred_at), "nowrap", "Time"));
+      tr.append(cell(event.action || "-", "", "Action"));
+      tr.append(cell(event.status || "-", `status-${event.status || ""}`, "Status"));
+      tr.append(cell(event.http_status != null ? String(event.http_status) : "-", "status-ok", "HTTP"));
+      tr.append(cell(event.message || "-", "truncate", "Message"));
+      tr.append(cell(event.source_name || event.source_url || "-", "truncate", "Source"));
+      tr.append(cell(event.posted === true ? "yes" : event.posted === false ? "no" : "-", "", "Posted"));
+      els.opsSuccessBody.append(tr);
+    }
   }
 }
 
