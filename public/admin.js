@@ -1,4 +1,5 @@
 const DEFAULT_CATEGORY = "Other news";
+const ITEMS_PER_PAGE = 20;
 
 // Category inference for manual entries (mirrors the public site's tag inference,
 // mapped to the category labels ATR actually uses). Pure client-side, no LLM.
@@ -155,7 +156,8 @@ const state = {
   filtered: [],
   selected: null,
   mode: "edit",
-  sponsors: []
+  sponsors: [],
+  page: 1
 };
 
 const els = {
@@ -916,6 +918,7 @@ function cell(value, className = "", label = "") {
 }
 
 function filterItems() {
+  state.page = 1;
   const query = els.searchInput.value.trim().toLowerCase();
   state.filtered = state.items.filter((item) => {
     if (!query) return true;
@@ -937,13 +940,19 @@ function filterItems() {
 
 function renderList() {
   els.itemList.replaceChildren();
-  els.listCount.textContent = `${state.filtered.length} shown`;
+  const total = state.filtered.length;
+  const totalPages = Math.max(1, Math.ceil(total / ITEMS_PER_PAGE));
+  state.page = Math.min(Math.max(1, state.page), totalPages);
+  const start = (state.page - 1) * ITEMS_PER_PAGE;
+  const pageItems = state.filtered.slice(start, start + ITEMS_PER_PAGE);
+  els.listCount.textContent = `${total} shown`;
 
   if (!state.filtered.length) {
     const empty = document.createElement("p");
     empty.className = "muted";
     empty.textContent = "No matching items.";
     els.itemList.append(empty);
+    renderListPagination(total);
     return;
   }
 
@@ -963,7 +972,7 @@ function renderList() {
   table.append(thead);
 
   const tbody = document.createElement("tbody");
-  for (const item of state.filtered) {
+  for (const item of pageItems) {
     const tr = document.createElement("tr");
     tr.className = "item-row";
     tr.tabIndex = 0;
@@ -995,6 +1004,42 @@ function renderList() {
   table.append(tbody);
   wrap.append(table);
   els.itemList.append(wrap);
+  renderListPagination(total);
+}
+
+function renderListPagination(total) {
+  const wrap = document.querySelector("#item-pagination");
+  if (!wrap) return;
+  wrap.replaceChildren();
+  const totalPages = Math.max(1, Math.ceil(total / ITEMS_PER_PAGE));
+  if (totalPages <= 1) return;
+
+  const prev = document.createElement("button");
+  prev.type = "button";
+  prev.className = "btn btn-ghost";
+  prev.textContent = "Previous";
+  prev.disabled = state.page <= 1;
+  prev.addEventListener("click", () => {
+    state.page -= 1;
+    renderList();
+  });
+  wrap.append(prev);
+
+  const label = document.createElement("span");
+  label.className = "pagination-label";
+  label.textContent = `Page ${state.page} of ${totalPages}`;
+  wrap.append(label);
+
+  const next = document.createElement("button");
+  next.type = "button";
+  next.className = "btn btn-ghost";
+  next.textContent = "Next";
+  next.disabled = state.page >= totalPages;
+  next.addEventListener("click", () => {
+    state.page += 1;
+    renderList();
+  });
+  wrap.append(next);
 }
 
 function formatTags(value) {
