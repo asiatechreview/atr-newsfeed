@@ -242,6 +242,13 @@ export async function onRequestGet({ env, request }) {
   let d1Items = [];
 
   try {
+    await ensureHeadlineColumn(env);
+    await ensureTagsColumn(env);
+  } catch {
+    // Migration attempts are best-effort; the query below is the real check.
+  }
+
+  try {
     const result = await env.ATR_FEED_DB.prepare(query).bind(...params).all();
     d1Items = result.results || [];
   } catch (error) {
