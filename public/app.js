@@ -1921,8 +1921,59 @@ function renderItems(items) {
     appendItemText(itemNode.querySelector(".blurb"), item);
     renderTags(itemNode.querySelector(".tags"), item);
 
+    const meta = itemNode.querySelector(".meta");
+    if (meta) {
+      const copyButton = document.createElement("button");
+      copyButton.type = "button";
+      copyButton.className = "item-copy-link";
+      copyButton.setAttribute("aria-label", "Copy link to this story");
+      copyButton.title = "Copy link";
+      copyButton.textContent = "Copy link";
+      copyButton.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        copyItemLink(item, copyButton);
+      });
+      meta.appendChild(copyButton);
+    }
+
     feed.appendChild(itemNode);
   }
+}
+
+function copyItemLink(item, button) {
+  const url = `${window.location.origin}/?item=${encodeURIComponent(item.id)}`;
+  const done = () => {
+    const original = button.textContent;
+    button.textContent = "Copied ✓";
+    button.classList.add("copied");
+    window.setTimeout(() => {
+      button.textContent = original;
+      button.classList.remove("copied");
+    }, 1800);
+  };
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(done, () => fallbackCopy(url, done));
+  } else {
+    fallbackCopy(url, done);
+  }
+}
+
+function fallbackCopy(text, done) {
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.select();
+  try {
+    document.execCommand("copy");
+    done();
+  } catch {
+    // Clipboard unavailable; leave the button unchanged.
+  }
+  textarea.remove();
 }
 
 function render(items, options = {}) {

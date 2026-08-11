@@ -607,6 +607,28 @@ main {
   100% { background: transparent; }
 }
 
+.item-copy-link {
+  margin-left: auto;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--quiet);
+  font: 600 11px/1 var(--font-meta);
+  padding: 4px 8px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.item-copy-link:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.item-copy-link.copied {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
 .date + .item {
   border-top: 0;
 }
