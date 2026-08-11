@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/admin.css?v=20260811-id-width">
+  <link rel="stylesheet" href="/admin.css?v=20260811-ops-tab">
 </head>
 <body class="logged-out">
   <div class="app">
@@ -50,10 +50,10 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="m7 13 3 3 3-3"/></svg>
           Ingest Log
         </button>
-        <a class="nav-item" href="/dashboard">
+        <button id="tab-dashboard" class="nav-item" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>
           Ops
-        </a>
+        </button>
         <a class="nav-item" href="/" target="_blank" rel="noopener">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>
           View site
@@ -366,6 +366,105 @@
           </div>
         </section>
 
+        <!-- ============ OPS DASHBOARD ============ -->
+        <section id="dashboard-view" hidden>
+          <div class="view-toolbar">
+            <select id="dashboard-window" class="input" style="width:auto" aria-label="Metrics window">
+              <option value="6">6h</option>
+              <option value="24" selected>24h</option>
+              <option value="72">72h</option>
+              <option value="168">7d</option>
+            </select>
+          </div>
+
+          <div class="stats">
+            <article class="stat">
+              <span class="stat-label">Status</span>
+              <strong id="overall-status" class="stat-value">-</strong>
+              <span id="overall-detail" class="stat-note">-</span>
+            </article>
+            <article class="stat">
+              <span class="stat-label">Public Items</span>
+              <strong id="public-items" class="stat-value">-</strong>
+              <span id="latest-item" class="stat-note">-</span>
+            </article>
+            <article class="stat">
+              <span class="stat-label">API/Feed Hits</span>
+              <strong id="api-hits" class="stat-value">-</strong>
+              <span id="hit-errors" class="stat-note">-</span>
+            </article>
+            <article class="stat">
+              <span class="stat-label">Posting Errors</span>
+              <strong id="posting-errors" class="stat-value">-</strong>
+              <span id="posting-total" class="stat-note">-</span>
+            </article>
+            <article class="stat">
+              <span class="stat-label">Markets</span>
+              <strong id="market-status" class="stat-value">-</strong>
+              <span id="market-detail" class="stat-note">-</span>
+            </article>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head">
+                <div class="card-title">Endpoint Traffic <small id="traffic-total">-</small></div>
+              </div>
+              <div id="traffic-breakdown" class="breakdown"></div>
+            </div>
+            <div class="card">
+              <div class="card-head">
+                <div class="card-title">Bot/User Agents <small id="bot-total">-</small></div>
+              </div>
+              <div id="bot-breakdown" class="breakdown"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">Recent Operational Events <small id="events-total">-</small></div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Severity</th>
+                    <th>Workflow</th>
+                    <th>Action</th>
+                    <th>Status</th>
+                    <th>Actor</th>
+                    <th>Message</th>
+                    <th>Source</th>
+                  </tr>
+                </thead>
+                <tbody id="events-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">Recent API, Feed And Crawler Hits <small id="logs-total">-</small></div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Path</th>
+                    <th>Status</th>
+                    <th>Bot</th>
+                    <th>Country</th>
+                    <th>User Agent</th>
+                  </tr>
+                </thead>
+                <tbody id="logs-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
       </main>
     </div>
   </div>
@@ -375,6 +474,6 @@
     <button id="mobile-refresh-button" type="button">Refresh</button>
   </nav>
 
-  <script src="/admin.js?v=20260811-ingest-success" defer></script>
+  <script src="/admin.js?v=20260811-ops-tab" defer></script>
 </body>
 </html>

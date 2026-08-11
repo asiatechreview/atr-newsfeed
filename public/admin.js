@@ -58,12 +58,33 @@ const els = {
   tabAnalytics: document.querySelector("#tab-analytics"),
   tabNewsletter: document.querySelector("#tab-newsletter"),
   tabSponsors: document.querySelector("#tab-sponsors"),
+  tabDashboard: document.querySelector("#tab-dashboard"),
   publishView: document.querySelector("#publish-view"),
   liveView: document.querySelector("#live-view"),
   opsView: document.querySelector("#ops-view"),
   analyticsView: document.querySelector("#analytics-view"),
   newsletterView: document.querySelector("#newsletter-view"),
   sponsorsView: document.querySelector("#sponsors-view"),
+  dashboardView: document.querySelector("#dashboard-view"),
+  dashboardWindow: document.querySelector("#dashboard-window"),
+  overallStatus: document.querySelector("#overall-status"),
+  overallDetail: document.querySelector("#overall-detail"),
+  publicItems: document.querySelector("#public-items"),
+  latestItem: document.querySelector("#latest-item"),
+  apiHits: document.querySelector("#api-hits"),
+  hitErrors: document.querySelector("#hit-errors"),
+  postingErrors: document.querySelector("#posting-errors"),
+  postingTotal: document.querySelector("#posting-total"),
+  marketStatus: document.querySelector("#market-status"),
+  marketDetail: document.querySelector("#market-detail"),
+  trafficTotal: document.querySelector("#traffic-total"),
+  trafficBreakdown: document.querySelector("#traffic-breakdown"),
+  botTotal: document.querySelector("#bot-total"),
+  botBreakdown: document.querySelector("#bot-breakdown"),
+  eventsTotal: document.querySelector("#events-total"),
+  eventsBody: document.querySelector("#events-body"),
+  logsTotal: document.querySelector("#logs-total"),
+  logsBody: document.querySelector("#logs-body"),
   analyticsVisits: document.querySelector("#analytics-visits"),
   analyticsWindow: document.querySelector("#analytics-window"),
   analyticsPageviews: document.querySelector("#analytics-pageviews"),
@@ -97,18 +118,21 @@ function switchTab(name) {
   const analytics = name === "analytics";
   const newsletter = name === "newsletter";
   const sponsors = name === "sponsors";
+  const dashboard = name === "dashboard";
   els.publishView.hidden = !publish;
   els.liveView.hidden = !live;
   els.opsView.hidden = !ops;
   els.analyticsView.hidden = !analytics;
   els.newsletterView.hidden = !newsletter;
   els.sponsorsView.hidden = !sponsors;
+  els.dashboardView.hidden = !dashboard;
   els.tabPublish.classList.toggle("active", publish);
   els.tabLive.classList.toggle("active", live);
   els.tabOps.classList.toggle("active", ops);
   els.tabAnalytics.classList.toggle("active", analytics);
   els.tabNewsletter.classList.toggle("active", newsletter);
   els.tabSponsors.classList.toggle("active", sponsors);
+  els.tabDashboard.classList.toggle("active", dashboard);
 
   const pageTitles = {
     publish: ["Publish", "Create and manage bulletin items"],
@@ -116,7 +140,8 @@ function switchTab(name) {
     ops: ["Ingest Log", "Automation and manual runs"],
     analytics: ["Analytics", "Traffic and engagement"],
     newsletter: ["Newsletter", "Homepage latest-post card"],
-    sponsors: ["Sponsors", "Sponsor blurbs and placements"]
+    sponsors: ["Sponsors", "Sponsor blurbs and placements"],
+    dashboard: ["Ops", "Deploys, traffic and operational health"]
   };
   const pageTitle = document.querySelector("#page-title");
   const pageSub = document.querySelector("#page-sub");
@@ -147,6 +172,7 @@ async function checkSession() {
       loadOps();
       loadAnalytics();
       loadSiteContent();
+      loadDashboard();
       return;
     }
   } catch {
@@ -180,6 +206,7 @@ els.tokenButton.addEventListener("click", () => {
 
 els.tabPublish.addEventListener("click", () => switchTab("publish"));
 els.tabLive.addEventListener("click", () => switchTab("live"));
+els.tabDashboard.addEventListener("click", () => switchTab("dashboard"));
 els.tabOps.addEventListener("click", () => switchTab("ops"));
 els.tabAnalytics.addEventListener("click", () => switchTab("analytics"));
 els.tabNewsletter.addEventListener("click", () => switchTab("newsletter"));
@@ -200,6 +227,7 @@ els.refreshButton.addEventListener("click", () => {
   loadItems();
   loadOps();
   loadAnalytics();
+  loadDashboard();
 });
 
 const mobileRefreshButton = document.querySelector("#mobile-refresh-button");
@@ -212,6 +240,7 @@ if (mobileRefreshButton) {
     loadItems();
     loadOps();
     loadAnalytics();
+    loadDashboard();
   });
 }
 
@@ -232,6 +261,7 @@ if (itemsToggle && itemPanel) {
   });
 }
 els.analyticsWindowSelect.addEventListener("change", () => loadAnalytics());
+els.dashboardWindow.addEventListener("change", () => loadDashboard());
 els.searchInput.addEventListener("input", filterItems);
 els.newButton.addEventListener("click", () => {
   startNewItem();
@@ -444,6 +474,145 @@ function renderOps(payload) {
       els.opsSuccessBody.append(tr);
     }
   }
+}
+
+async function loadDashboard() {
+  els.overallStatus.textContent = "Loading";
+  els.overallDetail.textContent = "Refreshing dashboard";
+  const since = new Date(Date.now() - Number(els.dashboardWindow.value) * 60 * 60 * 1000).toISOString();
+
+  try {
+    const response = await fetch(`/api/dashboard?since=${encodeURIComponent(since)}&limit=120`, {
+      credentials: "same-origin"
+    });
+    if (response.status === 401) {
+      els.authPanel.hidden = false;
+      setAuthMessage("Session expired, sign in again.");
+      return;
+    }
+    if (!response.ok) throw new Error(`Dashboard API returned ${response.status}`);
+    const payload = await response.json();
+    renderDashboard(payload);
+  } catch (error) {
+    els.overallStatus.textContent = "Error";
+    els.overallDetail.textContent = error.message;
+  }
+}
+
+function renderDashboard(payload) {
+  const status = payload.status || {};
+  const traffic = payload.traffic || {};
+  const operations = payload.operations || {};
+  const items = payload.items || {};
+  const markets = payload.markets || null;
+
+  els.overallStatus.classList.toggle("stat-ok", status.overall === "ok");
+  els.overallStatus.classList.toggle("stat-attention", status.overall !== "ok");
+  els.overallStatus.textContent = status.overall === "ok" ? "OK" : "Attention";
+  els.overallDetail.textContent = `Generated ${formatTime(payload.generated_at)}`;
+  els.publicItems.textContent = formatNumber(status.public_items);
+  els.latestItem.textContent = items.latest_published ? `Latest ${formatTime(items.latest_published.published_at)}` : "No published item";
+  els.apiHits.textContent = formatNumber(status.api_hits);
+  els.hitErrors.textContent = `${formatNumber(traffic.totals?.errors || 0)} HTTP errors`;
+  els.postingErrors.textContent = formatNumber(operations.totals?.errors || 0);
+  els.postingTotal.textContent = `${formatNumber(operations.totals?.total || 0)} operational events`;
+  els.marketStatus.textContent = markets ? markets.status : "No data";
+  els.marketDetail.textContent = markets?.fetched_at ? `${markets.market_count || 0} indices, ${formatTime(markets.fetched_at)}` : "No refresh stored";
+
+  els.trafficTotal.textContent = `${formatNumber(traffic.totals?.total || 0)} hits`;
+  els.botTotal.textContent = `${formatNumber(traffic.totals?.total || 0)} hits`;
+  els.eventsTotal.textContent = `${formatNumber(operations.events?.length || 0)} shown`;
+  els.logsTotal.textContent = `${formatNumber(traffic.logs?.length || 0)} shown`;
+
+  renderBreakdown(els.trafficBreakdown, traffic.totals?.byPath || {});
+  renderBreakdown(els.botBreakdown, traffic.totals?.byBot || {});
+  renderEvents(operations.events || []);
+  renderLogs(traffic.logs || []);
+}
+
+function renderBreakdown(target, values) {
+  target.replaceChildren();
+  const entries = Object.entries(values).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  const max = Math.max(...entries.map(([, count]) => count), 1);
+
+  if (!entries.length) {
+    const empty = document.createElement("p");
+    empty.className = "muted";
+    empty.textContent = "No hits in this window.";
+    target.append(empty);
+    return;
+  }
+
+  for (const [label, count] of entries) {
+    const row = document.createElement("div");
+    row.className = "bar-row";
+
+    const name = document.createElement("span");
+    name.textContent = label || "Unclassified";
+    row.append(name);
+
+    const track = document.createElement("div");
+    track.className = "bar-track";
+    const fill = document.createElement("div");
+    fill.className = "bar-fill";
+    fill.style.width = `${Math.max(4, (count / max) * 100)}%`;
+    track.append(fill);
+    row.append(track);
+
+    const value = document.createElement("span");
+    value.className = "bar-value";
+    value.textContent = formatNumber(count);
+    row.append(value);
+    target.append(row);
+  }
+}
+
+function renderEvents(events) {
+  els.eventsBody.replaceChildren();
+  if (!events.length) {
+    els.eventsBody.append(emptyTableRow(8, "No operational events in this window."));
+    return;
+  }
+  for (const event of events) {
+    const tr = document.createElement("tr");
+    tr.append(cell(formatTime(event.occurred_at), "nowrap", "Time"));
+    tr.append(cell(event.severity || "info", `severity-${event.severity || "info"}`, "Severity"));
+    tr.append(cell(event.workflow || "-", "", "Workflow"));
+    tr.append(cell(event.action || "-", "", "Action"));
+    tr.append(cell(event.status || "-", `status-${event.status || ""}`, "Status"));
+    tr.append(cell(event.details?.actor || "-", "", "Actor"));
+    tr.append(cell(event.message || "-", "truncate", "Message"));
+    tr.append(cell(event.source_name || event.source_url || "-", "truncate", "Source"));
+    els.eventsBody.append(tr);
+  }
+}
+
+function renderLogs(logs) {
+  els.logsBody.replaceChildren();
+  if (!logs.length) {
+    els.logsBody.append(emptyTableRow(6, "No API/feed/crawler hits in this window."));
+    return;
+  }
+  for (const log of logs) {
+    const tr = document.createElement("tr");
+    tr.append(cell(formatTime(log.requested_at), "nowrap", "Time"));
+    tr.append(cell(log.path || "-", "nowrap", "Path"));
+    tr.append(cell(log.status || "-", Number(log.status) >= 400 ? "status-error" : "status-ok", "Status"));
+    tr.append(cell(log.bot_name || "Unclassified", "", "Bot"));
+    tr.append(cell([log.country, log.colo].filter(Boolean).join(" / ") || "-", "", "Country"));
+    tr.append(cell(log.user_agent || "-", "truncate", "User Agent"));
+    els.logsBody.append(tr);
+  }
+}
+
+function emptyTableRow(colspan, message) {
+  const tr = document.createElement("tr");
+  const td = document.createElement("td");
+  td.colSpan = colspan;
+  td.className = "muted";
+  td.textContent = message;
+  tr.append(td);
+  return tr;
 }
 
 function cell(value, className = "", label = "") {
