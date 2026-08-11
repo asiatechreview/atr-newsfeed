@@ -1562,12 +1562,30 @@ function readPendingToastItem() {
   });
 }
 
-function handleRequestedItem() {
+async function handleRequestedItem() {
   const itemId = requestedItemId;
   if (!itemId) return;
 
-  const item = allItems.find((candidate) => String(candidate.id) === String(itemId));
-  if (!item) return;
+  let item = allItems.find((candidate) => String(candidate.id) === String(itemId));
+
+  if (!item) {
+    // Beyond the 500-item window: resolve by id through the API.
+    try {
+      const response = await fetch(`/api/v1/items/${encodeURIComponent(itemId)}`, {
+        cache: "no-store",
+        headers: { Accept: "application/json" }
+      });
+      if (!response.ok) return;
+      const payload = await response.json();
+      if (!payload || !(payload.raw_id || payload.id)) return;
+      const resolved = normalizeItem({ ...payload, id: payload.raw_id || payload.id });
+      if (!resolved) return;
+      allItems = sortItems([...allItems, resolved].filter(Boolean));
+      item = resolved;
+    } catch {
+      return;
+    }
+  }
 
   const key = stableItemKey(item);
   let node = [...feed.querySelectorAll(".item")].find((el) => el.dataset.itemKey === key);
