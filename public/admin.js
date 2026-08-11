@@ -38,6 +38,117 @@ function maybeAutoFillCategory() {
   els.category.value = inferred;
 }
 
+// Source name inference: derive the outlet from the source URL domain.
+const SOURCE_NAME_MAP = {
+  "reuters.com": "Reuters",
+  "bloomberg.com": "Bloomberg",
+  "nytimes.com": "NYTimes",
+  "wsj.com": "WSJ",
+  "ft.com": "Financial Times",
+  "techcrunch.com": "TechCrunch",
+  "techmeme.com": "Techmeme",
+  "economist.com": "The Economist",
+  "theverge.com": "The Verge",
+  "theinformation.com": "The Information",
+  "nikkei.com": "Nikkei",
+  "asia.nikkei.com": "Nikkei",
+  "nikkei.asia": "Nikkei",
+  "economictimes.indiatimes.com": "The Economic Times",
+  "entrackr.com": "Entrackr",
+  "theblock.co": "The Block",
+  "coindesk.com": "CoinDesk",
+  "cointelegraph.com": "CoinTelegraph",
+  "technode.global": "TNGlobal",
+  "techinasia.com": "Tech in Asia",
+  "dealstreetasia.com": "DealStreetAsia",
+  "thehindu.com": "The Hindu",
+  "livemint.com": "Mint",
+  "moneycontrol.com": "Moneycontrol",
+  "businesstoday.in": "Business Today",
+  "indianexpress.com": "The Indian Express",
+  "straitstimes.com": "The Straits Times",
+  "channelnewsasia.com": "CNA",
+  "scmp.com": "South China Morning Post",
+  "japantimes.co.jp": "The Japan Times",
+  "koreaherald.com": "The Korea Herald",
+  "yonhapnews.co.kr": "Yonhap",
+  "cnbc.com": "CNBC",
+  "cnn.com": "CNN",
+  "bbc.com": "BBC",
+  "bbc.co.uk": "BBC",
+  "apnews.com": "AP",
+  "theguardian.com": "The Guardian",
+  "wired.com": "Wired",
+  "restofworld.org": "Rest of World",
+  "semafor.com": "Semafor",
+  "axios.com": "Axios",
+  "thefintechtimes.com": "The Fintech Times",
+  "finews.asia": "finews.asia",
+  "pymnts.com": "PYMNTS",
+  "thenextweb.com": "TNW",
+  "sifted.eu": "Sifted",
+  "campaignasia.com": "Campaign Asia",
+  "marketing-interactive.com": "Marketing Interactive",
+  "digiday.com": "Digiday",
+  "gizmochina.com": "Gizmochina",
+  "xda-developers.com": "XDA Developers"
+};
+
+function domainOf(url) {
+  const value = String(url || "").trim();
+  if (!value) return "";
+  try {
+    return new URL(value).hostname.toLowerCase();
+  } catch {
+    try {
+      return new URL(`https://${value}`).hostname.toLowerCase();
+    } catch {
+      return "";
+    }
+  }
+}
+
+const COMPOUND_TLDS = ["co.uk", "org.uk", "gov.uk", "com.au", "org.au", "com.sg", "com.cn", "org.cn", "co.jp", "co.kr", "com.hk", "co.in", "com.my", "com.tw", "com.br", "co.nz", "com.ph", "com.vn", "com.th", "com.id", "co.za"];
+
+function registrableName(parts) {
+  const host = parts.join(".");
+  for (const suffix of COMPOUND_TLDS) {
+    if (host === suffix || host.endsWith(`.${suffix}`)) {
+      const base = host.slice(0, -(suffix.length + 1));
+      const baseParts = base.split(".");
+      return baseParts[baseParts.length - 1];
+    }
+  }
+  return parts.length > 2 ? parts[parts.length - 2] : parts[0];
+}
+
+function inferSourceName(url) {
+  const host = domainOf(url);
+  if (!host) return "";
+  const parts = host.split(".");
+  for (let i = 0; i < parts.length - 1; i++) {
+    const candidate = parts.slice(i).join(".");
+    if (SOURCE_NAME_MAP[candidate]) return SOURCE_NAME_MAP[candidate];
+  }
+  return registrableName(parts)
+    .split(/[-_]/)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+let lastAutoSourceName = "";
+
+function maybeAutoFillSourceName() {
+  if (state.mode !== "new") return;
+  const current = els.sourceName.value.trim();
+  if (current !== "" && current !== lastAutoSourceName) return;
+  const inferred = inferSourceName(els.sourceUrl.value);
+  if (!inferred) return;
+  lastAutoSourceName = inferred;
+  els.sourceName.value = inferred;
+}
+
 const state = {
   items: [],
   filtered: [],
@@ -305,6 +416,7 @@ els.searchInput.addEventListener("input", filterItems);
 els.blurb.addEventListener("input", maybeAutoFillCategory);
 els.headline.addEventListener("input", maybeAutoFillCategory);
 els.sourceName.addEventListener("input", maybeAutoFillCategory);
+els.sourceUrl.addEventListener("input", maybeAutoFillSourceName);
 els.newButton.addEventListener("click", () => {
   startNewItem();
   switchTab("publish");
@@ -783,6 +895,7 @@ function startNewItem() {
   state.mode = "new";
   state.selected = null;
   lastAutoCategory = "";
+  lastAutoSourceName = "";
   els.editorTitle.textContent = "New Item";
   els.editorMode.textContent = "Draft";
   fillForm({
