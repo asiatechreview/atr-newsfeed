@@ -42,7 +42,7 @@ function maybeAutoFillCategory() {
 const SOURCE_NAME_MAP = {
   "reuters.com": "Reuters",
   "bloomberg.com": "Bloomberg",
-  "nytimes.com": "NYTimes",
+  "nytimes.com": "NYT",
   "wsj.com": "WSJ",
   "ft.com": "FT",
   "techcrunch.com": "TechCrunch",
@@ -58,7 +58,7 @@ const SOURCE_NAME_MAP = {
   "theblock.co": "The Block",
   "coindesk.com": "CoinDesk",
   "cointelegraph.com": "CoinTelegraph",
-  "technode.global": "TNGlobal",
+  "technode.global": "TechNode",
   "techinasia.com": "Tech in Asia",
   "news.nus.edu.sg": "NUS",
   "dealstreetasia.com": "DealStreetAsia",
