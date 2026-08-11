@@ -455,24 +455,71 @@ function renderList() {
     return;
   }
 
+  const wrap = document.createElement("div");
+  wrap.className = "table-wrap";
+  const table = document.createElement("table");
+
+  const thead = document.createElement("thead");
+  const headRow = document.createElement("tr");
+  for (const label of ["ID", "Publisher", "Category", "Tags", "Published"]) {
+    const th = document.createElement("th");
+    th.textContent = label;
+    headRow.append(th);
+  }
+  thead.append(headRow);
+  table.append(thead);
+
+  const tbody = document.createElement("tbody");
   for (const item of state.filtered) {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = `item-button${state.selected?.id === item.id ? " active" : ""}`;
-    button.dataset.id = item.id;
-    button.addEventListener("click", () => {
+    const tr = document.createElement("tr");
+    tr.className = "item-row";
+    tr.tabIndex = 0;
+    tr.addEventListener("click", () => {
       selectItem(item.id);
       switchTab("publish");
     });
-
-    const title = document.createElement("strong");
-    title.textContent = item.headline || item.title || firstWords(item.blurb, 12);
-    const meta = document.createElement("span");
-    meta.textContent = `${item.id} / ${item.source_name || "Source"} / ${formatTime(item.published_at)}`;
-
-    button.append(title, meta);
-    els.itemList.append(button);
+    tr.append(cell(String(item.id), "nowrap", "ID"));
+    tr.append(cell(item.source_name || "Source", "truncate", "Publisher"));
+    tr.append(cell(item.category || "Other news", "", "Category"));
+    tr.append(cell(formatTags(item.tags), "", "Tags"));
+    tr.append(cell(formatDateTime(item.published_at), "nowrap", "Published"));
+    tbody.append(tr);
   }
+  table.append(tbody);
+  wrap.append(table);
+  els.itemList.append(wrap);
+}
+
+function formatTags(value) {
+  if (!value) return "-";
+  let tags = value;
+  if (typeof tags === "string") {
+    const trimmed = tags.trim();
+    if (trimmed.startsWith("[")) {
+      try {
+        tags = JSON.parse(trimmed);
+      } catch {
+        return trimmed;
+      }
+    } else {
+      return trimmed;
+    }
+  }
+  if (Array.isArray(tags)) return tags.filter(Boolean).join(", ");
+  return String(tags);
+}
+
+function formatDateTime(value) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(date);
 }
 
 function selectItem(id) {
