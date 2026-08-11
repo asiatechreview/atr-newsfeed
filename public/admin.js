@@ -165,6 +165,20 @@ const els = {
   saveTokenButton: document.querySelector("#save-token-button"),
   tokenButton: document.querySelector("#token-button"),
   whoami: document.querySelector("#whoami"),
+  whoamiAvatar: document.querySelector("#whoami-avatar"),
+  whoamiRole: document.querySelector("#whoami-role"),
+  tabProfile: document.querySelector("#tab-profile"),
+  profileView: document.querySelector("#profile-view"),
+  profileStatus: document.querySelector("#profile-status"),
+  profileDisplayName: document.querySelector("#profile-display-name"),
+  profileUsername: document.querySelector("#profile-username"),
+  profileRole: document.querySelector("#profile-role"),
+  profileCreated: document.querySelector("#profile-created"),
+  profileCurrentPassword: document.querySelector("#profile-current-password"),
+  profileNewPassword: document.querySelector("#profile-new-password"),
+  profileConfirmPassword: document.querySelector("#profile-confirm-password"),
+  profileSave: document.querySelector("#profile-save"),
+  profilePasswordSave: document.querySelector("#profile-password-save"),
   refreshButton: document.querySelector("#refresh-button"),
   newButton: document.querySelector("#new-button"),
   statusTitle: document.querySelector("#status-title"),
@@ -266,6 +280,7 @@ function switchTab(name) {
   const newsletter = name === "newsletter";
   const sponsors = name === "sponsors";
   const dashboard = name === "dashboard";
+  const profile = name === "profile";
   els.publishView.hidden = !publish;
   els.liveView.hidden = !live;
   els.opsView.hidden = !ops;
@@ -273,6 +288,7 @@ function switchTab(name) {
   els.newsletterView.hidden = !newsletter;
   els.sponsorsView.hidden = !sponsors;
   els.dashboardView.hidden = !dashboard;
+  els.profileView.hidden = !profile;
   els.tabPublish.classList.toggle("active", publish);
   els.tabLive.classList.toggle("active", live);
   els.tabOps.classList.toggle("active", ops);
@@ -288,7 +304,8 @@ function switchTab(name) {
     analytics: ["Analytics", "Traffic and engagement"],
     newsletter: ["Newsletter", "Homepage latest-post card"],
     sponsors: ["Sponsors", "Sponsor blurbs and placements"],
-    dashboard: ["Dashboard", "Deploys, traffic and operational health"]
+    dashboard: ["Dashboard", "Deploys, traffic and operational health"],
+    profile: ["Profile", "Account settings"]
   };
   const pageTitle = document.querySelector("#page-title");
   const pageSub = document.querySelector("#page-sub");
@@ -312,8 +329,12 @@ async function checkSession() {
     if (response.status === 200) {
       const payload = await response.json();
       document.body.classList.remove("logged-out");
-      els.whoami.textContent = payload.username || "";
+      const shownName = payload.display_name || payload.username || "";
+      els.whoami.textContent = shownName;
       els.whoami.hidden = false;
+      els.whoamiAvatar.textContent = (shownName || "?").charAt(0).toUpperCase();
+      els.whoamiAvatar.hidden = false;
+      if (payload.role) els.whoamiRole.textContent = payload.role;
       els.authPanel.hidden = true;
       loadItems();
       startNewItem();
@@ -321,6 +342,7 @@ async function checkSession() {
       loadAnalytics();
       loadSiteContent();
       loadDashboard();
+      loadProfile();
       return;
     }
   } catch {
@@ -355,6 +377,7 @@ els.tokenButton.addEventListener("click", () => {
 els.tabPublish.addEventListener("click", () => switchTab("publish"));
 els.tabLive.addEventListener("click", () => switchTab("live"));
 els.tabDashboard.addEventListener("click", () => switchTab("dashboard"));
+els.tabProfile.addEventListener("click", () => switchTab("profile"));
 els.tabOps.addEventListener("click", () => switchTab("ops"));
 els.tabAnalytics.addEventListener("click", () => switchTab("analytics"));
 els.tabNewsletter.addEventListener("click", () => switchTab("newsletter"));
@@ -370,6 +393,8 @@ els.sponsorAdd.addEventListener("click", () => {
   renderSponsors();
 });
 els.sponsorsSave.addEventListener("click", saveSponsors);
+els.profileSave.addEventListener("click", saveProfile);
+els.profilePasswordSave.addEventListener("click", changePassword);
 
 els.refreshButton.addEventListener("click", () => {
   loadItems();
@@ -761,6 +786,87 @@ function emptyTableRow(colspan, message) {
   td.textContent = message;
   tr.append(td);
   return tr;
+}
+
+async function loadProfile() {
+  try {
+    const response = await fetch("/api/auth/profile", { credentials: "same-origin" });
+    if (!response.ok) throw new Error(`Profile API returned ${response.status}`);
+    const payload = await response.json();
+    els.profileUsername.value = payload.username || "";
+    els.profileRole.value = payload.role || "";
+    els.profileCreated.value = formatDateOnly(payload.created_at);
+    els.profileDisplayName.value = payload.display_name || "";
+    els.profileStatus.textContent = "Loaded";
+    if (payload.role) els.whoamiRole.textContent = payload.role;
+  } catch (error) {
+    els.profileStatus.textContent = "Error";
+    els.profileStatus.title = error.message;
+  }
+}
+
+async function saveProfile() {
+  const displayName = els.profileDisplayName.value.trim();
+  els.profileStatus.textContent = "Saving";
+  try {
+    const response = await fetch("/api/auth/profile", {
+      method: "PATCH",
+      credentials: "same-origin",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({ displayName })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || `PATCH returned ${response.status}`);
+    const shownName = displayName || els.profileUsername.value || "";
+    els.whoami.textContent = shownName;
+    els.whoamiAvatar.textContent = (shownName || "?").charAt(0).toUpperCase();
+    els.whoamiAvatar.hidden = false;
+    els.profileStatus.textContent = "Saved";
+  } catch (error) {
+    els.profileStatus.textContent = "Error";
+    els.profileStatus.title = error.message;
+  }
+}
+
+async function changePassword() {
+  const currentPassword = els.profileCurrentPassword.value;
+  const newPassword = els.profileNewPassword.value;
+  const confirm = els.profileConfirmPassword.value;
+  if (newPassword.length < 8) {
+    els.profileStatus.textContent = "8+ chars";
+    els.profileStatus.title = "New password must be at least 8 characters.";
+    return;
+  }
+  if (newPassword !== confirm) {
+    els.profileStatus.textContent = "Mismatch";
+    els.profileStatus.title = "New passwords do not match.";
+    return;
+  }
+  els.profileStatus.textContent = "Saving";
+  try {
+    const response = await fetch("/api/auth/profile", {
+      method: "PATCH",
+      credentials: "same-origin",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({ currentPassword, newPassword })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || `PATCH returned ${response.status}`);
+    els.profileCurrentPassword.value = "";
+    els.profileNewPassword.value = "";
+    els.profileConfirmPassword.value = "";
+    els.profileStatus.textContent = "Password updated";
+  } catch (error) {
+    els.profileStatus.textContent = "Error";
+    els.profileStatus.title = error.message;
+  }
+}
+
+function formatDateOnly(value) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric" }).format(date);
 }
 
 function cell(value, className = "", label = "") {

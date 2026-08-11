@@ -72,16 +72,27 @@ export async function sessionUser(env, request) {
   if (!row?.username) return null;
 
   let role = "super_admin";
+  let displayName = null;
   try {
     const user = await env.ATR_FEED_DB.prepare(
-      "SELECT role FROM admin_users WHERE username = ?"
+      "SELECT role, display_name FROM admin_users WHERE username = ?"
     ).bind(row.username).first();
     if (user?.role) role = user.role;
+    if (user?.display_name) displayName = user.display_name;
   } catch {
     // Role lookup must never break session validation.
   }
 
-  return { username: row.username, role };
+  return { username: row.username, role, display_name: displayName };
+}
+
+export async function ensureDisplayNameColumn(env) {
+  if (!env?.ATR_FEED_DB) return;
+  try {
+    await env.ATR_FEED_DB.prepare("ALTER TABLE admin_users ADD COLUMN display_name TEXT").run();
+  } catch {
+    // Column already exists.
+  }
 }
 
 // Returns the acting identity: username for a valid session,

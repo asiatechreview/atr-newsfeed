@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/admin.css?v=20260811-dashboard-readable">
+  <link rel="stylesheet" href="/admin.css?v=20260811-profile">
 </head>
 <body class="logged-out">
   <div class="app">
@@ -65,13 +65,13 @@
       </div>
 
       <div class="sidebar-foot">
-        <div class="user">
+        <button id="tab-profile" class="user user-button" type="button" title="Profile settings">
           <div class="avatar" id="whoami-avatar" hidden>?</div>
           <div class="user-meta">
             <div class="user-name" id="whoami" hidden>sai</div>
-            <div class="user-role">Super admin</div>
+            <div class="user-role" id="whoami-role">Super admin</div>
           </div>
-        </div>
+        </button>
         <button id="token-button" class="signout" type="button">Sign out</button>
       </div>
     </aside>
@@ -464,6 +464,64 @@
           </div>
         </section>
 
+        <!-- ============ PROFILE ============ -->
+        <section id="profile-view" hidden>
+          <div class="card" style="max-width:620px">
+            <div class="card-head">
+              <div class="card-title">Profile <small>Account settings</small></div>
+              <span id="profile-status" class="pill">Not loaded</span>
+            </div>
+
+            <div class="field">
+              <label for="profile-display-name">Display name</label>
+              <input id="profile-display-name" class="input" type="text" maxlength="40" placeholder="How your name appears in the admin">
+              <p class="field-hint">Shown in the sidebar instead of your username.</p>
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <label for="profile-username">Username</label>
+                <input id="profile-username" class="input" type="text" disabled>
+                <p class="field-hint">Login identifier, cannot be changed.</p>
+              </div>
+              <div class="field">
+                <label for="profile-role">Role</label>
+                <input id="profile-role" class="input" type="text" disabled>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="profile-created">Member since</label>
+              <input id="profile-created" class="input" type="text" disabled>
+            </div>
+
+            <div class="form-actions">
+              <button id="profile-save" class="btn btn-primary" type="button">Save display name</button>
+            </div>
+
+            <hr class="profile-divider">
+
+            <div class="card-title" style="margin-bottom:14px">Change password <small>You stay signed in</small></div>
+            <div class="field">
+              <label for="profile-current-password">Current password</label>
+              <input id="profile-current-password" class="input" type="password" autocomplete="current-password">
+            </div>
+            <div class="row">
+              <div class="field">
+                <label for="profile-new-password">New password</label>
+                <input id="profile-new-password" class="input" type="password" autocomplete="new-password">
+              </div>
+              <div class="field">
+                <label for="profile-confirm-password">Confirm new password</label>
+                <input id="profile-confirm-password" class="input" type="password" autocomplete="new-password">
+              </div>
+            </div>
+            <div class="form-actions">
+              <button id="profile-password-save" class="btn btn-ghost" type="button">Update password</button>
+            </div>
+          </div>
+        </section>
+
       </main>
     </div>
   </div>
@@ -473,6 +531,6 @@
     <button id="mobile-refresh-button" type="button">Refresh</button>
   </nav>
 
-  <script src="/admin.js?v=20260811-no-markets" defer></script>
+  <script src="/admin.js?v=20260811-profile" defer></script>
 </body>
 </html>

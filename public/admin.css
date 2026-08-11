@@ -83,6 +83,18 @@ h1, h2, h3 { font-weight: 700; }
 }
 .user-name { font-size: 13px; font-weight: 600; line-height: 1.2; }
 .user-role { font-size: 11px; color: var(--faint); }
+.user-button {
+  width: 100%;
+  border: 1px solid transparent;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.user-button:hover { background: var(--panel-2); border-color: var(--border-2); }
+.field-hint { font-size: 11px; color: var(--faint); margin-top: 5px; }
+.profile-divider { border: 0; border-top: 1px solid var(--border-2); margin: 22px 0; }
 .signout { margin-top: 6px; width: 100%; padding: 8px 10px; text-align: left; color: var(--faint); border-radius: var(--radius-sm); font-size: 13px; }
 .signout:hover { color: var(--red); background: var(--red-dim); }
 

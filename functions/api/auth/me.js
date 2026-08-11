@@ -6,7 +6,7 @@ export async function onRequestGet({ env, request }) {
     return json({ error: "Unauthorized" }, 401);
   }
 
-  return json({ ok: true, username: session.username, role: session.role });
+  return json({ ok: true, username: session.username, display_name: session.display_name || null, role: session.role });
 }
 
 function json(payload, status = 200) {
