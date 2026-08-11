@@ -141,7 +141,7 @@ function switchTab(name) {
     analytics: ["Analytics", "Traffic and engagement"],
     newsletter: ["Newsletter", "Homepage latest-post card"],
     sponsors: ["Sponsors", "Sponsor blurbs and placements"],
-    dashboard: ["Ops", "Deploys, traffic and operational health"]
+    dashboard: ["Dashboard", "Deploys, traffic and operational health"]
   };
   const pageTitle = document.querySelector("#page-title");
   const pageSub = document.querySelector("#page-sub");
