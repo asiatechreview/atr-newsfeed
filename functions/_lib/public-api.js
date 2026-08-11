@@ -73,6 +73,7 @@ export function toPublicItem(item) {
     type: "bulletin_item",
     id: publicId(rawId),
     raw_id: rawId,
+    link_key: clean(item.link_key) || null,
     title,
     blurb,
     source_name: sourceName,

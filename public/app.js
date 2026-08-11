@@ -1360,6 +1360,7 @@ function normalizeItem(item) {
 
   return {
     id,
+    link_key: String(item.link_key || "").trim(),
     blurb,
     published_at: parsedDate && !Number.isNaN(parsedDate.getTime()) ? parsedDate.toISOString() : new Date().toISOString(),
     region: String(item.Region || item.region || item.Category || item.category || "").trim(),
@@ -1566,7 +1567,7 @@ async function handleRequestedItem() {
   const itemId = requestedItemId;
   if (!itemId) return;
 
-  let item = allItems.find((candidate) => String(candidate.id) === String(itemId));
+  let item = allItems.find((candidate) => String(candidate.id) === String(itemId) || (candidate.link_key && candidate.link_key.toLowerCase() === String(itemId).toLowerCase()));
 
   if (!item) {
     // Beyond the 500-item window: resolve by id through the API.
@@ -1940,7 +1941,7 @@ function renderItems(items) {
     renderTags(itemNode.querySelector(".tags"), item);
 
     const meta = itemNode.querySelector(".meta");
-    if (meta) {
+    if (meta && item.link_key) {
       const copyButton = document.createElement("button");
       copyButton.type = "button";
       copyButton.className = "item-copy-link";
@@ -1960,7 +1961,7 @@ function renderItems(items) {
 }
 
 function copyItemLink(item, button) {
-  const url = `${window.location.origin}/?item=${encodeURIComponent(item.id)}`;
+  const url = `${window.location.origin}/?item=${encodeURIComponent(item.link_key || item.id)}`;
   const done = () => {
     const original = button.textContent;
     button.textContent = "Copied ✓";

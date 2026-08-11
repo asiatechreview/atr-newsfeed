@@ -228,7 +228,7 @@ export async function onRequestGet({ env, request }) {
   const category = url.searchParams.get("category");
   const date = parseDateParam(url.searchParams.get("date"));
 
-  let query = "SELECT id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at FROM feed_items WHERE status = ?";
+  let query = "SELECT id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key FROM feed_items WHERE status = ?";
   const params = ["published"];
 
   if (category) {
@@ -511,6 +511,7 @@ export async function onRequestPost({ env, request }) {
   try {
     await ensureHeadlineColumn(env);
     await ensureTagsColumn(env);
+    await ensureLinkKeyColumn(env);
   } catch (error) {
     await writeOperationalEvent(env, request, {
       workflow: "bulletin_ingest",
@@ -529,24 +530,26 @@ export async function onRequestPost({ env, request }) {
   let result;
   let status = 201;
 
+  const linkKey = await linkKeyFor(sourceUrl);
+
   try {
     if (sourceUrl) {
       result = await env.ATR_FEED_DB.prepare(
         `INSERT INTO feed_items
-          (headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at)
-         SELECT ?, ?, ?, ?, ?, ?, ?, ?
+          (headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, link_key)
+         SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?
          WHERE NOT EXISTS (
            SELECT 1 FROM feed_items
            WHERE lower(source_url) = lower(?) AND status = ?
          )
-         RETURNING id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at`
+         RETURNING id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key`
       )
-        .bind(headline || null, blurb, sourceName, sourceUrl, category, tags, telegramMessageId || null, publishedAt, sourceUrl, "published")
+        .bind(headline || null, blurb, sourceName, sourceUrl, category, tags, telegramMessageId || null, publishedAt, linkKey, sourceUrl, "published")
         .first();
 
       if (!result) {
         result = await env.ATR_FEED_DB.prepare(
-          `SELECT id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at
+          `SELECT id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key
            FROM feed_items
            WHERE lower(source_url) = lower(?) AND status = ?
            ORDER BY published_at DESC, id DESC
@@ -672,13 +675,15 @@ export async function onRequestPatch({ env, request }) {
     return json({ error: "sourceUrl must be an http(s) URL" }, 400);
   }
 
+  const nextLinkKey = nextSourceUrl === current.source_url ? current.link_key : await linkKeyFor(nextSourceUrl);
+
   const result = await env.ATR_FEED_DB.prepare(
     `UPDATE feed_items
-       SET headline = ?, blurb = ?, source_name = ?, source_url = ?, category = ?, tags = ?
+       SET headline = ?, blurb = ?, source_name = ?, source_url = ?, category = ?, tags = ?, link_key = ?
      WHERE id = ? AND status = ?
-     RETURNING id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at`
+     RETURNING id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key`
   )
-    .bind(nextHeadline || null, nextBlurb, nextSourceName, nextSourceUrl, nextCategory, nextTags, id, "published")
+    .bind(nextHeadline || null, nextBlurb, nextSourceName, nextSourceUrl, nextCategory, nextTags, nextLinkKey, id, "published")
     .first();
 
   await writeOperationalEvent(env, request, {
@@ -821,6 +826,27 @@ async function ensureTagsColumn(env) {
     await env.ATR_FEED_DB.prepare("ALTER TABLE feed_items ADD COLUMN tags TEXT").run();
   } catch {
     // D1 throws once the column already exists.
+  }
+}
+
+async function ensureLinkKeyColumn(env) {
+  try {
+    await env.ATR_FEED_DB.prepare("ALTER TABLE feed_items ADD COLUMN link_key TEXT").run();
+  } catch {
+    // D1 throws once the column already exists.
+  }
+}
+
+// Public deep-link key: first 10 hex chars of sha256(source_url).
+// Case-insensitive, collision odds ~1 in a trillion, no volume leakage.
+async function linkKeyFor(url) {
+  const value = clean(url);
+  if (!value) return null;
+  try {
+    const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+    return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("").slice(0, 10);
+  } catch {
+    return null;
   }
 }
 
