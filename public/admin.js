@@ -953,7 +953,7 @@ function renderList() {
 
   const thead = document.createElement("thead");
   const headRow = document.createElement("tr");
-  for (const label of ["ID", "Title", "Publisher", "Category", "Tags", "Published"]) {
+  for (const label of ["ID", "Title", "Publisher", "Category", "Tags", "Published", "Link"]) {
     const th = document.createElement("th");
     th.textContent = label;
     if (label === "ID") th.className = "id-cell";
@@ -977,6 +977,19 @@ function renderList() {
     tr.append(cell(item.category || "Other news", "", "Category"));
     tr.append(cell(formatTags(item.tags), "", "Tags"));
     tr.append(cell(formatDateTime(item.published_at), "nowrap", "Published"));
+
+    const linkUrl = `https://bulletin.asiatechreview.com/?item=${encodeURIComponent(item.link_key || item.id)}`;
+    const linkTd = document.createElement("td");
+    linkTd.dataset.label = "Link";
+    linkTd.className = "truncate";
+    const linkA = document.createElement("a");
+    linkA.href = linkUrl;
+    linkA.target = "_blank";
+    linkA.rel = "noopener";
+    linkA.textContent = linkUrl;
+    linkA.title = linkUrl;
+    linkTd.append(linkA);
+    tr.append(linkTd);
     tbody.append(tr);
   }
   table.append(tbody);
