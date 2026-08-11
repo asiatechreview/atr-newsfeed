@@ -1,6 +1,5 @@
 import { isAdmin } from "../_lib/admin-auth.js";
 import { ensureCrawlerAccessLogTable } from "../_lib/crawler-log.js";
-import { ensureMarketSnapshotTable } from "../_lib/markets.js";
 import { ensureOperationalEventsTable, summarizeOperationalEvents } from "../_lib/operational-log.js";
 
 const DEFAULT_LIMIT = 80;
@@ -17,7 +16,6 @@ export async function onRequestGet({ env, request }) {
 
   await Promise.all([
     ensureCrawlerAccessLogTable(env),
-    ensureMarketSnapshotTable(env),
     ensureOperationalEventsTable(env)
   ]);
 
@@ -27,7 +25,6 @@ export async function onRequestGet({ env, request }) {
     crawlerTotals,
     operationalEvents,
     operationalTotals,
-    latestMarketSnapshot,
     ingestFailures,
     ingestSuccesses,
     deployInfo
@@ -37,7 +34,6 @@ export async function onRequestGet({ env, request }) {
     readCrawlerTotals(env, { since }),
     readOperationalEvents(env, { since, limit }),
     readOperationalTotals(env, { since }),
-    readLatestMarketSnapshotRow(env),
     readIngestFailures(env, { since, limit: 25 }),
     readIngestSuccesses(env, { since, limit: 25 }),
     readDeployInfo(env)
@@ -47,7 +43,7 @@ export async function onRequestGet({ env, request }) {
     type: "atr_bulletin_dashboard",
     generated_at: new Date().toISOString(),
     window: { since },
-    status: buildStatus({ itemSummary, crawlerTotals, operationalTotals, latestMarketSnapshot, ingestFailures }),
+    status: buildStatus({ itemSummary, crawlerTotals, operationalTotals, ingestFailures }),
     items: itemSummary,
     ingest: {
       ...ingestFailures,
@@ -64,8 +60,7 @@ export async function onRequestGet({ env, request }) {
       events: operationalEvents,
       summary: summarizeOperationalEvents(operationalEvents),
       totals: operationalTotals
-    },
-    markets: latestMarketSnapshot
+    }
   });
 }
 
@@ -354,34 +349,11 @@ async function readOperationalTotals(env, { since }) {
   };
 }
 
-async function readLatestMarketSnapshotRow(env) {
-  const row = await env.ATR_FEED_DB.prepare(
-    `SELECT id, fetched_at, source, cadence, status, market_count, snapshot_json
-     FROM market_snapshots
-     ORDER BY fetched_at DESC, id DESC
-     LIMIT 1`
-  ).first();
-
-  if (!row) return null;
-
-  const snapshot = parseJson(row.snapshot_json);
-  return {
-    id: row.id,
-    fetched_at: row.fetched_at,
-    source: row.source,
-    cadence: row.cadence,
-    status: row.status,
-    market_count: row.market_count,
-    updated_at: snapshot.updated_at || null
-  };
-}
-
-function buildStatus({ itemSummary, crawlerTotals, operationalTotals, latestMarketSnapshot, ingestFailures }) {
+function buildStatus({ itemSummary, crawlerTotals, operationalTotals, ingestFailures }) {
   const publishedItems = Number(itemSummary?.public_count || itemSummary?.d1_counts?.published || 0);
   const recentErrors = Number(operationalTotals?.errors || 0) + Number(crawlerTotals?.errors || 0);
   const ingestFailuresCount = Number(ingestFailures?.failure_count || 0);
   const strandedCount = Number(ingestFailures?.stranded?.length || 0);
-  const marketAgeHours = latestMarketSnapshot?.fetched_at ? hoursBetween(latestMarketSnapshot.fetched_at, new Date().toISOString()) : null;
 
   return {
     overall: (recentErrors || ingestFailuresCount) ? "attention" : "ok",
@@ -390,9 +362,7 @@ function buildStatus({ itemSummary, crawlerTotals, operationalTotals, latestMark
     ingest_failures: ingestFailuresCount,
     stranded_items: strandedCount,
     api_hits: crawlerTotals?.total || 0,
-    latest_item_at: itemSummary?.latest_published?.published_at || null,
-    latest_market_refresh_at: latestMarketSnapshot?.fetched_at || null,
-    market_snapshot_stale: marketAgeHours === null ? true : marketAgeHours > 36
+    latest_item_at: itemSummary?.latest_published?.published_at || null
   };
 }
 
@@ -433,13 +403,6 @@ function parseJson(value) {
 
 function hoursAgoIso(hours) {
   return new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
-}
-
-function hoursBetween(start, end) {
-  const a = Date.parse(start);
-  const b = Date.parse(end);
-  if (!Number.isFinite(a) || !Number.isFinite(b)) return null;
-  return Math.max(0, (b - a) / 36e5);
 }
 
 function clean(value) {

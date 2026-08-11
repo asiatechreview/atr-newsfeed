@@ -224,8 +224,6 @@ const els = {
   hitErrors: document.querySelector("#hit-errors"),
   postingErrors: document.querySelector("#posting-errors"),
   postingTotal: document.querySelector("#posting-total"),
-  marketStatus: document.querySelector("#market-status"),
-  marketDetail: document.querySelector("#market-detail"),
   trafficTotal: document.querySelector("#traffic-total"),
   trafficBreakdown: document.querySelector("#traffic-breakdown"),
   botTotal: document.querySelector("#bot-total"),
@@ -657,7 +655,6 @@ function renderDashboard(payload) {
   const traffic = payload.traffic || {};
   const operations = payload.operations || {};
   const items = payload.items || {};
-  const markets = payload.markets || null;
 
   els.overallStatus.classList.toggle("stat-ok", status.overall === "ok");
   els.overallStatus.classList.toggle("stat-attention", status.overall !== "ok");
@@ -669,8 +666,6 @@ function renderDashboard(payload) {
   els.hitErrors.textContent = `${formatNumber(traffic.totals?.errors || 0)} HTTP errors`;
   els.postingErrors.textContent = formatNumber(operations.totals?.errors || 0);
   els.postingTotal.textContent = `${formatNumber(operations.totals?.total || 0)} operational events`;
-  els.marketStatus.textContent = markets ? markets.status : "No data";
-  els.marketDetail.textContent = markets?.fetched_at ? `${markets.market_count || 0} indices, ${formatTime(markets.fetched_at)}` : "No refresh stored";
 
   els.trafficTotal.textContent = `${formatNumber(traffic.totals?.total || 0)} hits`;
   els.botTotal.textContent = `${formatNumber(traffic.totals?.total || 0)} hits`;
