@@ -109,6 +109,10 @@ if (!adminHtml.includes("analytics-view") || !adminScript.includes("/api/analyti
   console.error("admin assets must expose a protected Cloudflare Web Analytics view");
   process.exit(1);
 }
+if (!adminHtml.includes("newsletter-update-now") || !adminHtml.includes("newsletter-preview") || !adminScript.includes("/api/site-content/newsletter/refresh") || !adminScript.includes("updateNewsletterNow") || !adminScript.includes("renderNewsletterPreview")) {
+  console.error("admin assets must expose a manual newsletter refresh trigger and live preview");
+  process.exit(1);
+}
 if (!adminHtml.includes('action="/api/auth/login"') || !adminHtml.includes('name="username"') || !adminHtml.includes('name="password"') || !adminScript.includes("/api/auth/me")) {
   console.error("admin assets must use a native username/password login form");
   process.exit(1);

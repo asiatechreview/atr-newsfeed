@@ -278,7 +278,15 @@ const els = {
   newsletterUrl: document.querySelector("#newsletter-url"),
   newsletterImage: document.querySelector("#newsletter-image"),
   newsletterSave: document.querySelector("#newsletter-save"),
+  newsletterUpdateNow: document.querySelector("#newsletter-update-now"),
   newsletterReload: document.querySelector("#newsletter-reload"),
+  newsletterPreview: document.querySelector("#newsletter-preview"),
+  newsletterPreviewStatus: document.querySelector("#newsletter-preview-status"),
+  previewNewsletterImageLink: document.querySelector("#preview-newsletter-image-link"),
+  previewNewsletterImage: document.querySelector("#preview-newsletter-image"),
+  previewNewsletterTitle: document.querySelector("#preview-newsletter-title"),
+  previewNewsletterBlurb: document.querySelector("#preview-newsletter-blurb"),
+  previewNewsletterReadLink: document.querySelector("#preview-newsletter-read-link"),
   newsletterReadbackStatus: document.querySelector("#newsletter-readback-status"),
   newsletterReadbackOutput: document.querySelector("#newsletter-readback-output"),
   sponsorsList: document.querySelector("#sponsors-list"),
@@ -424,6 +432,7 @@ els.newsletterForm.addEventListener("submit", (event) => {
   saveNewsletter();
 });
 els.newsletterReload.addEventListener("click", loadLatestSubstackPost);
+els.newsletterUpdateNow.addEventListener("click", updateNewsletterNow);
 els.sponsorAdd.addEventListener("click", () => {
   state.sponsors.push({ name: "", blurb: "", url: "", logo: "", enabled: false });
   renderSponsors();
@@ -1478,6 +1487,7 @@ async function loadSiteContent() {
     if (!response.ok) throw new Error(`/api/site-content returned ${response.status}`);
     const content = await response.json();
     fillNewsletterForm(content.newsletter || {});
+    renderNewsletterPreview(content.newsletter || {});
     state.sponsors = Array.isArray(content.sponsors) ? content.sponsors.map((s) => ({ ...s })) : [];
     renderSponsors();
   } catch (error) {
@@ -1492,6 +1502,57 @@ function fillNewsletterForm(newsletter) {
   els.newsletterUrl.value = newsletter.url || "";
   els.newsletterImage.value = newsletter.image || "";
   els.newsletterStatus.textContent = "Loaded";
+  renderNewsletterPreview(newsletter);
+}
+
+function renderNewsletterPreview(newsletter) {
+  const title = newsletter.title || "";
+  const url = newsletter.url || "";
+  const image = newsletter.image || "";
+  const blurb = newsletter.blurb || "";
+
+  els.previewNewsletterTitle.textContent = title || "No card loaded";
+  els.previewNewsletterBlurb.textContent = blurb;
+  els.previewNewsletterImage.alt = title;
+  els.previewNewsletterReadLink.href = url || "#";
+  els.previewNewsletterImageLink.href = url || "#";
+
+  if (image) {
+    els.previewNewsletterImage.src = image;
+    els.previewNewsletterImage.hidden = false;
+  } else {
+    els.previewNewsletterImage.removeAttribute("src");
+    els.previewNewsletterImage.hidden = true;
+  }
+
+  els.newsletterPreviewStatus.textContent = "Live from /api/site-content";
+}
+
+async function updateNewsletterNow() {
+  els.newsletterUpdateNow.disabled = true;
+  els.newsletterStatus.textContent = "Updating";
+  els.newsletterPreviewStatus.textContent = "Fetching latest post";
+  try {
+    const response = await fetch("/api/site-content/newsletter/refresh", {
+      method: "POST",
+      credentials: "same-origin"
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || `Refresh returned ${response.status}`);
+
+    const newsletter = result.item || {};
+    fillNewsletterForm(newsletter);
+    renderNewsletterPreview(newsletter);
+    els.newsletterStatus.textContent = result.updated ? "Updated to latest post" : "Already current";
+    els.newsletterReadbackStatus.textContent = result.updated ? "Updated" : "No change";
+    els.newsletterReadbackOutput.textContent = JSON.stringify(result, null, 2);
+  } catch (error) {
+    els.newsletterStatus.textContent = "Update failed";
+    els.newsletterReadbackStatus.textContent = "Error";
+    els.newsletterReadbackOutput.textContent = error.message;
+  } finally {
+    els.newsletterUpdateNow.disabled = false;
+  }
 }
 
 async function saveNewsletter() {

@@ -16,7 +16,7 @@
       }
     } catch (error) {}
   </script>
-  <link rel="stylesheet" href="/admin.css?v=20260812-live-edit">
+  <link rel="stylesheet" href="/admin.css?v=20260812-newsletter-trigger">
 </head>
 <body class="logged-out">
   <div class="app">
@@ -393,14 +393,31 @@
                 </div>
               </div>
               <div class="form-actions">
+                <button id="newsletter-update-now" class="btn btn-primary" type="button">Fetch latest & update now</button>
                 <button id="newsletter-save" class="btn btn-primary" type="submit">Save card</button>
-                <button id="newsletter-reload" class="btn btn-ghost" type="button">Reload from Substack</button>
+                <button id="newsletter-reload" class="btn btn-ghost" type="button">Load latest into form</button>
               </div>
             </form>
             <details class="readback">
               <summary>Readback <span id="newsletter-readback-status" class="pill">Idle</span></summary>
               <pre id="newsletter-readback-output">Load the newsletter card to edit it.</pre>
             </details>
+            <div class="card" style="margin-top:14px">
+              <div class="card-head">
+                <div class="card-title">Live preview <small>exactly as it renders on bulletin.asiatechreview.com</small></div>
+                <span id="newsletter-preview-status" class="pill">Idle</span>
+              </div>
+              <div class="newsletter-promo" id="newsletter-preview">
+                <a class="newsletter-image-link" id="preview-newsletter-image-link" href="#" target="_blank" rel="noopener">
+                  <img id="preview-newsletter-image" src="" alt="">
+                </a>
+                <div class="newsletter-copy">
+                  <h3 id="preview-newsletter-title">No card loaded</h3>
+                  <p id="preview-newsletter-blurb"></p>
+                </div>
+                <a class="newsletter-link" id="preview-newsletter-read-link" href="#" target="_blank" rel="noopener">Read now →</a>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -672,6 +689,6 @@
     <button id="mobile-refresh-button" type="button">Refresh</button>
   </nav>
 
-  <script src="/admin.js?v=20260812-live-edit" defer></script>
+  <script src="/admin.js?v=20260812-newsletter-trigger" defer></script>
 </body>
 </html>

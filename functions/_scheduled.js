@@ -1,5 +1,6 @@
 import { ensureSiteContentTable, readSiteContent, writeSiteContent } from "./_lib/site-content.js";
 import { ensureOperationalEventsTable, writeOperationalEvent } from "./_lib/operational-log.js";
+import { refreshNewsletterCardFromFeed } from "./_lib/newsletter-refresh.js";
 
 const PUBLIC_BASE = "https://bulletin.asiatechreview.com";
 const DEV_BASE = "https://atr-newsfeed.pages.dev";
@@ -40,69 +41,7 @@ export async function onScheduled({ env, cron }) {
 
 async function refreshNewsletterCard(env) {
   try {
-    await ensureSiteContentTable(env);
-    await ensureOperationalEventsTable(env);
-
-    const feedResponse = await fetch("https://www.asiatechreview.com/feed", {
-      headers: { accept: "application/xml" }
-    });
-    if (!feedResponse.ok) {
-      await writeOperationalEvent(env, null, {
-        workflow: "site_content",
-        action: "newsletter_auto_refresh",
-        status: "error",
-        severity: "error",
-        http_status: feedResponse.status,
-        message: `Newsletter auto-refresh failed: feed returned ${feedResponse.status}.`
-      });
-      return;
-    }
-
-    const xml = await feedResponse.text();
-    const item = parseFirstFeedItem(xml);
-    if (!item || !item.link || !item.title) {
-      await writeOperationalEvent(env, null, {
-        workflow: "site_content",
-        action: "newsletter_auto_refresh",
-        status: "error",
-        severity: "error",
-        message: "Newsletter auto-refresh failed: no usable item in feed."
-      });
-      return;
-    }
-
-    const content = await readSiteContent(env);
-    const stored = content.newsletter || {};
-
-    if (item.link === stored.url) {
-      await writeOperationalEvent(env, null, {
-        workflow: "site_content",
-        action: "newsletter_auto_refresh",
-        status: "success",
-        severity: "info",
-        message: "Newsletter card already current; no update needed.",
-        details: { url: item.link }
-      });
-      return;
-    }
-
-    await writeSiteContent(env, {
-      newsletter: {
-        title: item.title,
-        blurb: item.description || item.title,
-        url: item.link,
-        image: item.image || stored.image || ""
-      }
-    }, "scheduled:substack-refresh");
-
-    await writeOperationalEvent(env, null, {
-      workflow: "site_content",
-      action: "newsletter_auto_refresh",
-      status: "success",
-      severity: "info",
-      message: "Newsletter card auto-refreshed to the latest Substack post.",
-      details: { title: item.title, url: item.link }
-    });
+    await refreshNewsletterCardFromFeed(env);
   } catch (error) {
     await writeOperationalEvent(env, null, {
       workflow: "site_content",
@@ -113,56 +52,6 @@ async function refreshNewsletterCard(env) {
       details: { error: error.message }
     });
   }
-}
-
-function parseFirstFeedItem(xml) {
-  const blockMatch = String(xml || "").match(/<item[\s>][\s\S]*?<\/item>/i) || String(xml || "").match(/<entry[\s>][\s\S]*?<\/entry>/i);
-  if (!blockMatch) return null;
-
-  const block = blockMatch[0];
-  const title = decodeEntities(stripTags(extractTag(block, "title")));
-  const link = decodeEntities(extractTag(block, "link")).trim();
-  const description = decodeEntities(stripTags(extractTag(block, "description")));
-  const imageMatch = block.match(/<enclosure[^>]*url="([^"]+)"/i);
-  const image = imageMatch ? decodeEntities(imageMatch[1]) : "";
-
-  return { title, link, description, image };
-}
-
-function extractTag(block, tag) {
-  const match = block.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, "i"));
-  return match ? match[1].trim() : "";
-}
-
-function stripTags(value) {
-  return String(value || "")
-    .replace(/<!\[CDATA\[/g, "")
-    .replace(/\]\]>/g, "")
-    .replace(/<[^>]*>/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function decodeEntities(value) {
-  const named = {
-    amp: "&",
-    lt: "<",
-    gt: ">",
-    quot: "\"",
-    apos: "'",
-    nbsp: " ",
-    mdash: "—",
-    ndash: "–",
-    hellip: "…",
-    rsquo: "’",
-    lsquo: "‘",
-    rdquo: "”",
-    ldquo: "“"
-  };
-  return String(value || "")
-    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
-    .replace(/&#([0-9]+);/g, (_, dec) => String.fromCodePoint(parseInt(dec, 10)))
-    .replace(/&([a-zA-Z]+);/g, (match, name) => (name in named ? named[name] : match));
 }
 
 // ---------------------------------------------------------------------------
