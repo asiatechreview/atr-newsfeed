@@ -1479,7 +1479,7 @@ function renderSignal(items) {
 
   const topicCounts = new Map();
   for (const item of items) {
-    const topic = primaryTopicTag(item.tags);
+    const topic = item.region || item.category || primaryTopicTag(item.tags);
     topicCounts.set(topic, (topicCounts.get(topic) || 0) + 1);
   }
 
@@ -1527,7 +1527,7 @@ function showNewItemToast(item, count = 1) {
   newItemToastTitle.textContent = item?.headline || "New update available";
   newItemToastMeta.textContent = count > 1
     ? `${count} new updates · just now`
-    : `${titleCaseTag(primaryTopicTag(item?.tags))} · just now`;
+    : `${titleCaseTag(item?.region || item?.category || primaryTopicTag(item?.tags))} · just now`;
   newItemToast.hidden = false;
 
   if (newItemToastTimer) {
@@ -1929,7 +1929,7 @@ function renderItems(items) {
     }
 
     const itemNode = itemTemplate.content.cloneNode(true);
-    const primaryTag = primaryTopicTag(item.tags);
+    const primaryTag = item.region || item.category || primaryTopicTag(item.tags);
     const primaryTagLink = itemNode.querySelector(".item-primary-tag");
 
     itemNode.querySelector(".item-time").textContent = formatTime(item.published_at);
