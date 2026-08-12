@@ -5,7 +5,7 @@ const DEFAULT_LIMIT = 100;
 const MAX_LIMIT = 500;
 
 export async function onRequestGet({ env, request }) {
-  if (!isAuthorized(env, request)) {
+  if (!(await isAuthorized(env, request))) {
     return json({ error: "Unauthorized" }, 401);
   }
 

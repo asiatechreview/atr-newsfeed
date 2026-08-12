@@ -428,7 +428,7 @@ function moveBangkokDate(value, targetDate) {
 }
 
 export async function onRequestPost({ env, request }) {
-  if (!isAuthorized(env, request)) {
+  if (!(await isAuthorized(env, request))) {
     await writeOperationalEvent(env, request, {
       workflow: "bulletin_ingest",
       action: "create_item",
@@ -523,7 +523,7 @@ export async function onRequestPost({ env, request }) {
       source_name: sourceName,
       source_url: sourceUrl,
       message: "Bulletin item create failed while preparing the database.",
-      details: { error: error.message }
+      details: { error: error.message, payload: { headline, blurb, sourceName, sourceUrl, category, tags, telegramMessageId, publishedAt } }
     });
     return json({ error: "database setup failed" }, 500);
   }
@@ -580,7 +580,7 @@ export async function onRequestPost({ env, request }) {
       source_name: sourceName,
       source_url: sourceUrl,
       message: "Bulletin item create failed during database write.",
-      details: { error: error.message, category, headline }
+      details: { error: error.message, category, headline, payload: { headline, blurb, sourceName, sourceUrl, category, tags, telegramMessageId, publishedAt } }
     });
     return json({ error: "database write failed" }, 500);
   }
@@ -602,7 +602,7 @@ export async function onRequestPost({ env, request }) {
 }
 
 export async function onRequestPatch({ env, request }) {
-  if (!isAuthorized(env, request)) {
+  if (!(await isAuthorized(env, request))) {
     await writeOperationalEvent(env, request, {
       workflow: "bulletin_ingest",
       action: "update_item",
@@ -704,7 +704,7 @@ export async function onRequestPatch({ env, request }) {
 }
 
 export async function onRequestDelete({ env, request }) {
-  if (!isAuthorized(env, request)) {
+  if (!(await isAuthorized(env, request))) {
     await writeOperationalEvent(env, request, {
       workflow: "bulletin_ingest",
       action: "remove_item",

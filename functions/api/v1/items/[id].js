@@ -9,7 +9,7 @@ export async function onRequestGet({ params, request }) {
     .find((candidate) =>
       isNumeric
         ? stripPublicId(candidate.id) === requestedId || stripPublicId(candidate.raw_id) === requestedId || candidate.id === publicId(requestedId)
-        : candidate.link_key === requestedId.toLowerCase()
+        : candidate.link_key === requestedId.toLowerCase() || candidate.raw_id === requestedId || candidate.id === publicId(requestedId)
     );
 
   if (!item) {

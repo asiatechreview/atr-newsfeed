@@ -5,7 +5,7 @@ const DEFAULT_ACCOUNT_ID = "3e7885d961646e313d2e1a50ec33d62d";
 const DEFAULT_SITE_TAG = "70c51d1d7a294d70af9aa1512f678135";
 
 export async function onRequestGet({ env, request }) {
-  if (!isAuthorized(env, request)) {
+  if (!(await isAuthorized(env, request))) {
     return json({ error: "Unauthorized" }, 401);
   }
 

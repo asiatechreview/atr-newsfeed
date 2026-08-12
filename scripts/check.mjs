@@ -10,8 +10,6 @@ import { onRequestGet as onApiV1ItemRequestGet } from "../functions/api/v1/items
 import { onRequestGet as onApiV1CategoriesRequestGet } from "../functions/api/v1/categories.js";
 import { onRequestGet as onApiV1SearchRequestGet } from "../functions/api/v1/search.js";
 import { onRequestGet as onOpenApiRequestGet } from "../functions/api/openapi.json.js";
-import { onRequestGet as onMarketsRequestGet } from "../functions/api/markets.js";
-import { onRequestPost as onMarketsRefreshRequestPost } from "../functions/api/markets/refresh.js";
 import { onRequestGet as onDashboardRequestGet } from "../functions/api/dashboard.js";
 import { onRequestGet as onJsonFeedRequestGet } from "../functions/feed.json.js";
 import { onRequestGet as onRssRequestGet } from "../functions/rss.xml.js";
@@ -31,6 +29,7 @@ const required = [
   "public/admin.css",
   "public/admin.js",
   "functions/api/items.js",
+  "functions/_scheduled.js",
   "functions/api/health.js",
   "functions/api/crawler-logs.js",
   "functions/api/dashboard.js",
@@ -43,7 +42,6 @@ const required = [
   "functions/_lib/admin-auth.js",
   "functions/_lib/site-content.js",
   "functions/api/index.js",
-  "functions/api/markets.js",
   "functions/api/openapi.json.js",
   "functions/api/v1/index.js",
   "functions/api/v1/items.js",
@@ -234,7 +232,10 @@ if (headlineFailures.length) {
 const originalFetch = globalThis.fetch;
 globalThis.fetch = async (url) => {
   if (String(url).includes("/api/items")) {
-    return new Response(JSON.stringify({ items: generatedItems }), {
+    const requestUrl = new URL(url);
+    const limit = Math.min(Number(requestUrl.searchParams.get("limit")) || generatedItems.length, generatedItems.length);
+    const offset = Math.max(0, Number(requestUrl.searchParams.get("offset")) || 0);
+    return new Response(JSON.stringify({ items: generatedItems.slice(offset, offset + limit) }), {
       headers: { "content-type": "application/json; charset=utf-8" }
     });
   }
@@ -459,7 +460,7 @@ const patchResponse = await onRequestPatch({
 });
 const patchPayload = await patchResponse.json();
 
-if (patchResponse.status !== 200 || patchPayload.item?.blurb !== "Edited item from the custom bulletin admin." || patchUpdateParams?.[5] !== existingPostItem.id) {
+if (patchResponse.status !== 200 || patchPayload.item?.blurb !== "Edited item from the custom bulletin admin." || patchUpdateParams?.[7] !== existingPostItem.id) {
   console.error("FAILED: PATCH /api/items must update an existing bulletin item for the admin UI");
   process.exit(1);
 }
@@ -680,131 +681,7 @@ if (crawlerLogsResponse.status !== 200 || crawlerLogsPayload.summary?.byBot?.GPT
   process.exit(1);
 }
 
-const marketsConfiguredResponse = await onMarketsRequestGet({
-  env: {
-    MARKET_SNAPSHOT_JSON: JSON.stringify({
-      source: "Check fixture",
-      updated_at: "2026-08-02T09:45:00Z",
-      markets: [
-        { name: "Nikkei 225", change_percent: 0.42 },
-        { name: "KOSPI", change_percent: -0.18 }
-      ]
-    })
-  },
-  request: new Request("https://bulletin.asiatechreview.com/api/markets")
-});
-const marketsConfiguredPayload = await marketsConfiguredResponse.json();
-
-if (marketsConfiguredResponse.status !== 200 || marketsConfiguredPayload.markets?.length !== 2 || marketsConfiguredPayload.markets[0]?.name !== "Nikkei 225") {
-  console.error("FAILED: /api/markets must return configured market snapshot rows");
-  process.exit(1);
-}
-
-let marketSnapshotInsert = null;
-const marketSnapshotEnv = {
-  FEED_INGEST_TOKEN: "test-token",
-  ATR_FEED_DB: {
-    prepare(query) {
-      return {
-        bind(...params) {
-          return {
-            async run() {
-              if (query.includes("INSERT INTO market_snapshots")) {
-                marketSnapshotInsert = params;
-              }
-              return { success: true };
-            },
-            async first() {
-              if (query.includes("FROM market_snapshots")) {
-                return marketSnapshotInsert ? {
-                  id: 1,
-                  fetched_at: "2026-08-02T10:30:00Z",
-                  source: marketSnapshotInsert[0],
-                  cadence: marketSnapshotInsert[1],
-                  status: marketSnapshotInsert[2],
-                  market_count: marketSnapshotInsert[3],
-                  snapshot_json: marketSnapshotInsert[4]
-                } : null;
-              }
-              return null;
-            }
-          };
-        },
-        async run() {
-          return { success: true };
-        },
-        async first() {
-          if (query.includes("FROM market_snapshots")) {
-            return marketSnapshotInsert ? {
-              id: 1,
-              fetched_at: "2026-08-02T10:30:00Z",
-              source: marketSnapshotInsert[0],
-              cadence: marketSnapshotInsert[1],
-              status: marketSnapshotInsert[2],
-              market_count: marketSnapshotInsert[3],
-              snapshot_json: marketSnapshotInsert[4]
-            } : null;
-          }
-          return null;
-        }
-      };
-    }
-  }
-};
-
-const marketsRefreshUnauthorizedResponse = await onMarketsRefreshRequestPost({
-  env: marketSnapshotEnv,
-  request: new Request("https://bulletin.asiatechreview.com/api/markets/refresh", { method: "POST" })
-});
-
-if (marketsRefreshUnauthorizedResponse.status !== 401) {
-  console.error("FAILED: /api/markets/refresh must require authorization");
-  process.exit(1);
-}
-
-const marketFetch = globalThis.fetch;
-globalThis.fetch = async () => new Response(JSON.stringify({
-  chart: {
-    result: [{
-      meta: {
-        regularMarketPrice: 40000,
-        chartPreviousClose: 39800,
-        regularMarketTime: 1785664800
-      }
-    }]
-  }
-}), {
-  status: 200,
-  headers: { "content-type": "application/json" }
-});
-
-const marketsRefreshResponse = await onMarketsRefreshRequestPost({
-  env: marketSnapshotEnv,
-  request: new Request("https://bulletin.asiatechreview.com/api/markets/refresh", {
-    method: "POST",
-    headers: { authorization: "Bearer test-token" }
-  })
-});
-const marketsRefreshPayload = await marketsRefreshResponse.json();
-globalThis.fetch = marketFetch;
-
-if (marketsRefreshResponse.status !== 200 || marketsRefreshPayload.status !== "ok" || !marketSnapshotInsert) {
-  console.error("FAILED: /api/markets/refresh must fetch and store a market snapshot");
-  process.exit(1);
-}
-
-const marketsCachedResponse = await onMarketsRequestGet({
-  env: marketSnapshotEnv,
-  request: new Request("https://bulletin.asiatechreview.com/api/markets")
-});
-const marketsCachedPayload = await marketsCachedResponse.json();
-
-if (marketsCachedResponse.status !== 200 || marketsCachedPayload.cadence !== "open_midday_close" || marketsCachedPayload.markets?.length !== 13) {
-  console.error("FAILED: /api/markets must read the latest cached market snapshot");
-  process.exit(1);
-}
-
-console.log(`OK: ATR feed checks passed (${STATIC_ITEMS.length} static items, ${generatedItems.length} generated headlines, RSS/JSON feed formatting, public API, duplicate POST guard, crawler/API logging, market snapshot endpoint).`);
+console.log(`OK: ATR feed checks passed (${STATIC_ITEMS.length} static items, ${generatedItems.length} generated headlines, RSS/JSON feed formatting, public API, duplicate POST guard, crawler/API logging).`);
 
 function isWeakHeadline(headline) {
   const value = String(headline || "").trim().replace(/\bU\.S\./g, "US");

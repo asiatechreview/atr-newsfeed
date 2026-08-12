@@ -6,3 +6,8 @@ pages_build_output_dir = "public"
 binding = "ATR_FEED_DB"
 database_name = "atr-newsfeed-db"
 database_id = "b02c4b49-922e-48d8-8c54-ceeedd76c41a"
+
+# Scheduled functions (functions/_scheduled.js). Keep in sync with the CRONS
+# strings in that file. Times are UTC.
+[triggers]
+crons = ["0 1 * * *", "*/30 * * * *", "*/10 * * * *"]
