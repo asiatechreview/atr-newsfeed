@@ -207,6 +207,27 @@ h1, h2, h3 { font-weight: 700; }
 .item-button.active { background: var(--accent-dim); border-color: var(--accent); }
 .item-button.active strong { color: var(--accent-strong); }
 
+/* ============ Live item editor ============ */
+.live-edit-overlay {
+  position: fixed; inset: 0; z-index: 60;
+  background: rgba(0,0,0,.55);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+}
+.live-edit-overlay[hidden] { display: none; }
+.live-edit-panel {
+  width: min(680px, 100%);
+  max-height: min(88vh, 900px);
+  overflow-y: auto;
+  background: var(--panel); border: 1px solid var(--border-2); border-radius: var(--radius);
+  padding: 22px;
+  box-shadow: 0 24px 60px rgba(0,0,0,.5);
+}
+.live-edit-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.live-edit-meta { font-size: 12px; color: var(--faint); margin-top: 4px; }
+.edit-status { margin-bottom: 12px; padding: 8px 10px; border-radius: var(--radius-sm); background: var(--panel-2); font-size: 12px; color: var(--muted); }
+body.edit-open { overflow: hidden; }
+
 /* ============ Readback ============ */
 .readback { margin-top: 18px; border-top: 1px solid var(--border); padding-top: 12px; }
 .readback summary { cursor: pointer; font-size: 12px; font-weight: 600; color: var(--muted); display: flex; align-items: center; gap: 8px; }

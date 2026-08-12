@@ -285,7 +285,27 @@ const els = {
   sponsorAdd: document.querySelector("#sponsor-add"),
   sponsorsSave: document.querySelector("#sponsors-save"),
   sponsorsReadbackStatus: document.querySelector("#sponsors-readback-status"),
-  sponsorsReadbackOutput: document.querySelector("#sponsors-readback-output")
+  sponsorsReadbackOutput: document.querySelector("#sponsors-readback-output"),
+  liveEditOverlay: document.querySelector("#live-edit-overlay"),
+  liveEditTitle: document.querySelector("#live-edit-title"),
+  liveEditMode: document.querySelector("#live-edit-mode"),
+  liveEditMeta: document.querySelector("#live-edit-meta"),
+  liveEditClose: document.querySelector("#live-edit-close"),
+  liveEditForm: document.querySelector("#live-edit-form"),
+  liveEditId: document.querySelector("#live-edit-id"),
+  liveEditCategory: document.querySelector("#live-edit-category"),
+  liveEditHeadline: document.querySelector("#live-edit-headline"),
+  liveEditBlurb: document.querySelector("#live-edit-blurb"),
+  liveEditSourceName: document.querySelector("#live-edit-source-name"),
+  liveEditSourceUrl: document.querySelector("#live-edit-source-url"),
+  liveEditPublishedAt: document.querySelector("#live-edit-published-at"),
+  liveEditTags: document.querySelector("#live-edit-tags"),
+  liveEditStatus: document.querySelector("#live-edit-status"),
+  liveEditSave: document.querySelector("#live-edit-save"),
+  liveEditRemove: document.querySelector("#live-edit-remove"),
+  liveEditCancel: document.querySelector("#live-edit-cancel"),
+  liveEditReadbackStatus: document.querySelector("#live-edit-readback-status"),
+  liveEditReadbackOutput: document.querySelector("#live-edit-readback-output")
 };
 
 function switchTab(name) {
@@ -494,6 +514,20 @@ els.form.addEventListener("submit", async (event) => {
   if (!state.selected) return;
   payload.id = Number(state.selected.id);
   await mutateItem("PATCH", payload, "Saved");
+});
+
+els.liveEditClose.addEventListener("click", closeLiveEditor);
+els.liveEditCancel.addEventListener("click", closeLiveEditor);
+els.liveEditForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  saveLiveEditor();
+});
+els.liveEditRemove.addEventListener("click", removeLiveEditor);
+els.liveEditOverlay.addEventListener("click", (event) => {
+  if (event.target === els.liveEditOverlay) closeLiveEditor();
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !els.liveEditOverlay.hidden) closeLiveEditor();
 });
 
 async function loadItems() {
@@ -1011,8 +1045,7 @@ function renderList() {
     tr.className = "item-row";
     tr.tabIndex = 0;
     tr.addEventListener("click", () => {
-      selectItem(item.id);
-      switchTab("publish");
+      openLiveEditor(item.id);
     });
     tr.append(cell(String(item.id), "nowrap id-cell", "ID"));
     tr.append(cell(item.headline || item.title || firstWords(item.blurb, 12), "truncate", "Title"));
@@ -1137,6 +1170,190 @@ function formatTags(value) {
   }
   if (Array.isArray(tags)) return tags.filter(Boolean).join(", ");
   return String(tags);
+}
+
+// ---------- Live item editor (custom CMS panel, not the publish form) ----------
+
+function tagsToInput(value) {
+  if (!value) return "";
+  let tags = value;
+  if (typeof tags === "string") {
+    const trimmed = tags.trim();
+    if (trimmed.startsWith("[")) {
+      try {
+        tags = JSON.parse(trimmed);
+      } catch {
+        return trimmed;
+      }
+    } else {
+      return trimmed;
+    }
+  }
+  if (Array.isArray(tags)) return tags.filter(Boolean).join(", ");
+  return String(tags);
+}
+
+function openLiveEditor(id) {
+  const item = state.items.find((candidate) => String(candidate.id) === String(id));
+  if (!item) return;
+
+  state.selected = item;
+  state.mode = "edit";
+  els.liveEditTitle.textContent = "Edit Item";
+  els.liveEditMode.textContent = "Published";
+  els.liveEditMeta.textContent = `${item.source_name || "Source"} · ${item.category || DEFAULT_CATEGORY} · ${formatDateTime(item.published_at)}`;
+  fillLiveEditor(item);
+  els.liveEditOverlay.hidden = false;
+  document.body.classList.add("edit-open");
+  els.liveEditHeadline.focus();
+}
+
+function fillLiveEditor(item) {
+  const numeric = Number(item.id);
+  const editable = Number.isInteger(numeric) && numeric > 0;
+
+  els.liveEditId.value = item.id || "";
+  els.liveEditHeadline.value = item.headline || item.title || "";
+  els.liveEditBlurb.value = item.blurb || "";
+  els.liveEditSourceName.value = item.source_name || "";
+  els.liveEditSourceUrl.value = item.source_url || "";
+  els.liveEditPublishedAt.value = formatDateTime(item.published_at);
+  els.liveEditTags.value = tagsToInput(item.tags);
+
+  const currentCategory = item.category || DEFAULT_CATEGORY;
+  const cats = state.categories.length ? state.categories : [currentCategory];
+  if (!cats.includes(currentCategory)) cats.unshift(currentCategory);
+  els.liveEditCategory.replaceChildren();
+  for (const cat of cats) {
+    const opt = document.createElement("option");
+    opt.value = cat;
+    opt.textContent = cat;
+    if (cat === currentCategory) opt.selected = true;
+    els.liveEditCategory.append(opt);
+  }
+
+  const controls = [
+    els.liveEditHeadline,
+    els.liveEditBlurb,
+    els.liveEditSourceName,
+    els.liveEditSourceUrl,
+    els.liveEditCategory,
+    els.liveEditTags
+  ];
+  controls.forEach((control) => { control.disabled = !editable; });
+  els.liveEditSave.disabled = !editable;
+  els.liveEditRemove.disabled = !editable;
+
+  els.liveEditStatus.hidden = true;
+  if (!editable) {
+    els.liveEditStatus.hidden = false;
+    els.liveEditStatus.textContent = "Static legacy item — not in the database, cannot be edited here.";
+    els.liveEditStatus.className = "edit-status";
+  }
+
+  els.liveEditReadbackStatus.textContent = "Loaded";
+  els.liveEditReadbackOutput.textContent = JSON.stringify(item, null, 2);
+}
+
+function closeLiveEditor() {
+  els.liveEditOverlay.hidden = true;
+  document.body.classList.remove("edit-open");
+  state.selected = null;
+}
+
+function setLiveEditStatus(status, message) {
+  els.liveEditStatus.hidden = false;
+  els.liveEditStatus.textContent = `${status}: ${message}`;
+  els.liveEditStatus.className = "edit-status";
+  if (status === "Error") els.liveEditStatus.classList.add("status-error");
+  if (status === "Saved" || status === "Removed") els.liveEditStatus.classList.add("status-ok");
+}
+
+async function saveLiveEditor() {
+  if (!state.selected) return;
+  const item = state.selected;
+  const numeric = Number(item.id);
+  if (!Number.isInteger(numeric) || numeric <= 0) {
+    setLiveEditStatus("Error", "Static items cannot be saved here.");
+    return;
+  }
+
+  const payload = {
+    id: numeric,
+    headline: els.liveEditHeadline.value.trim(),
+    blurb: els.liveEditBlurb.value.trim(),
+    sourceName: els.liveEditSourceName.value.trim(),
+    sourceUrl: els.liveEditSourceUrl.value.trim(),
+    category: els.liveEditCategory.value.trim() || DEFAULT_CATEGORY,
+    tags: els.liveEditTags.value.split(",").map((tag) => tag.trim()).filter(Boolean)
+  };
+
+  if (!payload.blurb || !payload.sourceName || !payload.sourceUrl || !payload.category) {
+    setLiveEditStatus("Missing fields", "Blurb, source, URL and category are required.");
+    return;
+  }
+
+  setLiveEditStatus("Saving", "PATCH /api/items");
+  try {
+    const response = await fetch("/api/items", {
+      method: "PATCH",
+      credentials: "same-origin",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const result = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      els.authPanel.hidden = false;
+      throw new Error("Token rejected.");
+    }
+    if (!response.ok) throw new Error(result.error || `/api/items returned ${response.status}`);
+
+    const updated = result.item;
+    if (updated) {
+      const idx = state.items.findIndex((candidate) => String(candidate.id) === String(item.id));
+      if (idx >= 0) state.items[idx] = { ...state.items[idx], ...updated };
+    }
+    setLiveEditStatus("Saved", `Item ${item.id} updated`);
+    els.liveEditReadbackStatus.textContent = "Saved";
+    els.liveEditReadbackOutput.textContent = JSON.stringify(result, null, 2);
+    filterItems();
+    setStatus("Saved", `Item ${item.id} updated`);
+  } catch (error) {
+    setLiveEditStatus("Error", error.message);
+    els.liveEditReadbackStatus.textContent = "Error";
+    els.liveEditReadbackOutput.textContent = error.message;
+  }
+}
+
+async function removeLiveEditor() {
+  if (!state.selected) return;
+  const item = state.selected;
+  const numeric = Number(item.id);
+  if (!Number.isInteger(numeric) || numeric <= 0) return;
+
+  const ok = window.confirm(`Remove bulletin item ${item.id}? This hides it from the public site, API, RSS and JSON feed.`);
+  if (!ok) return;
+
+  setLiveEditStatus("Removing", "DELETE /api/items");
+  try {
+    const response = await fetch("/api/items", {
+      method: "DELETE",
+      credentials: "same-origin",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({ id: numeric })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || `DELETE returned ${response.status}`);
+
+    state.items = state.items.filter((candidate) => String(candidate.id) !== String(item.id));
+    closeLiveEditor();
+    filterItems();
+    setStatus("Removed", `Item ${item.id} removed`);
+  } catch (error) {
+    setLiveEditStatus("Error", error.message);
+    els.liveEditReadbackStatus.textContent = "Error";
+    els.liveEditReadbackOutput.textContent = error.message;
+  }
 }
 
 function formatDateTime(value) {
