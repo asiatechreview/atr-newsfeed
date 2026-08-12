@@ -274,7 +274,7 @@ export const STATIC_ITEMS = [
     "blurb": "Xi Jinping will attend China's flagship World AI Conference for the first time as Beijing places AI higher in its technology rivalry with the US",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-13/xi-to-debut-at-china-s-flagship-ai-summit-as-us-rivalry-heats-up",
-    "category": "WAIC 2026",
+    "category": "AI and Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:59:08.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -374,7 +374,7 @@ export const STATIC_ITEMS = [
     "blurb": "China's Dongfang Suanxin (DFSX) unveiled an AI chip road map built around software-defined computing and 3D-stacked near-memory architecture as it tries to reduce dependence on Nvidia and export-restricted components. Chinese startup DFSX launches an AI chip that it claims uses a fully domestic supply chain and is built on a 14nm process, but says it can rival 4nm chips",
     "source_name": "SCMP",
     "source_url": "https://www.scmp.com/tech/tech-war/article/3360415/nvidias-future-challenger-chinese-start-reveals-aggressive-ai-chip-road-map",
-    "category": "WAIC 2026",
+    "category": "AI and Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:58.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -554,7 +554,7 @@ export const STATIC_ITEMS = [
     "blurb": "WAIC 2026 runs from July 17-20 in Shanghai, with pre-event reporting pointing to more than 1,100 companies, 3,000 exhibits and 300 global product debuts",
     "source_name": "Shanghai Municipal Government",
     "source_url": "https://english.shanghai.gov.cn/en-Events/20260624/9cc202d708504b56ba32f70fbd61ef79.html",
-    "category": "WAIC 2026",
+    "category": "AI and Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:40.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -564,7 +564,7 @@ export const STATIC_ITEMS = [
     "blurb": "Chinese President Xi Jinping will attend WAIC's opening ceremony and give a keynote, signalling Beijing's increased focus on AI development and governance",
     "source_name": "SCMP",
     "source_url": "https://www.scmp.com/tech/article/3360404/xi-jinping-attend-world-ai-conference-first-time-china-elevates-tech-push",
-    "category": "WAIC 2026",
+    "category": "AI and Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:39.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -574,7 +574,7 @@ export const STATIC_ITEMS = [
     "blurb": "Huawei will show the physical unit of its Atlas 950 SuperPoD at WAIC 2026, positioning the system as part of China's domestic AI compute push",
     "source_name": "SCMP",
     "source_url": "https://www.scmp.com/tech/article/3359733/huaweis-new-computing-cluster-worlds-first-ai-agent-phone-debut-china-ai-summit",
-    "category": "WAIC 2026",
+    "category": "AI and Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:38.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -584,7 +584,7 @@ export const STATIC_ITEMS = [
     "blurb": "Dongfang Suanxin, also known as DFSX, unveiled its DF1000 AI chip using software-defined computing and 3D near-memory architecture to reduce dependence on foreign high-bandwidth memory and advanced chipmaking nodes",
     "source_name": "WSJ",
     "source_url": "https://www.wsj.com/tech/ai/chinese-ai-startup-dfsx-releases-chip-to-take-on-the-west-ffc71526",
-    "category": "WAIC 2026",
+    "category": "AI and Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:37.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -594,7 +594,7 @@ export const STATIC_ITEMS = [
     "blurb": "MiniMax will showcase its M3 multimodal large model at WAIC 2026 as one of the conference's headline model demos",
     "source_name": "Shanghai Municipal Government",
     "source_url": "https://english.shanghai.gov.cn/en-Latest-WhatsNew/20260710/6cd94d78f71a42e3a747541b9021fe2b.html",
-    "category": "WAIC 2026",
+    "category": "AI and Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:36.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -604,7 +604,7 @@ export const STATIC_ITEMS = [
     "blurb": "StepFun will debut its Agent operating system and StepX Neo AI-agent smartphone, with partners including Trip.com, Alipay, Didi, Meituan, WPS and ByteDance's Jianying",
     "source_name": "Shanghai Daily",
     "source_url": "https://www.citynewsservice.cn/articles/shanghaidaily/news/stepfun-launches-worlds-first-mass-market-agentic-smartphone-dk4lj5zn",
-    "category": "WAIC 2026",
+    "category": "AI and Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:35.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -614,7 +614,7 @@ export const STATIC_ITEMS = [
     "blurb": "Alibaba and Honor are expected to deepen their partnership on an AI device operating system at WAIC, with new agent capabilities planned as China's AI-phone race intensifies",
     "source_name": "SCMP",
     "source_url": "https://www.scmp.com/tech/article/3360525/alibaba-team-honor-race-build-ai-agentic-devices",
-    "category": "WAIC 2026",
+    "category": "AI and Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:34.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -624,7 +624,7 @@ export const STATIC_ITEMS = [
     "blurb": "WAIC 2026 will feature near-memory computing 3D chips, humanoid robots and AI dexterous hands as China tries to connect domestic compute with embodied AI hardware",
     "source_name": "People's Daily",
     "source_url": "https://en.people.cn/n3/2026/0708/c90000-20475542.html",
-    "category": "WAIC 2026",
+    "category": "AI and Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:33.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -634,7 +634,7 @@ export const STATIC_ITEMS = [
     "blurb": "Shanghai Matwings Technology is previewing MatwingsVenus, an AI protein-design platform for pharma, diagnostics, food and agriculture use cases",
     "source_name": "Orient",
     "source_url": "https://orient.tm/en/china/1263",
-    "category": "WAIC 2026",
+    "category": "AI and Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:32.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -644,7 +644,7 @@ export const STATIC_ITEMS = [
     "blurb": "The conference is being framed as a full-stack AI showcase for China, spanning domestic chips and compute, agentic phones, robots, vertical AI tools and governance messaging",
     "source_name": "Shanghai Municipal Government",
     "source_url": "https://english.shanghai.gov.cn/en-Events/20260624/9cc202d708504b56ba32f70fbd61ef79.html",
-    "category": "WAIC 2026",
+    "category": "AI and Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:31.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
