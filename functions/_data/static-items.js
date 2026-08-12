@@ -4,7 +4,7 @@ export const STATIC_ITEMS = [
     "blurb": "DeepSeek is pushing China’s AI price war into enterprise adoption, with its V4 Flash model completing a standard intelligence task for about two cents versus more than $2 for Anthropic’s premium model, as founder Liang Wenfeng closes a first funding round of over $7 billion at a valuation above $40 billion",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/newsletters/2026-07-17/china-can-still-win-the-ai-race-with-inferior-technology",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": "23783",
     "published_at": "2026-07-17T12:13:57.105992Z",
     "created_at": "2026-07-17T12:13:57.105992Z"
@@ -14,7 +14,7 @@ export const STATIC_ITEMS = [
     "blurb": "South Korean authorities searched and seized materials from Chinese chipmaker Montage Technology's local office over a potential competition law violation, while Montage said it is cooperating with Seoul prosecutors and that no directors or employees have been charged, with South Korea accounting for 2.93 billion yuan ($432.63 million) of its fiscal 2025 sales",
     "source_name": "Reuters",
     "source_url": "https://www.reuters.com/world/asia-pacific/south-korea-searches-chinese-chipmaker-montage-technologys-office-competition-2026-07-17/",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": "17958",
     "published_at": "2026-07-17T01:33:30.000Z",
     "created_at": "2026-07-17T01:33:30.000Z"
@@ -24,7 +24,7 @@ export const STATIC_ITEMS = [
     "blurb": "Tata Electronics is preparing to produce India's first semiconductor wafers on 90nm process technology at its Dholera, Gujarat fab, using a mature node for industrial and automotive chips as it steps down from the 28nm process parent Tata Sons had touted in March 2025.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-17/tata-group-resorts-to-older-tech-to-launch-its-chip-foray",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-17T01:31:26.000Z",
     "created_at": "2026-07-17T01:31:26.000Z"
@@ -34,7 +34,7 @@ export const STATIC_ITEMS = [
     "blurb": "Moonshot AI unveiled Kimi K3, a 2.8-trillion-parameter model built on its Kimi Delta Attention architecture, with a 1-million-token context window and claimed top open-model results across its evaluation suite.",
     "source_name": "Kimi",
     "source_url": "https://www.kimi.com/blog/kimi-k3",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-17T01:30:26.000Z",
     "created_at": "2026-07-17T01:30:26.000Z"
@@ -44,7 +44,7 @@ export const STATIC_ITEMS = [
     "blurb": "DeepSeek was valued at 350.88 billion yuan ($51.82 billion) in its first external funding round, according to a Chinese filing that showed a fund backed by Anhui Korrun invested 2.9 billion yuan for an indirect 0.8265% stake",
     "source_name": "Reuters",
     "source_url": "https://www.reuters.com/world/asia-pacific/chinese-filing-implies-deepseek-valuation-around-52-billion-2026-07-16/",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": "17955",
     "published_at": "2026-07-17T01:25:25.000Z",
     "created_at": "2026-07-17T01:25:25.000Z"
@@ -54,7 +54,7 @@ export const STATIC_ITEMS = [
     "blurb": "Representatives from 29 countries signed an agreement to establish a global AI cooperation body headquartered in Shanghai, with founding members including Russia, Belarus, Serbia, Cuba, Brazil and Venezuela, plus 10 African and 12 Asian countries, Xinhua said.",
     "source_name": "Reuters",
     "source_url": "https://www.reuters.com/world/china/twenty-nine-countries-sign-agreement-establish-global-ai-cooperation-body-2026-07-16",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T15:38:00.000Z",
     "created_at": "2026-07-16T15:38:00.000Z"
@@ -64,7 +64,7 @@ export const STATIC_ITEMS = [
     "blurb": "US House China committee chair John Moolenaar urged the Trump administration to ban US companies from buying CXMT and YMTC memory chips, warning reliance on Chinese suppliers would create an unacceptable national, economic and supply-chain security risk.",
     "source_name": "FT",
     "source_url": "https://www.ft.com/content/9e7cdf3c-2e52-492f-afeb-b63d86a53ce6",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T11:58:00.000Z",
     "created_at": "2026-07-16T11:58:00.000Z"
@@ -74,7 +74,7 @@ export const STATIC_ITEMS = [
     "blurb": "Moonshot is preparing to launch Kimi K3, a 2tn-3tn parameter open-weight model that could challenge Anthropic's Opus 4.8 on mainstream benchmarks, while raising funding at about a $31.5 billion valuation as Chinese labs narrow the gap with US frontier models.",
     "source_name": "FT",
     "source_url": "https://www.ft.com/content/c6ecd8ce-c441-4d7c-aea6-fae3e28fb6ff",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T11:29:00.000Z",
     "created_at": "2026-07-16T11:29:00.000Z"
@@ -84,7 +84,7 @@ export const STATIC_ITEMS = [
     "blurb": "TSMC pledged Thursday to invest another $100 billion in Arizona, saying AI-driven demand will stay strong through 2030. The chipmaker posted a 77% jump in second-quarter profit to a record T$706.6 billion ($22 billion), topping forecasts and marking its ninth straight quarter of double-digit growth.",
     "source_name": "Reuters",
     "source_url": "https://www.reuters.com/world/asia-pacific/tsmcs-second-quarter-profit-seen-hitting-record-ai-boom-2026-07-15/",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": "17950",
     "published_at": "2026-07-16T09:11:08.681Z",
     "created_at": "2026-07-16T09:11:08.681Z"
@@ -94,7 +94,7 @@ export const STATIC_ITEMS = [
     "blurb": "Nvidia and four Japanese industrial automation companies will expand collaboration on robot development through its Cosmos physical AI platform, deepening its push into AI-enabled robotics and factory automation",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-16/japan-s-robot-makers-join-nvidia-s-physical-ai-cosmos-coalition",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T05:24:45.467Z",
     "created_at": "2026-07-16T05:24:45.467Z"
@@ -104,7 +104,7 @@ export const STATIC_ITEMS = [
     "blurb": "Hyundai will buy SoftBank's roughly 10% stake in Boston Dynamics, making the US robotics company a wholly owned subsidiary, with plans to deploy Atlas humanoid robots at a Georgia car plant from 2028",
     "source_name": "Reuters",
     "source_url": "https://www.reuters.com/world/hyundai-motor-group-make-boston-dynamics-wholly-owned-with-purchase-softbank-2026-07-16/",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": "17948",
     "published_at": "2026-07-16T05:13:02.738Z",
     "created_at": "2026-07-16T05:13:02.738Z"
@@ -134,7 +134,7 @@ export const STATIC_ITEMS = [
     "blurb": "Chinese humanoid robot startup LimX Dynamics raised nearly $200 million at a 15 billion yuan ($2.2 billion) valuation in a pre-IPO round backed by Redstone VC, GGG Group, Lens Technology and Stone Venture",
     "source_name": "Nikkei Asia",
     "source_url": "https://asia.nikkei.com/business/technology/chinese-robot-startup-limx-dynamics-raises-200m-to-improve-autonomy",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:59:22.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -144,7 +144,7 @@ export const STATIC_ITEMS = [
     "blurb": "India's Elevation Capital raised a $500 million fund to back seed and Series A startups, with a focus on the application layer of AI",
     "source_name": "Economic Times",
     "source_url": "https://economictimes.indiatimes.com/tech/funding/elevation-capital-closes-500-million-india-fund-to-back-startups-building-on-ais-app-layer/articleshow/132374831.cms",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:59:21.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -164,7 +164,7 @@ export const STATIC_ITEMS = [
     "blurb": "TSMC reported a 36% jump in quarterly sales, meeting elevated expectations as AI computing demand remained strong",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-13/tsmc-sales-surge-36-in-fresh-sign-of-ai-spending-momentum",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:59:19.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -174,7 +174,7 @@ export const STATIC_ITEMS = [
     "blurb": "SK Hynix shares closed down more than 15% in Seoul after the South Korean chipmaker's Nasdaq debut, as investors took profits and questioned memory-chip valuations",
     "source_name": "Nikkei Asia",
     "source_url": "https://asia.nikkei.com/business/markets/sk-hynix-loses-more-than-15-after-successful-nasdaq-debut",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:59:18.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -214,7 +214,7 @@ export const STATIC_ITEMS = [
     "blurb": "Samsung Electronics is in early talks with banks about a possible American depositary receipt offering, though the South Korean company has not decided whether to proceed",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-14/samsung-is-said-in-early-discussions-on-potential-us-share-sale",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:59:14.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -224,7 +224,7 @@ export const STATIC_ITEMS = [
     "blurb": "China's integrated-circuit exports nearly doubled in the first half of 2026 to 179.44 billion units worth $177.28 billion, according to customs data",
     "source_name": "SCMP",
     "source_url": "https://www.scmp.com/tech/article/3360503/global-ai-boom-sees-chinas-chip-exports-nearly-double-first-half-year",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:59:13.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -234,7 +234,7 @@ export const STATIC_ITEMS = [
     "blurb": "DeepSeek has started preparing for an IPO and could file as early as this year",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-14/deepseek-mulls-new-funding-weeks-after-7-billion-round-ft-says",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:59:12.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -244,7 +244,7 @@ export const STATIC_ITEMS = [
     "blurb": "Chinese memory chipmaker CXMT appears set to raise more than $8.54 billion in what would be China's largest semiconductor IPO, as global demand for memory chips remains tight",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-14/cxmt-prices-shanghai-star-board-ipo-at-8-66-yuan-per-share",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:59:11.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -254,7 +254,7 @@ export const STATIC_ITEMS = [
     "blurb": "Chinese memory chipmaker CXMT priced its Shanghai IPO at 8.66 yuan ($1.28) per share, aiming to raise 57.9 billion yuan ($8.5 billion) in China's largest semiconductor listing on a mainland exchange",
     "source_name": "SCMP",
     "source_url": "https://www.scmp.com/tech/article/3360615/china-memory-giant-cxmt-valued-us85-billion-record-shanghai-ipo",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:59:10.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -264,7 +264,7 @@ export const STATIC_ITEMS = [
     "blurb": "State-backed Chinese companies are setting up semiconductor funds as Beijing pushes more patient, long-term capital into the sector",
     "source_name": "SCMP",
     "source_url": "https://www.scmp.com/tech/article/3360269/chinese-state-owned-firms-set-semiconductor-funds-amid-calls-patient-capital",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:59:09.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -274,7 +274,7 @@ export const STATIC_ITEMS = [
     "blurb": "Xi Jinping will attend China's flagship World AI Conference for the first time as Beijing places AI higher in its technology rivalry with the US",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-13/xi-to-debut-at-china-s-flagship-ai-summit-as-us-rivalry-heats-up",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:59:08.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -284,7 +284,7 @@ export const STATIC_ITEMS = [
     "blurb": "South Korea expects record tax revenue from the AI-driven semiconductor boom, giving President Lee Jae Myung's government more room to fund its investment agenda",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-13/south-korea-to-tap-record-ai-tax-windfall-to-fund-future-growth",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:59:07.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -294,7 +294,7 @@ export const STATIC_ITEMS = [
     "blurb": "TSMC will build two more advanced chip-packaging plants at Taiwan's Chiayi Science Park as it expands capacity for AI-related demand",
     "source_name": "Reuters",
     "source_url": "https://www.reuters.com/world/asia-pacific/tsmc-add-2-advanced-chip-packaging-plants-chiayi-taiwan-minister-says-2026-07-13/",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:59:06.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -304,7 +304,7 @@ export const STATIC_ITEMS = [
     "blurb": "Indian startups are turning to Chinese open-weight models from DeepSeek, Alibaba and Moonshot to cut AI costs, deepening their dependence on China-made technology",
     "source_name": "Nikkei Asia",
     "source_url": "https://asia.nikkei.com/business/technology/artificial-intelligence/indian-companies-look-to-chinese-llms-as-ai-costs-bite",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:59:05.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -314,7 +314,7 @@ export const STATIC_ITEMS = [
     "blurb": "DoorDash, Siemens and Airbnb are among companies using Chinese AI models to lower costs and reduce reliance on US technology",
     "source_name": "FT",
     "source_url": "https://www.ft.com/content/9c8ff45b-7c20-4c2e-93c9-c52339ffdcee",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:59:04.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -324,7 +324,7 @@ export const STATIC_ITEMS = [
     "blurb": "Anthropic and OpenAI accused DeepSeek, MiniMax, Moonshot AI and other Chinese firms of illicit model distillation, drawing US policy attention to a dispute over AI training practices",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-13/anthropic-openai-warnings-prompt-distillation-debate-in-dc",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:59:03.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -334,7 +334,7 @@ export const STATIC_ITEMS = [
     "blurb": "Samsung will bring forward the launch of its Yongin chip fabrication site to 2029 from 2030-31 to meet rising demand for AI memory chips",
     "source_name": "Reuters",
     "source_url": "https://www.reuters.com/world/asia-pacific/samsung-electronics-move-up-start-chip-factory-yongin-2029-source-says-2026-07-13/",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:59:02.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -344,7 +344,7 @@ export const STATIC_ITEMS = [
     "blurb": "India's semiconductor-device consumption is expected to rise from $54 billion in 2026 to $130 billion by 2030, with government incentives seen as key to sustaining growth",
     "source_name": "Economic Times",
     "source_url": "https://economictimes.indiatimes.com/tech/technology/govt-sops-key-as-indias-chip-market-set-to-explode-to-350-billion-by-2035/articleshow/132355783.cms",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:59:01.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -354,7 +354,7 @@ export const STATIC_ITEMS = [
     "blurb": "Taiwan's UMC began producing advanced photonics chips in Singapore as AI demand increases the need for faster data-centre connectivity",
     "source_name": "Nikkei Asia",
     "source_url": "https://asia.nikkei.com/business/tech/semiconductors/taiwan-s-no.-2-chipmaker-umc-starts-photonic-chip-production-in-singapore",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:59:00.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -364,7 +364,7 @@ export const STATIC_ITEMS = [
     "blurb": "Anthropic introduced India-specific rupee pricing for Claude, with its Pro plan starting at INR1,999 ($21) per month on annual billing",
     "source_name": "TechCrunch",
     "source_url": "https://techcrunch.com/2026/07/13/anthropic-starts-localizing-claude-pricing-for-india-its-biggest-market-after-the-us/",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:59.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -374,7 +374,7 @@ export const STATIC_ITEMS = [
     "blurb": "China's Dongfang Suanxin (DFSX) unveiled an AI chip road map built around software-defined computing and 3D-stacked near-memory architecture as it tries to reduce dependence on Nvidia and export-restricted components. Chinese startup DFSX launches an AI chip that it claims uses a fully domestic supply chain and is built on a 14nm process, but says it can rival 4nm chips",
     "source_name": "SCMP",
     "source_url": "https://www.scmp.com/tech/tech-war/article/3360415/nvidias-future-challenger-chinese-start-reveals-aggressive-ai-chip-road-map",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:58.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -384,7 +384,7 @@ export const STATIC_ITEMS = [
     "blurb": "India asked domestic AI firms Sarvam and BharatGen to adapt their foundation models for critical-infrastructure cybersecurity tasks on government-hosted compute",
     "source_name": "Economic Times",
     "source_url": "https://economictimes.indiatimes.com/tech/technology/govt-working-with-sarvam-and-bharatgen-for-mythos-like-models/articleshow/132375203.cms",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:57.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -394,7 +394,7 @@ export const STATIC_ITEMS = [
     "blurb": "Chinese AI founders including Yoolee AI's Zhang Fan are moving away from frontier model competition and toward industry-specific AI systems",
     "source_name": "SCMP",
     "source_url": "https://www.scmp.com/tech/big-tech/article/3360411/chinese-ai-labs-challenge-thinking-machines-lab-new-industry-focus",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:56.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -404,7 +404,7 @@ export const STATIC_ITEMS = [
     "blurb": "Nvidia has cut its list of authorised Asian buyers for AI chips by more than half after tightening compliance checks in Singapore, Malaysia and Japan to prevent exports reaching China",
     "source_name": "FT",
     "source_url": "https://www.ft.com/content/7c146c56-cc7a-40ec-93cb-58106a012421",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:55.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -414,7 +414,7 @@ export const STATIC_ITEMS = [
     "blurb": "DeepSeek is weighing another funding round that would value the Chinese AI lab at roughly $71 billion pre-money, one month after raising about $7 billion at a $52 billion valuation",
     "source_name": "FT",
     "source_url": "https://www.ft.com/content/6deb470e-d152-43a2-be0d-cc1fde4f3db8",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:54.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -424,7 +424,7 @@ export const STATIC_ITEMS = [
     "blurb": "DeepSeek founder Liang Wenfeng's net worth more than doubled to $36 billion after the company's latest fundraising round, making him the richest founder among AI model creators",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-14/deepseek-s-liang-tops-amodei-and-brockman-as-richest-ai-founder",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:53.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -434,7 +434,7 @@ export const STATIC_ITEMS = [
     "blurb": "Israeli chipmaker Tower Semiconductor plans to invest roughly $3 billion in Japan, backed by $1 billion in government grants, to expand capacity for silicon photonics, silicon germanium and advanced optical packaging",
     "source_name": "Calcalist",
     "source_url": "https://www.calcalistech.com/ctechnews/article/sy4kku74ze",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:52.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -444,7 +444,7 @@ export const STATIC_ITEMS = [
     "blurb": "SoftBank founder Masayoshi Son said global AI infrastructure will require $5 trillion a year in investment by 2040, driven by data centres, power supplies and humanoid robots",
     "source_name": "Reuters",
     "source_url": "https://www.reuters.com/world/asia-pacific/softbanks-son-says-ai-will-need-5-trillion-per-year-by-2040-dismisses-bubble-2026-07-14/",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:51.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -454,7 +454,7 @@ export const STATIC_ITEMS = [
     "blurb": "Google outlined several India AI initiatives at I/O Connect India 2026, including agentic safety work and startup infrastructure support",
     "source_name": "Google",
     "source_url": "https://blog.google/intl/en-in/company-news/google-io-connect-india-2026/",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:50.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -464,7 +464,7 @@ export const STATIC_ITEMS = [
     "blurb": "Japan's Panasonic, Sony and Hitachi are leaning into data centres, entertainment and infrastructure as they try to adapt old electronics businesses for an AI-driven market",
     "source_name": "Nikkei Asia",
     "source_url": "https://asia.nikkei.com/business/business-asia/from-tvs-to-ai-japan-s-old-electronics-giants-tune-into-digital-world",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:49.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -474,7 +474,7 @@ export const STATIC_ITEMS = [
     "blurb": "Nvidia has begun shipping H200 AI chips to Chinese customers after securing US approval, though US officials said only a small number had shipped so far",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-14/small-amount-of-nvidia-ai-chips-shipped-to-china-with-us-license",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:48.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -484,7 +484,7 @@ export const STATIC_ITEMS = [
     "blurb": "ByteDance is shutting down Doubao's custom AI persona feature to comply with new Chinese rules on AI-generated content, cutting off users from virtual companions they had spent years building",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-14/beijing-diktat-leaves-chinese-with-virtual-ai-lovers-heartbroken",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:47.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -494,7 +494,7 @@ export const STATIC_ITEMS = [
     "blurb": "Chinese regulators approved Apple Intelligence for iPhones in China, with Alibaba and Baidu acting as technical partners, alongside approvals for six other smartphone AI services",
     "source_name": "SCMP",
     "source_url": "https://www.scmp.com/tech/policy/article/3360685/china-approves-apple-intelligence-phones-alibaba-baidu-emerging-partners",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:46.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -514,7 +514,7 @@ export const STATIC_ITEMS = [
     "blurb": "DeepSeek's annualised revenue recently reached $400 million-$500 million as cloud-based API sales helped support plans for a 50 billion yuan ($7.4 billion) funding round and a possible Shanghai IPO next year",
     "source_name": "The Information",
     "source_url": "https://www.theinformation.com/articles/deepseeks-annualized-revenue-nears-500-million-boosting-fundraise-ipo-plans",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:44.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -524,7 +524,7 @@ export const STATIC_ITEMS = [
     "blurb": "Oracle is leading the race to provide Japan's top-secret air-gapped cloud services, ahead of AWS, Microsoft and Google, as Tokyo and Washington work to secure intelligence-sharing infrastructure",
     "source_name": "FT",
     "source_url": "https://www.ft.com/content/c8d32323-1d06-4470-8375-2ee6dd42749e",
-    "category": "AI and Chips",
+    "category": "Other news",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:43.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -534,7 +534,7 @@ export const STATIC_ITEMS = [
     "blurb": "India pledged another 1.9 trillion rupees ($19.7 billion) to boost domestic chip and smartphone production, including 1.28 trillion rupees for semiconductors and 625 billion rupees for phones",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-15/india-unveils-13-3-billion-fund-to-advance-chipmaking-push",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:42.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -544,7 +544,7 @@ export const STATIC_ITEMS = [
     "blurb": "Viettel's planned $1.3 billion semiconductor fab helped Hanoi attract $588.2 million in high-tech investment in the first half of 2026, with Japan's Meiko adding $190 million to its local semiconductor-electronics operations",
     "source_name": "TechNode",
     "source_url": "https://technode.global/2026/07/15/viettels-1-3b-chip-factory-helps-hanoi-attract-588m-in-high-tech-investment/",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:41.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -554,7 +554,7 @@ export const STATIC_ITEMS = [
     "blurb": "WAIC 2026 runs from July 17-20 in Shanghai, with pre-event reporting pointing to more than 1,100 companies, 3,000 exhibits and 300 global product debuts",
     "source_name": "Shanghai Municipal Government",
     "source_url": "https://english.shanghai.gov.cn/en-Events/20260624/9cc202d708504b56ba32f70fbd61ef79.html",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:40.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -564,7 +564,7 @@ export const STATIC_ITEMS = [
     "blurb": "Chinese President Xi Jinping will attend WAIC's opening ceremony and give a keynote, signalling Beijing's increased focus on AI development and governance",
     "source_name": "SCMP",
     "source_url": "https://www.scmp.com/tech/article/3360404/xi-jinping-attend-world-ai-conference-first-time-china-elevates-tech-push",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:39.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -574,7 +574,7 @@ export const STATIC_ITEMS = [
     "blurb": "Huawei will show the physical unit of its Atlas 950 SuperPoD at WAIC 2026, positioning the system as part of China's domestic AI compute push",
     "source_name": "SCMP",
     "source_url": "https://www.scmp.com/tech/article/3359733/huaweis-new-computing-cluster-worlds-first-ai-agent-phone-debut-china-ai-summit",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:38.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -584,7 +584,7 @@ export const STATIC_ITEMS = [
     "blurb": "Dongfang Suanxin, also known as DFSX, unveiled its DF1000 AI chip using software-defined computing and 3D near-memory architecture to reduce dependence on foreign high-bandwidth memory and advanced chipmaking nodes",
     "source_name": "WSJ",
     "source_url": "https://www.wsj.com/tech/ai/chinese-ai-startup-dfsx-releases-chip-to-take-on-the-west-ffc71526",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:37.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -594,7 +594,7 @@ export const STATIC_ITEMS = [
     "blurb": "MiniMax will showcase its M3 multimodal large model at WAIC 2026 as one of the conference's headline model demos",
     "source_name": "Shanghai Municipal Government",
     "source_url": "https://english.shanghai.gov.cn/en-Latest-WhatsNew/20260710/6cd94d78f71a42e3a747541b9021fe2b.html",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:36.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -604,7 +604,7 @@ export const STATIC_ITEMS = [
     "blurb": "StepFun will debut its Agent operating system and StepX Neo AI-agent smartphone, with partners including Trip.com, Alipay, Didi, Meituan, WPS and ByteDance's Jianying",
     "source_name": "Shanghai Daily",
     "source_url": "https://www.citynewsservice.cn/articles/shanghaidaily/news/stepfun-launches-worlds-first-mass-market-agentic-smartphone-dk4lj5zn",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:35.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -614,7 +614,7 @@ export const STATIC_ITEMS = [
     "blurb": "Alibaba and Honor are expected to deepen their partnership on an AI device operating system at WAIC, with new agent capabilities planned as China's AI-phone race intensifies",
     "source_name": "SCMP",
     "source_url": "https://www.scmp.com/tech/article/3360525/alibaba-team-honor-race-build-ai-agentic-devices",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:34.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -624,7 +624,7 @@ export const STATIC_ITEMS = [
     "blurb": "WAIC 2026 will feature near-memory computing 3D chips, humanoid robots and AI dexterous hands as China tries to connect domestic compute with embodied AI hardware",
     "source_name": "People's Daily",
     "source_url": "https://en.people.cn/n3/2026/0708/c90000-20475542.html",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:33.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -634,7 +634,7 @@ export const STATIC_ITEMS = [
     "blurb": "Shanghai Matwings Technology is previewing MatwingsVenus, an AI protein-design platform for pharma, diagnostics, food and agriculture use cases",
     "source_name": "Orient",
     "source_url": "https://orient.tm/en/china/1263",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:32.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -644,7 +644,7 @@ export const STATIC_ITEMS = [
     "blurb": "The conference is being framed as a full-stack AI showcase for China, spanning domestic chips and compute, agentic phones, robots, vertical AI tools and governance messaging",
     "source_name": "Shanghai Municipal Government",
     "source_url": "https://english.shanghai.gov.cn/en-Events/20260624/9cc202d708504b56ba32f70fbd61ef79.html",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:31.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -724,7 +724,7 @@ export const STATIC_ITEMS = [
     "blurb": "Huawei plans to raise smartphone shipments by more than 20% this year to as many as 60 million units, even as a memory-chip shortage forces Xiaomi, Oppo and Vivo to cut targets",
     "source_name": "Nikkei Asia",
     "source_url": "https://asia.nikkei.com/spotlight/huawei-crackdown/huawei-aims-for-20-smartphone-growth-despite-memory-crunch-sources",
-    "category": "AI and Chips",
+    "category": "Other news",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:23.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -754,7 +754,7 @@ export const STATIC_ITEMS = [
     "blurb": "The Philippines' top outsourcing industry group cut its 2028 revenue and jobs forecasts, citing AI, geopolitics and rising competition",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-14/philippine-outsourcing-group-cuts-revenue-jobs-forecasts-on-ai",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:20.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
@@ -814,7 +814,7 @@ export const STATIC_ITEMS = [
     "blurb": "Thinking Machines Lab released Inkling, its first general-purpose AI model, using an architecture based on DeepSeek-V3 and post-training data from Moonshot AI's Kimi K2.5",
     "source_name": "FT",
     "source_url": "https://www.ft.com/content/ef486929-d2c2-480b-8b00-9cb98bda6acf?syn-25a6b1a6=1",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T01:12:25.805Z",
     "created_at": "2026-07-16T01:12:25.805Z"
@@ -824,7 +824,7 @@ export const STATIC_ITEMS = [
     "blurb": "Taiwan is building its own AI model, TAIDE, to preserve traditional-script language and counter mainland Chinese political framing and vocabulary in global AI systems trained mostly on simplified-script data",
     "source_name": "Nikkei Asia",
     "source_url": "https://asia.nikkei.com/business/technology/artificial-intelligence/taiwan-eyes-local-ai-as-digital-bulwark-against-chinese-influence",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T01:09:03.598Z",
     "created_at": "2026-07-16T01:09:03.598Z"
@@ -834,7 +834,7 @@ export const STATIC_ITEMS = [
     "blurb": "Nexchip Semiconductor begins trading in Hong Kong Friday after raising $890 million in a share sale, a test of investor appetite for Chinese chipmakers amid a wave of AI-sector listings. The Hefei-based wafer foundry priced 216.2 million shares at HK$32.30 apiece, the top of its offer range, marking a 57% discount to its Shanghai-listed stock's Thursday close of 65.21 yuan.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-09/nexchip-set-to-debut-in-hong-kong-after-890-million-listing",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-12T04:59:59.000Z",
     "created_at": "2026-07-12T04:59:59.000Z"
@@ -844,7 +844,7 @@ export const STATIC_ITEMS = [
     "blurb": "CXMT is emerging as one of the world's most important chipmakers, positioned to shake up the memory market and advance Beijing's AI ambitions. The state-backed firm is launching China's biggest IPO of 2026, seeking upwards of $4.3 billion, with plans to double output this year and build a full supply chain from design to assembly. Its rise has drawn scrutiny from Washington, which has blacklisted CXMT over alleged ties to China's military.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/features/2026-07-09/china-s-cxmt-chipmaker-eyes-ipo-to-challenge-samsung-sk-hynix-micron",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-12T04:59:58.000Z",
     "created_at": "2026-07-12T04:59:58.000Z"
@@ -854,7 +854,7 @@ export const STATIC_ITEMS = [
     "blurb": "SK Hynix Inc. raised $26.5 billion in its American depositary receipt offering, as the South Korean memory chipmaker powered through volatility to deliver the largest ever US first-time share sale by a foreign company.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-09/sk-hynix-is-said-to-price-us-share-offering-at-149-apiece-mrdz562z",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-12T04:59:57.000Z",
     "created_at": "2026-07-12T04:59:57.000Z"
@@ -864,7 +864,7 @@ export const STATIC_ITEMS = [
     "blurb": "China’s MiniMax is seeking to raise as much as HK$14.54 billion ($1.9 billion) through a sale of new shares and convertible bonds",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-09/minimax-seeks-1-9-billion-from-share-sale-convertible-bond",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-12T04:59:56.000Z",
     "created_at": "2026-07-12T04:59:56.000Z"
@@ -874,7 +874,7 @@ export const STATIC_ITEMS = [
     "blurb": "Roughly 20% of USB drives surfacing as top picks on Amazon carry multiple reviews flagging inflated storage capacity, a Nikkei investigation found, with nearly 40% of flagged listings on the US site alone. The probe began after Japan's Ground Self-Defense Force was found using thumb drives loaded with China-linked malware, and internal defense documents showed devices with falsified capacity circulating widely online, often resold on platforms like Rakuten after being sourced from Amazon.",
     "source_name": "Nikkei Asia",
     "source_url": "https://asia.nikkei.com/business/electronics/usb-drives-on-amazon-have-20-complaint-rate-about-faked-storage",
-    "category": "AI and Chips",
+    "category": "Other news",
     "telegram_message_id": null,
     "published_at": "2026-07-12T04:59:55.000Z",
     "created_at": "2026-07-12T04:59:55.000Z"
@@ -884,7 +884,7 @@ export const STATIC_ITEMS = [
     "blurb": "Tencent is negotiating to become Manus's largest shareholder as investors move to unwind Meta's $2 billion acquisition of the AI agent startup, following a Beijing order to reverse the deal. Most of Manus's existing backers, including Tencent, ZhenFund and HSG, along with company management, are discussing a buyback at the same $2 billion valuation.",
     "source_name": "FT",
     "source_url": "https://www.ft.com/content/0d04378d-d71b-4225-b31a-70504e358480?syn-25a6b1a6=1",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-12T04:59:54.000Z",
     "created_at": "2026-07-12T04:59:54.000Z"
@@ -894,7 +894,7 @@ export const STATIC_ITEMS = [
     "blurb": "MiniMax CEO Junjie Yan told staff in an internal memo that he will forgo his salary until the company reaches artificial general intelligence, and will give up 4% of his personal equity for employee incentives and another 1% to fund open-source and AI ecosystem efforts. The move comes as MiniMax shares have fallen 80% from their March peak, with the Hong Kong-listed firm losing ground to rivals Zhipu, DeepSeek and Moonshot AI as its June-released flagship model, M3, struggles to match the traction of DeepSeek’s V4 and Zhipu’s GLM-5.2.",
     "source_name": "The Information",
     "source_url": "https://www.theinformation.com/briefings/minimax-ceo-vows-forgo-salary-achieving-agi",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-12T04:59:53.000Z",
     "created_at": "2026-07-12T04:59:53.000Z"
@@ -904,7 +904,7 @@ export const STATIC_ITEMS = [
     "blurb": "Taiwanese DRAM chipmaker Nanya Technology plans to spend more than T$200 billion ($6.2 billion) on capital expenditure next year, roughly quadrupling this year’s outlay as AI-driven demand for memory chips surges.",
     "source_name": "Reuters",
     "source_url": "https://www.reuters.com/world/asia-pacific/taiwanese-chipmaker-nanya-plans-6-billion-spending-2027-riding-ai-boom-2026-07-10/",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-12T04:59:52.000Z",
     "created_at": "2026-07-12T04:59:52.000Z"
@@ -924,7 +924,7 @@ export const STATIC_ITEMS = [
     "blurb": "India approved a manufacturing joint venture between China’s Vivo and local firm Dixon Technologies, clearing a partnership announced in December 2024 under rules that subject China-linked investment to extra scrutiny. The venture will absorb some of Vivo’s manufacturing assets, produce part of its smartphone orders in India, and make electronics for other brands, extending India’s rise as a global smartphone manufacturing hub after Apple.",
     "source_name": "TechCrunch",
     "source_url": "https://techcrunch.com/2026/07/09/after-apple-indias-smartphone-manufacturing-boom-enters-new-phase-with-vivo-jv/",
-    "category": "AI and Chips",
+    "category": "Other news",
     "telegram_message_id": null,
     "published_at": "2026-07-12T04:59:50.000Z",
     "created_at": "2026-07-12T04:59:50.000Z"
@@ -934,7 +934,7 @@ export const STATIC_ITEMS = [
     "blurb": "Malaysia Prime Minister Anwar Ibrahim plans to debut an agentic AI avatar of himself in the coming days, which aims to help the public use government services",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-10/malaysia-s-anwar-to-debut-an-ai-double-that-sounds-just-like-him?accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzb3VyY2UiOiJTdWJzY3JpYmVyR2lmdGVkQXJ0aWNsZSIsImlhdCI6MTc4MzY2NjQwMSwiZXhwIjoxNzg0MjcxMjAxLCJhcnRpY2xlSWQiOiJUSFg2MEVLSVAzSjgwMCIsImJjb25uZWN0SWQiOiJDNTc5RDIwMDZBQjQ0RjRDODkwMTU0M0U0ODMxNkJCNiJ9.gnU3rG68X5p_s0oHqL4pKhl9Ou3QVuI7WUNIXblvyfk",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-12T04:59:49.000Z",
     "created_at": "2026-07-12T04:59:49.000Z"
@@ -944,7 +944,7 @@ export const STATIC_ITEMS = [
     "blurb": "OpenAI and Google have been supplying AI models to Singapore-based subsidiaries of Alibaba, Baidu and Tencent, all companies on US blacklists.",
     "source_name": "FT",
     "source_url": "https://www.ft.com/content/5d6aafa1-5d47-4585-aa95-6ec06a6cd20f",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-12T04:59:48.000Z",
     "created_at": "2026-07-12T04:59:48.000Z"
@@ -964,7 +964,7 @@ export const STATIC_ITEMS = [
     "blurb": "SK Hynix CEO Kwak Noh-jung warned 2027 will be the worst supply shortage in memory chip industry history, with customer demand set to outstrip production capacity well past 2030 despite the company's expansion efforts.",
     "source_name": "Reuters",
     "source_url": "https://www.reuters.com/world/asia-pacific/sk-hynix-ceo-sees-worst-ever-memory-supply-shortage-2027-says-demand-outstrip-2026-07-10/",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-12T04:59:46.000Z",
     "created_at": "2026-07-12T04:59:46.000Z"
@@ -974,7 +974,7 @@ export const STATIC_ITEMS = [
     "blurb": "SK Hynix pulled off the largest US listing by a foreign company on record, with shares jumping 13% on their debut. The $26.5 billion ADR offering will fund a manufacturing expansion the industry had long avoided, a bet that AI demand has permanently broken the memory chip sector's boom-and-bust cycle.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-10/sk-hynix-debut-is-a-bet-that-ai-breaks-boom-and-bust-chip-cycle",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-12T04:59:45.000Z",
     "created_at": "2026-07-12T04:59:45.000Z"
@@ -984,7 +984,7 @@ export const STATIC_ITEMS = [
     "blurb": "China dropped its numerical target for urban job creation, aiming instead to keep new jobs at a \"considerable scale\" from 2026 to 2030, with annual goals set flexibly based on conditions each year. The labor ministry's new five-year plan also pledges to address how AI and shifting global trade affect employment.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-10/china-omits-job-goal-in-five-year-plan-for-first-time-in-decades",
-    "category": "AI and Chips",
+    "category": "Policy",
     "telegram_message_id": null,
     "published_at": "2026-07-12T04:59:44.000Z",
     "created_at": "2026-07-12T04:59:44.000Z"
@@ -994,7 +994,7 @@ export const STATIC_ITEMS = [
     "blurb": "SK Hynix shares rose 13% to close at $168.01 in their Nasdaq debut, as US investors bought into South Korea's second-most valuable company. The ADRs, priced at $149, raised $26.5 billion for factory and equipment expansion; the stock trades under SKHYV until switching to SKHY on Tuesday.",
     "source_name": "CNBC",
     "source_url": "https://www.cnbc.com/2026/07/10/sk-hynix-skhy-stock-nasdaq.html",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-12T04:59:43.000Z",
     "created_at": "2026-07-12T04:59:43.000Z"
@@ -1014,7 +1014,7 @@ export const STATIC_ITEMS = [
     "blurb": "Beyond Claude Code: the Chinese AI tools poised to benefit after back-door alert — As Beijing flags a security risk in Anthropic software, domestic tech firms are rapidly embracing local alternatives such as ByteDance’s Trae and Alibaba’s Qoder",
     "source_name": "SCMP",
     "source_url": "https://www.scmp.com/tech/tech-trends/article/3360148/beyond-claude-code-chinese-ai-tools-poised-benefit-after-back-door-alert",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-12T04:59:41.000Z",
     "created_at": "2026-07-12T04:59:41.000Z"
@@ -1024,7 +1024,7 @@ export const STATIC_ITEMS = [
     "blurb": "China will let a handful of its top AI firms buy limited quantities of Nvidia's H200 chips, easing a supply crunch driven by surging demand. The move follows Washington's decision in December to let Nvidia ship the previously restricted chips to approved Chinese buyers, though Beijing had held off on approving local purchases to shield domestic chipmakers.",
     "source_name": "The Information",
     "source_url": "https://www.theinformation.com/articles/china-plans-let-top-ai-firms-buy-limited-amount-nvidia-h200-chips",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-09T04:59:59.000Z",
     "created_at": "2026-07-09T04:59:59.000Z"
@@ -1044,7 +1044,7 @@ export const STATIC_ITEMS = [
     "blurb": "Bain Capital has exited its entire stake in flash memory chipmaker Kioxia, closing out a deal that reshaped Japan's tech and investment landscape. The sale caps record returns for the US private equity firm, as a global AI spending boom drove Kioxia's shares up more than 4,000% since its debut, making it one of Japan's most valuable companies.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-08/bain-exits-kioxia-after-landmark-chip-deal-yields-record-returns",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-09T04:59:57.000Z",
     "created_at": "2026-07-09T04:59:57.000Z"
@@ -1064,7 +1064,7 @@ export const STATIC_ITEMS = [
     "blurb": "China's newest AI models, such as Zhipu's GLM-5.2, are narrowing the performance gap with US rivals while undercutting them on price. The shift is starting to reshape the global frontier AI market, with European firms increasingly turning to China's cheaper models.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/newsletters/2026-07-08/chinese-ai-models-advance-causing-us-cybersecurity-anxiety",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-09T04:59:55.000Z",
     "created_at": "2026-07-09T04:59:55.000Z"
@@ -1084,7 +1084,7 @@ export const STATIC_ITEMS = [
     "blurb": "LG will invest $1 billion in a chip packaging plant in Hai Phong, Vietnam, the first high-tech project in the port city's new free trade zone. The LG Innotek facility starts operations in 2027 and reaches mass production by 2028, according to the local Communist Party outlet. Vietnam's chip industry has so far focused on packaging and testing, but investments from Intel, Amkor and Samsung are pushing it toward more sophisticated manufacturing.",
     "source_name": "Nikkei Asia",
     "source_url": "https://asia.nikkei.com/business/tech/semiconductors/lg-s-1bn-move-shows-vietnam-climbing-semiconductor-value-chain",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-09T04:59:53.000Z",
     "created_at": "2026-07-09T04:59:53.000Z"
@@ -1094,7 +1094,7 @@ export const STATIC_ITEMS = [
     "blurb": "India’s JioStar, the Reliance Industries streaming unit with 500 million monthly users, is using OpenAI's technology to build a conversational AI platform that helps viewers discover shows and buy products, with executives betting it could become a real-time signal of audience demand and shorten the feedback loop between what viewers want and what studios produce. The company sees the interface extending beyond entertainment, folding in food delivery and letting viewers buy products featured in shows as part of a broader \"content commerce\" push.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-08/india-s-jiostar-taps-ai-for-shopping-tv-movie-night-ideas",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-09T04:59:52.000Z",
     "created_at": "2026-07-09T04:59:52.000Z"
@@ -1104,7 +1104,7 @@ export const STATIC_ITEMS = [
     "blurb": "CXMT will open investor subscriptions next week for a Shanghai IPO that could raise more than $5 billion, the biggest listing in mainland China since 2022. The Hefei-based memory chipmaker, a rival to Samsung and SK Hynix, is offering 6.688 billion shares on the STAR Board and targeting at least 29.5 billion yuan ($4.3 billion), a deal that would also rank as Asia's largest since CATL's share sale last year.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-09/memory-chipmaker-cxmt-to-launch-4-3-billion-china-ipo-next-week",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-09T04:59:51.000Z",
     "created_at": "2026-07-09T04:59:51.000Z"
@@ -1114,7 +1114,7 @@ export const STATIC_ITEMS = [
     "blurb": "SK Hynix's $28 billion US listing is multiple times oversubscribed ahead of Thursday's pricing. The South Korean memory chipmaker has drawn strong early demand from global long-only funds and tech-focused investors, putting the offering on track to become the biggest-ever US listing by a foreign company.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-07/sk-hynix-us-listing-said-to-be-multiple-times-oversubscribed",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-09T04:59:50.000Z",
     "created_at": "2026-07-09T04:59:50.000Z"
@@ -1124,7 +1124,7 @@ export const STATIC_ITEMS = [
     "blurb": "India has scrapped 7.5% and 5% import duties on select mobile phone and electronics components, a move set to benefit manufacturers like Apple and Xiaomi.",
     "source_name": "Reuters",
     "source_url": "https://www.reuters.com/business/media-telecom/india-removes-import-duty-some-electronics-smartphone-parts-2026-07-09/",
-    "category": "AI and Chips",
+    "category": "Policy",
     "telegram_message_id": null,
     "published_at": "2026-07-09T04:59:49.000Z",
     "created_at": "2026-07-09T04:59:49.000Z"
@@ -1144,7 +1144,7 @@ export const STATIC_ITEMS = [
     "blurb": "WizCommerce, an AI-native sales and ecommerce platform for wholesale distributors, has raised Rs 79.5 crore (around $8.3 million) in a fresh funding round from existing investors Blume Ventures, Alpha Wave, Z47, 100X VC, and Peak XV Partners. The fresh capital comes less than a year after WizCommerce raised $8 million in its Series A round led by Peak XV Partners in August 2025.",
     "source_name": "Entrackr",
     "source_url": "https://entrackr.com/exclusive/exclusive-wizcommerce-raises-83-mn-from-blume-alpha-wave-peak-xv-and-others-12147588",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-09T04:59:47.000Z",
     "created_at": "2026-07-09T04:59:47.000Z"
@@ -1154,7 +1154,7 @@ export const STATIC_ITEMS = [
     "blurb": "American companies have developed a growing reliance on cheaper Chinese AI models, with offerings from DeepSeek and Moonshot AI becoming core to daily work across Silicon Valley as cost-effective alternatives to OpenAI and Anthropic. Beijing, however, is now considering tighter controls on homegrown AI technology, having held discussions with domestic labs about safeguarding proprietary systems over concerns the technology could be exploited by adversaries.",
     "source_name": "WSJ",
     "source_url": "https://www.wsj.com/tech/ai/china-weighs-limits-on-the-ai-models-american-companies-love-c3ad8f2b",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-09T04:59:46.000Z",
     "created_at": "2026-07-09T04:59:46.000Z"
@@ -1164,7 +1164,7 @@ export const STATIC_ITEMS = [
     "blurb": "Zhipu AI shares jumped as much as 22% Thursday before paring gains, after the Beijing-based AI company announced a US$4 billion fundraising despite pricing new shares at a discount. The stock recently traded 9% higher at HK$1,989.00 (US$253.72), outpacing the Hang Seng Tech Index's 0.1% decline, as Zhipu offers 19.78 million shares at HK$1,588 each, nearly 13% below Wednesday's HK$1,825 close.",
     "source_name": "WSJ",
     "source_url": "https://www.wsj.com/tech/ai/chinas-zhipu-ai-shares-surge-on-4-0-billion-fundraising-00c6abc7",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-09T04:59:45.000Z",
     "created_at": "2026-07-09T04:59:45.000Z"
@@ -1174,7 +1174,7 @@ export const STATIC_ITEMS = [
     "blurb": "Thailand has approved nine major investment projects worth a combined $1.99 billion across artificial intelligence (AI), advanced electronics, aviation, clean energy, and food, as global manufacturers reposition supply chains across Southeast Asia. In a statement on Wednesday, the Thailand Board of Investment (BOI) said the approvals were given at a recent meeting chaired by Deputy Prime Minister and Finance Minister Ekniti Nitithanprapas.",
     "source_name": "TechNode",
     "source_url": "https://technode.global/2026/07/09/thailand-to-invest-1-99b-in-ai-electronics-aviation-clean-energy-amid-supply-chain-updates/",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-09T04:59:44.000Z",
     "created_at": "2026-07-09T04:59:44.000Z"
@@ -1204,7 +1204,7 @@ export const STATIC_ITEMS = [
     "blurb": "Shares of Chinese AI model maker Zhipu jumped as much as 22% in Hong Kong on Thursday after it priced a $4 billion share sale, more than six times the size of its December IPO, at the low end of the marketed range despite a 13% discount to the prior close. The stock has now risen roughly 1,700% since its debut. Analysts said the strong demand reflects growing investor confidence in Zhipu's large language model as a market leader gaining ground on rivals.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-08/ai-firm-zhipu-prices-4-billion-placement-at-hk-1-588-each-share",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-09T04:59:41.000Z",
     "created_at": "2026-07-09T04:59:41.000Z"
@@ -1224,7 +1224,7 @@ export const STATIC_ITEMS = [
     "blurb": "Google Cloud will roll out its latest AI models locally in India as part of a data sovereignty push, CEO Thomas Kurian said, adding that the company is setting up a hub of \"forward deployed engineers\" in India to serve customers across Asia and exploring plans for local AI server manufacturing.",
     "source_name": "Economic Times",
     "source_url": "https://economictimes.indiatimes.com/tech/technology/in-a-big-sovereignty-push-google-cloud-to-host-its-latest-ai-models-in-india-global-chief-thomas-kurian/articleshow/132245951.cms",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-08T04:59:59.000Z",
     "created_at": "2026-07-08T04:59:59.000Z"
@@ -1244,7 +1244,7 @@ export const STATIC_ITEMS = [
     "blurb": "Chinese AI developer MiniMax is working on a 2.7T-parameter model, the biggest of any Chinese AI model on the market, dubbed M3 Pro and set for release as early as Q3, and plans to open-source it.",
     "source_name": "The Information",
     "source_url": "https://www.theinformation.com/briefings/exclusive-chinas-minimax-plans-launch-2-7-trillion-parameter-model",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-08T04:59:57.000Z",
     "created_at": "2026-07-08T04:59:57.000Z"
@@ -1254,7 +1254,7 @@ export const STATIC_ITEMS = [
     "blurb": "Singapore’s Temasek doubles down on AI and private credit",
     "source_name": "FT",
     "source_url": "https://www.ft.com/content/39e28145-ed1d-493f-bfc3-aeaa0ea88096",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-08T04:59:56.000Z",
     "created_at": "2026-07-08T04:59:56.000Z"
@@ -1264,7 +1264,7 @@ export const STATIC_ITEMS = [
     "blurb": "China’s government-run National Vulnerability Database said Wednesday it found “security backdoor vulnerabilities” in Anthropic’s Claude Code, escalating tensions in the U.S.-China AI rivalry. Several versions of the coding tool released between April and June allegedly sent user location and identity data to remote servers without consent, the agency said, citing a built-in monitoring mechanism. China’s move came after a post on online forum Reddit last week alleged that Anthropic had secretly inserted code into the software to identify users who accessed it from China. In a response to the allegations on Reddit, an Anthropic employee said on X that the code was part of an experiment the American startup started in March. The experiment was “meant to prevent account abuse from unauthorized resellers and protect against distillation,” the employee said",
     "source_name": "WSJ",
     "source_url": "https://www.wsj.com/tech/ai/china-says-it-has-found-security-vulnerabilities-in-anthropics-claude-code-5ecf05dc",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-08T04:59:55.000Z",
     "created_at": "2026-07-08T04:59:55.000Z"
@@ -1284,7 +1284,7 @@ export const STATIC_ITEMS = [
     "blurb": "US lawmakers are weighing ways to curb American companies' growing use of Chinese AI models as geopolitical tensions over AI deployment intensify. A House Committee investigation is examining the risks tied to China's rising AI capabilities.",
     "source_name": "CNBC",
     "source_url": "https://www.cnbc.com/2026/07/08/chinese-ai-models-probe-us-lawmakers.html",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-08T04:59:53.000Z",
     "created_at": "2026-07-08T04:59:53.000Z"
@@ -1294,7 +1294,7 @@ export const STATIC_ITEMS = [
     "blurb": "South Korean AI chip startup Rebellions plans to list on the Korean market in the first half of next year, with a potential US listing to follow",
     "source_name": "Reuters",
     "source_url": "https://www.reuters.com/world/asia-pacific/s-koreas-rebellions-targets-ipo-next-year-followed-by-potential-us-listing-ceo-2026-07-08/",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-08T04:59:52.000Z",
     "created_at": "2026-07-08T04:59:52.000Z"
@@ -1314,7 +1314,7 @@ export const STATIC_ITEMS = [
     "blurb": "Tencent has begun testing Xiaowei, a prototype AI agent that runs errands for users inside WeChat, as the company races to turn its super-app into an AI-powered assistant platform. The agent, in testing with select users since late June, remains limited in scope, but its integration with WeChat's vast user base and behavioral data gives it a built-in edge over rival AI agents.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-08/tencent-wechat-ai-agent-shows-promise-in-super-app-fight-review",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-08T04:59:50.000Z",
     "created_at": "2026-07-08T04:59:50.000Z"
@@ -1344,7 +1344,7 @@ export const STATIC_ITEMS = [
     "blurb": "South Korea's Kospi index is down 20%+ from its record high in June, falling 5%+ on Wednesday; Samsung and SK Hynix fall 5%+ amid long-term chip deal concerns",
     "source_name": "FT",
     "source_url": "https://www.ft.com/content/2cb790fc-016b-4b15-a9d8-5b6057592e1a",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-08T04:59:47.000Z",
     "created_at": "2026-07-08T04:59:47.000Z"
@@ -1354,7 +1354,7 @@ export const STATIC_ITEMS = [
     "blurb": "Shanghai chipmaker Iluvatar CoreX is raising about $850 million in a Hong Kong share placement, capitalizing on a rally that has sent its stock soaring since its January IPO. The company is offering shares at HK$476 to HK$498.40 each, up to 15% below Wednesday's close, confirming an earlier Bloomberg report. The sale comes just a day after the six-month lock-up from its IPO expired.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-08/iluvatar-corex-seeks-to-raise-850-million-after-stock-rally",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-08T04:59:46.000Z",
     "created_at": "2026-07-08T04:59:46.000Z"
@@ -1364,7 +1364,7 @@ export const STATIC_ITEMS = [
     "blurb": "Chinese artificial-intelligence model maker Zhipu is seeking to raise about $4 billion from a share sale after its stock soared almost 1,500% since a January listing in Hong Kong.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-08/ai-firm-zhipu-to-sell-4-billion-of-shares-after-1-500-rally",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-08T04:59:45.000Z",
     "created_at": "2026-07-08T04:59:45.000Z"
@@ -1384,7 +1384,7 @@ export const STATIC_ITEMS = [
     "blurb": "Chinese AI startup MiniMax Group is developing a large language model with 2.7 trillion parameters, making it the largest open-weight AI model released by a Chinese firm and possibly the largest in the world. The trillion-parameter race reflects growing demand for autonomous systems capable of complex, multi-step reasoning without human intervention, analysts say. The model could launch as early as the third quarter",
     "source_name": "Reuters",
     "source_url": "https://www.reuters.com/world/asia-pacific/chinas-minimax-plans-launch-giant-27-trillion-parameter-model-2026-07-08/",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-08T04:59:43.000Z",
     "created_at": "2026-07-08T04:59:43.000Z"
@@ -1394,7 +1394,7 @@ export const STATIC_ITEMS = [
     "blurb": "Samsung Electronics said Tuesday its second-quarter operating profit surged nearly 19-fold from a year earlier to an estimated 89.4 trillion won ($58.44 billion), topping analyst forecasts and exceeding its combined profits over the past three years. Revenue is expected to jump 129% to 171 trillion won.",
     "source_name": "Reuters",
     "source_url": "https://www.reuters.com/world/asia-pacific/samsung-estimates-19-fold-rise-q2-operating-profit-beating-expectations-2026-07-06/",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-07T04:59:59.000Z",
     "created_at": "2026-07-07T04:59:59.000Z"
@@ -1404,7 +1404,7 @@ export const STATIC_ITEMS = [
     "blurb": "LG Electronics expects second-quarter operating profit to jump nearly 150% year-on-year to 1.579 trillion won ($1.03 billion), helped by a US tariff refund and steady profitability in home appliances, TVs and auto parts. The forecast keeps the South Korean electronics giant on track for an earnings recovery this year, building on a strong first-quarter rebound as it pushes into new areas like AI data-center cooling and robotics.",
     "source_name": "WSJ",
     "source_url": "https://www.wsj.com/business/earnings/lg-electronics-expects-quarterly-earnings-to-more-than-double-796a01cb",
-    "category": "AI and Chips",
+    "category": "Other news",
     "telegram_message_id": null,
     "published_at": "2026-07-07T04:59:58.000Z",
     "created_at": "2026-07-07T04:59:58.000Z"
@@ -1414,7 +1414,7 @@ export const STATIC_ITEMS = [
     "blurb": "Chinese companies plan to shift nearly half their AI accelerator budgets to domestic chips over the next year, up from 30% today, as tensions with Washington push Beijing toward tech self-reliance. Executives said they expect to allocate 46% of spending to homegrown silicon instead of Nvidia's advanced processors.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-07/chinese-firms-leave-nvidia-for-local-ai-suppliers-survey-shows",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-07T04:59:57.000Z",
     "created_at": "2026-07-07T04:59:57.000Z"
@@ -1434,7 +1434,7 @@ export const STATIC_ITEMS = [
     "blurb": "Tencent has officially launched its Hy3 model, claiming performance that rivals flagship models two to five times its size while offering greater stability and cost efficiency than its preview version.The model is already powering Tencent products including WorkBuddy, CodeBuddy, Yuanbao, Marvis and ima, with its API now live on Tencent Cloud's TokenHub and broader third-party integration expected to follow.",
     "source_name": "Tencent",
     "source_url": "https://www.tencent.com/en-us/articles/2202386.html",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-07T04:59:55.000Z",
     "created_at": "2026-07-07T04:59:55.000Z"
@@ -1464,7 +1464,7 @@ export const STATIC_ITEMS = [
     "blurb": "Alibaba's Qwen models have made it an AI powerhouse, but the company has struggled to turn their global popularity into a profitable business – Alibaba's open-source AI models have become a global hit with developers, but that same openness, letting anyone use or modify them freely, is making it hard for the company to turn the popularity into profit.",
     "source_name": "NYT",
     "source_url": "https://www.nytimes.com/2026/07/06/business/alibaba-ai-qwen.html",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-07T04:59:52.000Z",
     "created_at": "2026-07-07T04:59:52.000Z"
@@ -1474,7 +1474,7 @@ export const STATIC_ITEMS = [
     "blurb": "Global investment firm B Capital has closed its third early-stage fund at $500 million, aiming to back young companies working on artificial intelligence and other frontier technologies. The firm, cofounded by Eduardo Saverin and Raj Ganguly in 2015, has backed Indian companies including Meesho, Dailyhunt and BlackBuck since entering the market in 2016. While B Capital initially focused on India-for-global bets, chairman Howard Morgan said in March that the country's large domestic consumer base has made the firm more open to India-for-India opportunities too.",
     "source_name": "Economic Times",
     "source_url": "https://economictimes.indiatimes.com/tech/funding/meesho-dailyhunt-investor-b-capital-closes-500-million-early-stage-fund/articleshow/132220672.cms",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-07T04:59:51.000Z",
     "created_at": "2026-07-07T04:59:51.000Z"
@@ -1484,7 +1484,7 @@ export const STATIC_ITEMS = [
     "blurb": "DeepSeek is developing its own AI chip to cut its dependence on Nvidia and Huawei processors. The chip is built for inference, running trained models rather than training them, and marks a significant strategic shift for a company already seen as China's AI standard-bearer. Success could also complicate matters for Huawei, which had hoped to fill that same gap.",
     "source_name": "Reuters",
     "source_url": "https://www.reuters.com/world/china/chinas-deepseek-developing-its-own-ai-chip-sources-say-2026-07-07/",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-07T04:59:50.000Z",
     "created_at": "2026-07-07T04:59:50.000Z"
@@ -1494,7 +1494,7 @@ export const STATIC_ITEMS = [
     "blurb": "Chinese authorities have met with major tech firms over the past month to discuss restricting overseas access to the country's most advanced AI models, including unreleased ones. The talks, which included Alibaba, ByteDance and startupZ.ai, follow a series of moves by Beijing to keep homegrown AI development within its borders, treating frontier AI as a national asset requiring tight control, much like the US does.",
     "source_name": "Reuters",
     "source_url": "https://www.reuters.com/world/beijing-is-looking-curbing-overseas-access-chinas-top-ai-models-sources-say-2026-07-07/",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-07T04:59:49.000Z",
     "created_at": "2026-07-07T04:59:49.000Z"
@@ -1504,7 +1504,7 @@ export const STATIC_ITEMS = [
     "blurb": "Chinese smartphone sales fell 13% year-on-year during the month-long 618 shopping festival as brands raised prices to offset rising memory costs, Counterpoint Research data showed. All major domestic brands except Huawei posted double-digit declines between May 26 and June 21, with Honor down 33% and Xiaomi off 24%, as thinner promotions and costlier components tied to the AI infrastructure boom squeezed the discounts typically seen during the event.",
     "source_name": "Reuters",
     "source_url": "https://www.reuters.com/business/media-telecom/china-smartphone-sales-drop-13-during-618-festival-memory-costs-limit-discounts-2026-07-07/",
-    "category": "AI and Chips",
+    "category": "Other news",
     "telegram_message_id": null,
     "published_at": "2026-07-07T04:59:48.000Z",
     "created_at": "2026-07-07T04:59:48.000Z"
@@ -1514,7 +1514,7 @@ export const STATIC_ITEMS = [
     "blurb": "Chinese AI models are winning over U.S. companies as they close the performance gap with American leaders while staying far cheaper to run. Recent releases from DeepSeek andZ.ai are seen as highly competitive with frontier systems from Anthropic and OpenAI, even as rising token prices at U.S. labs push up costs for users. On OpenRouter, U.S. companies' share of tokens spent on Chinese models has topped 30% every week since Feb. 8, peaking at 46%, up from an average of just 11% over the prior 12 months.",
     "source_name": "CNBC",
     "source_url": "https://www.cnbc.com/2026/07/07/chinese-ai-models-costs-us-openai-anthropic.html",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-07T04:59:47.000Z",
     "created_at": "2026-07-07T04:59:47.000Z"
@@ -1524,7 +1524,7 @@ export const STATIC_ITEMS = [
     "blurb": "South Korea's government plans to launch an investment fund fueled by tax revenue from the country's semiconductor boom, Yonhap News reported Sunday, citing presidential chief of staff Kang Hoon-sik.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-05/south-korea-eyes-growth-fund-from-chip-tax-windfall-yonhap-says",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-06T04:59:59.000Z",
     "created_at": "2026-07-06T04:59:59.000Z"
@@ -1544,7 +1544,7 @@ export const STATIC_ITEMS = [
     "blurb": "A Samsung union leader's $26 billion bonus win has splintered the union he leads, as unequal payouts between semiconductor workers and staff at loss-making units drove membership below 55,000, less than half the company's domestic workforce. The leader now wants to narrow that bonus gap and admits semiconductor and other employees may eventually need separate unions.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/features/2026-07-05/samsung-s-ai-bonus-deal-a-short-lived-victory-for-millennial-union-leader",
-    "category": "AI and Chips",
+    "category": "Other news",
     "telegram_message_id": null,
     "published_at": "2026-07-06T04:59:57.000Z",
     "created_at": "2026-07-06T04:59:57.000Z"
@@ -1554,7 +1554,7 @@ export const STATIC_ITEMS = [
     "blurb": "ByteDance’s Doubao and Alibaba’s Qwen are shutting down customised AI agent features ahead of new Chinese rules on humanlike AI interactions. Doubao’s agent tools go offline July 15, with data wiped from view by October 15, while Qwen is disabling its humanlike and user-created agents by July 10 and pulling remaining agent services by July 15, cutting users off from settings and past chats.",
     "source_name": "SCMP",
     "source_url": "https://www.scmp.com/tech/big-tech/article/3359482/bytedance-and-alibaba-disable-humanlike-ai-custom-agents-new-rules-loom",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-06T04:59:56.000Z",
     "created_at": "2026-07-06T04:59:56.000Z"
@@ -1564,7 +1564,7 @@ export const STATIC_ITEMS = [
     "blurb": "Hyundai Motor showcased its Atlas humanoid robot at the 2026 World Cup, using the spotlight to highlight its progress toward mass production and factory use. During Sunday's Brazil-Norway Round of 16 match, the Boston Dynamics-built robot walked through the tunnel, performed goal celebrations including Cunha's surfing move and Son Heung-min's camera gesture, then handed the ball to the referee. Hyundai aims to build up to 30,000 humanoids a year in the US starting 2028, mainly for its Georgia plants.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-05/hyundai-motor-showcases-humanoid-at-world-cup-in-robotics-push",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-06T04:59:55.000Z",
     "created_at": "2026-07-06T04:59:55.000Z"
@@ -1574,7 +1574,7 @@ export const STATIC_ITEMS = [
     "blurb": "Singapore prosecutors added money laundering charges against Alan Wei Zhaolun, a suspect in an alleged scheme to divert Nvidia AI chips to countries like China, as the city-state tightens scrutiny of illegal chip flows. Wei pleaded not guilty on Monday and his bail was revoked after prosecutors raised it to more than S$1.2 million ($928,000); he remains in custody. Prosecutors accuse him of defrauding major server makers to obtain hardware potentially containing export-controlled Nvidia processors, alongside separate fraud charges.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-06/singapore-files-new-charges-in-nvidia-chip-fraud-case",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-06T04:59:54.000Z",
     "created_at": "2026-07-06T04:59:54.000Z"
@@ -1584,7 +1584,7 @@ export const STATIC_ITEMS = [
     "blurb": "Shenzhen-based smart glasses startup Even Realities has raised $150 million in a pre-Series B round led by Meituan and returning backer Tencent, valuing the company at $1 billion. Founder and CEO Will Wang said his company is betting on display-first glasses that beam information directly into the wearer's line of sight without sacrificing privacy, a different approach from rivals building camera-equipped devices for content capture and AI.",
     "source_name": "TechCrunch",
     "source_url": "https://techcrunch.com/2026/07/06/smart-glasses-maker-even-realities-hits-1b-valuation-with-150m-funding-led-by-meituan-tencent/",
-    "category": "AI and Chips",
+    "category": "Other news",
     "telegram_message_id": null,
     "published_at": "2026-07-06T04:59:53.000Z",
     "created_at": "2026-07-06T04:59:53.000Z"
@@ -1594,7 +1594,7 @@ export const STATIC_ITEMS = [
     "blurb": "Chinese web novel platforms including Tencent, ByteDance and Baidu are cracking down on the AI tools they once embraced, imposing daily word limits and tighter quality standards on authors. The move aims to curb a flood of low-quality automated fiction that has swamped the sites.",
     "source_name": "Rest of World",
     "source_url": "https://restofworld.org/2026/china-ai-web-novels/",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-06T04:59:52.000Z",
     "created_at": "2026-07-06T04:59:52.000Z"
@@ -1604,7 +1604,7 @@ export const STATIC_ITEMS = [
     "blurb": "South Korean chipmaker SK Hynix began formal marketing on Monday for a US listing, seeking to sell American depositary receipts worth roughly $28 billion at Friday's closing price in Seoul, after its stock surged about 260% this year and pushed its market cap past $1 trillion. The listing gives the world's top HBM supplier a fresh funding channel as AI-driven chip demand surges, with SK Hynix and rival Samsung Electronics set to ramp up investment under an $880 billion government-led initiative.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-06/memory-chipmaker-sk-hynix-starts-marketing-us-listing",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-06T04:59:51.000Z",
     "created_at": "2026-07-06T04:59:51.000Z"
@@ -1654,7 +1654,7 @@ export const STATIC_ITEMS = [
     "blurb": "Tokyo Artisan Intelligence will mass-produce its own chips next year, backed by Malaysian design house Oppstar, wagering that smaller players can carve out space outside the data center race dominated by Nvidia and other giants. The startup recently completed evaluation of Sting Ray, a test chip for edge AI systems that process data locally rather than in the cloud.",
     "source_name": "Nikkei Asia",
     "source_url": "https://asia.nikkei.com/business/tech/semiconductors/japan-ai-chip-startup-taps-malaysia-s-oppstar-to-gear-up-for-production",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-06T04:59:46.000Z",
     "created_at": "2026-07-06T04:59:46.000Z"
@@ -1664,7 +1664,7 @@ export const STATIC_ITEMS = [
     "blurb": "Shanghai Biren Technology is raising HK$7 billion ($892.5 million) to ramp up GPU production as it competes for a slice of Nvidia's market in China's booming AI chip race. The company, which listed in Hong Kong in January, will issue 153 million new shares at HK$46.2 each, a 9.9% discount to Friday's closing price of HK$51.3, according to a stock exchange filing Sunday.",
     "source_name": "SCMP",
     "source_url": "https://www.scmp.com/tech/tech-trends/article/3359528/chinas-biren-seeks-us900m-fund-gpu-push-and-challenge-nvidia-amid-ai-boom",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-06T04:59:45.000Z",
     "created_at": "2026-07-06T04:59:45.000Z"
@@ -1674,7 +1674,7 @@ export const STATIC_ITEMS = [
     "blurb": "Masayoshi Son is remaking SoftBank in his own image, betting on AI; SoftBank trades at a ~50% discount to its net asset value, as some question the strategy",
     "source_name": "FT",
     "source_url": "https://www.ft.com/content/a29a698c-3fb6-4e6f-ab02-1b7843786066",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-06T04:59:44.000Z",
     "created_at": "2026-07-06T04:59:44.000Z"
@@ -1714,7 +1714,7 @@ export const STATIC_ITEMS = [
     "blurb": "Micron broke ground Saturday on a ¥1.5 trillion ($9.3 billion) expansion of its Hiroshima plant, which will produce high-bandwidth memory chips for AI processors, with shipments expected around summer 2028. Japan's trade ministry is subsidizing up to ¥500 billion of the project, part of a broader global buildout as Micron also expands fabs in Boise and near Syracuse, New York, while SK Hynix and Samsung ramp up their own capacity.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-04/micron-breaks-ground-on-9-billion-western-japan-plant-expansion",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-05T04:59:58.000Z",
     "created_at": "2026-07-05T04:59:58.000Z"
@@ -1734,7 +1734,7 @@ export const STATIC_ITEMS = [
     "blurb": "How ByteDance is making Hollywood inroads with its Seedance video generator, thanks to low pricing, striking realism, and features like timeline-based prompting (Nilesh Christopher/Los Angeles Times)",
     "source_name": "Los Angeles Times",
     "source_url": "https://www.latimes.com/business/story/2026-07-03/bytedances-tiktok-took-over-social-media-now-its-video-ai-is-taking-over-hollywood",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-05T04:59:56.000Z",
     "created_at": "2026-07-05T04:59:56.000Z"
@@ -1744,7 +1744,7 @@ export const STATIC_ITEMS = [
     "blurb": "India’s CG Power & Industrial Solutions has begun chip production at its new Sanand, Gujarat facility, with capacity set to grow from 200 million to 5 billion units a year. The OSAT plant, run by CG Semi, is the country’s third semiconductor venture to reach commercial output this year, with two more plants due online in 2026.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-04/india-s-cg-semi-starts-production-with-200-million-chips",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-05T04:59:55.000Z",
     "created_at": "2026-07-05T04:59:55.000Z"
@@ -1754,7 +1754,7 @@ export const STATIC_ITEMS = [
     "blurb": "Kioxia has begun shipping samples of its next-generation 3D flash memory chips to AI data center operators as it looks to compete for a bigger share of the market. The Tokyo-based chipmaker says the 332-layer chips offer higher storage density, faster data transfer and better power efficiency, and will power its data-center SSDs, manufactured at a new facility at its Kitakami plant in Iwate prefecture.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-02/kioxia-ships-samples-of-newest-flash-memory-for-ai-data-centers",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-04T04:59:59.000Z",
     "created_at": "2026-07-04T04:59:59.000Z"
@@ -1764,7 +1764,7 @@ export const STATIC_ITEMS = [
     "blurb": "Hong Kong has become a key gateway for high-tech goods flowing in and out of China, now handling more than half of the mainland's $239 billion in chip imports through May, up from just a third a decade ago. The city is carving out a new role in the AI boom as trade with China surged nearly 50% in May from a year earlier, its fastest pace since 1992 outside the pandemic.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-02/booming-ai-chip-trade-seals-hong-kong-s-role-as-gateway-to-china",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-04T04:59:58.000Z",
     "created_at": "2026-07-04T04:59:58.000Z"
@@ -1774,7 +1774,7 @@ export const STATIC_ITEMS = [
     "blurb": "Indian data centre operator Yotta Data Services is in talks with global and domestic funds to raise roughly $1 billion for expansion. Promoters plan to sell a 25-30% stake at a $3 billion valuation.",
     "source_name": "Economic Times",
     "source_url": "https://economictimes.indiatimes.com/tech/funding/yotta-data-services-in-talks-with-pe-funds-to-raise-1-billion/articleshow/132151592.cms",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-04T04:59:57.000Z",
     "created_at": "2026-07-04T04:59:57.000Z"
@@ -1784,7 +1784,7 @@ export const STATIC_ITEMS = [
     "blurb": "Alibaba has barred employees from using Anthropic's Claude Code after the tool drew scrutiny for features that can flag China-linked users",
     "source_name": "Reuters",
     "source_url": "https://www.reuters.com/world/china/alibaba-ban-claude-code-workplace-over-alleged-backdoor-risks-source-says-2026-07-03/",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-04T04:59:56.000Z",
     "created_at": "2026-07-04T04:59:56.000Z"
@@ -1794,7 +1794,7 @@ export const STATIC_ITEMS = [
     "blurb": "Sources: Anthropic moves to close loopholes that let Chinese firms like Ant use its models via workarounds including cloud providers and overseas subsidiaries",
     "source_name": "FT",
     "source_url": "https://www.ft.com/content/ad033063-60f9-4c0c-8d8a-9193a83e6f60",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-04T04:59:55.000Z",
     "created_at": "2026-07-04T04:59:55.000Z"
@@ -1804,7 +1804,7 @@ export const STATIC_ITEMS = [
     "blurb": "A look at the quant fund frenzy in China, as assets under management have more than doubled to \\~$384B in less than a year amid rapid AI adoption",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-02/china-quant-funds-draw-billions-as-ai-trounces-human-traders",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-04T04:59:54.000Z",
     "created_at": "2026-07-04T04:59:54.000Z"
@@ -1814,7 +1814,7 @@ export const STATIC_ITEMS = [
     "blurb": "Chinese robot maker Unitree Robotics has received regulatory approval for a Shanghai listing through which it plans to raise 4.2 billion yuan ($619.4 million), moving it closer to one of China's most watched technology initial public offerings.",
     "source_name": "Reuters",
     "source_url": "https://www.reuters.com/world/asia-pacific/chinese-robot-maker-unitree-wins-approval-619-million-shanghai-ipo-2026-07-03/",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-04T04:59:53.000Z",
     "created_at": "2026-07-04T04:59:53.000Z"
@@ -1854,7 +1854,7 @@ export const STATIC_ITEMS = [
     "blurb": "India is investigating a data breach at Tata Electronics that exposed documents tied to Apple's unreleased iPhone 18 Pro, the country's IT secretary said Thursday, marking the government's first public comments on the incident. A ransomware group that stole data from the Apple supplier posted sensitive component and supplier lists, along with photos of the iPhone 18 Pro, on the dark web.",
     "source_name": "Reuters",
     "source_url": "https://www.reuters.com/world/india/india-investigating-tata-data-leak-that-exposed-apple-iphone-secrets-2026-07-03/",
-    "category": "AI and Chips",
+    "category": "Cybersecurity",
     "telegram_message_id": null,
     "published_at": "2026-07-04T04:59:49.000Z",
     "created_at": "2026-07-04T04:59:49.000Z"
@@ -1874,7 +1874,7 @@ export const STATIC_ITEMS = [
     "blurb": "Singapore's dConstruct Technologies has raised $125 million in Series A funding, the standout result from RoboNexus accelerator's first cohort under the National Robotics Program. The inaugural class also included LionsBot and Spinoff Robotics, both now expanding across Asia, Europe, the US and the Middle East. link BeeX, a Singapore-based maker of autonomous underwater drones, has raised $7.7 million in a Series A round led by Monk's Hill Ventures, with participation from SEEDS, ShipsFocus, OCTAVE Capital and NUS Technology Holdings.The funding will go toward expanding BeeX's drone fleet and operational reach, as demand grows for offshore infrastructure inspection and defense modernization.",
     "source_name": "Monk's Hill Ventures",
     "source_url": "https://www.monkshill.com/content-hub/next-frontier-for-physical-ai-underwater-beex",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-04T04:59:47.000Z",
     "created_at": "2026-07-04T04:59:47.000Z"
@@ -1974,7 +1974,7 @@ export const STATIC_ITEMS = [
     "blurb": "SK Hynix will invest 100 trillion won ($64.38 billion) to build new chip plants in Cheongju, including a NAND flash facility, as part of a broader South Korean push to spread AI boom gains beyond Seoul. The projects are part of a $2.1 trillion plan unveiled this week alongside rival Samsung Electronics, which also includes a new chip cluster in the southwest.",
     "source_name": "Reuters",
     "source_url": "https://www.reuters.com/world/asia-pacific/sk-hynix-build-51-billion-nand-memory-chip-factory-by-2029-2026-07-02/",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-02T04:59:50.000Z",
     "created_at": "2026-07-02T04:59:50.000Z"
@@ -1984,7 +1984,7 @@ export const STATIC_ITEMS = [
     "blurb": "Microsoft and telecom startup Lightstorm are leading a consortium to build an undersea cable linking India with Malaysia and Singapore, part of a broader race to expand AI and cloud infrastructure in one of the world's fastest-growing data markets. The 3,600-km I-2SEA cable, backed by Tata Communications, Singtel, ASEAN Cableship and NEC, will land in Machilipatnam, Andhra Pradesh, where Meta and Alphabet have already announced data centers. The companies have not disclosed the investment size.",
     "source_name": "Reuters",
     "source_url": "https://www.reuters.com/business/media-telecom/microsoft-partners-with-singapores-lightstorm-build-india-southeast-asia-2026-07-02/",
-    "category": "AI and Chips",
+    "category": "Other news",
     "telegram_message_id": null,
     "published_at": "2026-07-02T04:59:49.000Z",
     "created_at": "2026-07-02T04:59:49.000Z"
@@ -1994,7 +1994,7 @@ export const STATIC_ITEMS = [
     "blurb": "Apple is in talks to buy memory chips from ChangXin Memory Technologies and Yangtze Memory Technologies, both on a Pentagon blacklist, as it looks to ease a global memory shortage that has pushed up prices across its lineup. The components would go into devices sold in China, according to people familiar with the matter, who said the discussions are ongoing and no deal has been finalized.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-01/apple-seeks-to-buy-chinese-made-memory-chips-with-lobbying-push?accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzb3VyY2UiOiJTdWJzY3JpYmVyR2lmdGVkQXJ0aWNsZSIsImlhdCI6MTc4MjkzNzEyNywiZXhwIjoxNzgzNTQxOTI3LCJhcnRpY2xlSWQiOiJUSEVRUTNLSkg2VjUwMCIsImJjb25uZWN0SWQiOiJDNEVEQ0FFMUZBMDU0MEJFQTI0QTlGMjExQzFFOTA4MCJ9.FuF6awzVXEizz_5Wz3mQJyaU0R5PPc8T4fo6aUH9Z-c",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-02T04:59:48.000Z",
     "created_at": "2026-07-02T04:59:48.000Z"
@@ -2024,7 +2024,7 @@ export const STATIC_ITEMS = [
     "blurb": "South Korean AI rout drags emerging stocks to three-week low",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-02/south-korean-ai-rout-drags-emerging-stocks-to-three-week-low",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-02T04:59:45.000Z",
     "created_at": "2026-07-02T04:59:45.000Z"
@@ -2034,7 +2034,7 @@ export const STATIC_ITEMS = [
     "blurb": "SoftBank Group and its telecom unit will begin renting AI computing power to US companies starting next fiscal year, tapping their expanding data center pipeline to take on CoreWeave and Nebius. The two SoftBank companies are launching a joint venture, SB Neo Inc., to sell AI chips and cloud services to major clients including hyperscalers. Telecom unit head Junichi Miyakawa said the neocloud venture aims to scale up to 10 gigawatts of data center capacity by around 2030 for large-scale AI training and inference.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-02/softbank-launches-ai-cloud-unit-with-plans-to-tap-10-gigawatt-capacity",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-02T04:59:44.000Z",
     "created_at": "2026-07-02T04:59:44.000Z"
@@ -2044,7 +2044,7 @@ export const STATIC_ITEMS = [
     "blurb": "Beijing-based Z.ai, formerly Zhipu AI, launched ZCode on Wednesday, a free desktop app it calls an \"Agentic Development Environment\" built specifically for its flagship GLM-5.2 model. The launch pushes the company deeper into the AI coding tool race, putting it up against Cursor, Claude Code, GitHub Copilot and Google's Antigravity.",
     "source_name": "VentureBeat",
     "source_url": "https://venturebeat.com/technology/z-ai-launches-zcode-to-challenge-cursor-claude-code-and-github-copilot-in-ai-coding",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-02T04:59:43.000Z",
     "created_at": "2026-07-02T04:59:43.000Z"
@@ -2054,7 +2054,7 @@ export const STATIC_ITEMS = [
     "blurb": "Z.ai has narrowed the AI capability gap with Western rivals through its new GLM-5.2 model, drawing rare praise from Silicon Valley figures for coding and agent skills that rival top US offerings at a fraction of the cost. Launched last month, GLM-5.2 has climbed past Anthropic's models in usage rankings on developer platform OpenRouter, with executives including Snowflake CEO Sridhar Ramaswamy and venture capitalist Marc Andreessen praising its performance. Some industry watchers are calling it a \"mini DeepSeek moment,\" referencing the Chinese startup that jolted global AI markets with a cheap but capable model early last year.",
     "source_name": "Reuters",
     "source_url": "https://www.reuters.com/world/china/a-new-inexpensive-chinese-ai-model-is-catching-up-with-anthropic-openai-their-2026-07-02/",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-02T04:59:42.000Z",
     "created_at": "2026-07-02T04:59:42.000Z"
@@ -2074,7 +2074,7 @@ export const STATIC_ITEMS = [
     "blurb": "India is betting on offline, multilingual AI devices to reach classrooms, farms and clinics that big-tech models can't serve, launching a hackathon for startups, researchers and students backed by government platform Bhashini, French nonprofit Current AI and Mumbai-based Kalpa Impact.",
     "source_name": "Rest of World",
     "source_url": "https://restofworld.org/2026/india-bhashini-open-source-offline-ai-hackathon/",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-02T04:59:40.000Z",
     "created_at": "2026-07-02T04:59:40.000Z"
@@ -2124,7 +2124,7 @@ export const STATIC_ITEMS = [
     "blurb": "Chinese chip material makers are ramping up production of advanced products as Beijing pushes for semiconductor self-sufficiency, taking direct aim at longtime Japanese leaders. Guangyuan New Material has started shipping T-glass, used in AI chip packaging to resist heat-driven warping, to clients including Panasonic Holdings and Resonac Holdings, and plans to scale output to 1 million meters a month. The company, first in China to develop low-dielectric glass cloth for AI servers and 5G base stations, built a 6.8 billion yuan ($1 billion) factory in Henan to support that growth, challenging Nittobo's near-total grip on the global T-glass market.",
     "source_name": "Nikkei Asia",
     "source_url": "https://asia.nikkei.com/business/tech/semiconductors/china-chip-material-makers-battle-japan-rivals-for-73bn-market",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-01T04:59:55.000Z",
     "created_at": "2026-07-01T04:59:55.000Z"
@@ -2134,7 +2134,7 @@ export const STATIC_ITEMS = [
     "blurb": "Taiwanese prosecutors detained two Super Micro Computer employees and an Albatron Technology manager this week, part of a widening probe into alleged shipments of Nvidia chips to China. The Keelung District Court granted detention for two of four Super Micro staff under investigation for falsifying documents and breach of trust, while the other two were released on bail but barred from leaving Taiwan; a Chief Telecom employee was also questioned.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-01/taiwan-detains-super-micro-workers-probing-smuggling-of-nvidia-chips-to-china",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-01T04:59:54.000Z",
     "created_at": "2026-07-01T04:59:54.000Z"
@@ -2154,7 +2154,7 @@ export const STATIC_ITEMS = [
     "blurb": "Anthropic is rolling back a covert Claude Code feature that secretly tracked whether users were based in China or linked to Chinese AI labs, after the tool sparked backlash on social media. The company embedded the tracking through hidden system prompt changes, quietly flagging users' location and lab affiliations without disclosure.",
     "source_name": "The Information",
     "source_url": "https://www.theinformation.com/briefings/anthropic-backtracks-spyware-targeting-chinese-users-controversy",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-01T04:59:52.000Z",
     "created_at": "2026-07-01T04:59:52.000Z"
@@ -2164,7 +2164,7 @@ export const STATIC_ITEMS = [
     "blurb": "Twelve Labs is raising $100 million from Amazon, NEA and Naver Ventures to expand its AI video search technology. AWS has signed a multiyear deal to host the startup's workloads on Trainium chips, with new models launching for developers on the platform. Founded by Korean engineers and based in San Francisco, the company builds AI that makes video archives searchable and easier to monetize.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-01/video-search-startup-raises-100-million-from-amazon-vc-funds",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-01T04:59:51.000Z",
     "created_at": "2026-07-01T04:59:51.000Z"
@@ -2184,7 +2184,7 @@ export const STATIC_ITEMS = [
     "blurb": "ByteDance has chosen Brazil for its largest data center outside China, a $39 billion project and the latest win from President Lula's push to attract Chinese investment. Hundreds of workers are already building the complex in Ceará state, which will start at 200 megawatts and scale to 1 gigawatt of computing capacity. Brazil's cheap renewable power and strategic location are drawing other Chinese tech giants to the country as well.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-07-01/tiktok-creator-bytedance-picks-brazil-for-largest-data-center-outside-china",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-01T04:59:49.000Z",
     "created_at": "2026-07-01T04:59:49.000Z"
@@ -2204,7 +2204,7 @@ export const STATIC_ITEMS = [
     "blurb": "Vietnam’s G-Group Technology Corporation will build its G-Campus Hoa Lac, a high-tech center and Tier III data center complex specializing in artificial intelligence and high-performance computing, with total investment of VND7,600 billion ($300 million). In a statement on Tuesday, G-Group said it received an investment certificate for the project at Hanoi’s investment promotion conference a day earlier.",
     "source_name": "TechNode",
     "source_url": "https://technode.global/2026/07/01/vietnams-g-group-to-invest-300m-in-building-ai-data-center-campus-in-hanoi/",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-01T04:59:47.000Z",
     "created_at": "2026-07-01T04:59:47.000Z"
@@ -2234,7 +2234,7 @@ export const STATIC_ITEMS = [
     "blurb": "Thailand-based Amity Robotics has closed a $7 million seed round combining equity and debt financing. East Ventures led the equity side with 500 Global participating, while AlteriQ Global led the debt portion.",
     "source_name": "Amity Robotics",
     "source_url": "https://www.amityrobotics.com/blog/amity-robotics-closes-7m-seed-round",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-01T04:59:44.000Z",
     "created_at": "2026-07-01T04:59:44.000Z"
@@ -2254,7 +2254,7 @@ export const STATIC_ITEMS = [
     "blurb": "Acti, a Singapore-based company describing itself as the world’s first agentic keyboard, has raised $5.3 million in a seed round led by the United States-based BITKRAFT Ventures. In a statement on Tuesday, Acti said it can transform the keyboard into an AI-powered context layer that works across every application a user opens. The funding will go toward engineering and AI hiring, deepening Acti’s on-device intelligence, and growing its Skill ecosystem and developer community.",
     "source_name": "TechNode",
     "source_url": "https://technode.global/2026/07/01/singapores-acti-raises-5-3m-seed-round-to-build-ai-powered-keyboard-as-personal-context-layer/",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-01T04:59:42.000Z",
     "created_at": "2026-07-01T04:59:42.000Z"
@@ -2264,7 +2264,7 @@ export const STATIC_ITEMS = [
     "blurb": "Japan will pour up to 1 trillion yen ($6.16 billion) into a nine-company consortium building a domestic AI foundation model, as Tokyo races to secure technological sovereignty against the US and China. The project, called Noetra and led by SoftBank, Honda, NEC and Sony alongside the government-backed National Institute of Advanced Industrial Science and Technology, kicks off with 387.3 billion yen in its first year starting fiscal 2026, with funding set to grow through fiscal 2027 and beyond based on results.",
     "source_name": "Nikkei Asia",
     "source_url": "https://asia.nikkei.com/business/technology/artificial-intelligence/japan-backs-softbank-led-ai-models-with-up-to-6.2bn-in-chasing-us-china",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-01T04:59:41.000Z",
     "created_at": "2026-07-01T04:59:41.000Z"
@@ -2274,7 +2274,7 @@ export const STATIC_ITEMS = [
     "blurb": "UBTech Robotics, the world’s first publicly traded humanoid robot maker, has launched a consumer humanoid designed for personal companionship, featuring lifelike silicone skin and emotional artificial intelligence, as Chinese tech firms increasingly transition robots from the factory floor to the family living room. The U1, unveiled on Tuesday in Shenzhen, comes in male and female versions, standing 183cm and 168cm tall, respectively. The model is available in Lite, Pro and Ultra variants, priced from 119,800 yuan (US$17,650) to 990,000 yuan.",
     "source_name": "SCMP",
     "source_url": "https://www.scmp.com/tech/tech-trends/article/3358884/ubtechs-lifelike-humanoid-robots-built-companionship-arriving-homes-across-china",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-01T04:59:40.000Z",
     "created_at": "2026-07-01T04:59:40.000Z"
@@ -2284,7 +2284,7 @@ export const STATIC_ITEMS = [
     "blurb": "South Korean exports in June surged past $100 billion for the first time, government figures showed Wednesday, boosted by record semiconductor shipments as industry titans SK Hynix and Samsung Electronics answer unprecedented demand for the components amid the ongoing global artificial intelligence boom. The country logged $102.25 billion worth of exports last month, rising 70.9% from June last year, and marking highest ever total on a monthly basis. The year-on-year increase, meanwhile, was the the biggest since October 1978, according to Reuters.",
     "source_name": "Nikkei Asia",
     "source_url": "https://asia.nikkei.com/economy/south-korean-exports-hit-monthly-high-on-booming-ai-chip-demand",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-07-01T04:59:39.000Z",
     "created_at": "2026-07-01T04:59:39.000Z"
@@ -2294,7 +2294,7 @@ export const STATIC_ITEMS = [
     "blurb": "Beijing has laid out a road map to speed up its industrial internet buildout, setting new targets for 5G networks and data systems as it pushes AI deeper into manufacturing. Eight government agencies led by the Ministry of Industry and Information Technology jointly issued the plan Tuesday, calling for 50,000 industrial 5G private networks by 2030 and a mature industrial data system, according to a notice on the ministry's WeChat account.",
     "source_name": "SCMP",
     "source_url": "https://www.scmp.com/tech/article/3359015/china-unveils-industrial-internet-road-map-ai-5g-core-manufacturing-upgrade",
-    "category": "AI and Chips",
+    "category": "Policy",
     "telegram_message_id": null,
     "published_at": "2026-07-01T04:59:38.000Z",
     "created_at": "2026-07-01T04:59:38.000Z"
@@ -2304,7 +2304,7 @@ export const STATIC_ITEMS = [
     "blurb": "Kuaishou-backed Kling AI is nearing a $3 billion fundraising round that would value the company at $18 billion, as competition heats up in China's AI video generation market. The valuation was trimmed from an initial $20 billion target set in April, when Kuaishou first planned to spin off the unit, reflecting shifting market sentiment.",
     "source_name": "SCMP",
     "source_url": "https://www.scmp.com/tech/big-tech/article/3359059/chinas-kling-ai-nears-us3-billion-round-us18-billion-valuation-sources",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-01T04:59:37.000Z",
     "created_at": "2026-07-01T04:59:37.000Z"
@@ -2314,7 +2314,7 @@ export const STATIC_ITEMS = [
     "blurb": "How the rapid rise in US- and China-made AI abilities is leading to both a transformation in AI use at work, and sudden lurches in policies and markets (Ethan Mollick/One Useful Thing)",
     "source_name": "One Useful Thing",
     "source_url": "https://www.oneusefulthing.org/p/the-twilight-of-the-chatbots",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-01T04:59:36.000Z",
     "created_at": "2026-07-01T04:59:36.000Z"
@@ -2324,7 +2324,7 @@ export const STATIC_ITEMS = [
     "blurb": "More numbers and figures inside the story The first half of 2026 was driven by artificial intelligence, with startups such as Neysa and Sarvam AI securing some of the largest funding rounds. But the biggest headline arrived towards the end of the period when CRED raised $900 million from Facebook parent Meta, followed by founder Kunal Shah's appointment as Global CEO of WhatsApp. These developments lifted startup funding to nearly $7.4 billion, making H1 2026 the second highest funded first half after the 2021 and 2022 boom. The six month period also saw D2C beauty and health brands emerge as attractive acquisition targets, while the IPO pipeline gained momentum with OYO, Zepto, Razorpay, Kuku and Zetwerk moving closer to listings. Turtlemint, Fractal, Shadowfax and Kissht also made their stock market debut.",
     "source_name": "Entrackr",
     "source_url": "https://entrackr.com/report/indian-startups-raise-74-bn-in-h1-2026-as-cred-meta-deal-lifts-funding-12123065",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-01T04:59:35.000Z",
     "created_at": "2026-07-01T04:59:35.000Z"
@@ -2334,7 +2334,7 @@ export const STATIC_ITEMS = [
     "blurb": "Taiwan authorities raided Super Micro Computer's offices and the homes of six individuals connected to the company, widening an investigation into alleged smuggling of Nvidia chips into China via its servers. Three affiliated companies were also searched.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-06-29/super-micro-office-raided-as-taiwan-expands-chip-smuggling-probe",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-06-30T04:59:59.000Z",
     "created_at": "2026-06-30T04:59:59.000Z"
@@ -2354,7 +2354,7 @@ export const STATIC_ITEMS = [
     "blurb": "Tencent has ramped up share buybacks as its Hong Kong-listed stock struggles to recover from a selloff that has erased about $309 billion in market value since October, with shares down more than a third from their peak. Investor concerns center on how the WeChat operator plans to monetize its heavy AI investments. The buybacks appear to be cushioning the decline: Tencent shares are down 1.8% this month, compared to a 10% slump in the Hang Seng Tech Index.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-06-30/tencent-ramps-up-buybacks-as-share-rout-wipes-out-309-billion",
-    "category": "AI and Chips",
+    "category": "Markets",
     "telegram_message_id": null,
     "published_at": "2026-06-30T04:59:57.000Z",
     "created_at": "2026-06-30T04:59:57.000Z"
@@ -2414,7 +2414,7 @@ export const STATIC_ITEMS = [
     "blurb": "Singapore-based AI startup Akro raises $700,000 Pre-Seed led by Amigos Venture Capital",
     "source_name": "TechNode",
     "source_url": "https://technode.global/2026/06/30/singapore-based-ai-startup-akro-raises-700000-pre-seed-led-by-amigos-venture-capital/",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-06-30T04:59:51.000Z",
     "created_at": "2026-06-30T04:59:51.000Z"
@@ -2474,7 +2474,7 @@ export const STATIC_ITEMS = [
     "blurb": "Meituan has open-sourced LongCat-2.0, which it calls China's largest AI model trained entirely on domestic chips, marking a shift from using home-grown hardware solely for inference. The 1.6 trillion-parameter model, with a 1 million-token context window, rivals DeepSeek's V4-pro in scale but goes further: Meituan says it's the first trillion-parameter model to complete both training and inference on a 50,000-card domestic computing cluster, unlike DeepSeek's chip, which handled only inference.",
     "source_name": "SCMP",
     "source_url": "https://www.scmp.com/tech/tech-trends/article/3358854/china-debuts-biggest-ai-model-trained-local-chips-meituan-releases-longcat-20",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-06-30T04:59:45.000Z",
     "created_at": "2026-06-30T04:59:45.000Z"
@@ -2484,7 +2484,7 @@ export const STATIC_ITEMS = [
     "blurb": "Five Chinese tech and manufacturing firms launched Hong Kong listings Tuesday, aiming to raise up to HK$44.1 billion ($5.6 billion) in one of the busiest IPO days of the year. The largest offering comes from Apple supplier Luxshare Precision Industry, seeking up to HK$24.27 billion ($3.15 billion) after weighing a Hong Kong listing for over a year. The deals extend a wave of mainland companies tapping Hong Kong for capital, with first-half 2026 listings reaching $22.45 billion, up nearly 57% from last year and the busiest start in five years, per LSEG data; analysts say investor appetite for AI, chips and robotics names remains strong, though some caution on valuations and geopolitical risk persists.",
     "source_name": "Reuters",
     "source_url": "https://www.reuters.com/world/asia-pacific/chinas-luxshare-precision-industry-seeks-raise-up-31-billion-hk-share-sale-2026-06-29/",
-    "category": "AI and Chips",
+    "category": "Markets",
     "telegram_message_id": null,
     "published_at": "2026-06-30T04:59:44.000Z",
     "created_at": "2026-06-30T04:59:44.000Z"
@@ -2524,7 +2524,7 @@ export const STATIC_ITEMS = [
     "blurb": "Indian AI startup Rocket, which lets users build apps from plain-language prompts, is in talks to raise $40-50 million at a roughly $500 million valuation led by 360 ONE Asset, less than a year after closing a $15 million round at $60 million backed by Salesforce Ventures, Accel and Together Fund.",
     "source_name": "Economic Times",
     "source_url": "https://economictimes.indiatimes.com/tech/funding/ai-startup-rocket-in-talks-to-raise-40-50-million-sources/articleshow/132055768.cms",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-06-29T04:59:58.000Z",
     "created_at": "2026-06-29T04:59:58.000Z"
@@ -2534,7 +2534,7 @@ export const STATIC_ITEMS = [
     "blurb": "Blackstone-backed data center operator AirTrunk is nearing a confidential filing for a REIT IPO in Singapore. The offering is targeting around $1.5 billion, which would make it the largest Singapore listing since 2017.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-06-29/airtrunk-is-said-to-near-confidential-filing-for-biggest-singapore-ipo-in-years",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-06-29T04:59:57.000Z",
     "created_at": "2026-06-29T04:59:57.000Z"
@@ -2554,7 +2554,7 @@ export const STATIC_ITEMS = [
     "blurb": "Chinese memory chipmaker CXMT has signed a multi-year DRAM supply deal with Tencent worth more than 20 billion yuan ($2.94 billion), ahead of its highly anticipated stock market debut.",
     "source_name": "Reuters",
     "source_url": "https://www.reuters.com/world/china/chinas-cxmt-wins-3-billion-memory-supply-deal-with-tencent-sources-say-2026-06-29/",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-06-29T04:59:55.000Z",
     "created_at": "2026-06-29T04:59:55.000Z"
@@ -2564,7 +2564,7 @@ export const STATIC_ITEMS = [
     "blurb": "Two Chinese robotics startups, AI² Robotics and Alibaba-backed X Square Robot, each reached valuations of around $2.9 billion in recent funding rounds, adding to the at least 46 billion yuan investors have poured into the sector this year. More than 140 Chinese firms are now building AI-powered humanoid robots, with Unitree Robotics securing approval in early June for a 4.2 billion yuan Shanghai IPO at the head of a growing listings pipeline.",
     "source_name": "Bloomberg",
     "source_url": "https://www.bloomberg.com/news/articles/2026-06-29/china-births-two-robot-unicorns-as-sector-funding-stays-strong",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-06-29T04:59:54.000Z",
     "created_at": "2026-06-29T04:59:54.000Z"
@@ -2594,7 +2594,7 @@ export const STATIC_ITEMS = [
     "blurb": "DeepSeek has rolled out a major upgrade to its V3 model that boosts per-user response speeds by up to 85%, using a speculative decoding framework it calls DSpark. The efficiency gain could reduce AI systems' reliance on high-end chip infrastructure, as Chinese developers increasingly compete on serving costs and user experience rather than raw capability.",
     "source_name": "SCMP",
     "source_url": "https://www.scmp.com/tech/big-tech/article/3358647/faster-ai-lower-costs-dspark-eases-inference-bottlenecks-and-chip-strain-says-deepseek",
-    "category": "AI and Chips",
+    "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-06-29T04:59:51.000Z",
     "created_at": "2026-06-29T04:59:51.000Z"
@@ -2604,7 +2604,7 @@ export const STATIC_ITEMS = [
     "blurb": "ByteDance aims to finalize its next-generation in-house CPU design by early next year, with mass production and wider deployment targeted for the second half of 2027. An early version of the chip has been used internally since late last year, though tape-out — the final design stage before fabrication — could be accelerated given urgent demand.",
     "source_name": "SCMP",
     "source_url": "https://www.scmp.com/tech/tech-trends/article/3358777/bytedance-targets-early-next-year-new-cpu-power-own-ai-infrastructure-sources",
-    "category": "AI and Chips",
+    "category": "Chips",
     "telegram_message_id": null,
     "published_at": "2026-06-29T04:59:50.000Z",
     "created_at": "2026-06-29T04:59:50.000Z"
