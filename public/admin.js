@@ -157,7 +157,9 @@ const state = {
   selected: null,
   mode: "edit",
   sponsors: [],
-  page: 1
+  page: 1,
+  category: "",
+  categories: []
 };
 
 const els = {
@@ -192,6 +194,7 @@ const els = {
   selectedDetail: document.querySelector("#selected-detail"),
   listCount: document.querySelector("#list-count"),
   searchInput: document.querySelector("#search-input"),
+  categoryFilter: document.querySelector("#category-filter"),
   itemList: document.querySelector("#item-list"),
   editorTitle: document.querySelector("#editor-title"),
   editorMode: document.querySelector("#editor-mode"),
@@ -449,6 +452,10 @@ if (itemsToggle && itemPanel) {
 els.analyticsWindowSelect.addEventListener("change", () => loadAnalytics());
 els.dashboardWindow.addEventListener("change", () => loadDashboard());
 els.searchInput.addEventListener("input", filterItems);
+els.categoryFilter.addEventListener("change", () => {
+  state.category = els.categoryFilter.value;
+  filterItems();
+});
 els.blurb.addEventListener("input", maybeAutoFillCategory);
 els.headline.addEventListener("input", maybeAutoFillCategory);
 els.sourceName.addEventListener("input", maybeAutoFillCategory);
@@ -509,6 +516,7 @@ async function loadItems() {
       offset += pageSize;
     }
     state.items = allItems;
+    populateCategoryFilter();
     filterItems();
     setStatus("Ready", `Loaded ${state.items.length} public items`);
   } catch (error) {
@@ -920,7 +928,9 @@ function cell(value, className = "", label = "") {
 function filterItems() {
   state.page = 1;
   const query = els.searchInput.value.trim().toLowerCase();
+  const category = state.category;
   state.filtered = state.items.filter((item) => {
+    if (category && (item.category || "Other news") !== category) return false;
     if (!query) return true;
     return [
       item.id,
@@ -936,6 +946,30 @@ function filterItems() {
 
   renderList();
   renderCounts();
+}
+
+function populateCategoryFilter() {
+  const counts = new Map();
+  for (const item of state.items) {
+    const cat = item.category || "Other news";
+    counts.set(cat, (counts.get(cat) || 0) + 1);
+  }
+  state.categories = [...counts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(([cat]) => cat);
+
+  els.categoryFilter.replaceChildren();
+  const all = document.createElement("option");
+  all.value = "";
+  all.textContent = "All categories";
+  els.categoryFilter.append(all);
+  for (const cat of state.categories) {
+    const opt = document.createElement("option");
+    opt.value = cat;
+    opt.textContent = `${cat} (${counts.get(cat)})`;
+    els.categoryFilter.append(opt);
+  }
+  els.categoryFilter.value = state.category;
 }
 
 function renderList() {
@@ -983,7 +1017,23 @@ function renderList() {
     tr.append(cell(String(item.id), "nowrap id-cell", "ID"));
     tr.append(cell(item.headline || item.title || firstWords(item.blurb, 12), "truncate", "Title"));
     tr.append(cell(item.source_name || "Source", "truncate", "Publisher"));
-    tr.append(cell(item.category || "Other news", "", "Category"));
+
+    const catTd = document.createElement("td");
+    catTd.dataset.label = "Category";
+    const catSelect = document.createElement("select");
+    catSelect.className = "input cat-edit";
+    const cats = state.categories.length ? state.categories : [item.category || "Other news"];
+    for (const cat of cats) {
+      const opt = document.createElement("option");
+      opt.value = cat;
+      opt.textContent = cat;
+      if (cat === (item.category || "Other news")) opt.selected = true;
+      catSelect.append(opt);
+    }
+    catSelect.addEventListener("change", () => saveItemCategory(item, catSelect.value));
+    catSelect.addEventListener("click", (event) => event.stopPropagation());
+    catTd.append(catSelect);
+    tr.append(catTd);
     tr.append(cell(formatTags(item.tags), "", "Tags"));
     tr.append(cell(formatDateTime(item.published_at), "nowrap", "Published"));
 
@@ -1040,6 +1090,34 @@ function renderListPagination(total) {
     renderList();
   });
   wrap.append(next);
+}
+
+async function saveItemCategory(item, newCategory) {
+  const oldCategory = item.category || "Other news";
+  if (newCategory === oldCategory) return;
+  setStatus("Saving", `Updating category for item ${item.id}`);
+  try {
+    const response = await fetch("/api/items", {
+      method: "PATCH",
+      credentials: "same-origin",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({ id: Number(item.id), category: newCategory })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || `PATCH returned ${response.status}`);
+    const updated = result.item;
+    if (updated) {
+      const idx = state.items.findIndex((candidate) => String(candidate.id) === String(item.id));
+      if (idx >= 0) state.items[idx] = { ...state.items[idx], category: updated.category || newCategory };
+    } else {
+      item.category = newCategory;
+    }
+    setStatus("Saved", `Category updated for item ${item.id}`);
+    filterItems();
+  } catch (error) {
+    setStatus("Error", error.message);
+    filterItems();
+  }
 }
 
 function formatTags(value) {

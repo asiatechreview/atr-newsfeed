@@ -16,7 +16,7 @@
       }
     } catch (error) {}
   </script>
-  <link rel="stylesheet" href="/admin.css?v=20260811-theme">
+  <link rel="stylesheet" href="/admin.css?v=20260811-cat-filter">
 </head>
 <body class="logged-out">
   <div class="app">
@@ -221,7 +221,12 @@
               <div class="card-title">Live Items <small id="list-count">-</small></div>
               <button id="items-toggle" class="btn btn-ghost" style="padding:6px 10px;font-size:12px" type="button" aria-expanded="true">Hide list</button>
             </div>
-            <input id="search-input" class="input" type="search" placeholder="Search URL, title, blurb or source">
+            <div class="item-toolbar">
+              <input id="search-input" class="input" type="search" placeholder="Search URL, title, blurb or source">
+              <select id="category-filter" class="input" style="width:auto" aria-label="Filter by category">
+                <option value="">All categories</option>
+              </select>
+            </div>
             <div id="item-list" class="item-list"></div>
             <div id="item-pagination" class="item-pagination"></div>
           </div>
@@ -596,6 +601,6 @@
     <button id="mobile-refresh-button" type="button">Refresh</button>
   </nav>
 
-  <script src="/admin.js?v=20260811-live-pagination" defer></script>
+  <script src="/admin.js?v=20260811-cat-filter" defer></script>
 </body>
 </html>

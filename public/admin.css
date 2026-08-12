@@ -179,6 +179,9 @@ h1, h2, h3 { font-weight: 700; }
 
 /* ============ Item list ============ */
 .item-list { margin-top: 12px; }
+.item-toolbar { display: flex; gap: 10px; margin-bottom: 12px; }
+.item-toolbar #search-input { flex: 1; }
+.cat-edit { padding: 4px 6px; font-size: 12px; width: 140px; }
 .item-pagination { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 14px; }
 .pagination-label { font-size: 12px; color: var(--muted); }
 .item-row { cursor: pointer; }
