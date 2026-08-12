@@ -635,7 +635,7 @@ export async function onRequestPatch({ env, request }) {
   }
 
   const current = await env.ATR_FEED_DB.prepare(
-    "SELECT id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at FROM feed_items WHERE id = ? AND status = ?"
+    "SELECT id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key FROM feed_items WHERE id = ? AND status = ?"
   )
     .bind(id, "published")
     .first();
