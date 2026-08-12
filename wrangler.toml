@@ -7,7 +7,9 @@ binding = "ATR_FEED_DB"
 database_name = "atr-newsfeed-db"
 database_id = "b02c4b49-922e-48d8-8c54-ceeedd76c41a"
 
-# Scheduled functions (functions/_scheduled.js). Keep in sync with the CRONS
-# strings in that file. Times are UTC.
-[triggers]
-crons = ["0 1 * * *", "*/30 * * * *", "*/10 * * * *"]
+# NOTE: cron triggers for the scheduled functions in functions/_scheduled.js
+# cannot be declared here. Pages rejects [triggers] in wrangler.toml. Register
+# them once in the Pages dashboard: Settings -> Functions -> Cron Triggers:
+#   0 1 * * *     (newsletter card refresh)
+#   */30 * * * *  (ingest reconciliation)
+#   */10 * * * *  (health + deploy verification)
