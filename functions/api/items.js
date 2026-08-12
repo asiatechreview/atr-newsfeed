@@ -629,10 +629,14 @@ export async function onRequestPatch({ env, request }) {
     return json({ error: "Invalid JSON" }, 400);
   }
 
-  const id = Number(body.id);
-  if (!Number.isInteger(id) || id <= 0) {
+  const rawIdInput = String(body.id ?? "").trim();
+  if (!rawIdInput) {
     return json({ error: "id is required" }, 400);
   }
+  // Accept numeric DB ids and string ids (static/manual items such as
+  // manual-telegram-*, md-*, html-*). The id column stores both forms.
+  const numericId = Number(rawIdInput);
+  const id = Number.isInteger(numericId) && numericId > 0 ? numericId : rawIdInput;
 
   const current = await env.ATR_FEED_DB.prepare(
     "SELECT id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key FROM feed_items WHERE id = ? AND status = ?"
