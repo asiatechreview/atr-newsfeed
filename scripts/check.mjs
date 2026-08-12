@@ -39,6 +39,8 @@ const required = [
   "functions/api/auth/me.js",
   "functions/api/auth/users.js",
   "functions/api/site-content.js",
+  "functions/api/site-content/newsletter/refresh.js",
+  "functions/_lib/newsletter-refresh.js",
   "functions/_lib/admin-auth.js",
   "functions/_lib/site-content.js",
   "functions/api/index.js",

@@ -1,5 +1,5 @@
-import { refreshNewsletterCardFromFeed } from "../../_lib/newsletter-refresh.js";
-import { isAdmin } from "../../_lib/admin-auth.js";
+import { refreshNewsletterCardFromFeed } from "../../../_lib/newsletter-refresh.js";
+import { isAdmin } from "../../../_lib/admin-auth.js";
 
 // Manual trigger for the newsletter card: fetches the latest Substack post and
 // updates site-content immediately. Same logic as the scheduled newsletter
