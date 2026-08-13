@@ -1,5 +1,5 @@
 const SESSION_COOKIE = "atr_admin_session";
-const SESSION_TTL_SECONDS = 12 * 60 * 60; // 12 hours
+const SESSION_TTL_SECONDS = 30 * 24 * 60 * 60; // 30 days, sliding renewal
 const PBKDF2_ITERATIONS = 100000;
 
 export async function ensureAuthTables(env) {
@@ -70,6 +70,17 @@ export async function sessionUser(env, request) {
     "SELECT username, expires_at FROM admin_sessions WHERE token = ? AND expires_at > ?"
   ).bind(token, new Date().toISOString()).first();
   if (!row?.username) return null;
+
+  // Sliding renewal: extend the session on every valid use so active admins
+  // are not logged out by the TTL. Admin traffic is low; one UPDATE per
+  // request is negligible and renewal must never break session validation.
+  try {
+    await env.ATR_FEED_DB.prepare(
+      "UPDATE admin_sessions SET expires_at = ? WHERE token = ?"
+    ).bind(new Date(Date.now() + SESSION_TTL_SECONDS * 1000).toISOString(), token).run();
+  } catch {
+    // Ignore renewal failures; the session is still valid.
+  }
 
   let role = "super_admin";
   let displayName = null;

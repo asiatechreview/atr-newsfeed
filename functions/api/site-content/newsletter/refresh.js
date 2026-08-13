@@ -1,15 +1,12 @@
 import { refreshNewsletterCardFromFeed } from "../../../_lib/newsletter-refresh.js";
-import { isAdmin } from "../../../_lib/admin-auth.js";
 
 // Manual trigger for the newsletter card: fetches the latest Substack post and
 // updates site-content immediately. Same logic as the scheduled newsletter
-// cron (functions/_scheduled.js). Admin-only.
+// cron (functions/_scheduled.js). Intentionally unauthenticated: the endpoint
+// takes no user input and only mirrors the public Substack feed, so it cannot
+// be used to inject content. The "Save card" write endpoint stays admin-only.
 
 export async function onRequestPost({ env, request }) {
-  if (!(await isAdmin(env, request))) {
-    return json({ error: "Unauthorized" }, 401);
-  }
-
   try {
     const result = await refreshNewsletterCardFromFeed(env, request);
     return json({ ok: true, ...result });
