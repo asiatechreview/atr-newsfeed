@@ -1,5 +1,6 @@
 import { shouldLogCrawlerPath, writeCrawlerAccessLog } from "./_lib/crawler-log.js";
 import { ensureSiteContentTable, readSiteContent } from "./_lib/site-content.js";
+import { ogMetaBlock } from "./_lib/og-preview.js";
 
 const PUBLIC_HOST = "bulletin.asiatechreview.com";
 const HOMEPAGE_PATHS = new Set(["/", "/index.html"]);
@@ -39,7 +40,7 @@ export async function onRequest(context) {
   const response = await context.next();
 
   if (HOMEPAGE_PATHS.has(pathname) && isHtml(response)) {
-    const injected = await injectLatestNewsletter(response, context.env);
+    const injected = await injectHomepageMeta(response, context.env, url);
     if (injected) return injected;
   }
 
@@ -66,10 +67,50 @@ function escapeHtml(value) {
     .replaceAll('"', "&quot;");
 }
 
+// Insert a block of meta tags just before </head>.
+function insertBeforeHeadClose(html, metaBlock) {
+  const marker = "</head>";
+  const idx = html.indexOf(marker);
+  if (idx === -1) return html + "\n  " + metaBlock;
+  return html.slice(0, idx) + metaBlock + "\n  " + html.slice(idx);
+}
+
+// Compose OG/Twitter meta injection and the newsletter card swap on the same
+// homepage HTML. Returns a new Response when anything changed, else null.
+async function injectHomepageMeta(response, env, url) {
+  try {
+    const original = await response.text();
+    let html = original;
+    let changed = false;
+
+    const ogTags = await ogMetaBlock(env, url);
+    if (ogTags && !html.includes('property="og:title"')) {
+      html = insertBeforeHeadClose(html, ogTags);
+      changed = true;
+    }
+
+    const newsletterHtml = await applyNewsletterHtml(html, env);
+    if (newsletterHtml) {
+      html = newsletterHtml;
+      changed = true;
+    }
+
+    if (!changed) return null;
+
+    const headers = new Headers(response.headers);
+    headers.set("content-type", "text/html; charset=utf-8");
+    headers.set("cache-control", "public, max-age=60");
+    return new Response(html, { status: response.status, headers });
+  } catch {
+    // Fall back to the static page; never break the homepage.
+    return null;
+  }
+}
+
 // Replace the static fallback newsletter card in the homepage HTML with the
 // stored latest post, so the first paint is already current and there is no
 // flash of an older Substack post before the client-side swap.
-async function injectLatestNewsletter(response, env) {
+async function applyNewsletterHtml(html, env) {
   try {
     await ensureSiteContentTable(env);
     const content = await readSiteContent(env);
@@ -80,7 +121,6 @@ async function injectLatestNewsletter(response, env) {
     const image = escapeHtml(newsletter.image || "");
     if (!title && !url) return null;
 
-    const html = await response.text();
     let next = html;
     if (url) {
       next = next.replaceAll("https://www.asiatechreview.com/p/grab-bets-on-fintech-to-reinforce", url);
@@ -94,12 +134,7 @@ async function injectLatestNewsletter(response, env) {
     next = next.replaceAll("Grab bets on fintech to reinforce its tech story", title);
     next = next.replaceAll("The company's bid to become a fintech heavyweight is about to face its first major test", blurb);
 
-    if (next === html) return null;
-
-    const headers = new Headers(response.headers);
-    headers.set("content-type", "text/html; charset=utf-8");
-    headers.set("cache-control", "public, max-age=60");
-    return new Response(next, { status: response.status, headers });
+    return next === html ? null : next;
   } catch {
     // Fall back to the static page; never break the homepage.
     return null;
