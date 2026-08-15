@@ -1,5 +1,5 @@
-import { isAdmin } from "../_lib/admin-auth.js";
-import { writeOperationalEvent } from "../_lib/operational-log.js";
+import { isAdmin } from "../../_lib/admin-auth.js";
+import { writeOperationalEvent } from "../../_lib/operational-log.js";
 import {
   ensureCategoriesTable,
   seedCategories,
@@ -7,7 +7,7 @@ import {
   createCategory,
   updateCategory,
   deleteCategory
-} from "../_lib/categories.js";
+} from "../../_lib/categories.js";
 
 function json(payload, status = 200) {
   return new Response(JSON.stringify(payload, null, 2), {
