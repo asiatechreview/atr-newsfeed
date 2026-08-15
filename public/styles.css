@@ -686,6 +686,13 @@ main {
   font-size: 10px;
   line-height: 1.2;
 }
+/* Temporarily hidden on the live site per Sai (Aug 15): the hashtag bar
+   surfaced stored multi-word phrase tags that read badly. Tag filtering
+   (?tag=) still works via links elsewhere; this only hides the bar under
+   each item. Remove this override to restore the tags. */
+.tags {
+  display: none;
+}
 
 .tags[hidden] {
   display: none;
