@@ -222,6 +222,7 @@ const els = {
   dateFrom: document.querySelector("#date-from"),
   dateTo: document.querySelector("#date-to"),
   hiddenOnly: document.querySelector("#hidden-only"),
+  removedToggle: document.querySelector("#removed-toggle"),
   sortOrder: document.querySelector("#sort-order"),
   bulkBar: document.querySelector("#bulk-bar"),
   bulkCount: document.querySelector("#bulk-count"),
@@ -577,6 +578,9 @@ els.hiddenOnly?.addEventListener("change", () => {
   state.hiddenOnly = els.hiddenOnly.checked;
   filterItems();
 });
+els.removedToggle?.addEventListener("change", () => {
+  loadItems();
+});
 els.sortOrder?.addEventListener("change", () => {
   state.sort = els.sortOrder.value;
   filterItems();
@@ -660,12 +664,15 @@ async function loadItems() {
   beginLoad();
   setStatus("Loading", "Fetching live D1 items");
 
+  const removedMode = els.removedToggle?.checked;
+  const statusParam = removedMode ? "removed" : "all";
+
   try {
     const pageSize = 500;
     const allItems = [];
     let offset = 0;
     for (;;) {
-      const response = await fetch(`/api/items?status=all&limit=${pageSize}&offset=${offset}&_=${Date.now()}`, {
+      const response = await fetch(`/api/items?status=${statusParam}&limit=${pageSize}&offset=${offset}&_=${Date.now()}`, {
         headers: { accept: "application/json", "cache-control": "no-cache" }
       });
       if (response.status === 401) {
@@ -1524,27 +1531,40 @@ function renderList() {
     // Visible toggle: iOS-style switch for hide/show on the public site.
     const visTd = document.createElement("td");
     visTd.dataset.label = "Visible";
-    const visible = item.status !== "hidden" && item.status !== "draft";
-    const toggle = document.createElement("button");
-    toggle.type = "button";
-    toggle.className = "vis-switch" + (visible ? " on" : "");
-    toggle.setAttribute("role", "switch");
-    toggle.setAttribute("aria-checked", visible ? "true" : "false");
-    toggle.title = visible ? "Visible on the public site. Click to hide." : "Hidden from the public site. Click to show.";
-    const knob = document.createElement("span");
-    knob.className = "vis-switch-knob";
-    toggle.append(knob);
-    toggle.addEventListener("click", (event) => {
-      event.stopPropagation();
-      toggleItemVisibility(item);
-    });
-    visTd.append(toggle);
-    if (item.status === "draft") {
-      const draftBadge = document.createElement("span");
-      draftBadge.className = "status-badge status-badge-draft";
-      draftBadge.textContent = item.scheduled_at ? "Scheduled" : "Draft";
-      draftBadge.title = item.scheduled_at ? `Publishes ${formatDateTime(item.scheduled_at)}` : "Draft item";
-      visTd.append(draftBadge);
+    if (item.status === "removed") {
+      const restoreBtn = document.createElement("button");
+      restoreBtn.type = "button";
+      restoreBtn.className = "btn btn-ghost btn-sm";
+      restoreBtn.textContent = "Restore";
+      restoreBtn.title = "Restore this item to published";
+      restoreBtn.addEventListener("click", (event) => {
+        event.stopPropagation();
+        restoreItem(item);
+      });
+      visTd.append(restoreBtn);
+    } else {
+      const visible = item.status !== "hidden" && item.status !== "draft";
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "vis-switch" + (visible ? " on" : "");
+      toggle.setAttribute("role", "switch");
+      toggle.setAttribute("aria-checked", visible ? "true" : "false");
+      toggle.title = visible ? "Visible on the public site. Click to hide." : "Hidden from the public site. Click to show.";
+      const knob = document.createElement("span");
+      knob.className = "vis-switch-knob";
+      toggle.append(knob);
+      toggle.addEventListener("click", (event) => {
+        event.stopPropagation();
+        toggleItemVisibility(item);
+      });
+      visTd.append(toggle);
+      if (item.status === "draft") {
+        const draftBadge = document.createElement("span");
+        draftBadge.className = "status-badge status-badge-draft";
+        draftBadge.textContent = item.scheduled_at ? "Scheduled" : "Draft";
+        draftBadge.title = item.scheduled_at ? `Publishes ${formatDateTime(item.scheduled_at)}` : "Draft item";
+        visTd.append(draftBadge);
+      }
     }
     tr.append(visTd);
 
@@ -1676,6 +1696,25 @@ async function saveItemCategory(item, newCategory) {
   } catch (error) {
     setStatus("Error", error.message);
     filterItems();
+  }
+}
+
+async function restoreItem(item) {
+  setStatus("Saving", `Restoring item ${item.id}`);
+  try {
+    const response = await fetch("/api/items", {
+      method: "PATCH",
+      credentials: "same-origin",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({ id: String(item.id), status: "published" })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || `PATCH returned ${response.status}`);
+    setStatus("Saved", `Item ${item.id} restored to published`);
+    await loadItems();
+  } catch (error) {
+    setStatus("Error", error.message);
+    await loadItems();
   }
 }
 

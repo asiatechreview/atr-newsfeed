@@ -228,8 +228,9 @@ export async function onRequestGet({ env, request }) {
   const offset = Math.max(0, Number(url.searchParams.get("offset")) || 0);
   const category = url.searchParams.get("category");
   const date = parseDateParam(url.searchParams.get("date"));
-  const includeHidden = url.searchParams.get("status") === "all" || url.searchParams.get("includeHidden") === "1";
-  // Only an authenticated admin may list hidden items or see provenance fields.
+  const statusParam = url.searchParams.get("status");
+  const includeHidden = statusParam === "all" || statusParam === "removed" || url.searchParams.get("includeHidden") === "1";
+  // Only an authenticated admin may list hidden/draft/removed items or see provenance fields.
   const authorized = includeHidden ? await isAuthorized(env, request) : false;
 
   if (includeHidden && !authorized) {
@@ -239,9 +240,13 @@ export async function onRequestGet({ env, request }) {
   let select = "id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key";
   if (authorized) select += ", status, posted_by, posted_via, scheduled_at";
 
+
   let query = `SELECT ${select} FROM feed_items WHERE status = ?`;
   const params = ["published"];
-  if (authorized) {
+  if (authorized && statusParam === "removed") {
+    query = `SELECT ${select} FROM feed_items WHERE status = 'removed'`;
+    params.length = 0;
+  } else if (authorized) {
     query = `SELECT ${select} FROM feed_items WHERE status IN ('published','hidden','draft')`;
     params.length = 0;
   }
@@ -663,7 +668,7 @@ export async function onRequestPatch({ env, request }) {
   const id = Number.isInteger(numericId) && numericId > 0 ? numericId : rawIdInput;
 
   const current = await env.ATR_FEED_DB.prepare(
-    "SELECT id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key, status, posted_by, posted_via FROM feed_items WHERE id = ? AND status IN ('published','hidden')"
+    "SELECT id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key, status, posted_by, posted_via, scheduled_at FROM feed_items WHERE id = ? AND status IN ('published','hidden','draft','removed')"
   )
     .bind(id)
     .first();
@@ -749,7 +754,7 @@ export async function onRequestPatch({ env, request }) {
   const result = await env.ATR_FEED_DB.prepare(
     `UPDATE feed_items
        SET headline = ?, blurb = ?, source_name = ?, source_url = ?, category = ?, tags = ?, link_key = ?, status = ?, posted_by = ?, posted_via = ?, scheduled_at = ?
-     WHERE id = ? AND status IN ('published','hidden','draft')
+     WHERE id = ? AND status IN ('published','hidden','draft','removed')
      RETURNING id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key, status, posted_by, posted_via, scheduled_at`
   )
     .bind(nextHeadline || null, nextBlurb, nextSourceName, nextSourceUrl, nextCategory, nextTags, nextLinkKey, nextStatus, nextPostedBy, nextPostedVia, nextScheduledAt, id)
