@@ -663,6 +663,34 @@ export async function onRequestPatch({ env, request }) {
     .first();
 
   if (!current) {
+    // Static archive items (md-*, html-*, manual-telegram-*) live in
+    // STATIC_ITEMS and have no D1 row yet, so PATCH by their string id
+    // normally 404s. Materialise the row on first edit so the change
+    // persists, then return the stored row.
+    const materialised = await materialiseStaticItemOnEdit(env, id, rawIdInput, {
+      headline: body.headline || body.title,
+      blurb: body.blurb,
+      sourceName: body.sourceName || body.source_name,
+      sourceUrl: body.sourceUrl || body.source_url,
+      category: body.category || body.region,
+      tags: body.tags === undefined ? undefined : normalizeTagsInput(body.tags),
+      status: body.status === undefined ? undefined : clean(body.status)
+    });
+    if (materialised) {
+      await writeOperationalEvent(env, request, {
+        workflow: "bulletin_ingest",
+        action: "update_item",
+        status: "success",
+        severity: "info",
+        http_status: 200,
+        item_id: materialised.id,
+        source_name: materialised.source_name,
+        source_url: materialised.source_url,
+        message: "Static archive item materialised into D1 on first edit.",
+        details: { category: materialised.category, headline: materialised.headline }
+      });
+      return json({ item: withHeadlines([materialised])[0] });
+    }
     return json({ error: "item not found" }, 404);
   }
 
@@ -735,6 +763,72 @@ export async function onRequestPatch({ env, request }) {
   return json({ item: withHeadlines([result])[0] });
 }
 
+// Static archive items (md-*, html-*, manual-telegram-*) are hard-coded in
+// STATIC_ITEMS and merged into the API in memory, with no D1 row. When the
+// admin edits one (category, visibility, headline...), materialise it into
+// D1 on first edit so the change persists and subsequent edits are normal
+// row updates. Returns the stored row, or null if the id is not a static item.
+async function materialiseStaticItemOnEdit(env, id, rawIdInput, updates) {
+  const staticItem = STATIC_ITEMS.find((item) => String(item.id) === String(rawIdInput) || String(item.id) === String(id));
+  if (!staticItem) return null;
+  if (!env?.ATR_FEED_DB) return null;
+
+  try {
+    await ensureHeadlineColumn(env);
+    await ensureTagsColumn(env);
+    await ensureLinkKeyColumn(env);
+    await ensurePostedColumns(env);
+  } catch {
+    // Best-effort migrations; the insert below is the real check.
+  }
+
+  const headline = updates.headline === undefined ? staticItem.headline || null : clean(updates.headline) || null;
+  const blurb = updates.blurb === undefined ? staticItem.blurb : clean(updates.blurb);
+  const sourceName = updates.sourceName === undefined ? staticItem.source_name : clean(updates.sourceName);
+  const sourceUrl = updates.sourceUrl === undefined ? staticItem.source_url : clean(updates.sourceUrl);
+  const category = updates.category === undefined ? (staticItem.category || "Other news") : clean(updates.category);
+  const tags = updates.tags === undefined ? (staticItem.tags || null) : updates.tags;
+  const status = updates.status === undefined ? "published" : clean(updates.status);
+  const telegramMessageId = staticItem.telegram_message_id || null;
+  const publishedAt = staticItem.published_at || new Date().toISOString();
+
+  if (!blurb) {
+    return { ...staticItem, id, category, status, headline, tags, posted_by: null, posted_via: null };
+  }
+  if (!["published", "hidden"].includes(status)) return null;
+  if (!category) return null;
+
+  const linkKey = await linkKeyFor(sourceUrl);
+
+  try {
+    const result = await env.ATR_FEED_DB.prepare(
+      `INSERT INTO feed_items
+        (headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       RETURNING id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key, status, posted_by, posted_via`
+    )
+      .bind(headline, blurb, sourceName, sourceUrl, category, tags, telegramMessageId, publishedAt, new Date().toISOString(), linkKey, status)
+      .first();
+
+    if (!result) return null;
+    return result;
+  } catch (error) {
+    // Duplicate source_url guard or migration race: fall back to returning
+    // the static shape so the client still sees a consistent item.
+    return {
+      ...staticItem,
+      id,
+      category,
+      status,
+      headline,
+      tags,
+      posted_by: null,
+      posted_via: null,
+      link_key: linkKey
+    };
+  }
+}
+
 export async function onRequestDelete({ env, request }) {
   if (!(await isAuthorized(env, request))) {
     await writeOperationalEvent(env, request, {
@@ -756,11 +850,14 @@ export async function onRequestDelete({ env, request }) {
   }
 
   const url = new URL(request.url);
-  const id = Number(body.id || url.searchParams.get("id"));
+  const id = Number(body.id ?? url.searchParams.get("id"));
+  const rawId = String(body.id ?? url.searchParams.get("id") ?? "").trim();
   const sourceUrl = clean(body.sourceUrl || body.source_url || url.searchParams.get("source_url"));
   const headline = clean(body.headline || body.title || url.searchParams.get("headline"));
 
-  if (!Number.isInteger(id) && !sourceUrl && !headline) {
+  const isStaticId = !Number.isInteger(id) && Boolean(rawId) && STATIC_ITEMS.some((item) => String(item.id) === rawId);
+
+  if (!Number.isInteger(id) && !sourceUrl && !headline && !isStaticId) {
     await writeOperationalEvent(env, request, {
       workflow: "bulletin_ingest",
       action: "remove_item",
@@ -783,9 +880,19 @@ export async function onRequestDelete({ env, request }) {
   } else if (sourceUrl) {
     query += " AND lower(source_url) = lower(?)";
     params.push(sourceUrl);
-  } else {
+  } else if (headline) {
     query += " AND lower(headline) = lower(?)";
     params.push(headline);
+  } else {
+    // Static archive items (md-*, html-*, manual-telegram-*) have string ids.
+    // If the row was already materialised into D1, its id is numeric, so try
+    // the static item's source_url as the removal key.
+    const staticItem = STATIC_ITEMS.find((item) => String(item.id) === String(id));
+    if (!staticItem) {
+      return json({ error: "item not found" }, 404);
+    }
+    query += " AND lower(source_url) = lower(?)";
+    params.push(staticItem.source_url);
   }
 
   query += " RETURNING id, headline, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at";

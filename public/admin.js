@@ -562,7 +562,7 @@ els.removeButton.addEventListener("click", async () => {
   const ok = window.confirm(`Remove bulletin item ${state.selected.id}? This hides it from the public site, API, RSS and JSON feed.`);
   if (!ok) return;
 
-  await mutateItem("DELETE", { id: Number(state.selected.id) }, "Removed");
+  await mutateItem("DELETE", { id: String(state.selected.id) }, "Removed");
 });
 
 els.form.addEventListener("submit", async (event) => {
@@ -580,7 +580,7 @@ els.form.addEventListener("submit", async (event) => {
   }
 
   if (!state.selected) return;
-  payload.id = Number(state.selected.id);
+  payload.id = String(state.selected.id);
   await mutateItem("PATCH", payload, "Saved");
 });
 
@@ -1433,7 +1433,7 @@ async function saveItemCategory(item, newCategory) {
       method: "PATCH",
       credentials: "same-origin",
       headers: { "content-type": "application/json", accept: "application/json" },
-      body: JSON.stringify({ id: Number(item.id), category: newCategory })
+      body: JSON.stringify({ id: String(item.id), category: newCategory })
     });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.error || `PATCH returned ${response.status}`);
@@ -1461,7 +1461,7 @@ async function toggleItemVisibility(item) {
       method: "PATCH",
       credentials: "same-origin",
       headers: { "content-type": "application/json", accept: "application/json" },
-      body: JSON.stringify({ id: Number(item.id), status: next })
+      body: JSON.stringify({ id: String(item.id), status: next })
     });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.error || `PATCH returned ${response.status}`);
@@ -1598,13 +1598,10 @@ async function saveLiveEditor() {
   if (!state.selected) return;
   const item = state.selected;
   const numeric = Number(item.id);
-  if (!Number.isInteger(numeric) || numeric <= 0) {
-    setLiveEditStatus("Error", "Static items cannot be saved here.");
-    return;
-  }
+  const id = Number.isInteger(numeric) && numeric > 0 ? numeric : String(item.id);
 
   const payload = {
-    id: numeric,
+    id,
     headline: els.liveEditHeadline.value.trim(),
     blurb: els.liveEditBlurb.value.trim(),
     sourceName: els.liveEditSourceName.value.trim(),
@@ -1654,7 +1651,7 @@ async function removeLiveEditor() {
   if (!state.selected) return;
   const item = state.selected;
   const numeric = Number(item.id);
-  if (!Number.isInteger(numeric) || numeric <= 0) return;
+  const id = Number.isInteger(numeric) && numeric > 0 ? numeric : String(item.id);
 
   const ok = window.confirm(`Remove bulletin item ${item.id}? This hides it from the public site, API, RSS and JSON feed.`);
   if (!ok) return;
@@ -1665,7 +1662,7 @@ async function removeLiveEditor() {
       method: "DELETE",
       credentials: "same-origin",
       headers: { "content-type": "application/json", accept: "application/json" },
-      body: JSON.stringify({ id: numeric })
+      body: JSON.stringify({ id })
     });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.error || `DELETE returned ${response.status}`);
