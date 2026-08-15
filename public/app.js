@@ -857,13 +857,23 @@ function normalizeTag(value) {
 
 function explicitTags(item) {
   const value = item.Tags || item.tags || item.Tag || item.tag || "";
+  // Only surface single-token stored tags. Multi-word phrase tags written
+  // into the database since mid-August ("Open-weight models", "Digital
+  // sovereignty") read badly as hashtags; the client-side tag inference
+  // (inferTags/inferCountryTags) supplies clean generic tags instead, which
+  // is how the site looked before stored phrase tags existed.
+  const cleanTag = (tag) => {
+    const trimmed = String(tag || "").trim();
+    if (!trimmed || /\s/.test(trimmed)) return "";
+    return normalizeTag(trimmed);
+  };
   if (Array.isArray(value)) {
-    return value.map(normalizeTag).filter(Boolean);
+    return value.map(cleanTag).filter(Boolean);
   }
 
   return String(value)
     .split(/[,|#]/)
-    .map(normalizeTag)
+    .map(cleanTag)
     .filter(Boolean);
 }
 
