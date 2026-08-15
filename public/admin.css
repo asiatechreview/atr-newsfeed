@@ -235,12 +235,37 @@ select.input.select-auto { width: auto; flex: 0 0 auto; }
 .field { margin-bottom: 14px; }
 .field label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
 .input, .textarea, select.input {
-  width: 100%; padding: 10px 12px;
+  width: 100%; padding: 8px 12px;
   background: var(--surface-2); border: 1px solid var(--border-2); border-radius: var(--radius-md);
   color: var(--text); font: inherit; font-size: 14px;
+  height: 36px;
 }
 .input:focus, .textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
 .textarea { min-height: 96px; resize: vertical; }
+
+/* Selects render as native widgets by default (taller/short, tight corners,
+   default double-arrow). Strip the native chrome and draw a custom chevron
+   so selects match the standard input exactly (36px, radius-md, same pad). */
+select.input {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 32px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%239aa3ad' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 14px;
+}
+:root[data-theme="light"] select.input {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%238b94a1' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+}
+select.input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+/* Compact in-table category editor: stays small, keeps its own chevron. */
+.cat-edit {
+  height: 28px;
+  padding: 4px 28px 4px 6px;
+  background-position: right 6px center;
+  background-size: 12px;
+}
 .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .form-actions { display: flex; gap: 10px; margin-top: 18px; }
 
