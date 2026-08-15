@@ -1309,6 +1309,7 @@ function renderList() {
   const wrap = document.createElement("div");
   wrap.className = "table-wrap";
   const table = document.createElement("table");
+  table.className = "item-table";
 
   const thead = document.createElement("thead");
   const headRow = document.createElement("tr");
@@ -1330,7 +1331,7 @@ function renderList() {
       openLiveEditor(item.id);
     });
     tr.append(cell(String(item.id), "nowrap id-cell", "ID"));
-    tr.append(cell(item.headline || item.title || firstWords(item.blurb, 12), "truncate", "Title"));
+    tr.append(cell(item.headline || item.title || firstWords(item.blurb, 12), "truncate title-cell", "Title"));
     tr.append(cell(item.source_name || "Source", "truncate", "Publisher"));
 
     const catTd = document.createElement("td");
@@ -1349,7 +1350,7 @@ function renderList() {
     catSelect.addEventListener("click", (event) => event.stopPropagation());
     catTd.append(catSelect);
     tr.append(catTd);
-    tr.append(cell(formatTags(item.tags), "", "Tags"));
+    tr.append(tagPillsCell(item.tags));
     tr.append(cell(formatDateTime(item.published_at), "nowrap", "Published"));
 
     // Visible toggle: hide/show on the public site.
@@ -1493,6 +1494,52 @@ function formatTags(value) {
   }
   if (Array.isArray(tags)) return tags.filter(Boolean).join(", ");
   return String(tags);
+}
+
+// Render tags as compact pills that wrap horizontally instead of a raw comma
+// string that stacks vertically and stretches the row. Caps the visible pills
+// at 4 and shows a +N overflow badge.
+function tagPillsCell(value) {
+  const td = document.createElement("td");
+  td.dataset.label = "Tags";
+  let tags = value;
+  if (typeof tags === "string") {
+    const trimmed = tags.trim();
+    if (trimmed.startsWith("[")) {
+      try {
+        tags = JSON.parse(trimmed);
+      } catch {
+        tags = trimmed.split(",").map((t) => t.trim()).filter(Boolean);
+      }
+    } else if (trimmed) {
+      tags = trimmed.split(",").map((t) => t.trim()).filter(Boolean);
+    }
+  }
+  const list = Array.isArray(tags) ? tags.filter(Boolean) : [];
+  if (!list.length) {
+    td.textContent = "-";
+    return td;
+  }
+
+  const pills = document.createElement("div");
+  pills.className = "tag-pills";
+  const visible = list.slice(0, 4);
+  for (const tag of visible) {
+    const pill = document.createElement("span");
+    pill.className = "tag-pill";
+    pill.textContent = tag;
+    pill.title = tag;
+    pills.append(pill);
+  }
+  if (list.length > visible.length) {
+    const more = document.createElement("span");
+    more.className = "tag-pill tag-pill-more";
+    more.textContent = `+${list.length - visible.length}`;
+    more.title = list.slice(visible.length).join(", ");
+    pills.append(more);
+  }
+  td.append(pills);
+  return td;
 }
 
 // ---------- Live item editor (custom CMS panel, not the publish form) ----------
