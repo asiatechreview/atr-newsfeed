@@ -175,7 +175,8 @@ const state = {
   page: 1,
   category: "",
   categories: [],
-  currentUser: ""
+  currentUser: "",
+  selectedIds: new Set()
 };
 
 const els = {
@@ -212,6 +213,13 @@ const els = {
   listCount: document.querySelector("#list-count"),
   searchInput: document.querySelector("#search-input"),
   categoryFilter: document.querySelector("#category-filter"),
+  bulkBar: document.querySelector("#bulk-bar"),
+  bulkCount: document.querySelector("#bulk-count"),
+  bulkShow: document.querySelector("#bulk-show"),
+  bulkHide: document.querySelector("#bulk-hide"),
+  bulkCategory: document.querySelector("#bulk-category"),
+  bulkApplyCategory: document.querySelector("#bulk-apply-category"),
+  bulkClear: document.querySelector("#bulk-clear"),
   itemList: document.querySelector("#item-list"),
   editorTitle: document.querySelector("#editor-title"),
   editorMode: document.querySelector("#editor-mode"),
@@ -536,6 +544,17 @@ els.searchInput.addEventListener("input", filterItems);
 els.categoryFilter.addEventListener("change", () => {
   state.category = els.categoryFilter.value;
   filterItems();
+});
+els.bulkShow?.addEventListener("click", () => bulkUpdate({ status: "published" }));
+els.bulkHide?.addEventListener("click", () => bulkUpdate({ status: "hidden" }));
+els.bulkClear?.addEventListener("click", clearBulkSelection);
+els.bulkCategory?.addEventListener("change", () => {
+  if (els.bulkApplyCategory) els.bulkApplyCategory.disabled = !els.bulkCategory.value;
+});
+els.bulkApplyCategory?.addEventListener("click", () => {
+  if (els.bulkCategory && els.bulkCategory.value) {
+    bulkUpdate({ category: els.bulkCategory.value });
+  }
 });
 els.blurb.addEventListener("input", maybeAutoFillCategory);
 els.headline.addEventListener("input", maybeAutoFillCategory);
@@ -1347,6 +1366,22 @@ function renderList() {
 
   const thead = document.createElement("thead");
   const headRow = document.createElement("tr");
+  const checkTh = document.createElement("th");
+  checkTh.className = "select-col";
+  const selectAll = document.createElement("input");
+  selectAll.type = "checkbox";
+  selectAll.className = "row-check select-all-check";
+  selectAll.title = "Select all items on this page";
+  selectAll.checked = pageItems.length > 0 && pageItems.every((item) => state.selectedIds.has(String(item.id)));
+  selectAll.addEventListener("change", () => {
+    for (const item of pageItems) {
+      if (selectAll.checked) state.selectedIds.add(String(item.id));
+      else state.selectedIds.delete(String(item.id));
+    }
+    renderList();
+  });
+  checkTh.append(selectAll);
+  headRow.append(checkTh);
   for (const label of ["ID", "Title", "Publisher", "Category", "Tags", "Published", "Visible", "Link"]) {
     const th = document.createElement("th");
     th.textContent = label;
@@ -1361,6 +1396,21 @@ function renderList() {
     const tr = document.createElement("tr");
     tr.className = "item-row" + (item.status === "hidden" ? " item-row-hidden" : "");
     tr.tabIndex = 0;
+    const checkTd = document.createElement("td");
+    checkTd.className = "select-col";
+    const rowCheck = document.createElement("input");
+    rowCheck.type = "checkbox";
+    rowCheck.className = "row-check";
+    rowCheck.checked = state.selectedIds.has(String(item.id));
+    rowCheck.title = "Select this item";
+    rowCheck.addEventListener("click", (event) => event.stopPropagation());
+    rowCheck.addEventListener("change", () => {
+      if (rowCheck.checked) state.selectedIds.add(String(item.id));
+      else state.selectedIds.delete(String(item.id));
+      updateBulkBar();
+    });
+    checkTd.append(rowCheck);
+    tr.append(checkTd);
     tr.addEventListener("click", () => {
       openLiveEditor(item.id);
     });
@@ -1432,6 +1482,7 @@ function renderList() {
   wrap.append(table);
   els.itemList.append(wrap);
   renderListPagination(total);
+  updateBulkBar();
 }
 
 function renderListPagination(total) {
@@ -1467,6 +1518,52 @@ function renderListPagination(total) {
     renderList();
   });
   wrap.append(next);
+}
+
+function updateBulkBar() {
+  const count = state.selectedIds.size;
+  if (els.bulkBar) els.bulkBar.hidden = count === 0;
+  if (els.bulkCount) els.bulkCount.textContent = `${count} selected`;
+  if (els.bulkCategory && count > 0 && !els.bulkCategory.options.length) {
+    const cats = state.categories.length ? state.categories : [DEFAULT_CATEGORY];
+    for (const cat of cats) {
+      const opt = document.createElement("option");
+      opt.value = cat;
+      opt.textContent = cat;
+      els.bulkCategory.append(opt);
+    }
+  }
+  if (els.bulkApplyCategory) {
+    els.bulkApplyCategory.disabled = !(els.bulkCategory && els.bulkCategory.value);
+  }
+}
+
+async function bulkUpdate(payload) {
+  const ids = [...state.selectedIds];
+  if (!ids.length) return;
+  setStatus("Saving", `Updating ${ids.length} items`);
+  try {
+    const response = await fetch("/api/items/batch", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({ ids, ...payload })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || `batch returned ${response.status}`);
+    state.selectedIds.clear();
+    setStatus("Saved", `${result.updated} item(s) updated`);
+    await loadItems();
+  } catch (error) {
+    setStatus("Error", error.message);
+    await loadItems();
+  }
+}
+
+function clearBulkSelection() {
+  state.selectedIds.clear();
+  renderList();
+  updateBulkBar();
 }
 
 async function saveItemCategory(item, newCategory) {

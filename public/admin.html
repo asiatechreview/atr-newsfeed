@@ -236,6 +236,16 @@
                 <option value="">All categories</option>
               </select>
             </div>
+            <div id="bulk-bar" class="bulk-bar" hidden>
+              <span id="bulk-count" class="bulk-count">0 selected</span>
+              <button id="bulk-show" class="btn btn-ghost btn-sm" type="button">Show</button>
+              <button id="bulk-hide" class="btn btn-ghost btn-sm" type="button">Hide</button>
+              <select id="bulk-category" class="input select-auto" aria-label="Reassign selected to category">
+                <option value="">Reassign to…</option>
+              </select>
+              <button id="bulk-apply-category" class="btn btn-primary btn-sm" type="button" disabled>Apply</button>
+              <button id="bulk-clear" class="btn btn-ghost btn-sm" type="button">Clear</button>
+            </div>
             <div id="item-list" class="item-list"></div>
             <div id="item-pagination" class="item-pagination"></div>
           </div>

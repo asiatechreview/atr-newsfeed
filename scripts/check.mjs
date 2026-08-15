@@ -29,6 +29,7 @@ const required = [
   "public/admin.css",
   "public/admin.js",
   "functions/api/items.js",
+  "functions/api/items/batch.js",
   "functions/_scheduled.js",
   "functions/api/health.js",
   "functions/api/crawler-logs.js",
