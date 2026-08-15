@@ -57,6 +57,22 @@ button { font: inherit; cursor: pointer; border: 0; background: none; color: inh
 a { color: var(--accent-strong); text-decoration: none; }
 h1, h2, h3 { font-weight: 700; }
 
+/* Apple-style focus: every interactive element gets a visible ring on
+   keyboard focus only, so the UI never traps invisible focus states. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.btn:focus-visible,
+button:focus-visible,
+select:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 /* ============ Layout ============ */
 .app { display: flex; min-height: 100vh; }
 
