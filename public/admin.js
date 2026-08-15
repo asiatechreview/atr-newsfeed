@@ -1085,12 +1085,19 @@ function filterItems() {
 function populateCategoryFilter() {
   const counts = new Map();
   for (const item of state.items) {
-    const cat = item.category || "Other news";
+    const cat = item.category || DEFAULT_CATEGORY;
     counts.set(cat, (counts.get(cat) || 0) + 1);
   }
-  state.categories = [...counts.entries()]
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-    .map(([cat]) => cat);
+
+  // Always offer the full canonical category list first (including brand-new
+  // categories that no item uses yet), then any legacy categories found on
+  // existing items, so every category is reachable from the admin UI.
+  const canonical = CATEGORY_RULES.map((rule) => rule.label);
+  if (!canonical.includes(DEFAULT_CATEGORY)) canonical.push(DEFAULT_CATEGORY);
+  const extras = [...counts.keys()]
+    .filter((cat) => !canonical.includes(cat))
+    .sort((a, b) => (counts.get(b) || 0) - (counts.get(a) || 0) || a.localeCompare(b));
+  state.categories = [...canonical, ...extras];
 
   els.categoryFilter.replaceChildren();
   const all = document.createElement("option");
@@ -1100,7 +1107,7 @@ function populateCategoryFilter() {
   for (const cat of state.categories) {
     const opt = document.createElement("option");
     opt.value = cat;
-    opt.textContent = `${cat} (${counts.get(cat)})`;
+    opt.textContent = `${cat} (${counts.get(cat) || 0})`;
     els.categoryFilter.append(opt);
   }
   els.categoryFilter.value = state.category;
