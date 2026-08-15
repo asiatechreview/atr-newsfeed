@@ -172,7 +172,8 @@ const state = {
   sponsors: [],
   page: 1,
   category: "",
-  categories: []
+  categories: [],
+  currentUser: ""
 };
 
 const els = {
@@ -261,8 +262,6 @@ const els = {
   sourcesHiddenDetail: document.querySelector("#sources-hidden-detail"),
   sourcesActorSummary: document.querySelector("#sources-actor-summary"),
   sourcesActorDetail: document.querySelector("#sources-actor-detail"),
-  postedBy: document.querySelector("#posted-by-input"),
-  postedVia: document.querySelector("#posted-via-input"),
   opsView: document.querySelector("#ops-view"),
   analyticsView: document.querySelector("#analytics-view"),
   newsletterView: document.querySelector("#newsletter-view"),
@@ -415,6 +414,7 @@ async function checkSession() {
       const payload = await response.json();
       document.body.classList.remove("logged-out");
       const shownName = payload.display_name || payload.username || "";
+      state.currentUser = shownName;
       els.whoami.textContent = shownName;
       els.whoami.hidden = false;
       els.whoamiAvatar.textContent = (shownName || "?").charAt(0).toUpperCase();
@@ -1746,10 +1746,12 @@ function collectForm() {
     category: els.category.value.trim() || DEFAULT_CATEGORY,
   };
 
-  const postedBy = els.postedBy ? els.postedBy.value.trim() : "";
-  const postedVia = els.postedVia ? els.postedVia.value.trim() : "";
-  if (postedBy) payload.postedBy = postedBy;
-  if (postedVia) payload.postedVia = postedVia;
+  // Provenance is grabbed automatically from the session, never typed in.
+  // Only set it for new items; edits keep the original provenance.
+  if (state.mode === "new") {
+    if (state.currentUser) payload.postedBy = state.currentUser;
+    payload.postedVia = "Admin";
+  }
 
   const publishedAt = fromLocalDateTime(els.publishedAt.value);
   if (state.mode === "new" && publishedAt) payload.publishedAt = publishedAt;
