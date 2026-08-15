@@ -38,8 +38,9 @@ const SEED_CATEGORIES = [
   { name: "Health", pattern: "\\b(health|healthcare|health care|hospital|hospitals|medical|medicine|doctor|doctors|nurse|nurses|patient|patients|telehealth|telemedicine|medtech|wellness|mental health|health insurance)\\b" },
   { name: "Crypto", pattern: "\\b(crypto|bitcoin|stablecoin|stablecoins|blockchain|onchain|token|digital asset|solana)\\b" },
   { name: "Fintech", pattern: "\\b(bank|banking|fintech|financial|payments?|qr payment|insurance|lending|digital bank|coinhako)\\b" },
-  { name: "Venture Capital", pattern: "\\b(venture capital|venture-capital|vc firm|vc fund|limited partner|fund of funds|accelerator|incubator)\\b" },
-  { name: "Deals", pattern: "\\b(fund|funding|raised|raise|secured|series [a-z]|seed|stake|acquisition|buy|bought|deal|invest|investment|grant|equity|debt|convertible|restructuring)\\b" },
+  { name: "Venture Capital", pattern: "\\b(venture capital|venture-capital|vc firm|vc firms|vc fund|vc funds|private equity|pe firm|pe firms|pe fund|pe funds|fund of funds|limited partner|limited partners|accelerator|incubator|raises?[^.]*?\\bfund\\b|closes?[^.]*?\\bfund\\b|new\\s+fund\\b)\\b" },
+  { name: "Funding", pattern: "\\b(funding|raise|raised|raises|raising|secured|secures|series [a-z]|seed round|pre-seed|backs|backed by|valuation)\\b" },
+  { name: "Deals", pattern: "\\b(acquisition|acquisitions|acquire|acquires|acquired|merger|mergers|merging|buyout|buyouts|takeover|take over|stake|stakes|sell|sells|sold|divest|divesting|consolidat|restructuring)\\b" },
   { name: "Earnings", pattern: "\\b(earnings|quarterly results|quarterly report|net income|net profit|profit warning)\\b" },
   { name: "Markets", pattern: "\\b(markets?|shares?|stock|trading|revenue|profit|sales|yield|price|ipo|listing|public listing|investors?|balance sheet|tax)\\b" },
   { name: "Policy", pattern: "\\b(regulator|regulators|regulation|regulations|policy|government|ministry|customs|approval|approved|audit|probe|immigration|law|rules|compliance|incentives|public sector|sanctions|tariff|tariffs)\\b" },
@@ -56,7 +57,25 @@ export async function seedCategories(env) {
   if (!env?.ATR_FEED_DB) return;
 
   const row = await env.ATR_FEED_DB.prepare("SELECT COUNT(*) AS count FROM categories").first();
-  if (row && Number(row.count) > 0) return;
+  if (row && Number(row.count) > 0) {
+    // Table already seeded. Backfill any seed categories added later
+    // (e.g. Funding) without touching existing rows, so the live table
+    // picks up new canonical categories on next request.
+    const existing = await env.ATR_FEED_DB.prepare("SELECT name FROM categories").all();
+    const known = new Set((existing.results || []).map((r) => r.name));
+    const insert = env.ATR_FEED_DB.prepare(
+      "INSERT OR IGNORE INTO categories (name, pattern, sort_order) VALUES (?, ?, ?)"
+    );
+    const missing = SEED_CATEGORIES
+      .map((cat, index) => ({ cat, index }))
+      .filter(({ cat }) => !known.has(cat.name));
+    if (missing.length) {
+      await env.ATR_FEED_DB.batch(
+        missing.map(({ cat, index }) => insert.bind(cat.name, cat.pattern, index))
+      );
+    }
+    return;
+  }
 
   const insert = env.ATR_FEED_DB.prepare(
     "INSERT INTO categories (name, pattern, sort_order) VALUES (?, ?, ?)"
