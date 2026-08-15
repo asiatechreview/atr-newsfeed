@@ -8,7 +8,7 @@
   <link rel="icon" href="/favicon.png" type="image/png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script>
     try {
       if (localStorage.getItem("atr-admin-theme") === "light") {
@@ -16,7 +16,7 @@
       }
     } catch (error) {}
   </script>
-  <link rel="stylesheet" href="/admin.css?v=20260812-newsletter-trigger">
+  <link rel="stylesheet" href="/admin.css?v=20260815-uxpass">
 </head>
 <body class="logged-out">
   <div class="app">
@@ -121,6 +121,7 @@
       </header>
 
       <main class="content">
+        <div id="load-bar" class="load-bar" hidden></div>
 
         <!-- ============ LOGIN SPLASH ============ -->
         <section id="auth-panel" class="auth-panel">
@@ -150,8 +151,8 @@
           <div class="stats">
             <article class="stat">
               <span class="stat-label">Status</span>
-              <strong id="status-title" class="stat-value stat-ok">Locked</strong>
-              <span id="status-detail" class="stat-note">Enter token</span>
+              <strong id="status-title" class="stat-value stat-ok">Ready</strong>
+              <span id="status-detail" class="stat-note">Signed in</span>
             </article>
             <article class="stat">
               <span class="stat-label">Loaded Items</span>
@@ -177,8 +178,9 @@
                     <input id="item-id" class="input" type="text" disabled>
                   </div>
                   <div class="field">
-                    <label for="category-input">Category <span class="label-hint">(auto)</span></label>
-                    <input id="category-input" class="input" type="text" disabled placeholder="e.g. Markets, AI, Crypto">
+                    <label for="category-input">Category <span class="label-hint">(auto-suggested, editable)</span></label>
+                    <input id="category-input" class="input" type="text" placeholder="e.g. Markets, AI, Crypto" list="category-options">
+                    <datalist id="category-options"></datalist>
                   </div>
                 </div>
 
@@ -227,11 +229,10 @@
           <div class="card">
             <div class="card-head">
               <div class="card-title">Live Items <small id="list-count">-</small></div>
-              <button id="items-toggle" class="btn btn-ghost" style="padding:6px 10px;font-size:12px" type="button" aria-expanded="true">Hide list</button>
             </div>
             <div class="item-toolbar">
               <input id="search-input" class="input" type="search" placeholder="Search URL, title, blurb or source">
-              <select id="category-filter" class="input" style="width:auto" aria-label="Filter by category">
+              <select id="category-filter" class="input select-auto" aria-label="Filter by category">
                 <option value="">All categories</option>
               </select>
             </div>
@@ -425,7 +426,7 @@
           <div class="card">
             <div class="card-head">
               <div class="card-title">Daily Traffic <small id="analytics-days">-</small></div>
-              <select id="analytics-window-select" class="input" style="width:auto">
+              <select id="analytics-window-select" class="input select-auto">
                 <option value="7">7 days</option>
                 <option value="14">14 days</option>
                 <option value="30">30 days</option>
@@ -467,7 +468,7 @@
 
         <!-- ============ NEWSLETTER ============ -->
         <section id="newsletter-view" hidden>
-          <div class="card" style="max-width:760px">
+          <div class="card card-narrow">
             <div class="card-head">
               <div class="card-title">Latest Newsletter Card <small>shown on the bulletin homepage</small></div>
               <span id="newsletter-status" class="pill">Not loaded</span>
@@ -501,7 +502,7 @@
               <summary>Readback <span id="newsletter-readback-status" class="pill">Idle</span></summary>
               <pre id="newsletter-readback-output">Load the newsletter card to edit it.</pre>
             </details>
-            <div class="card" style="margin-top:14px">
+            <div class="card card-stacked">
               <div class="card-head">
                 <div class="card-title">Live preview <small>exactly as it renders on bulletin.asiatechreview.com</small></div>
                 <span id="newsletter-preview-status" class="pill">Idle</span>
@@ -522,10 +523,10 @@
 
         <!-- ============ SPONSORS ============ -->
         <section id="sponsors-view" hidden>
-          <div class="card" style="max-width:760px">
+          <div class="card card-narrow">
             <div class="card-head">
               <div class="card-title">Sponsors <small>Placeholder, not live</small></div>
-              <button id="sponsor-add" class="btn btn-ghost" style="padding:6px 10px;font-size:12px" type="button">Add sponsor</button>
+              <button id="sponsor-add" class="btn btn-ghost btn-sm" type="button">Add sponsor</button>
             </div>
             <p class="muted">Sponsor blurbs are saved here but not shown on the public site yet.</p>
             <div id="sponsors-list" class="sponsors-list"></div>
@@ -607,7 +608,7 @@
         <!-- ============ OPS DASHBOARD ============ -->
         <section id="dashboard-view" hidden>
           <div class="view-toolbar">
-            <select id="dashboard-window" class="input" style="width:auto" aria-label="Metrics window">
+            <select id="dashboard-window" class="input select-auto" aria-label="Metrics window">
               <option value="6">6h</option>
               <option value="24" selected>24h</option>
               <option value="72">72h</option>
@@ -723,7 +724,7 @@
 
         <!-- ============ PROFILE ============ -->
         <section id="profile-view" hidden>
-          <div class="card" style="max-width:620px">
+          <div class="card card-narrow card-profile">
             <div class="card-head">
               <div class="card-title">Profile <small>Account settings</small></div>
               <span id="profile-status" class="pill">Not loaded</span>
@@ -758,7 +759,7 @@
 
             <hr class="profile-divider">
 
-            <div class="card-title" style="margin-bottom:14px">Change password <small>You stay signed in</small></div>
+            <div class="card-title section-title">Change password <small>You stay signed in</small></div>
             <div class="field">
               <label for="profile-current-password">Current password</label>
               <input id="profile-current-password" class="input" type="password" autocomplete="current-password">
@@ -788,6 +789,6 @@
     <button id="mobile-refresh-button" type="button">Refresh</button>
   </nav>
 
-  <script src="/admin.js?v=20260812-newsletter-trigger" defer></script>
+  <script src="/admin.js?v=20260815-uxpass" defer></script>
 </body>
 </html>

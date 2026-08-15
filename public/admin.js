@@ -179,6 +179,7 @@ const state = {
 };
 
 const els = {
+  loadBar: document.querySelector("#load-bar"),
   authPanel: document.querySelector("#auth-panel"),
   authMessage: document.querySelector("#auth-message"),
   usernameInput: document.querySelector("#username-input"),
@@ -511,8 +512,6 @@ els.refreshButton.addEventListener("click", () => {
 
 const mobileRefreshButton = document.querySelector("#mobile-refresh-button");
 const mobileNewButton = document.querySelector("#mobile-new-button");
-const itemsToggle = document.querySelector("#items-toggle");
-const itemPanel = document.querySelector("#live-view .card");
 
 if (mobileRefreshButton) {
   mobileRefreshButton.addEventListener("click", () => {
@@ -527,16 +526,6 @@ if (mobileNewButton) {
   mobileNewButton.addEventListener("click", () => {
     startNewItem();
     switchTab("publish");
-  });
-}
-
-if (itemsToggle && itemPanel) {
-  itemsToggle.addEventListener("click", () => {
-    const list = document.querySelector("#item-list");
-    const open = list ? !list.hidden : true;
-    if (list) list.hidden = open;
-    itemsToggle.textContent = open ? "Show list" : "Hide list";
-    itemsToggle.setAttribute("aria-expanded", open ? "false" : "true");
   });
 }
 els.analyticsWindowSelect.addEventListener("change", () => loadAnalytics());
@@ -600,7 +589,18 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !els.liveEditOverlay.hidden) closeLiveEditor();
 });
 
+let loadCount = 0;
+function beginLoad() {
+  loadCount += 1;
+  if (els.loadBar) els.loadBar.hidden = false;
+}
+function endLoad() {
+  loadCount = Math.max(0, loadCount - 1);
+  if (els.loadBar && loadCount === 0) els.loadBar.hidden = true;
+}
+
 async function loadItems() {
+  beginLoad();
   setStatus("Loading", "Fetching live D1 items");
 
   try {
@@ -628,23 +628,37 @@ async function loadItems() {
     setStatus("Ready", `Loaded ${state.items.length} items (published + hidden)`);
   } catch (error) {
     setStatus("Error", error.message);
+  } finally {
+    endLoad();
   }
 }
 
 async function loadSources() {
+  beginLoad();
   try {
-    const response = await fetch(`/api/items?status=all&limit=500&_=${Date.now()}`, {
-      headers: { accept: "application/json", "cache-control": "no-cache" },
-      credentials: "same-origin"
-    });
-    if (response.status === 401) throw new Error("Session expired, sign in again.");
-    if (!response.ok) throw new Error(`/api/items returned ${response.status}`);
-    const payload = await response.json();
-    const items = Array.isArray(payload.items) ? payload.items : [];
-    renderSources(items);
+    const pageSize = 500;
+    const allItems = [];
+    let offset = 0;
+    for (;;) {
+      const response = await fetch(`/api/items?status=all&limit=${pageSize}&offset=${offset}&_=${Date.now()}`, {
+        headers: { accept: "application/json", "cache-control": "no-cache" },
+        credentials: "same-origin"
+      });
+      if (response.status === 401) throw new Error("Session expired, sign in again.");
+      if (!response.ok) throw new Error(`/api/items returned ${response.status}`);
+      const payload = await response.json();
+      const page = Array.isArray(payload.items) ? payload.items : [];
+      allItems.push(...page);
+      const total = payload.total != null ? payload.total : allItems.length;
+      if (!page.length || allItems.length >= total) break;
+      offset += pageSize;
+    }
+    renderSources(allItems);
   } catch (error) {
     els.sourcesCount.textContent = "Error";
     els.sourcesCountDetail.textContent = error.message;
+  } finally {
+    endLoad();
   }
 }
 
@@ -688,6 +702,7 @@ function renderSources(items) {
 }
 
 async function loadCategories() {
+  beginLoad();
   try {
     const response = await fetch(`/api/admin/categories?_=${Date.now()}`, {
       headers: { accept: "application/json", "cache-control": "no-cache" },
@@ -701,6 +716,8 @@ async function loadCategories() {
   } catch (error) {
     els.categoriesCount.textContent = "Error";
     els.categoriesListCount.textContent = error.message;
+  } finally {
+    endLoad();
   }
 }
 
@@ -836,6 +853,7 @@ async function deleteCategory(cat) {
 }
 
 async function loadOps() {
+  beginLoad();
   try {
     const since = new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString();
     const response = await fetch(`/api/dashboard?since=${encodeURIComponent(since)}&limit=50`, {
@@ -847,10 +865,13 @@ async function loadOps() {
     renderOps(payload);
   } catch (error) {
     els.deployDetail.textContent = error.message;
+  } finally {
+    endLoad();
   }
 }
 
 async function loadAnalytics() {
+  beginLoad();
   try {
     const days = els.analyticsWindowSelect.value || "7";
     const response = await fetch(`/api/analytics?days=${days}&_=${Date.now()}`, {
@@ -862,6 +883,8 @@ async function loadAnalytics() {
   } catch (error) {
     els.analyticsVisits.textContent = "Error";
     els.analyticsWindow.textContent = error.message;
+  } finally {
+    endLoad();
   }
 }
 
@@ -995,6 +1018,7 @@ function renderOps(payload) {
 }
 
 async function loadDashboard() {
+  beginLoad();
   els.overallStatus.textContent = "Loading";
   els.overallDetail.textContent = "Refreshing dashboard";
   const since = new Date(Date.now() - Number(els.dashboardWindow.value) * 60 * 60 * 1000).toISOString();
@@ -1006,6 +1030,7 @@ async function loadDashboard() {
     if (response.status === 401) {
       els.authPanel.hidden = false;
       setAuthMessage("Session expired, sign in again.");
+      endLoad();
       return;
     }
     if (!response.ok) throw new Error(`Dashboard API returned ${response.status}`);
@@ -1014,6 +1039,8 @@ async function loadDashboard() {
   } catch (error) {
     els.overallStatus.textContent = "Error";
     els.overallDetail.textContent = error.message;
+  } finally {
+    endLoad();
   }
 }
 
@@ -1148,6 +1175,7 @@ function emptyTableRow(colspan, message) {
 }
 
 async function loadProfile() {
+  beginLoad();
   try {
     const response = await fetch("/api/auth/profile", { credentials: "same-origin" });
     if (!response.ok) throw new Error(`Profile API returned ${response.status}`);
@@ -1161,6 +1189,8 @@ async function loadProfile() {
   } catch (error) {
     els.profileStatus.textContent = "Error";
     els.profileStatus.title = error.message;
+  } finally {
+    endLoad();
   }
 }
 
@@ -1332,6 +1362,12 @@ function renderList() {
     tr.addEventListener("click", () => {
       openLiveEditor(item.id);
     });
+    tr.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openLiveEditor(item.id);
+      }
+    });
     tr.append(cell(String(item.id), "nowrap id-cell", "ID"));
     tr.append(titleCell(item));
     tr.append(cell(item.source_name || "Source", "truncate", "Publisher"));
@@ -1385,6 +1421,7 @@ function renderList() {
     linkA.rel = "noopener";
     linkA.textContent = linkUrl;
     linkA.title = linkUrl;
+    linkA.addEventListener("click", (event) => event.stopPropagation());
     linkTd.append(linkA);
     tr.append(linkTd);
     tbody.append(tr);
@@ -1480,25 +1517,6 @@ async function toggleItemVisibility(item) {
     setStatus("Error", error.message);
     filterItems();
   }
-}
-
-function formatTags(value) {
-  if (!value) return "-";
-  let tags = value;
-  if (typeof tags === "string") {
-    const trimmed = tags.trim();
-    if (trimmed.startsWith("[")) {
-      try {
-        tags = JSON.parse(trimmed);
-      } catch {
-        return trimmed;
-      }
-    } else {
-      return trimmed;
-    }
-  }
-  if (Array.isArray(tags)) return tags.filter(Boolean).join(", ");
-  return String(tags);
 }
 
 // Title cell with a hover tooltip showing the full blurb, so the operator can
@@ -1622,7 +1640,7 @@ function openLiveEditor(id) {
   state.selected = item;
   state.mode = "edit";
   els.liveEditTitle.textContent = "Edit Item";
-  els.liveEditMode.textContent = "Published";
+  els.liveEditMode.textContent = item.status === "hidden" ? "Hidden" : "Published";
   els.liveEditMeta.textContent = `${item.source_name || "Source"} · ${item.category || DEFAULT_CATEGORY} · ${formatDateTime(item.published_at)}`;
   fillLiveEditor(item);
   els.liveEditOverlay.hidden = false;
@@ -1901,6 +1919,7 @@ function renderCounts() {
 }
 
 async function loadSiteContent() {
+  beginLoad();
   try {
     const response = await fetch("/api/site-content", { credentials: "same-origin" });
     if (!response.ok) throw new Error(`/api/site-content returned ${response.status}`);
@@ -1912,6 +1931,8 @@ async function loadSiteContent() {
   } catch (error) {
     els.newsletterStatus.textContent = "Error";
     els.newsletterStatus.title = error.message;
+  } finally {
+    endLoad();
   }
 }
 
@@ -2155,9 +2176,9 @@ function formatTime(value) {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return new Intl.DateTimeFormat(undefined, {
-    month: "short",
+  return new Intl.DateTimeFormat("en-GB", {
     day: "numeric",
+    month: "short",
     hour: "2-digit",
     minute: "2-digit"
   }).format(date);
@@ -2233,7 +2254,6 @@ if (themeLabel) {
   themeLabel.textContent = document.documentElement.dataset.theme === "light" ? "Dark mode" : "Light mode";
 }
 
-document.querySelectorAll(".nav-item[data-close]");
 sidebar?.addEventListener("click", (event) => {
   if (event.target.closest("a, button")) closeSidebar();
 });

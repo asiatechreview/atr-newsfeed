@@ -103,7 +103,7 @@ if (!dashboardHtml.includes("/dashboard.js") || !dashboardScript.includes("/api/
   process.exit(1);
 }
 
-if (!adminHtml.includes("/admin.js") || !adminScript.includes("PATCH") || !adminScript.includes("DELETE") || !adminScript.includes("/api/items") || !adminCss.includes(".admin-grid")) {
+if (!adminHtml.includes("/admin.js") || !adminScript.includes("PATCH") || !adminScript.includes("DELETE") || !adminScript.includes("/api/items") || !adminCss.includes(".grid-2")) {
   console.error("admin assets must expose a protected bulletin item editor UI");
   process.exit(1);
 }
