@@ -358,6 +358,8 @@ const els = {
   liveEditStatusSelect: document.querySelector("#live-edit-status-select"),
   liveEditTags: document.querySelector("#live-edit-tags"),
   liveEditStatus: document.querySelector("#live-edit-status"),
+  liveEditHistory: document.querySelector("#live-edit-history"),
+  liveEditHistoryStatus: document.querySelector("#live-edit-history-status"),
   liveEditSave: document.querySelector("#live-edit-save"),
   liveEditRemove: document.querySelector("#live-edit-remove"),
   liveEditCancel: document.querySelector("#live-edit-cancel"),
@@ -1807,12 +1809,72 @@ function fillLiveEditor(item) {
 
   els.liveEditReadbackStatus.textContent = "Loaded";
   els.liveEditReadbackOutput.textContent = JSON.stringify(item, null, 2);
+  loadItemHistory(item);
 }
 
 function closeLiveEditor() {
   els.liveEditOverlay.hidden = true;
   document.body.classList.remove("edit-open");
   state.selected = null;
+}
+
+async function loadItemHistory(item) {
+  if (!els.liveEditHistory || !els.liveEditHistoryStatus) return;
+  const id = String(item?.id || "");
+  if (!id) {
+    els.liveEditHistoryStatus.textContent = "No id";
+    els.liveEditHistory.replaceChildren();
+    return;
+  }
+  els.liveEditHistoryStatus.textContent = "Loading";
+  try {
+    const response = await fetch(`/api/items/${encodeURIComponent(id)}/history?_=${Date.now()}`, {
+      headers: { accept: "application/json" },
+      credentials: "same-origin"
+    });
+    if (!response.ok) throw new Error(`history returned ${response.status}`);
+    const payload = await response.json();
+    const events = Array.isArray(payload.events) ? payload.events : [];
+    els.liveEditHistoryStatus.textContent = `${events.length} event(s)`;
+    els.liveEditHistory.replaceChildren();
+    if (!events.length) {
+      const empty = document.createElement("p");
+      empty.className = "muted";
+      empty.textContent = "No edit history yet.";
+      els.liveEditHistory.append(empty);
+      return;
+    }
+    for (const event of events) {
+      const row = document.createElement("div");
+      row.className = "history-event";
+      const time = document.createElement("time");
+      time.textContent = formatTime(event.occurred_at);
+      row.append(time);
+      const msg = document.createElement("span");
+      msg.className = "history-msg";
+      const action = String(event.action || "");
+      const label = String(event.details?.actor || "");
+      msg.append(`${event.message || ""} `);
+      if (label) {
+        const actor = document.createElement("strong");
+        actor.textContent = label;
+        msg.append(actor);
+      }
+      row.append(msg);
+      const act = document.createElement("span");
+      act.className = "history-action";
+      act.textContent = action;
+      row.append(act);
+      els.liveEditHistory.append(row);
+    }
+  } catch (error) {
+    els.liveEditHistoryStatus.textContent = "Error";
+    els.liveEditHistory.replaceChildren();
+    const empty = document.createElement("p");
+    empty.className = "muted";
+    empty.textContent = error.message;
+    els.liveEditHistory.append(empty);
+  }
 }
 
 function setLiveEditStatus(status, message) {

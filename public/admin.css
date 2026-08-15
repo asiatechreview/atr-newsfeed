@@ -355,6 +355,16 @@ select.input.select-auto { width: auto; flex: 0 0 auto; }
 .live-edit-meta { font-size: 12px; color: var(--faint); margin-top: 4px; }
 .edit-status { margin-bottom: 12px; padding: 8px 10px; border-radius: var(--radius-sm); background: var(--panel-2); font-size: 12px; color: var(--muted); }
 body.edit-open { overflow: hidden; }
+.edit-history { margin-top: 10px; display: grid; gap: 8px; max-height: 260px; overflow-y: auto; }
+.history-event {
+  display: grid; grid-template-columns: 92px 1fr auto; gap: 10px; align-items: baseline;
+  padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--bg); font-size: 12px;
+}
+.history-event time { font-family: var(--mono); font-size: 11px; color: var(--faint); }
+.history-event .history-msg { color: var(--muted); line-height: 1.4; word-break: break-word; }
+.history-event .history-msg strong { color: var(--text); }
+.history-event .history-action { font-size: 11px; font-weight: 700; color: var(--faint); text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
 
 /* ============ Readback ============ */
 .readback { margin-top: 18px; border-top: 1px solid var(--border); padding-top: 12px; }
