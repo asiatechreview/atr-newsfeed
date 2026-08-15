@@ -114,6 +114,47 @@ function checkSimilarHeadline() {
   }
 }
 
+// Server-side story match: same company + same event within the match window
+// (see /api/story-match and _lib/story-match.js). Debounced so typing does
+// not hammer the endpoint; results are appended to the same warning element.
+let storyMatchTimer = null;
+function checkStoryMatch() {
+  if (state.mode !== "new") return;
+  const headline = (els.headline.value || "").trim();
+  const blurb = (els.blurb.value || "").trim();
+  if (!headline && !blurb) return;
+
+  window.clearTimeout(storyMatchTimer);
+  storyMatchTimer = window.setTimeout(async () => {
+    const warning = els.headlineSimilarWarning;
+    if (!warning) return;
+    try {
+      const response = await fetch(`/api/story-match?headline=${encodeURIComponent(headline)}&blurb=${encodeURIComponent(blurb)}`, {
+        headers: { accept: "application/json" },
+        credentials: "same-origin"
+      });
+      if (response.status === 401) return;
+      if (!response.ok) return;
+      const payload = await response.json();
+      const matches = Array.isArray(payload.matches) ? payload.matches : [];
+      if (!matches.length) {
+        if (!warning.textContent) warning.hidden = true;
+        return;
+      }
+      const top = matches.slice(0, 2);
+      const lines = top.map((m) => {
+        const when = m.days_ago < 1 ? "today" : `${m.days_ago}d ago`;
+        return `"${m.headline}" (${m.source_name || "?"}, ${when}, id ${m.id})`;
+      });
+      const label = matches.length > 1 ? `Possible same story (${matches.length}):` : "Possible same story:";
+      warning.textContent = `${label} ${lines.join(" | ")}`;
+      warning.hidden = false;
+    } catch {
+      // Story match is advisory; never block the form on a network error.
+    }
+  }, 350);
+}
+
 // Source name inference: derive the outlet from the source URL domain.
 const SOURCE_NAME_MAP = {
   "reuters.com": "Reuters",
@@ -640,6 +681,8 @@ els.headline.addEventListener("input", maybeAutoFillCategory);
 els.sourceName.addEventListener("input", maybeAutoFillCategory);
 els.headline.addEventListener("input", checkSimilarHeadline);
 els.blurb.addEventListener("input", checkSimilarHeadline);
+els.headline.addEventListener("input", checkStoryMatch);
+els.blurb.addEventListener("input", checkStoryMatch);
 els.sourceUrl.addEventListener("input", maybeAutoFillSourceName);
 els.newButton.addEventListener("click", () => {
   startNewItem();
