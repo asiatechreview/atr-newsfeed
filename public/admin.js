@@ -1510,7 +1510,6 @@ function titleCell(item) {
   const chip = document.createElement("span");
   chip.className = "title-chip";
   chip.textContent = title;
-  chip.title = title;
   td.append(chip);
 
   const blurb = String(item.blurb || "").trim();
