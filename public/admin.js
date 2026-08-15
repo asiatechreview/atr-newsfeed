@@ -1353,16 +1353,19 @@ function renderList() {
     tr.append(tagsIconCell(item.tags));
     tr.append(cell(formatDateTime(item.published_at), "nowrap", "Published"));
 
-    // Visible toggle: hide/show on the public site.
+    // Visible toggle: iOS-style switch for hide/show on the public site.
     const visTd = document.createElement("td");
     visTd.dataset.label = "Visible";
+    const visible = item.status !== "hidden";
     const toggle = document.createElement("button");
     toggle.type = "button";
-    toggle.className = "btn " + (item.status === "hidden" ? "btn-danger" : "btn-ghost");
-    toggle.style.padding = "4px 10px";
-    toggle.style.fontSize = "12px";
-    toggle.textContent = item.status === "hidden" ? "Hidden" : "Visible";
-    toggle.title = item.status === "hidden" ? "Hidden from the public site. Click to show." : "Visible on the public site. Click to hide.";
+    toggle.className = "vis-switch" + (visible ? " on" : "");
+    toggle.setAttribute("role", "switch");
+    toggle.setAttribute("aria-checked", visible ? "true" : "false");
+    toggle.title = visible ? "Visible on the public site. Click to hide." : "Hidden from the public site. Click to show.";
+    const knob = document.createElement("span");
+    knob.className = "vis-switch-knob";
+    toggle.append(knob);
     toggle.addEventListener("click", (event) => {
       event.stopPropagation();
       toggleItemVisibility(item);
