@@ -413,6 +413,7 @@ select.input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0
   padding: 22px;
   box-shadow: var(--shadow-lg);
 }
+.sheet-handle { display: none; }
 .live-edit-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
 .live-edit-meta { font-size: 12px; color: var(--faint); margin-top: 4px; }
 .edit-status { margin-bottom: 12px; padding: 8px 10px; border-radius: var(--radius-sm); background: var(--surface-2); font-size: 12px; color: var(--muted); }
@@ -688,6 +689,38 @@ body.logged-out .auth-panel { min-height: calc(100vh - 48px); }
 
   /* Empty state centers inside its card. */
   .table-wrap td.muted { justify-content: center; text-align: center; padding: 14px 0; }
+
+  /* Live editor becomes a bottom sheet: full width, rounded top corners
+     only, slides up, internal scroll, drag-handle bar (Apple pattern). */
+  .live-edit-overlay {
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0;
+  }
+  .live-edit-panel {
+    width: 100%;
+    max-width: none;
+    max-height: 92vh;
+    border-radius: var(--radius) var(--radius) 0 0;
+    border-bottom: 0;
+    padding: 10px 18px calc(18px + env(safe-area-inset-bottom));
+    animation: sheet-up var(--dur-slow) var(--ease);
+  }
+  .sheet-handle {
+    display: block;
+    width: 36px;
+    height: 5px;
+    border-radius: 999px;
+    background: var(--border-2);
+    margin: 0 auto 12px;
+    flex-shrink: 0;
+  }
+  body.edit-open { overflow: hidden; }
+}
+
+@keyframes sheet-up {
+  from { transform: translateY(40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 /* ============ Light theme ============ */
