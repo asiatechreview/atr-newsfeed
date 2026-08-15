@@ -385,6 +385,11 @@ const duplicatePostResponse = await onRequestPost({
           bind() {
             return {
               async run() {},
+              async all() {
+                // Normalised duplicate pre-check: no existing rows in the mock,
+                // so it falls through to the exact INSERT guard below.
+                return { results: [] };
+              },
               async first() {
                 if (query.includes("INSERT INTO feed_items")) {
                   insertAttempts += 1;

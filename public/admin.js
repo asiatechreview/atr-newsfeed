@@ -61,6 +61,59 @@ function maybeAutoFillCategory() {
   els.category.value = inferred;
 }
 
+// Soft duplicate guard for the publish form: when the typed headline closely
+// matches an existing item's headline, show a non-blocking warning so a story
+// that was already carried (possibly under a different URL) is flagged before
+// posting. Similarity is token-overlap on normalised text; >= 0.8 warns.
+function headlineTokens(text) {
+  return String(text || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
+function headlineSimilarity(a, b) {
+  const ta = headlineTokens(a);
+  const tb = headlineTokens(b);
+  if (!ta.length || !tb.length) return 0;
+  const set = new Set(tb);
+  const overlap = ta.filter((token) => set.has(token)).length;
+  return overlap / Math.max(ta.length, tb.length);
+}
+
+function checkSimilarHeadline() {
+  const warning = els.headlineSimilarWarning;
+  if (!warning) return;
+  const value = (els.headline.value || "").trim();
+  if (!value) {
+    warning.hidden = true;
+    return;
+  }
+
+  const editingId = state.mode === "edit" && state.selected ? String(state.selected.id) : null;
+  let best = null;
+  let bestScore = 0;
+  for (const item of state.items) {
+    const id = String(item.id);
+    if (editingId && id === editingId) continue;
+    const score = headlineSimilarity(value, item.headline || item.title || "");
+    if (score > bestScore) {
+      bestScore = score;
+      best = item;
+    }
+  }
+
+  if (best && bestScore >= 0.8) {
+    const exact = bestScore >= 0.99;
+    warning.textContent = `${exact ? "Duplicate" : "Similar"} headline already exists: "${best.headline || best.title}" (id ${best.id})`;
+    warning.hidden = false;
+  } else {
+    warning.hidden = true;
+  }
+}
+
 // Source name inference: derive the outlet from the source URL domain.
 const SOURCE_NAME_MAP = {
   "reuters.com": "Reuters",
@@ -240,6 +293,7 @@ const els = {
   itemStatus: document.querySelector("#item-status"),
   itemScheduledAt: document.querySelector("#item-scheduled-at"),
   headline: document.querySelector("#headline-input"),
+  headlineSimilarWarning: document.querySelector("#headline-similar-warning"),
   blurb: document.querySelector("#blurb-input"),
   sourceName: document.querySelector("#source-name-input"),
   sourceUrl: document.querySelector("#source-url-input"),
@@ -584,6 +638,8 @@ els.bulkApplyCategory?.addEventListener("click", () => {
 els.blurb.addEventListener("input", maybeAutoFillCategory);
 els.headline.addEventListener("input", maybeAutoFillCategory);
 els.sourceName.addEventListener("input", maybeAutoFillCategory);
+els.headline.addEventListener("input", checkSimilarHeadline);
+els.blurb.addEventListener("input", checkSimilarHeadline);
 els.sourceUrl.addEventListener("input", maybeAutoFillSourceName);
 els.newButton.addEventListener("click", () => {
   startNewItem();

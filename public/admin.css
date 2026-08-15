@@ -234,6 +234,17 @@ select.input.select-auto { width: auto; flex: 0 0 auto; }
 /* ============ Forms ============ */
 .field { margin-bottom: 14px; }
 .field label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+.dupe-warning {
+  margin-top: 6px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--amber-dim);
+  border: 1px solid var(--amber-border);
+  color: var(--amber);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.dupe-warning[hidden] { display: none; }
 .input, .textarea, select.input {
   width: 100%; padding: 8px 12px;
   background: var(--surface-2); border: 1px solid var(--border-2); border-radius: var(--radius-md);

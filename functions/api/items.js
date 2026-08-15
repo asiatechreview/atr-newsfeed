@@ -580,6 +580,35 @@ export async function onRequestPost({ env, request }) {
 
   try {
     if (sourceUrl) {
+      // Normalised duplicate pre-check: strip common tracking params
+      // (utm_*, fbclid, gclid, igshid, mc_cid, mc_eid) so a resubmitted link
+      // with a tracking variant of an already-posted URL is treated as the
+      // same story instead of slipping past the exact-string INSERT guard.
+      const normIncoming = normaliseUrlForDedupe(sourceUrl);
+      if (normIncoming) {
+        const candidates = await env.ATR_FEED_DB.prepare(
+          `SELECT id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key, posted_by, posted_via, status, scheduled_at
+           FROM feed_items WHERE status = ?`
+        ).bind(statusValue).all();
+        const existing = (candidates.results || []).find(
+          (row) => row.source_url && normaliseUrlForDedupe(row.source_url) === normIncoming
+        );
+        if (existing) {
+          await writeOperationalEvent(env, request, {
+            workflow: "bulletin_ingest",
+            action: "create_item",
+            status: "duplicate",
+            severity: "info",
+            http_status: 200,
+            item_id: existing.id,
+            source_name: existing.source_name,
+            source_url: existing.source_url,
+            message: "Duplicate source URL (tracking-normalised) returned existing bulletin item."
+          });
+          return json({ item: withHeadlines([existing])[0], duplicate: true }, 200);
+        }
+      }
+
       result = await env.ATR_FEED_DB.prepare(
         `INSERT INTO feed_items
           (headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, link_key, posted_by, posted_via, status, scheduled_at)
@@ -1033,6 +1062,30 @@ function normalizeTagsInput(value) {
     return value.split(",").map((tag) => clean(tag)).filter(Boolean).join(", ");
   }
   return "";
+}
+
+// Normalise a source URL for duplicate detection: lowercase, strip common
+// tracking parameters (utm_*, fbclid, gclid, igshid, mc_cid, mc_eid) and a
+// trailing slash, so resubmitted links with tracking variants are treated as
+// the same story. Returns "" for empty/invalid input.
+function normaliseUrlForDedupe(url) {
+  const value = String(url || "").trim();
+  if (!value) return "";
+  try {
+    const parsed = new URL(value);
+    for (const key of [...parsed.searchParams.keys()]) {
+      const lower = key.toLowerCase();
+      if (lower.startsWith("utm_") || ["fbclid", "gclid", "igshid", "mc_cid", "mc_eid"].includes(lower)) {
+        parsed.searchParams.delete(key);
+      }
+    }
+    let out = parsed.toString().toLowerCase();
+    if (out.endsWith("/")) out = out.slice(0, -1);
+    return out;
+  } catch {
+    // Not parseable as a URL: fall back to the trimmed lowercase string.
+    return value.toLowerCase();
+  }
 }
 
 function clean(value) {
