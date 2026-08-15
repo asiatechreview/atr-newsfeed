@@ -468,41 +468,43 @@
 
         <!-- ============ NEWSLETTER ============ -->
         <section id="newsletter-view" hidden>
-          <div class="card card-narrow">
-            <div class="card-head">
-              <div class="card-title">Latest Newsletter Card <small>shown on the bulletin homepage</small></div>
-              <span id="newsletter-status" class="pill">Not loaded</span>
+          <div class="grid-2 newsletter-grid">
+            <div class="card">
+              <div class="card-head">
+                <div class="card-title">Newsletter Card <small>shown on the bulletin homepage</small></div>
+                <span id="newsletter-status" class="pill">Not loaded</span>
+              </div>
+              <form id="newsletter-form" class="newsletter-form">
+                <div class="field">
+                  <label for="newsletter-title">Headline</label>
+                  <input id="newsletter-title" class="input" type="text" maxlength="120" placeholder="Latest Substack post title">
+                </div>
+                <div class="field">
+                  <label for="newsletter-blurb">Blurb</label>
+                  <textarea id="newsletter-blurb" class="textarea" rows="4" placeholder="Short summary shown on the homepage card"></textarea>
+                </div>
+                <div class="row">
+                  <div class="field">
+                    <label for="newsletter-url">Post URL</label>
+                    <input id="newsletter-url" class="input" type="url" placeholder="https://www.asiatechreview.com/p/...">
+                  </div>
+                  <div class="field">
+                    <label for="newsletter-image">Image URL</label>
+                    <input id="newsletter-image" class="input" type="url" placeholder="https://substackcdn.com/...">
+                  </div>
+                </div>
+                <div class="form-actions">
+                  <button id="newsletter-save" class="btn btn-primary" type="submit">Save card</button>
+                  <button id="newsletter-update-now" class="btn btn-ghost" type="button">Fetch latest</button>
+                  <button id="newsletter-reload" class="btn btn-ghost" type="button">Load into form</button>
+                </div>
+              </form>
+              <details class="readback">
+                <summary>Readback <span id="newsletter-readback-status" class="pill">Idle</span></summary>
+                <pre id="newsletter-readback-output">Load the newsletter card to edit it.</pre>
+              </details>
             </div>
-            <form id="newsletter-form" class="newsletter-form">
-              <div class="field">
-                <label for="newsletter-title">Headline</label>
-                <input id="newsletter-title" class="input" type="text" maxlength="120" placeholder="Latest Substack post title">
-              </div>
-              <div class="field">
-                <label for="newsletter-blurb">Blurb</label>
-                <textarea id="newsletter-blurb" class="textarea" rows="4" placeholder="Short summary shown on the homepage card"></textarea>
-              </div>
-              <div class="row">
-                <div class="field">
-                  <label for="newsletter-url">Post URL</label>
-                  <input id="newsletter-url" class="input" type="url" placeholder="https://www.asiatechreview.com/p/...">
-                </div>
-                <div class="field">
-                  <label for="newsletter-image">Image URL</label>
-                  <input id="newsletter-image" class="input" type="url" placeholder="https://substackcdn.com/...">
-                </div>
-              </div>
-              <div class="form-actions">
-                <button id="newsletter-update-now" class="btn btn-primary" type="button">Fetch latest & update now</button>
-                <button id="newsletter-save" class="btn btn-primary" type="submit">Save card</button>
-                <button id="newsletter-reload" class="btn btn-ghost" type="button">Load latest into form</button>
-              </div>
-            </form>
-            <details class="readback">
-              <summary>Readback <span id="newsletter-readback-status" class="pill">Idle</span></summary>
-              <pre id="newsletter-readback-output">Load the newsletter card to edit it.</pre>
-            </details>
-            <div class="card card-stacked">
+            <div class="card">
               <div class="card-head">
                 <div class="card-title">Live preview <small>exactly as it renders on bulletin.asiatechreview.com</small></div>
                 <span id="newsletter-preview-status" class="pill">Idle</span>
@@ -517,21 +519,25 @@
                 </div>
                 <a class="newsletter-link" id="preview-newsletter-read-link" href="#" target="_blank" rel="noopener">Read now →</a>
               </div>
+              <div class="preview-empty" id="newsletter-preview-empty" hidden>
+                <p class="muted">Save a card to see the live homepage preview here.</p>
+              </div>
             </div>
           </div>
         </section>
 
         <!-- ============ SPONSORS ============ -->
         <section id="sponsors-view" hidden>
-          <div class="card card-narrow">
+          <div class="card">
             <div class="card-head">
-              <div class="card-title">Sponsors <small>Placeholder, not live</small></div>
-              <button id="sponsor-add" class="btn btn-ghost btn-sm" type="button">Add sponsor</button>
+              <div class="card-title">Sponsors <small id="sponsors-count">No sponsors</small></div>
+              <button id="sponsor-add" class="btn btn-primary btn-sm" type="button">+ Add sponsor</button>
             </div>
             <p class="muted">Sponsor blurbs are saved here but not shown on the public site yet.</p>
             <div id="sponsors-list" class="sponsors-list"></div>
-            <div class="form-actions">
+            <div class="sponsors-save-bar">
               <button id="sponsors-save" class="btn btn-primary" type="button">Save sponsors</button>
+              <span id="sponsors-save-status" class="pill" hidden></span>
             </div>
             <details class="readback">
               <summary>Readback <span id="sponsors-readback-status" class="pill">Idle</span></summary>

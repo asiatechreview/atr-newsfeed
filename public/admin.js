@@ -327,6 +327,8 @@ const els = {
   sponsorsList: document.querySelector("#sponsors-list"),
   sponsorAdd: document.querySelector("#sponsor-add"),
   sponsorsSave: document.querySelector("#sponsors-save"),
+  sponsorsCount: document.querySelector("#sponsors-count"),
+  sponsorsSaveStatus: document.querySelector("#sponsors-save-status"),
   sponsorsReadbackStatus: document.querySelector("#sponsors-readback-status"),
   sponsorsReadbackOutput: document.querySelector("#sponsors-readback-output"),
   liveEditOverlay: document.querySelector("#live-edit-overlay"),
@@ -1957,6 +1959,10 @@ function renderNewsletterPreview(newsletter) {
   els.previewNewsletterReadLink.href = url || "#";
   els.previewNewsletterImageLink.href = url || "#";
 
+  const previewEmpty = document.querySelector("#newsletter-preview-empty");
+  if (previewEmpty) previewEmpty.hidden = Boolean(title || url || image || blurb);
+  if (els.newsletterPreview) els.newsletterPreview.hidden = !(title || url || image || blurb);
+
   if (image) {
     els.previewNewsletterImage.src = image;
     els.previewNewsletterImage.hidden = false;
@@ -2051,10 +2057,36 @@ async function loadLatestSubstackPost() {
 
 function renderSponsors() {
   els.sponsorsList.replaceChildren();
-  if (!state.sponsors.length) {
-    const empty = document.createElement("p");
-    empty.className = "muted";
-    empty.textContent = "No sponsors yet. Add one to draft a blurb.";
+  const count = state.sponsors.length;
+  if (els.sponsorsCount) {
+    els.sponsorsCount.textContent = count === 1 ? "1 sponsor" : `${count} sponsors`;
+  }
+  if (!count) {
+    const empty = document.createElement("div");
+    empty.className = "sponsors-empty";
+    const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    icon.setAttribute("viewBox", "0 0 24 24");
+    icon.setAttribute("fill", "none");
+    icon.setAttribute("stroke", "currentColor");
+    icon.setAttribute("stroke-width", "2");
+    icon.setAttribute("stroke-linecap", "round");
+    icon.setAttribute("stroke-linejoin", "round");
+    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    rect.setAttribute("x", "2");
+    rect.setAttribute("y", "7");
+    rect.setAttribute("width", "20");
+    rect.setAttribute("height", "14");
+    rect.setAttribute("rx", "2");
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", "M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16");
+    icon.append(rect, path);
+    empty.append(icon);
+    const text = document.createElement("p");
+    text.textContent = "No sponsors yet";
+    empty.append(text);
+    const sub = document.createElement("span");
+    sub.textContent = "Add one to draft a sponsor blurb.";
+    empty.append(sub);
     els.sponsorsList.append(empty);
     return;
   }
@@ -2063,25 +2095,37 @@ function renderSponsors() {
     const card = document.createElement("div");
     card.className = "sponsor-card";
 
+    const head = document.createElement("div");
+    head.className = "sponsor-card-head";
+    const title = document.createElement("div");
+    title.className = "sponsor-card-title";
+    title.textContent = sponsor.name || `Sponsor ${index + 1}`;
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "btn btn-ghost btn-sm sponsor-remove";
+    removeButton.textContent = "Remove";
+    removeButton.addEventListener("click", () => {
+      state.sponsors.splice(index, 1);
+      renderSponsors();
+    });
+    head.append(title, removeButton);
+    card.append(head);
+
+    const grid = document.createElement("div");
+    grid.className = "sponsor-grid";
+
     const nameLabel = document.createElement("label");
     nameLabel.append("Sponsor name");
     const nameInput = document.createElement("input");
     nameInput.type = "text";
     nameInput.value = sponsor.name || "";
     nameInput.placeholder = "Banxa";
-    nameInput.addEventListener("input", () => { sponsor.name = nameInput.value; });
+    nameInput.addEventListener("input", () => {
+      sponsor.name = nameInput.value;
+      title.textContent = sponsor.name || `Sponsor ${index + 1}`;
+    });
     nameLabel.append(nameInput);
-    card.append(nameLabel);
-
-    const blurbLabel = document.createElement("label");
-    blurbLabel.append("Blurb");
-    const blurbInput = document.createElement("textarea");
-    blurbInput.rows = 3;
-    blurbInput.value = sponsor.blurb || "";
-    blurbInput.placeholder = "What the sponsor does";
-    blurbInput.addEventListener("input", () => { sponsor.blurb = blurbInput.value; });
-    blurbLabel.append(blurbInput);
-    card.append(blurbLabel);
+    grid.append(nameLabel);
 
     const urlLabel = document.createElement("label");
     urlLabel.append("Link");
@@ -2091,7 +2135,18 @@ function renderSponsors() {
     urlInput.placeholder = "https://...";
     urlInput.addEventListener("input", () => { sponsor.url = urlInput.value; });
     urlLabel.append(urlInput);
-    card.append(urlLabel);
+    grid.append(urlLabel);
+
+    const blurbLabel = document.createElement("label");
+    blurbLabel.className = "sponsor-blurb";
+    blurbLabel.append("Blurb");
+    const blurbInput = document.createElement("textarea");
+    blurbInput.rows = 3;
+    blurbInput.value = sponsor.blurb || "";
+    blurbInput.placeholder = "What the sponsor does";
+    blurbInput.addEventListener("input", () => { sponsor.blurb = blurbInput.value; });
+    blurbLabel.append(blurbInput);
+    grid.append(blurbLabel);
 
     const logoLabel = document.createElement("label");
     logoLabel.append("Logo URL");
@@ -2101,27 +2156,31 @@ function renderSponsors() {
     logoInput.placeholder = "https://... (optional)";
     logoInput.addEventListener("input", () => { sponsor.logo = logoInput.value; });
     logoLabel.append(logoInput);
-    card.append(logoLabel);
+    grid.append(logoLabel);
 
-    const enabledLabel = document.createElement("label");
-    enabledLabel.className = "checkbox-label";
-    const enabledInput = document.createElement("input");
-    enabledInput.type = "checkbox";
-    enabledInput.checked = Boolean(sponsor.enabled);
-    enabledInput.addEventListener("change", () => { sponsor.enabled = enabledInput.checked; });
-    enabledLabel.append(enabledInput, " Show on site (not live yet)");
-    card.append(enabledLabel);
-
-    const removeButton = document.createElement("button");
-    removeButton.type = "button";
-    removeButton.className = "danger";
-    removeButton.textContent = "Remove";
-    removeButton.addEventListener("click", () => {
-      state.sponsors.splice(index, 1);
-      renderSponsors();
+    const foot = document.createElement("div");
+    foot.className = "sponsor-card-foot";
+    const enabledLabel = document.createElement("span");
+    enabledLabel.className = "sponsor-toggle";
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "vis-switch" + (sponsor.enabled ? " on" : "");
+    toggle.setAttribute("role", "switch");
+    toggle.setAttribute("aria-checked", sponsor.enabled ? "true" : "false");
+    const knob = document.createElement("span");
+    knob.className = "vis-switch-knob";
+    toggle.append(knob);
+    toggle.addEventListener("click", () => {
+      sponsor.enabled = !sponsor.enabled;
+      toggle.classList.toggle("on", sponsor.enabled);
+      toggle.setAttribute("aria-checked", sponsor.enabled ? "true" : "false");
     });
-    card.append(removeButton);
+    const toggleText = document.createElement("span");
+    toggleText.textContent = "Show on site";
+    enabledLabel.append(toggle, toggleText);
+    foot.append(enabledLabel);
 
+    card.append(grid, foot);
     els.sponsorsList.append(card);
   });
 }
@@ -2138,6 +2197,10 @@ async function saveSponsors() {
   };
 
   els.sponsorsReadbackStatus.textContent = "Saving";
+  if (els.sponsorsSaveStatus) {
+    els.sponsorsSaveStatus.hidden = false;
+    els.sponsorsSaveStatus.textContent = "Saving…";
+  }
   try {
     const response = await fetch("/api/site-content", {
       method: "PUT",
@@ -2149,9 +2212,18 @@ async function saveSponsors() {
     if (!response.ok) throw new Error(result.error || `PUT returned ${response.status}`);
     els.sponsorsReadbackStatus.textContent = "Saved";
     els.sponsorsReadbackOutput.textContent = JSON.stringify(result.sponsors || payload.sponsors, null, 2);
+    if (els.sponsorsSaveStatus) {
+      els.sponsorsSaveStatus.textContent = "Saved ✓";
+      els.sponsorsSaveStatus.className = "pill status-ok";
+      setTimeout(() => { if (els.sponsorsSaveStatus) els.sponsorsSaveStatus.hidden = true; }, 4000);
+    }
   } catch (error) {
     els.sponsorsReadbackStatus.textContent = "Error";
     els.sponsorsReadbackOutput.textContent = error.message;
+    if (els.sponsorsSaveStatus) {
+      els.sponsorsSaveStatus.textContent = "Save failed";
+      els.sponsorsSaveStatus.className = "pill status-error";
+    }
   }
 }
 

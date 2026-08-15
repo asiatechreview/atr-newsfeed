@@ -138,6 +138,7 @@ h1, h2, h3 { font-weight: 700; }
 .btn:disabled { opacity: .45; cursor: not-allowed; }
 .btn-sm { padding: 6px 10px; font-size: 12px; }
 .select-auto { width: auto; }
+select.input.select-auto { width: auto; flex: 0 0 auto; }
 .card-narrow { max-width: 760px; }
 .card-profile { max-width: 620px; }
 .card-stacked { margin-top: 14px; }
@@ -385,25 +386,52 @@ td strong { color: var(--text); font-weight: 600; }
 .status-error { color: var(--red); }
 
 /* ============ Sponsors ============ */
-.sponsors-list { margin: 14px 0; }
+.sponsors-list { margin: 14px 0; display: grid; gap: 14px; }
 .sponsor-card {
   border: 1px solid var(--border); border-radius: var(--radius-sm);
-  padding: 14px; margin-bottom: 12px; background: var(--panel-2);
+  padding: 16px; background: var(--panel-2);
 }
-.sponsor-card label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
-.sponsor-card input[type="text"], .sponsor-card input[type="url"], .sponsor-card textarea {
+.sponsor-card-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--border);
+}
+.sponsor-card-title { font-size: 14px; font-weight: 700; color: var(--text); }
+.sponsor-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px;
+}
+.sponsor-grid label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); }
+.sponsor-grid input, .sponsor-grid textarea {
   width: 100%; margin-top: 5px; padding: 8px 10px;
   background: var(--panel); border: 1px solid var(--border-2); border-radius: var(--radius-sm);
   color: var(--text); font: inherit; font-size: 13px;
 }
-.sponsor-card textarea { resize: vertical; }
-.sponsor-card .checkbox-label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); font-weight: 500; }
-.sponsor-card .danger {
-  margin-top: 8px; padding: 6px 12px; border-radius: var(--radius-sm);
-  border: 1px solid rgba(224,122,106,.45); color: var(--red); background: transparent;
-  font-size: 12px; font-weight: 600;
+.sponsor-grid textarea { resize: vertical; }
+.sponsor-grid .sponsor-blurb { grid-column: 1 / -1; }
+.sponsor-card-foot {
+  display: flex; align-items: center; justify-content: flex-end;
+  margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);
 }
-.sponsor-card .danger:hover { background: var(--red-dim); }
+.sponsor-toggle {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer;
+}
+.sponsor-toggle .vis-switch { width: 36px; height: 22px; }
+.sponsor-toggle .vis-switch-knob { width: 18px; height: 18px; }
+.sponsor-toggle .vis-switch.on .vis-switch-knob { transform: translateX(14px); }
+.sponsors-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px; min-height: 180px;
+  border: 1px dashed var(--border-2); border-radius: var(--radius);
+  color: var(--faint); text-align: center; padding: 20px;
+}
+.sponsors-empty svg { width: 28px; height: 28px; opacity: .6; margin-bottom: 6px; }
+.sponsors-empty p { font-size: 14px; font-weight: 600; color: var(--muted); }
+.sponsors-empty span { font-size: 12px; }
+.sponsors-save-bar {
+  display: flex; align-items: center; gap: 12px;
+  margin-top: 6px;
+}
+.sponsors-save-bar .pill { padding: 6px 10px; }
 
 /* ============ Login splash ============ */
 .auth-panel {
@@ -520,6 +548,14 @@ body.logged-out .auth-panel { min-height: calc(100vh - 48px); }
 }
 
 /* ============ Newsletter live preview ============ */
+.newsletter-grid { align-items: stretch; }
+.newsletter-grid > .card { display: flex; flex-direction: column; }
+.newsletter-grid .newsletter-form { flex: 1; }
+.preview-empty {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 220px; border: 1px dashed var(--border-2); border-radius: var(--radius);
+  text-align: center; padding: 20px;
+}
 .newsletter-promo {
   display: grid;
   grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
