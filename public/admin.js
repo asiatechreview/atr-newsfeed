@@ -1663,7 +1663,10 @@ function updateBulkBar() {
   const count = state.selectedIds.size;
   if (els.bulkBar) els.bulkBar.hidden = count === 0;
   if (els.bulkCount) els.bulkCount.textContent = `${count} selected`;
-  if (els.bulkCategory && count > 0 && !els.bulkCategory.options.length) {
+  // The select ships with a "Reassign to…" placeholder option, so options
+  // length is 1 before categories are added. Populate whenever we only have
+  // the placeholder (or nothing) so the category list always loads.
+  if (els.bulkCategory && count > 0 && els.bulkCategory.options.length <= 1) {
     const cats = state.categories.length ? state.categories : [DEFAULT_CATEGORY];
     for (const cat of cats) {
       const opt = document.createElement("option");
