@@ -16,6 +16,16 @@ const watchlistHeadline = document.querySelector("#watchlist-headline");
 const watchlistBlurb = document.querySelector("#watchlist-blurb");
 const dateTemplate = document.querySelector("#date-template");
 const itemTemplate = document.querySelector("#item-template");
+
+// Stop the browser from restoring the old scroll position on reload, so
+// navigation between views always starts at the top of the page.
+if ("scrollRestoration" in history) {
+  history.scrollRestoration = "manual";
+}
+
+function scrollFeedToTop() {
+  window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+}
 const ITEMS_PER_PAGE = 15;
 const VISIBLE_PAGE_BUTTONS = 8;
 const ARCHIVE_DAYS = 5;
@@ -1691,6 +1701,7 @@ function createPageButton(label, page, options = {}) {
     } else {
       renderPage(page);
     }
+    scrollFeedToTop();
   });
   return button;
 }
@@ -2159,6 +2170,7 @@ if (searchForm && searchInput) {
   searchForm.addEventListener("submit", (event) => {
     event.preventDefault();
     renderSearch(searchInput.value, 1);
+    scrollFeedToTop();
   });
 
   searchInput.addEventListener("input", () => {
@@ -2184,6 +2196,7 @@ if (searchToggle && mobileSearchForm && mobileSearchInput) {
   mobileSearchForm.addEventListener("submit", (event) => {
     event.preventDefault();
     renderSearch(mobileSearchInput.value, 1);
+    scrollFeedToTop();
   });
 
   mobileSearchInput.addEventListener("input", () => {
