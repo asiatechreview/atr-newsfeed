@@ -647,7 +647,50 @@ els.liveEditOverlay.addEventListener("click", (event) => {
   if (event.target === els.liveEditOverlay) closeLiveEditor();
 });
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && !els.liveEditOverlay.hidden) closeLiveEditor();
+  if (event.key === "Escape" && !els.liveEditOverlay.hidden) {
+    closeLiveEditor();
+    return;
+  }
+
+  // Global shortcuts are disabled while the user is typing in a field,
+  // except Ctrl/Cmd+S (save) and Escape.
+  const target = event.target;
+  const typing =
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLTextAreaElement ||
+    target instanceof HTMLSelectElement ||
+    target?.isContentEditable;
+
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
+    event.preventDefault();
+    if (!els.liveEditOverlay.hidden && els.liveEditForm) {
+      els.liveEditForm.requestSubmit();
+    } else if (els.form) {
+      els.form.requestSubmit();
+    }
+    return;
+  }
+
+  if (typing) return;
+
+  if (event.key === "/") {
+    event.preventDefault();
+    els.searchInput?.focus();
+    return;
+  }
+
+  if (event.key === "j" || event.key === "k") {
+    const rows = [...document.querySelectorAll(".item-row")];
+    if (!rows.length) return;
+    event.preventDefault();
+    const current = document.activeElement instanceof HTMLElement ? rows.indexOf(document.activeElement) : -1;
+    let next = current;
+    if (event.key === "j") next = current + 1 >= rows.length ? current : current + 1;
+    else next = current - 1 < 0 ? (current === -1 ? rows.length - 1 : current) : current - 1;
+    if (next === -1) next = 0;
+    rows[next].focus();
+    rows[next].scrollIntoView({ block: "nearest" });
+  }
 });
 
 let loadCount = 0;
