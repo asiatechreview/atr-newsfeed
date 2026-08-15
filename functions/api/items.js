@@ -228,9 +228,23 @@ export async function onRequestGet({ env, request }) {
   const offset = Math.max(0, Number(url.searchParams.get("offset")) || 0);
   const category = url.searchParams.get("category");
   const date = parseDateParam(url.searchParams.get("date"));
+  const includeHidden = url.searchParams.get("status") === "all" || url.searchParams.get("includeHidden") === "1";
+  // Only an authenticated admin may list hidden items or see provenance fields.
+  const authorized = includeHidden ? await isAuthorized(env, request) : false;
 
-  let query = "SELECT id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key FROM feed_items WHERE status = ?";
+  if (includeHidden && !authorized) {
+    return json({ error: "Unauthorized" }, 401);
+  }
+
+  let select = "id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key";
+  if (authorized) select += ", status, posted_by, posted_via";
+
+  let query = `SELECT ${select} FROM feed_items WHERE status = ?`;
   const params = ["published"];
+  if (authorized) {
+    query = `SELECT ${select} FROM feed_items WHERE status IN ('published','hidden')`;
+    params.length = 0;
+  }
 
   if (category) {
     query += " AND category = ?";
@@ -245,6 +259,7 @@ export async function onRequestGet({ env, request }) {
   try {
     await ensureHeadlineColumn(env);
     await ensureTagsColumn(env);
+    await ensurePostedColumns(env);
   } catch {
     // Migration attempts are best-effort; the query below is the real check.
   }
@@ -463,6 +478,8 @@ export async function onRequestPost({ env, request }) {
   const tags = normalizeTagsInput(body.tags);
   const telegramMessageId = clean(body.telegramMessageId || body.telegram_message_id);
   const publishedAt = clean(body.publishedAt || body.published_at) || new Date().toISOString();
+  const postedBy = clean(body.postedBy || body.posted_by) || null;
+  const postedVia = clean(body.postedVia || body.posted_via) || null;
 
   if (!blurb) {
     await writeOperationalEvent(env, request, {
@@ -513,6 +530,7 @@ export async function onRequestPost({ env, request }) {
     await ensureHeadlineColumn(env);
     await ensureTagsColumn(env);
     await ensureLinkKeyColumn(env);
+    await ensurePostedColumns(env);
   } catch (error) {
     await writeOperationalEvent(env, request, {
       workflow: "bulletin_ingest",
@@ -523,7 +541,7 @@ export async function onRequestPost({ env, request }) {
       source_name: sourceName,
       source_url: sourceUrl,
       message: "Bulletin item create failed while preparing the database.",
-      details: { error: error.message, payload: { headline, blurb, sourceName, sourceUrl, category, tags, telegramMessageId, publishedAt } }
+      details: { error: error.message, payload: { headline, blurb, sourceName, sourceUrl, category, tags, telegramMessageId, publishedAt, postedBy, postedVia } }
     });
     return json({ error: "database setup failed" }, 500);
   }
@@ -537,20 +555,20 @@ export async function onRequestPost({ env, request }) {
     if (sourceUrl) {
       result = await env.ATR_FEED_DB.prepare(
         `INSERT INTO feed_items
-          (headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, link_key)
-         SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?
+          (headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, link_key, posted_by, posted_via)
+         SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
          WHERE NOT EXISTS (
            SELECT 1 FROM feed_items
            WHERE lower(source_url) = lower(?) AND status = ?
          )
-         RETURNING id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key`
+         RETURNING id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key, posted_by, posted_via`
       )
-        .bind(headline || null, blurb, sourceName, sourceUrl, category, tags, telegramMessageId || null, publishedAt, linkKey, sourceUrl, "published")
+        .bind(headline || null, blurb, sourceName, sourceUrl, category, tags, telegramMessageId || null, publishedAt, linkKey, postedBy, postedVia, sourceUrl, "published")
         .first();
 
       if (!result) {
         result = await env.ATR_FEED_DB.prepare(
-          `SELECT id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key
+          `SELECT id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key, posted_by, posted_via
            FROM feed_items
            WHERE lower(source_url) = lower(?) AND status = ?
            ORDER BY published_at DESC, id DESC
@@ -563,11 +581,11 @@ export async function onRequestPost({ env, request }) {
     } else {
       result = await env.ATR_FEED_DB.prepare(
         `INSERT INTO feed_items
-          (headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-         RETURNING id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at`
+          (headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, posted_by, posted_via)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         RETURNING id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, posted_by, posted_via`
       )
-        .bind(headline || null, blurb, sourceName, sourceUrl, category, tags, telegramMessageId || null, publishedAt)
+        .bind(headline || null, blurb, sourceName, sourceUrl, category, tags, telegramMessageId || null, publishedAt, postedBy, postedVia)
         .first();
     }
   } catch (error) {
@@ -580,7 +598,7 @@ export async function onRequestPost({ env, request }) {
       source_name: sourceName,
       source_url: sourceUrl,
       message: "Bulletin item create failed during database write.",
-      details: { error: error.message, category, headline, payload: { headline, blurb, sourceName, sourceUrl, category, tags, telegramMessageId, publishedAt } }
+      details: { error: error.message, category, headline, payload: { headline, blurb, sourceName, sourceUrl, category, tags, telegramMessageId, publishedAt, postedBy, postedVia } }
     });
     return json({ error: "database write failed" }, 500);
   }
@@ -639,9 +657,9 @@ export async function onRequestPatch({ env, request }) {
   const id = Number.isInteger(numericId) && numericId > 0 ? numericId : rawIdInput;
 
   const current = await env.ATR_FEED_DB.prepare(
-    "SELECT id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key FROM feed_items WHERE id = ? AND status = ?"
+    "SELECT id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key, status, posted_by, posted_via FROM feed_items WHERE id = ? AND status IN ('published','hidden')"
   )
-    .bind(id, "published")
+    .bind(id)
     .first();
 
   if (!current) {
@@ -654,9 +672,12 @@ export async function onRequestPatch({ env, request }) {
   const sourceUrl = body.sourceUrl || body.source_url;
   const category = body.category || body.region;
   const tags = body.tags === undefined ? undefined : normalizeTagsInput(body.tags);
+  const status = body.status === undefined ? undefined : clean(body.status);
+  const postedBy = body.postedBy === undefined ? undefined : clean(body.postedBy);
+  const postedVia = body.postedVia === undefined ? undefined : clean(body.postedVia);
 
-  if (headline === undefined && blurb === undefined && sourceName === undefined && sourceUrl === undefined && category === undefined && tags === undefined) {
-    return json({ error: "headline, blurb, sourceName, sourceUrl, category or tags is required" }, 400);
+  if (headline === undefined && blurb === undefined && sourceName === undefined && sourceUrl === undefined && category === undefined && tags === undefined && status === undefined && postedBy === undefined && postedVia === undefined) {
+    return json({ error: "headline, blurb, sourceName, sourceUrl, category, tags, status, postedBy or postedVia is required" }, 400);
   }
 
   const nextHeadline = headline === undefined ? current.headline : clean(headline);
@@ -665,6 +686,13 @@ export async function onRequestPatch({ env, request }) {
   const nextSourceUrl = sourceUrl === undefined ? current.source_url : clean(sourceUrl);
   const nextCategory = category === undefined ? current.category : clean(category);
   const nextTags = tags === undefined ? current.tags : tags;
+  const nextStatus = status === undefined ? current.status : status;
+  const nextPostedBy = postedBy === undefined ? current.posted_by : postedBy;
+  const nextPostedVia = postedVia === undefined ? current.posted_via : postedVia;
+
+  if (!["published", "hidden"].includes(nextStatus)) {
+    return json({ error: "status must be published or hidden" }, 400);
+  }
 
   if (!nextBlurb) {
     return json({ error: "blurb is required" }, 400);
@@ -684,11 +712,11 @@ export async function onRequestPatch({ env, request }) {
 
   const result = await env.ATR_FEED_DB.prepare(
     `UPDATE feed_items
-       SET headline = ?, blurb = ?, source_name = ?, source_url = ?, category = ?, tags = ?, link_key = ?
-     WHERE id = ? AND status = ?
-     RETURNING id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key`
+       SET headline = ?, blurb = ?, source_name = ?, source_url = ?, category = ?, tags = ?, link_key = ?, status = ?, posted_by = ?, posted_via = ?
+     WHERE id = ? AND status IN ('published','hidden')
+     RETURNING id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key, status, posted_by, posted_via`
   )
-    .bind(nextHeadline || null, nextBlurb, nextSourceName, nextSourceUrl, nextCategory, nextTags, nextLinkKey, id, "published")
+    .bind(nextHeadline || null, nextBlurb, nextSourceName, nextSourceUrl, nextCategory, nextTags, nextLinkKey, nextStatus, nextPostedBy, nextPostedVia, id)
     .first();
 
   await writeOperationalEvent(env, request, {
@@ -829,6 +857,19 @@ async function ensureHeadlineColumn(env) {
 async function ensureTagsColumn(env) {
   try {
     await env.ATR_FEED_DB.prepare("ALTER TABLE feed_items ADD COLUMN tags TEXT").run();
+  } catch {
+    // D1 throws once the column already exists.
+  }
+}
+
+async function ensurePostedColumns(env) {
+  try {
+    await env.ATR_FEED_DB.prepare("ALTER TABLE feed_items ADD COLUMN posted_by TEXT").run();
+  } catch {
+    // D1 throws once the column already exists.
+  }
+  try {
+    await env.ATR_FEED_DB.prepare("ALTER TABLE feed_items ADD COLUMN posted_via TEXT").run();
   } catch {
     // D1 throws once the column already exists.
   }

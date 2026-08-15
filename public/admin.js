@@ -223,6 +223,7 @@ const els = {
   opsSuccessBody: document.querySelector("#ops-success-body"),
   tabPublish: document.querySelector("#tab-publish"),
   tabLive: document.querySelector("#tab-live"),
+  tabSources: document.querySelector("#tab-sources"),
   tabOps: document.querySelector("#tab-ops"),
   tabAnalytics: document.querySelector("#tab-analytics"),
   tabNewsletter: document.querySelector("#tab-newsletter"),
@@ -230,6 +231,16 @@ const els = {
   tabDashboard: document.querySelector("#tab-dashboard"),
   publishView: document.querySelector("#publish-view"),
   liveView: document.querySelector("#live-view"),
+  sourcesView: document.querySelector("#sources-view"),
+  sourcesBody: document.querySelector("#sources-body"),
+  sourcesCount: document.querySelector("#sources-count"),
+  sourcesCountDetail: document.querySelector("#sources-count-detail"),
+  sourcesHiddenCount: document.querySelector("#sources-hidden-count"),
+  sourcesHiddenDetail: document.querySelector("#sources-hidden-detail"),
+  sourcesActorSummary: document.querySelector("#sources-actor-summary"),
+  sourcesActorDetail: document.querySelector("#sources-actor-detail"),
+  postedBy: document.querySelector("#posted-by-input"),
+  postedVia: document.querySelector("#posted-via-input"),
   opsView: document.querySelector("#ops-view"),
   analyticsView: document.querySelector("#analytics-view"),
   newsletterView: document.querySelector("#newsletter-view"),
@@ -319,6 +330,7 @@ const els = {
 function switchTab(name) {
   const publish = name === "publish";
   const live = name === "live";
+  const sources = name === "sources";
   const ops = name === "ops";
   const analytics = name === "analytics";
   const newsletter = name === "newsletter";
@@ -327,6 +339,7 @@ function switchTab(name) {
   const profile = name === "profile";
   els.publishView.hidden = !publish;
   els.liveView.hidden = !live;
+  els.sourcesView.hidden = !sources;
   els.opsView.hidden = !ops;
   els.analyticsView.hidden = !analytics;
   els.newsletterView.hidden = !newsletter;
@@ -335,6 +348,7 @@ function switchTab(name) {
   els.profileView.hidden = !profile;
   els.tabPublish.classList.toggle("active", publish);
   els.tabLive.classList.toggle("active", live);
+  els.tabSources.classList.toggle("active", sources);
   els.tabOps.classList.toggle("active", ops);
   els.tabAnalytics.classList.toggle("active", analytics);
   els.tabNewsletter.classList.toggle("active", newsletter);
@@ -344,6 +358,7 @@ function switchTab(name) {
   const pageTitles = {
     publish: ["Publish", "Create and manage bulletin items"],
     live: ["Live Items", "Browse and search published items"],
+    sources: ["Sources", "Where each item came from, who posted it and when"],
     ops: ["Ingest Log", "Automation and manual runs"],
     analytics: ["Analytics", "Traffic and engagement"],
     newsletter: ["Newsletter", "Homepage latest-post card"],
@@ -420,6 +435,10 @@ els.tokenButton.addEventListener("click", () => {
 
 els.tabPublish.addEventListener("click", () => switchTab("publish"));
 els.tabLive.addEventListener("click", () => switchTab("live"));
+els.tabSources.addEventListener("click", () => {
+  switchTab("sources");
+  loadSources();
+});
 els.tabDashboard.addEventListener("click", () => switchTab("dashboard"));
 els.tabProfile.addEventListener("click", () => switchTab("profile"));
 els.tabOps.addEventListener("click", () => switchTab("ops"));
@@ -547,9 +566,12 @@ async function loadItems() {
     const allItems = [];
     let offset = 0;
     for (;;) {
-      const response = await fetch(`/api/items?limit=${pageSize}&offset=${offset}&_=${Date.now()}`, {
+      const response = await fetch(`/api/items?status=all&limit=${pageSize}&offset=${offset}&_=${Date.now()}`, {
         headers: { accept: "application/json", "cache-control": "no-cache" }
       });
+      if (response.status === 401) {
+        throw new Error("Admin session expired, sign in again.");
+      }
       if (!response.ok) throw new Error(`/api/items returned ${response.status}`);
       const payload = await response.json();
       const page = Array.isArray(payload.items) ? payload.items : [];
@@ -561,9 +583,65 @@ async function loadItems() {
     state.items = allItems;
     populateCategoryFilter();
     filterItems();
-    setStatus("Ready", `Loaded ${state.items.length} public items`);
+    setStatus("Ready", `Loaded ${state.items.length} items (published + hidden)`);
   } catch (error) {
     setStatus("Error", error.message);
+  }
+}
+
+async function loadSources() {
+  try {
+    const response = await fetch(`/api/items?status=all&limit=500&_=${Date.now()}`, {
+      headers: { accept: "application/json", "cache-control": "no-cache" },
+      credentials: "same-origin"
+    });
+    if (response.status === 401) throw new Error("Session expired, sign in again.");
+    if (!response.ok) throw new Error(`/api/items returned ${response.status}`);
+    const payload = await response.json();
+    const items = Array.isArray(payload.items) ? payload.items : [];
+    renderSources(items);
+  } catch (error) {
+    els.sourcesCount.textContent = "Error";
+    els.sourcesCountDetail.textContent = error.message;
+  }
+}
+
+function renderSources(items) {
+  els.sourcesBody.replaceChildren();
+  const total = items.length;
+  const hidden = items.filter((item) => item.status === "hidden").length;
+  const actors = new Map();
+  for (const item of items) {
+    const actor = item.posted_by || "Unknown";
+    actors.set(actor, (actors.get(actor) || 0) + 1);
+  }
+  const actorSummary = [...actors.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([name, count]) => `${name} ${count}`)
+    .join(" · ");
+  els.sourcesCount.textContent = String(total);
+  els.sourcesCountDetail.textContent = `${hidden} hidden`;
+  els.sourcesHiddenCount.textContent = String(hidden);
+  els.sourcesHiddenDetail.textContent = `${total - hidden} visible`;
+  els.sourcesActorSummary.textContent = actorSummary || "-";
+  els.sourcesActorDetail.textContent = "Sai / Jon / JR";
+
+  if (!total) {
+    els.sourcesBody.append(emptyTableRow(7, "No items tracked yet."));
+    return;
+  }
+
+  for (const item of items) {
+    const tr = document.createElement("tr");
+    tr.className = item.status === "hidden" ? "item-row item-row-hidden" : "item-row";
+    tr.append(cell(String(item.id), "nowrap id-cell", "ID"));
+    tr.append(cell(item.headline || item.title || firstWords(item.blurb, 12), "truncate", "Title"));
+    tr.append(cell(item.source_name || "-", "truncate", "Source"));
+    tr.append(cell(item.posted_by || "-", "", "Posted by"));
+    tr.append(cell(item.posted_via || "-", "", "Via"));
+    tr.append(cell(formatDateTime(item.published_at || item.created_at), "nowrap", "When"));
+    tr.append(cell(item.status === "hidden" ? "Hidden" : "Published", item.status === "hidden" ? "status-error" : "status-ok", "Status"));
+    els.sourcesBody.append(tr);
   }
 }
 
@@ -1039,7 +1117,7 @@ function renderList() {
 
   const thead = document.createElement("thead");
   const headRow = document.createElement("tr");
-  for (const label of ["ID", "Title", "Publisher", "Category", "Tags", "Published", "Link"]) {
+  for (const label of ["ID", "Title", "Publisher", "Category", "Tags", "Published", "Visible", "Link"]) {
     const th = document.createElement("th");
     th.textContent = label;
     if (label === "ID") th.className = "id-cell";
@@ -1051,7 +1129,7 @@ function renderList() {
   const tbody = document.createElement("tbody");
   for (const item of pageItems) {
     const tr = document.createElement("tr");
-    tr.className = "item-row";
+    tr.className = "item-row" + (item.status === "hidden" ? " item-row-hidden" : "");
     tr.tabIndex = 0;
     tr.addEventListener("click", () => {
       openLiveEditor(item.id);
@@ -1078,6 +1156,23 @@ function renderList() {
     tr.append(catTd);
     tr.append(cell(formatTags(item.tags), "", "Tags"));
     tr.append(cell(formatDateTime(item.published_at), "nowrap", "Published"));
+
+    // Visible toggle: hide/show on the public site.
+    const visTd = document.createElement("td");
+    visTd.dataset.label = "Visible";
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "btn " + (item.status === "hidden" ? "btn-danger" : "btn-ghost");
+    toggle.style.padding = "4px 10px";
+    toggle.style.fontSize = "12px";
+    toggle.textContent = item.status === "hidden" ? "Hidden" : "Visible";
+    toggle.title = item.status === "hidden" ? "Hidden from the public site. Click to show." : "Visible on the public site. Click to hide.";
+    toggle.addEventListener("click", (event) => {
+      event.stopPropagation();
+      toggleItemVisibility(item);
+    });
+    visTd.append(toggle);
+    tr.append(visTd);
 
     const linkUrl = `https://bulletin.asiatechreview.com/?item=${encodeURIComponent(item.link_key || item.id)}`;
     const linkTd = document.createElement("td");
@@ -1155,6 +1250,30 @@ async function saveItemCategory(item, newCategory) {
       item.category = newCategory;
     }
     setStatus("Saved", `Category updated for item ${item.id}`);
+    filterItems();
+  } catch (error) {
+    setStatus("Error", error.message);
+    filterItems();
+  }
+}
+
+async function toggleItemVisibility(item) {
+  const next = item.status === "hidden" ? "published" : "hidden";
+  const label = next === "hidden" ? "Hide" : "Show";
+  setStatus("Saving", `${label}ing item ${item.id} on the public site`);
+  try {
+    const response = await fetch("/api/items", {
+      method: "PATCH",
+      credentials: "same-origin",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({ id: Number(item.id), status: next })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || `PATCH returned ${response.status}`);
+    const updated = result.item;
+    const idx = state.items.findIndex((candidate) => String(candidate.id) === String(item.id));
+    if (idx >= 0) state.items[idx] = { ...state.items[idx], status: updated?.status || next };
+    setStatus("Saved", `Item ${item.id} is now ${updated?.status === "hidden" ? "hidden" : "visible"} on the public site`);
     filterItems();
   } catch (error) {
     setStatus("Error", error.message);
@@ -1432,6 +1551,11 @@ function collectForm() {
     sourceUrl: els.sourceUrl.value.trim(),
     category: els.category.value.trim() || DEFAULT_CATEGORY,
   };
+
+  const postedBy = els.postedBy ? els.postedBy.value.trim() : "";
+  const postedVia = els.postedVia ? els.postedVia.value.trim() : "";
+  if (postedBy) payload.postedBy = postedBy;
+  if (postedVia) payload.postedVia = postedVia;
 
   const publishedAt = fromLocalDateTime(els.publishedAt.value);
   if (state.mode === "new" && publishedAt) payload.publishedAt = publishedAt;

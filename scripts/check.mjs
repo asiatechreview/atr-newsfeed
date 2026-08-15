@@ -367,6 +367,9 @@ const existingPostItem = {
   source_name: "FT",
   source_url: "https://www.ft.com/content/duplicate-guard-test",
   category: "Markets",
+  status: "published",
+  posted_by: null,
+  posted_via: null,
   telegram_message_id: "existing-message",
   published_at: "2026-08-02T06:00:00Z",
   created_at: "2026-08-02T06:00:00Z"
@@ -466,7 +469,7 @@ const patchResponse = await onRequestPatch({
 });
 const patchPayload = await patchResponse.json();
 
-if (patchResponse.status !== 200 || patchPayload.item?.blurb !== "Edited item from the custom bulletin admin." || patchUpdateParams?.[7] !== existingPostItem.id) {
+if (patchResponse.status !== 200 || patchPayload.item?.blurb !== "Edited item from the custom bulletin admin." || patchUpdateParams?.[10] !== existingPostItem.id) {
   console.error("FAILED: PATCH /api/items must update an existing bulletin item for the admin UI");
   process.exit(1);
 }
