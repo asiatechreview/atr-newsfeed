@@ -176,7 +176,12 @@ const state = {
   category: "",
   categories: [],
   currentUser: "",
-  selectedIds: new Set()
+  selectedIds: new Set(),
+  source: "",
+  dateFrom: "",
+  dateTo: "",
+  hiddenOnly: false,
+  sort: "newest"
 };
 
 const els = {
@@ -213,6 +218,11 @@ const els = {
   listCount: document.querySelector("#list-count"),
   searchInput: document.querySelector("#search-input"),
   categoryFilter: document.querySelector("#category-filter"),
+  sourceFilter: document.querySelector("#source-filter"),
+  dateFrom: document.querySelector("#date-from"),
+  dateTo: document.querySelector("#date-to"),
+  hiddenOnly: document.querySelector("#hidden-only"),
+  sortOrder: document.querySelector("#sort-order"),
   bulkBar: document.querySelector("#bulk-bar"),
   bulkCount: document.querySelector("#bulk-count"),
   bulkShow: document.querySelector("#bulk-show"),
@@ -549,6 +559,26 @@ els.dashboardWindow.addEventListener("change", () => loadDashboard());
 els.searchInput.addEventListener("input", filterItems);
 els.categoryFilter.addEventListener("change", () => {
   state.category = els.categoryFilter.value;
+  filterItems();
+});
+els.sourceFilter?.addEventListener("change", () => {
+  state.source = els.sourceFilter.value;
+  filterItems();
+});
+els.dateFrom?.addEventListener("change", () => {
+  state.dateFrom = els.dateFrom.value;
+  filterItems();
+});
+els.dateTo?.addEventListener("change", () => {
+  state.dateTo = els.dateTo.value;
+  filterItems();
+});
+els.hiddenOnly?.addEventListener("change", () => {
+  state.hiddenOnly = els.hiddenOnly.checked;
+  filterItems();
+});
+els.sortOrder?.addEventListener("change", () => {
+  state.sort = els.sortOrder.value;
   filterItems();
 });
 els.bulkShow?.addEventListener("click", () => bulkUpdate({ status: "published" }));
@@ -1297,8 +1327,18 @@ function filterItems() {
   state.page = 1;
   const query = els.searchInput.value.trim().toLowerCase();
   const category = state.category;
+  const source = state.source;
+  const from = state.dateFrom ? new Date(`${state.dateFrom}T00:00:00`) : null;
+  const to = state.dateTo ? new Date(`${state.dateTo}T23:59:59`) : null;
+  const hiddenOnly = state.hiddenOnly;
+
   state.filtered = state.items.filter((item) => {
     if (category && (item.category || "Other news") !== category) return false;
+    if (source && (item.source_name || "") !== source) return false;
+    if (hiddenOnly && item.status !== "hidden") return false;
+    const published = item.published_at ? new Date(item.published_at) : null;
+    if (from && published && published < from) return false;
+    if (to && published && published > to) return false;
     if (!query) return true;
     return [
       item.id,
@@ -1312,8 +1352,22 @@ function filterItems() {
     ].some((value) => String(value || "").toLowerCase().includes(query));
   });
 
+  state.filtered.sort(comparatorForSort(state.sort));
   renderList();
   renderCounts();
+}
+
+function comparatorForSort(sort) {
+  if (sort === "oldest") {
+    return (a, b) => (new Date(a.published_at).getTime() || 0) - (new Date(b.published_at).getTime() || 0) || String(a.id).localeCompare(String(b.id));
+  }
+  if (sort === "category") {
+    return (a, b) => (a.category || "Other news").localeCompare(b.category || "Other news") || (new Date(b.published_at).getTime() || 0) - (new Date(a.published_at).getTime() || 0);
+  }
+  if (sort === "source") {
+    return (a, b) => (a.source_name || "").localeCompare(b.source_name || "") || (new Date(b.published_at).getTime() || 0) - (new Date(a.published_at).getTime() || 0);
+  }
+  return (a, b) => (new Date(b.published_at).getTime() || 0) - (new Date(a.published_at).getTime() || 0) || String(b.id).localeCompare(String(a.id));
 }
 
 function populateCategoryFilter() {
@@ -1345,6 +1399,24 @@ function populateCategoryFilter() {
     els.categoryFilter.append(opt);
   }
   els.categoryFilter.value = state.category;
+
+  // Source filter options, derived from loaded items.
+  const sources = new Set();
+  for (const item of state.items) {
+    if (item.source_name) sources.add(item.source_name);
+  }
+  els.sourceFilter.replaceChildren();
+  const allSources = document.createElement("option");
+  allSources.value = "";
+  allSources.textContent = "All sources";
+  els.sourceFilter.append(allSources);
+  for (const name of [...sources].sort((a, b) => a.localeCompare(b))) {
+    const opt = document.createElement("option");
+    opt.value = name;
+    opt.textContent = name;
+    els.sourceFilter.append(opt);
+  }
+  els.sourceFilter.value = state.source;
 }
 
 function renderList() {

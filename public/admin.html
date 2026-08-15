@@ -250,6 +250,21 @@
               <select id="category-filter" class="input select-auto" aria-label="Filter by category">
                 <option value="">All categories</option>
               </select>
+              <select id="source-filter" class="input select-auto" aria-label="Filter by source">
+                <option value="">All sources</option>
+              </select>
+              <input id="date-from" class="input select-auto date-filter" type="date" aria-label="From date">
+              <span class="date-sep">–</span>
+              <input id="date-to" class="input select-auto date-filter" type="date" aria-label="To date">
+              <label class="filter-check">
+                <input id="hidden-only" type="checkbox"> Hidden only
+              </label>
+              <select id="sort-order" class="input select-auto" aria-label="Sort order">
+                <option value="newest">Newest first</option>
+                <option value="oldest">Oldest first</option>
+                <option value="category">By category</option>
+                <option value="source">By source</option>
+              </select>
             </div>
             <div id="bulk-bar" class="bulk-bar" hidden>
               <span id="bulk-count" class="bulk-count">0 selected</span>
