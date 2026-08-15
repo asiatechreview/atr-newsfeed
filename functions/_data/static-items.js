@@ -1,15 +1,5 @@
 export const STATIC_ITEMS = [
   {
-    "id": "manual-telegram-2026-07-17-005",
-    "blurb": "DeepSeek is pushing China’s AI price war into enterprise adoption, with its V4 Flash model completing a standard intelligence task for about two cents versus more than $2 for Anthropic’s premium model, as founder Liang Wenfeng closes a first funding round of over $7 billion at a valuation above $40 billion",
-    "source_name": "Bloomberg",
-    "source_url": "https://www.bloomberg.com/news/newsletters/2026-07-17/china-can-still-win-the-ai-race-with-inferior-technology",
-    "category": "AI",
-    "telegram_message_id": "23783",
-    "published_at": "2026-07-17T12:13:57.105992Z",
-    "created_at": "2026-07-17T12:13:57.105992Z"
-  },
-  {
     "id": "manual-telegram-2026-07-17-004",
     "blurb": "South Korean authorities searched and seized materials from Chinese chipmaker Montage Technology's local office over a potential competition law violation, while Montage said it is cooperating with Seoul prosecutors and that no directors or employees have been charged, with South Korea accounting for 2.93 billion yuan ($432.63 million) of its fiscal 2025 sales",
     "source_name": "Reuters",
@@ -18,26 +8,6 @@ export const STATIC_ITEMS = [
     "telegram_message_id": "17958",
     "published_at": "2026-07-17T01:33:30.000Z",
     "created_at": "2026-07-17T01:33:30.000Z"
-  },
-  {
-    "id": "manual-telegram-2026-07-17-003",
-    "blurb": "Tata Electronics is preparing to produce India's first semiconductor wafers on 90nm process technology at its Dholera, Gujarat fab, using a mature node for industrial and automotive chips as it steps down from the 28nm process parent Tata Sons had touted in March 2025.",
-    "source_name": "Bloomberg",
-    "source_url": "https://www.bloomberg.com/news/articles/2026-07-17/tata-group-resorts-to-older-tech-to-launch-its-chip-foray",
-    "category": "Chips",
-    "telegram_message_id": null,
-    "published_at": "2026-07-17T01:31:26.000Z",
-    "created_at": "2026-07-17T01:31:26.000Z"
-  },
-  {
-    "id": "manual-telegram-2026-07-17-002",
-    "blurb": "Moonshot AI unveiled Kimi K3, a 2.8-trillion-parameter model built on its Kimi Delta Attention architecture, with a 1-million-token context window and claimed top open-model results across its evaluation suite.",
-    "source_name": "Kimi",
-    "source_url": "https://www.kimi.com/blog/kimi-k3",
-    "category": "AI",
-    "telegram_message_id": null,
-    "published_at": "2026-07-17T01:30:26.000Z",
-    "created_at": "2026-07-17T01:30:26.000Z"
   },
   {
     "id": "manual-telegram-2026-07-17-001",
@@ -520,16 +490,6 @@ export const STATIC_ITEMS = [
     "created_at": "2026-07-16T03:59:24.000Z"
   },
   {
-    "id": "html-2026-07-16-042",
-    "blurb": "Oracle is leading the race to provide Japan's top-secret air-gapped cloud services, ahead of AWS, Microsoft and Google, as Tokyo and Washington work to secure intelligence-sharing infrastructure",
-    "source_name": "FT",
-    "source_url": "https://www.ft.com/content/c8d32323-1d06-4470-8375-2ee6dd42749e",
-    "category": "Other news",
-    "telegram_message_id": null,
-    "published_at": "2026-07-16T03:58:43.000Z",
-    "created_at": "2026-07-16T03:59:24.000Z"
-  },
-  {
     "id": "html-2026-07-16-043",
     "blurb": "India pledged another 1.9 trillion rupees ($19.7 billion) to boost domestic chip and smartphone production, including 1.28 trillion rupees for semiconductors and 625 billion rupees for phones",
     "source_name": "Bloomberg",
@@ -600,26 +560,6 @@ export const STATIC_ITEMS = [
     "created_at": "2026-07-16T03:59:24.000Z"
   },
   {
-    "id": "html-2026-07-16-050",
-    "blurb": "StepFun will debut its Agent operating system and StepX Neo AI-agent smartphone, with partners including Trip.com, Alipay, Didi, Meituan, WPS and ByteDance's Jianying",
-    "source_name": "Shanghai Daily",
-    "source_url": "https://www.citynewsservice.cn/articles/shanghaidaily/news/stepfun-launches-worlds-first-mass-market-agentic-smartphone-dk4lj5zn",
-    "category": "AI",
-    "telegram_message_id": null,
-    "published_at": "2026-07-16T03:58:35.000Z",
-    "created_at": "2026-07-16T03:59:24.000Z"
-  },
-  {
-    "id": "html-2026-07-16-051",
-    "blurb": "Alibaba and Honor are expected to deepen their partnership on an AI device operating system at WAIC, with new agent capabilities planned as China's AI-phone race intensifies",
-    "source_name": "SCMP",
-    "source_url": "https://www.scmp.com/tech/article/3360525/alibaba-team-honor-race-build-ai-agentic-devices",
-    "category": "AI",
-    "telegram_message_id": null,
-    "published_at": "2026-07-16T03:58:34.000Z",
-    "created_at": "2026-07-16T03:59:24.000Z"
-  },
-  {
     "id": "html-2026-07-16-052",
     "blurb": "WAIC 2026 will feature near-memory computing 3D chips, humanoid robots and AI dexterous hands as China tries to connect domestic compute with embodied AI hardware",
     "source_name": "People's Daily",
@@ -627,26 +567,6 @@ export const STATIC_ITEMS = [
     "category": "AI",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:33.000Z",
-    "created_at": "2026-07-16T03:59:24.000Z"
-  },
-  {
-    "id": "html-2026-07-16-053",
-    "blurb": "Shanghai Matwings Technology is previewing MatwingsVenus, an AI protein-design platform for pharma, diagnostics, food and agriculture use cases",
-    "source_name": "Orient",
-    "source_url": "https://orient.tm/en/china/1263",
-    "category": "AI",
-    "telegram_message_id": null,
-    "published_at": "2026-07-16T03:58:32.000Z",
-    "created_at": "2026-07-16T03:59:24.000Z"
-  },
-  {
-    "id": "html-2026-07-16-054",
-    "blurb": "The conference is being framed as a full-stack AI showcase for China, spanning domestic chips and compute, agentic phones, robots, vertical AI tools and governance messaging",
-    "source_name": "Shanghai Municipal Government",
-    "source_url": "https://english.shanghai.gov.cn/en-Events/20260624/9cc202d708504b56ba32f70fbd61ef79.html",
-    "category": "AI",
-    "telegram_message_id": null,
-    "published_at": "2026-07-16T03:58:31.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
   },
   {
@@ -690,16 +610,6 @@ export const STATIC_ITEMS = [
     "created_at": "2026-07-16T03:59:24.000Z"
   },
   {
-    "id": "html-2026-07-16-059",
-    "blurb": "Saudi Arabia bought a record $47.2 million worth of Taiwanese drones in June, making it the island's top UAV customer as buyers look beyond Chinese-made systems",
-    "source_name": "Bloomberg",
-    "source_url": "https://www.bloomberg.com/news/articles/2026-07-13/saudi-arabia-becomes-top-buyer-in-taiwan-s-young-drone-industry",
-    "category": "Markets",
-    "telegram_message_id": null,
-    "published_at": "2026-07-16T03:58:26.000Z",
-    "created_at": "2026-07-16T03:59:24.000Z"
-  },
-  {
     "id": "html-2026-07-16-060",
     "blurb": "An EY-Parthenon analysis estimated Europe and the US would need to invest an extra $23.6 trillion in critical industries over 25 years to reduce dependence on China",
     "source_name": "FT",
@@ -717,36 +627,6 @@ export const STATIC_ITEMS = [
     "category": "Markets",
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:24.000Z",
-    "created_at": "2026-07-16T03:59:24.000Z"
-  },
-  {
-    "id": "html-2026-07-16-062",
-    "blurb": "Huawei plans to raise smartphone shipments by more than 20% this year to as many as 60 million units, even as a memory-chip shortage forces Xiaomi, Oppo and Vivo to cut targets",
-    "source_name": "Nikkei Asia",
-    "source_url": "https://asia.nikkei.com/spotlight/huawei-crackdown/huawei-aims-for-20-smartphone-growth-despite-memory-crunch-sources",
-    "category": "Other news",
-    "telegram_message_id": null,
-    "published_at": "2026-07-16T03:58:23.000Z",
-    "created_at": "2026-07-16T03:59:24.000Z"
-  },
-  {
-    "id": "html-2026-07-16-063",
-    "blurb": "Singapore's High Court declined to stay Byju Raveendran's six-month jail sentence for contempt, meaning the failed edtech founder risks prison if he returns to the city-state",
-    "source_name": "Bloomberg",
-    "source_url": "https://www.bloomberg.com/news/articles/2026-07-14/byju-s-founder-loses-bid-to-overturn-singapore-jail-sentence",
-    "category": "Other news",
-    "telegram_message_id": null,
-    "published_at": "2026-07-16T03:58:22.000Z",
-    "created_at": "2026-07-16T03:59:24.000Z"
-  },
-  {
-    "id": "html-2026-07-16-064",
-    "blurb": "Malaysia opened an immigration probe into the Network School, the tech startup school promoted by Balaji Srinivasan in Johor",
-    "source_name": "Bloomberg",
-    "source_url": "https://www.bloomberg.com/news/articles/2026-07-14/malaysia-launches-probe-into-srinivasan-s-johor-startup-school",
-    "category": "Startups",
-    "telegram_message_id": null,
-    "published_at": "2026-07-16T03:58:21.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
   },
   {
@@ -778,36 +658,6 @@ export const STATIC_ITEMS = [
     "telegram_message_id": null,
     "published_at": "2026-07-16T03:58:18.000Z",
     "created_at": "2026-07-16T03:59:24.000Z"
-  },
-  {
-    "id": "html-2026-07-16-068",
-    "blurb": "Amazon is building new warehouses near major Chinese ports as US customs scrutiny rises, betting that China-based sellers still need compliant export routes despite its domestic e-commerce retreat",
-    "source_name": "Nikkei Asia",
-    "source_url": "https://asia.nikkei.com/business/retail/amazon-courts-china-sellers-with-us-customs-friendly-warehouses",
-    "category": "Other news",
-    "telegram_message_id": null,
-    "published_at": "2026-07-16T03:58:17.000Z",
-    "created_at": "2026-07-16T03:59:24.000Z"
-  },
-  {
-    "id": "html-2026-07-16-069",
-    "blurb": "Malaysia said residents at the Network School, the Johor tech commune promoted by former Coinbase executive Balaji Srinivasan, have valid travel documents after an immigration review",
-    "source_name": "Reuters",
-    "source_url": "https://www.reuters.com/world/asia-pacific/malaysia-says-residents-tech-commune-run-by-ex-coinbase-exec-have-valid-travel-2026-07-15/",
-    "category": "Startups",
-    "telegram_message_id": null,
-    "published_at": "2026-07-16T03:58:16.000Z",
-    "created_at": "2026-07-16T03:59:24.000Z"
-  },
-  {
-    "id": "manual-telegram-2026-07-16-003",
-    "blurb": "OnePlus plans to wind down US and Europe operations as early as this week under an Oppo restructuring, with a wider global shutdown including India expected in 2027",
-    "source_name": "Bloomberg",
-    "source_url": "https://www.bloomberg.com/news/articles/2026-07-15/oneplus-once-popular-with-tech-fans-to-pull-out-of-us-and-europe",
-    "category": "Other news",
-    "telegram_message_id": null,
-    "published_at": "2026-07-16T01:16:14.176Z",
-    "created_at": "2026-07-16T01:16:14.176Z"
   },
   {
     "id": "manual-telegram-2026-07-16-002",
@@ -870,16 +720,6 @@ export const STATIC_ITEMS = [
     "created_at": "2026-07-12T04:59:56.000Z"
   },
   {
-    "id": "md-2026-07-12-005",
-    "blurb": "Roughly 20% of USB drives surfacing as top picks on Amazon carry multiple reviews flagging inflated storage capacity, a Nikkei investigation found, with nearly 40% of flagged listings on the US site alone. The probe began after Japan's Ground Self-Defense Force was found using thumb drives loaded with China-linked malware, and internal defense documents showed devices with falsified capacity circulating widely online, often resold on platforms like Rakuten after being sourced from Amazon.",
-    "source_name": "Nikkei Asia",
-    "source_url": "https://asia.nikkei.com/business/electronics/usb-drives-on-amazon-have-20-complaint-rate-about-faked-storage",
-    "category": "Other news",
-    "telegram_message_id": null,
-    "published_at": "2026-07-12T04:59:55.000Z",
-    "created_at": "2026-07-12T04:59:55.000Z"
-  },
-  {
     "id": "md-2026-07-12-006",
     "blurb": "Tencent is negotiating to become Manus's largest shareholder as investors move to unwind Meta's $2 billion acquisition of the AI agent startup, following a Beijing order to reverse the deal. Most of Manus's existing backers, including Tencent, ZhenFund and HSG, along with company management, are discussing a buyback at the same $2 billion valuation.",
     "source_name": "FT",
@@ -918,36 +758,6 @@ export const STATIC_ITEMS = [
     "telegram_message_id": null,
     "published_at": "2026-07-12T04:59:51.000Z",
     "created_at": "2026-07-12T04:59:51.000Z"
-  },
-  {
-    "id": "md-2026-07-12-010",
-    "blurb": "India approved a manufacturing joint venture between China’s Vivo and local firm Dixon Technologies, clearing a partnership announced in December 2024 under rules that subject China-linked investment to extra scrutiny. The venture will absorb some of Vivo’s manufacturing assets, produce part of its smartphone orders in India, and make electronics for other brands, extending India’s rise as a global smartphone manufacturing hub after Apple.",
-    "source_name": "TechCrunch",
-    "source_url": "https://techcrunch.com/2026/07/09/after-apple-indias-smartphone-manufacturing-boom-enters-new-phase-with-vivo-jv/",
-    "category": "Other news",
-    "telegram_message_id": null,
-    "published_at": "2026-07-12T04:59:50.000Z",
-    "created_at": "2026-07-12T04:59:50.000Z"
-  },
-  {
-    "id": "md-2026-07-12-011",
-    "blurb": "Malaysia Prime Minister Anwar Ibrahim plans to debut an agentic AI avatar of himself in the coming days, which aims to help the public use government services",
-    "source_name": "Bloomberg",
-    "source_url": "https://www.bloomberg.com/news/articles/2026-07-10/malaysia-s-anwar-to-debut-an-ai-double-that-sounds-just-like-him?accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzb3VyY2UiOiJTdWJzY3JpYmVyR2lmdGVkQXJ0aWNsZSIsImlhdCI6MTc4MzY2NjQwMSwiZXhwIjoxNzg0MjcxMjAxLCJhcnRpY2xlSWQiOiJUSFg2MEVLSVAzSjgwMCIsImJjb25uZWN0SWQiOiJDNTc5RDIwMDZBQjQ0RjRDODkwMTU0M0U0ODMxNkJCNiJ9.gnU3rG68X5p_s0oHqL4pKhl9Ou3QVuI7WUNIXblvyfk",
-    "category": "AI",
-    "telegram_message_id": null,
-    "published_at": "2026-07-12T04:59:49.000Z",
-    "created_at": "2026-07-12T04:59:49.000Z"
-  },
-  {
-    "id": "md-2026-07-12-012",
-    "blurb": "OpenAI and Google have been supplying AI models to Singapore-based subsidiaries of Alibaba, Baidu and Tencent, all companies on US blacklists.",
-    "source_name": "FT",
-    "source_url": "https://www.ft.com/content/5d6aafa1-5d47-4585-aa95-6ec06a6cd20f",
-    "category": "AI",
-    "telegram_message_id": null,
-    "published_at": "2026-07-12T04:59:48.000Z",
-    "created_at": "2026-07-12T04:59:48.000Z"
   },
   {
     "id": "md-2026-07-12-013",
@@ -1060,26 +870,6 @@ export const STATIC_ITEMS = [
     "created_at": "2026-07-09T04:59:56.000Z"
   },
   {
-    "id": "md-2026-07-09-005",
-    "blurb": "China's newest AI models, such as Zhipu's GLM-5.2, are narrowing the performance gap with US rivals while undercutting them on price. The shift is starting to reshape the global frontier AI market, with European firms increasingly turning to China's cheaper models.",
-    "source_name": "Bloomberg",
-    "source_url": "https://www.bloomberg.com/news/newsletters/2026-07-08/chinese-ai-models-advance-causing-us-cybersecurity-anxiety",
-    "category": "AI",
-    "telegram_message_id": null,
-    "published_at": "2026-07-09T04:59:55.000Z",
-    "created_at": "2026-07-09T04:59:55.000Z"
-  },
-  {
-    "id": "md-2026-07-09-006",
-    "blurb": "Taiwan has charged two businessmen with helping Chinese state-linked hackers run a wide-ranging espionage campaign, accusing them of leasing out LINE messaging accounts used to impersonate international journalists and plant malware on targets' computers. The victims included politicians, academics and civil society groups, according to Taiwan's Ministry of Justice Investigation Bureau, with some impersonated journalists tied to the International Consortium of Investigative Journalists.",
-    "source_name": "The Record",
-    "source_url": "https://therecord.media/taiwan-charges-businessmen-china-cyber-espionage-campaign",
-    "category": "Cybersecurity",
-    "telegram_message_id": null,
-    "published_at": "2026-07-09T04:59:54.000Z",
-    "created_at": "2026-07-09T04:59:54.000Z"
-  },
-  {
     "id": "md-2026-07-09-007",
     "blurb": "LG will invest $1 billion in a chip packaging plant in Hai Phong, Vietnam, the first high-tech project in the port city's new free trade zone. The LG Innotek facility starts operations in 2027 and reaches mass production by 2028, according to the local Communist Party outlet. Vietnam's chip industry has so far focused on packaging and testing, but investments from Intel, Amkor and Samsung are pushing it toward more sophisticated manufacturing.",
     "source_name": "Nikkei Asia",
@@ -1160,16 +950,6 @@ export const STATIC_ITEMS = [
     "created_at": "2026-07-09T04:59:46.000Z"
   },
   {
-    "id": "md-2026-07-09-015",
-    "blurb": "Zhipu AI shares jumped as much as 22% Thursday before paring gains, after the Beijing-based AI company announced a US$4 billion fundraising despite pricing new shares at a discount. The stock recently traded 9% higher at HK$1,989.00 (US$253.72), outpacing the Hang Seng Tech Index's 0.1% decline, as Zhipu offers 19.78 million shares at HK$1,588 each, nearly 13% below Wednesday's HK$1,825 close.",
-    "source_name": "WSJ",
-    "source_url": "https://www.wsj.com/tech/ai/chinas-zhipu-ai-shares-surge-on-4-0-billion-fundraising-00c6abc7",
-    "category": "AI",
-    "telegram_message_id": null,
-    "published_at": "2026-07-09T04:59:45.000Z",
-    "created_at": "2026-07-09T04:59:45.000Z"
-  },
-  {
     "id": "md-2026-07-09-016",
     "blurb": "Thailand has approved nine major investment projects worth a combined $1.99 billion across artificial intelligence (AI), advanced electronics, aviation, clean energy, and food, as global manufacturers reposition supply chains across Southeast Asia. In a statement on Wednesday, the Thailand Board of Investment (BOI) said the approvals were given at a recent meeting chaired by Deputy Prime Minister and Finance Minister Ekniti Nitithanprapas.",
     "source_name": "TechNode",
@@ -1180,16 +960,6 @@ export const STATIC_ITEMS = [
     "created_at": "2026-07-09T04:59:44.000Z"
   },
   {
-    "id": "md-2026-07-09-017",
-    "blurb": "Truecaller has publicly clashed with India's telecom regulator, with CEO Rishit Jhunjhunwala accusing the Telecom Regulatory Authority of India of blocking the app from displaying spam data for calls from the country's 1400 and 1600 number series. He said the restriction has enabled abuse of those numbers and undermined trust in legitimate business calls, calling India's anti-spam framework a hindrance in the company's largest market.",
-    "source_name": "TechCrunch",
-    "source_url": "https://techcrunch.com/2026/07/08/truecaller-clashes-with-indias-telecom-regulator-over-anti-spam-rules/",
-    "category": "Other news",
-    "telegram_message_id": null,
-    "published_at": "2026-07-09T04:59:43.000Z",
-    "created_at": "2026-07-09T04:59:43.000Z"
-  },
-  {
     "id": "md-2026-07-09-018",
     "blurb": "CarDekho parent Girnar Software plans to file draft IPO papers this quarter, targeting an issue size of up to Rs 3,000 crore ($360 million).",
     "source_name": "Economic Times",
@@ -1198,36 +968,6 @@ export const STATIC_ITEMS = [
     "telegram_message_id": null,
     "published_at": "2026-07-09T04:59:42.000Z",
     "created_at": "2026-07-09T04:59:42.000Z"
-  },
-  {
-    "id": "md-2026-07-09-019",
-    "blurb": "Shares of Chinese AI model maker Zhipu jumped as much as 22% in Hong Kong on Thursday after it priced a $4 billion share sale, more than six times the size of its December IPO, at the low end of the marketed range despite a 13% discount to the prior close. The stock has now risen roughly 1,700% since its debut. Analysts said the strong demand reflects growing investor confidence in Zhipu's large language model as a market leader gaining ground on rivals.",
-    "source_name": "Bloomberg",
-    "source_url": "https://www.bloomberg.com/news/articles/2026-07-08/ai-firm-zhipu-prices-4-billion-placement-at-hk-1-588-each-share",
-    "category": "AI",
-    "telegram_message_id": null,
-    "published_at": "2026-07-09T04:59:41.000Z",
-    "created_at": "2026-07-09T04:59:41.000Z"
-  },
-  {
-    "id": "md-2026-07-09-020",
-    "blurb": "U.S. hospitals are increasingly hiring Filipino nurses for remote monitoring roles to cut costs and plug staffing gaps, a shift that may be worsening the nursing shortage in the Philippines.",
-    "source_name": "Rest of World",
-    "source_url": "https://restofworld.org/2026/u-s-healthcare-philippines-remote-nurses/",
-    "category": "Other news",
-    "telegram_message_id": null,
-    "published_at": "2026-07-09T04:59:40.000Z",
-    "created_at": "2026-07-09T04:59:40.000Z"
-  },
-  {
-    "id": "md-2026-07-08-001",
-    "blurb": "Google Cloud will roll out its latest AI models locally in India as part of a data sovereignty push, CEO Thomas Kurian said, adding that the company is setting up a hub of \"forward deployed engineers\" in India to serve customers across Asia and exploring plans for local AI server manufacturing.",
-    "source_name": "Economic Times",
-    "source_url": "https://economictimes.indiatimes.com/tech/technology/in-a-big-sovereignty-push-google-cloud-to-host-its-latest-ai-models-in-india-global-chief-thomas-kurian/articleshow/132245951.cms",
-    "category": "AI",
-    "telegram_message_id": null,
-    "published_at": "2026-07-08T04:59:59.000Z",
-    "created_at": "2026-07-08T04:59:59.000Z"
   },
   {
     "id": "md-2026-07-08-002",
@@ -1370,16 +1110,6 @@ export const STATIC_ITEMS = [
     "created_at": "2026-07-08T04:59:45.000Z"
   },
   {
-    "id": "md-2026-07-08-016",
-    "blurb": "Xendit, Indonesian payments infrastructure company, announced Wednesday the integration of Dragonpay Corporation, the Philippines’ alternative payments platform.",
-    "source_name": "TechNode",
-    "source_url": "https://technode.global/2026/07/08/indonesias-xendit-integrates-with-philippines-dragonpay/",
-    "category": "Fintech",
-    "telegram_message_id": null,
-    "published_at": "2026-07-08T04:59:44.000Z",
-    "created_at": "2026-07-08T04:59:44.000Z"
-  },
-  {
     "id": "md-2026-07-08-017",
     "blurb": "Chinese AI startup MiniMax Group is developing a large language model with 2.7 trillion parameters, making it the largest open-weight AI model released by a Chinese firm and possibly the largest in the world. The trillion-parameter race reflects growing demand for autonomous systems capable of complex, multi-step reasoning without human intervention, analysts say. The model could launch as early as the third quarter",
     "source_name": "Reuters",
@@ -1398,16 +1128,6 @@ export const STATIC_ITEMS = [
     "telegram_message_id": null,
     "published_at": "2026-07-07T04:59:59.000Z",
     "created_at": "2026-07-07T04:59:59.000Z"
-  },
-  {
-    "id": "md-2026-07-07-002",
-    "blurb": "LG Electronics expects second-quarter operating profit to jump nearly 150% year-on-year to 1.579 trillion won ($1.03 billion), helped by a US tariff refund and steady profitability in home appliances, TVs and auto parts. The forecast keeps the South Korean electronics giant on track for an earnings recovery this year, building on a strong first-quarter rebound as it pushes into new areas like AI data-center cooling and robotics.",
-    "source_name": "WSJ",
-    "source_url": "https://www.wsj.com/business/earnings/lg-electronics-expects-quarterly-earnings-to-more-than-double-796a01cb",
-    "category": "Other news",
-    "telegram_message_id": null,
-    "published_at": "2026-07-07T04:59:58.000Z",
-    "created_at": "2026-07-07T04:59:58.000Z"
   },
   {
     "id": "md-2026-07-07-003",
@@ -1450,16 +1170,6 @@ export const STATIC_ITEMS = [
     "created_at": "2026-07-07T04:59:54.000Z"
   },
   {
-    "id": "md-2026-07-07-007",
-    "blurb": "Apple has resumed card payments for Apple Account purchases in India, more than four years after dropping the option amid regulatory changes to the country's digital payments rules. The phased rollout lets users add eligible Visa and Mastercard credit and debit cards to pay for subscriptions like iCloud+ and Apple Music, as well as App Store purchases. Apple suspended card payments in May 2022 after India tightened rules on recurring transactions, pushing users toward UPI, net banking and Apple Account balance in the interim.",
-    "source_name": "TechCrunch",
-    "source_url": "https://techcrunch.com/2026/07/06/apple-brings-back-card-payments-for-apple-account-purchases-in-india-after-a-four-year-hiatus/",
-    "category": "Fintech",
-    "telegram_message_id": null,
-    "published_at": "2026-07-07T04:59:53.000Z",
-    "created_at": "2026-07-07T04:59:53.000Z"
-  },
-  {
     "id": "md-2026-07-07-008",
     "blurb": "Alibaba's Qwen models have made it an AI powerhouse, but the company has struggled to turn their global popularity into a profitable business – Alibaba's open-source AI models have become a global hit with developers, but that same openness, letting anyone use or modify them freely, is making it hard for the company to turn the popularity into profit.",
     "source_name": "NYT",
@@ -1480,16 +1190,6 @@ export const STATIC_ITEMS = [
     "created_at": "2026-07-07T04:59:51.000Z"
   },
   {
-    "id": "md-2026-07-07-010",
-    "blurb": "DeepSeek is developing its own AI chip to cut its dependence on Nvidia and Huawei processors. The chip is built for inference, running trained models rather than training them, and marks a significant strategic shift for a company already seen as China's AI standard-bearer. Success could also complicate matters for Huawei, which had hoped to fill that same gap.",
-    "source_name": "Reuters",
-    "source_url": "https://www.reuters.com/world/china/chinas-deepseek-developing-its-own-ai-chip-sources-say-2026-07-07/",
-    "category": "Chips",
-    "telegram_message_id": null,
-    "published_at": "2026-07-07T04:59:50.000Z",
-    "created_at": "2026-07-07T04:59:50.000Z"
-  },
-  {
     "id": "md-2026-07-07-011",
     "blurb": "Chinese authorities have met with major tech firms over the past month to discuss restricting overseas access to the country's most advanced AI models, including unreleased ones. The talks, which included Alibaba, ByteDance and startupZ.ai, follow a series of moves by Beijing to keep homegrown AI development within its borders, treating frontier AI as a national asset requiring tight control, much like the US does.",
     "source_name": "Reuters",
@@ -1498,16 +1198,6 @@ export const STATIC_ITEMS = [
     "telegram_message_id": null,
     "published_at": "2026-07-07T04:59:49.000Z",
     "created_at": "2026-07-07T04:59:49.000Z"
-  },
-  {
-    "id": "md-2026-07-07-012",
-    "blurb": "Chinese smartphone sales fell 13% year-on-year during the month-long 618 shopping festival as brands raised prices to offset rising memory costs, Counterpoint Research data showed. All major domestic brands except Huawei posted double-digit declines between May 26 and June 21, with Honor down 33% and Xiaomi off 24%, as thinner promotions and costlier components tied to the AI infrastructure boom squeezed the discounts typically seen during the event.",
-    "source_name": "Reuters",
-    "source_url": "https://www.reuters.com/business/media-telecom/china-smartphone-sales-drop-13-during-618-festival-memory-costs-limit-discounts-2026-07-07/",
-    "category": "Other news",
-    "telegram_message_id": null,
-    "published_at": "2026-07-07T04:59:48.000Z",
-    "created_at": "2026-07-07T04:59:48.000Z"
   },
   {
     "id": "md-2026-07-07-013",
@@ -1528,26 +1218,6 @@ export const STATIC_ITEMS = [
     "telegram_message_id": null,
     "published_at": "2026-07-06T04:59:59.000Z",
     "created_at": "2026-07-06T04:59:59.000Z"
-  },
-  {
-    "id": "md-2026-07-06-002",
-    "blurb": "A federal judge ordered the Pentagon to give Alibaba Group Holding Ltd. a reprieve from a law that caused all of its lobbyists to drop it as a client while she considers the constitutionality of the measure, in a case set to test the US’s ability to curtail Chinese companies’ activities.",
-    "source_name": "Bloomberg",
-    "source_url": "https://www.bloomberg.com/news/articles/2026-07-05/alibaba-gets-reprieve-from-lobbying-ban-tied-to-pentagon-s-curbs",
-    "category": "Other news",
-    "telegram_message_id": null,
-    "published_at": "2026-07-06T04:59:58.000Z",
-    "created_at": "2026-07-06T04:59:58.000Z"
-  },
-  {
-    "id": "md-2026-07-06-003",
-    "blurb": "A Samsung union leader's $26 billion bonus win has splintered the union he leads, as unequal payouts between semiconductor workers and staff at loss-making units drove membership below 55,000, less than half the company's domestic workforce. The leader now wants to narrow that bonus gap and admits semiconductor and other employees may eventually need separate unions.",
-    "source_name": "Bloomberg",
-    "source_url": "https://www.bloomberg.com/news/features/2026-07-05/samsung-s-ai-bonus-deal-a-short-lived-victory-for-millennial-union-leader",
-    "category": "Other news",
-    "telegram_message_id": null,
-    "published_at": "2026-07-06T04:59:57.000Z",
-    "created_at": "2026-07-06T04:59:57.000Z"
   },
   {
     "id": "md-2026-07-06-004",
@@ -1578,16 +1248,6 @@ export const STATIC_ITEMS = [
     "telegram_message_id": null,
     "published_at": "2026-07-06T04:59:54.000Z",
     "created_at": "2026-07-06T04:59:54.000Z"
-  },
-  {
-    "id": "md-2026-07-06-007",
-    "blurb": "Shenzhen-based smart glasses startup Even Realities has raised $150 million in a pre-Series B round led by Meituan and returning backer Tencent, valuing the company at $1 billion. Founder and CEO Will Wang said his company is betting on display-first glasses that beam information directly into the wearer's line of sight without sacrificing privacy, a different approach from rivals building camera-equipped devices for content capture and AI.",
-    "source_name": "TechCrunch",
-    "source_url": "https://techcrunch.com/2026/07/06/smart-glasses-maker-even-realities-hits-1b-valuation-with-150m-funding-led-by-meituan-tencent/",
-    "category": "Other news",
-    "telegram_message_id": null,
-    "published_at": "2026-07-06T04:59:53.000Z",
-    "created_at": "2026-07-06T04:59:53.000Z"
   },
   {
     "id": "md-2026-07-06-008",
@@ -1640,16 +1300,6 @@ export const STATIC_ITEMS = [
     "created_at": "2026-07-06T04:59:48.000Z"
   },
   {
-    "id": "md-2026-07-06-013",
-    "blurb": "Indian fintech Navi, cofounded by Flipkart cofounder Sachin Bansal, is preparing to file for an IPO by the March quarter of 2026-27 to raise Rs 3,000 crore. The Bengaluru-based company is working with Kotak Investment Banking on the issue, which will likely include both fresh capital and an offer for sale, though the split hasn't been finalized.",
-    "source_name": "Economic Times",
-    "source_url": "https://economictimes.indiatimes.com/tech/startups/sachin-bansals-fintech-firm-navi-eyeing-rs-3000-crore-ipo-by-march-2027/articleshow/132200445.cms",
-    "category": "Fintech",
-    "telegram_message_id": null,
-    "published_at": "2026-07-06T04:59:47.000Z",
-    "created_at": "2026-07-06T04:59:47.000Z"
-  },
-  {
     "id": "md-2026-07-06-014",
     "blurb": "Tokyo Artisan Intelligence will mass-produce its own chips next year, backed by Malaysian design house Oppstar, wagering that smaller players can carve out space outside the data center race dominated by Nvidia and other giants. The startup recently completed evaluation of Sting Ray, a test chip for edge AI systems that process data locally rather than in the cloud.",
     "source_name": "Nikkei Asia",
@@ -1688,16 +1338,6 @@ export const STATIC_ITEMS = [
     "telegram_message_id": null,
     "published_at": "2026-07-06T04:59:43.000Z",
     "created_at": "2026-07-06T04:59:43.000Z"
-  },
-  {
-    "id": "md-2026-07-06-018",
-    "blurb": "South Korea’s Supreme Court has proposed amendments that would introduce detailed procedures for the seizure and liquidation of digital assets.",
-    "source_name": "The Block",
-    "source_url": "https://www.theblock.co/post/407183/south-korea-crypto-specific-procedure",
-    "category": "Crypto",
-    "telegram_message_id": null,
-    "published_at": "2026-07-06T04:59:42.000Z",
-    "created_at": "2026-07-06T04:59:42.000Z"
   },
   {
     "id": "md-2026-07-05-001",
@@ -1770,16 +1410,6 @@ export const STATIC_ITEMS = [
     "created_at": "2026-07-04T04:59:58.000Z"
   },
   {
-    "id": "md-2026-07-04-003",
-    "blurb": "Indian data centre operator Yotta Data Services is in talks with global and domestic funds to raise roughly $1 billion for expansion. Promoters plan to sell a 25-30% stake at a $3 billion valuation.",
-    "source_name": "Economic Times",
-    "source_url": "https://economictimes.indiatimes.com/tech/funding/yotta-data-services-in-talks-with-pe-funds-to-raise-1-billion/articleshow/132151592.cms",
-    "category": "AI",
-    "telegram_message_id": null,
-    "published_at": "2026-07-04T04:59:57.000Z",
-    "created_at": "2026-07-04T04:59:57.000Z"
-  },
-  {
     "id": "md-2026-07-04-004",
     "blurb": "Alibaba has barred employees from using Anthropic's Claude Code after the tool drew scrutiny for features that can flag China-linked users",
     "source_name": "Reuters",
@@ -1820,36 +1450,6 @@ export const STATIC_ITEMS = [
     "created_at": "2026-07-04T04:59:53.000Z"
   },
   {
-    "id": "md-2026-07-04-008",
-    "blurb": "GoDaddy warns India's crackdown on fake websites impersonating major brands could make the internet less safe for legitimate businesses worldwide. A New Delhi court order blocking over 1,100 sites went further, requiring domain sellers to end default privacy protection, disclose buyer details within 72 hours to anyone with \"legitimate interest,\" and ban domains mimicking protected brand names.",
-    "source_name": "Reuters",
-    "source_url": "https://www.reuters.com/world/worlds-biggest-domain-seller-fears-indias-fake-site-crackdown-could-damage-2026-07-03/",
-    "category": "Other news",
-    "telegram_message_id": null,
-    "published_at": "2026-07-04T04:59:52.000Z",
-    "created_at": "2026-07-04T04:59:52.000Z"
-  },
-  {
-    "id": "md-2026-07-04-009",
-    "blurb": "Ashwini Vaishnaw directs MeitY to summon Meta regarding Instagram ads promoting child sexual abuse material",
-    "source_name": "Economic Times",
-    "source_url": "https://economictimes.indiatimes.com/tech/technology/ashwini-vaishnaw-directs-meity-to-summon-meta-regarding-instagram-ads-promoting-child-sexual-abuse-material/articleshow/132160557.cms",
-    "category": "Other news",
-    "telegram_message_id": null,
-    "published_at": "2026-07-04T04:59:51.000Z",
-    "created_at": "2026-07-04T04:59:51.000Z"
-  },
-  {
-    "id": "md-2026-07-04-010",
-    "blurb": "India: Instagram running ads promoting child sexual abuse material, BBC finds",
-    "source_name": "BBC",
-    "source_url": "https://www.bbc.com/news/articles/cvgm4e0316zo",
-    "category": "Other news",
-    "telegram_message_id": null,
-    "published_at": "2026-07-04T04:59:50.000Z",
-    "created_at": "2026-07-04T04:59:50.000Z"
-  },
-  {
     "id": "md-2026-07-04-011",
     "blurb": "India is investigating a data breach at Tata Electronics that exposed documents tied to Apple's unreleased iPhone 18 Pro, the country's IT secretary said Thursday, marking the government's first public comments on the incident. A ransomware group that stole data from the Apple supplier posted sensitive component and supplier lists, along with photos of the iPhone 18 Pro, on the dark web.",
     "source_name": "Reuters",
@@ -1880,16 +1480,6 @@ export const STATIC_ITEMS = [
     "created_at": "2026-07-04T04:59:47.000Z"
   },
   {
-    "id": "md-2026-07-02-001",
-    "blurb": "ShareChat, positioned as India's answer to Meta, plans to raise up to $400 million in an IPO next year. Parent company Mohalla Tech, which also owns short-video app Moj and micro-drama platform QuickTV, turned operationally profitable in the quarter starting April 2026.",
-    "source_name": "Bloomberg",
-    "source_url": "https://www.bloomberg.com/news/articles/2026-07-02/sharechat-india-s-meta-rival-plans-400-million-ipo-next-year",
-    "category": "Markets",
-    "telegram_message_id": null,
-    "published_at": "2026-07-02T04:59:59.000Z",
-    "created_at": "2026-07-02T04:59:59.000Z"
-  },
-  {
     "id": "md-2026-07-02-002",
     "blurb": "Sparrow Capital has closed its third fund at Rs 475 crore, as it looks to write larger cheques and lead more early-stage rounds at a time when seed funding sizes in India are increasing despite fewer startups getting funded. The Bengaluru-based firm will invest $1-2 million each in 25-30 startups over the next three years through the new fund; it has already made five commitments.",
     "source_name": "Economic Times",
@@ -1910,26 +1500,6 @@ export const STATIC_ITEMS = [
     "created_at": "2026-07-02T04:59:57.000Z"
   },
   {
-    "id": "md-2026-07-02-004",
-    "blurb": "SoftBank has restarted talks with lenders on a $10 billion loan backed by its OpenAI stake, after earlier discussions stalled over the difficulty of valuing private company shares. To win banks over, SoftBank is now offering a repayment guarantee, giving lenders recourse to the company itself if the pledged shares lose value.",
-    "source_name": "Reuters",
-    "source_url": "https://www.reuters.com/legal/transactional/softbank-renews-talks-10-billion-loan-against-openai-stake-adds-concessions-2026-07-01/",
-    "category": "Fintech",
-    "telegram_message_id": null,
-    "published_at": "2026-07-02T04:59:56.000Z",
-    "created_at": "2026-07-02T04:59:56.000Z"
-  },
-  {
-    "id": "md-2026-07-02-005",
-    "blurb": "South Korean trade watchdog alleges Google abused its position in Android app store",
-    "source_name": "Reuters",
-    "source_url": "https://www.reuters.com/legal/litigation/south-korean-trade-watchdog-alleges-google-abused-its-position-android-app-store-2026-07-01/",
-    "category": "Other news",
-    "telegram_message_id": null,
-    "published_at": "2026-07-02T04:59:55.000Z",
-    "created_at": "2026-07-02T04:59:55.000Z"
-  },
-  {
     "id": "md-2026-07-02-006",
     "blurb": "South Korea’s Krafton has agreed to pay bonuses to Unknown Worlds Entertainment's entire staff after settling its legal dispute with the Subnautica 2 studio's CEO and co-founders. As part of the deal, CEO Ted Gill is stepping down, months after Krafton fired him over a $250 million bonus dispute that a judge later forced the company to reverse by reinstating him in March.",
     "source_name": "Bloomberg",
@@ -1938,16 +1508,6 @@ export const STATIC_ITEMS = [
     "telegram_message_id": null,
     "published_at": "2026-07-02T04:59:54.000Z",
     "created_at": "2026-07-02T04:59:54.000Z"
-  },
-  {
-    "id": "md-2026-07-02-007",
-    "blurb": "India has told Meta to pause its rollout of custom WhatsApp usernames, warning the feature could fuel fraud, phishing and impersonation scams. WhatsApp began letting users reserve unique handles this week, aiming to let its 3 billion members message without sharing phone numbers, with the feature going live later this year. India's tech ministry has asked Meta to hold off until further consultations, according to a notice reviewed by Bloomberg News.",
-    "source_name": "Bloomberg",
-    "source_url": "https://www.bloomberg.com/news/articles/2026-07-01/whatsapp-s-new-feature-has-defenses-against-scams-meta-says?srnd=phx-technology",
-    "category": "Other news",
-    "telegram_message_id": null,
-    "published_at": "2026-07-02T04:59:53.000Z",
-    "created_at": "2026-07-02T04:59:53.000Z"
   },
   {
     "id": "md-2026-07-02-008",
@@ -1978,16 +1538,6 @@ export const STATIC_ITEMS = [
     "telegram_message_id": null,
     "published_at": "2026-07-02T04:59:50.000Z",
     "created_at": "2026-07-02T04:59:50.000Z"
-  },
-  {
-    "id": "md-2026-07-02-011",
-    "blurb": "Microsoft and telecom startup Lightstorm are leading a consortium to build an undersea cable linking India with Malaysia and Singapore, part of a broader race to expand AI and cloud infrastructure in one of the world's fastest-growing data markets. The 3,600-km I-2SEA cable, backed by Tata Communications, Singtel, ASEAN Cableship and NEC, will land in Machilipatnam, Andhra Pradesh, where Meta and Alphabet have already announced data centers. The companies have not disclosed the investment size.",
-    "source_name": "Reuters",
-    "source_url": "https://www.reuters.com/business/media-telecom/microsoft-partners-with-singapores-lightstorm-build-india-southeast-asia-2026-07-02/",
-    "category": "Other news",
-    "telegram_message_id": null,
-    "published_at": "2026-07-02T04:59:49.000Z",
-    "created_at": "2026-07-02T04:59:49.000Z"
   },
   {
     "id": "md-2026-07-02-012",
@@ -2030,16 +1580,6 @@ export const STATIC_ITEMS = [
     "created_at": "2026-07-02T04:59:45.000Z"
   },
   {
-    "id": "md-2026-07-02-016",
-    "blurb": "SoftBank Group and its telecom unit will begin renting AI computing power to US companies starting next fiscal year, tapping their expanding data center pipeline to take on CoreWeave and Nebius. The two SoftBank companies are launching a joint venture, SB Neo Inc., to sell AI chips and cloud services to major clients including hyperscalers. Telecom unit head Junichi Miyakawa said the neocloud venture aims to scale up to 10 gigawatts of data center capacity by around 2030 for large-scale AI training and inference.",
-    "source_name": "Bloomberg",
-    "source_url": "https://www.bloomberg.com/news/articles/2026-07-02/softbank-launches-ai-cloud-unit-with-plans-to-tap-10-gigawatt-capacity",
-    "category": "AI",
-    "telegram_message_id": null,
-    "published_at": "2026-07-02T04:59:44.000Z",
-    "created_at": "2026-07-02T04:59:44.000Z"
-  },
-  {
     "id": "md-2026-07-02-017",
     "blurb": "Beijing-based Z.ai, formerly Zhipu AI, launched ZCode on Wednesday, a free desktop app it calls an \"Agentic Development Environment\" built specifically for its flagship GLM-5.2 model. The launch pushes the company deeper into the AI coding tool race, putting it up against Cursor, Claude Code, GitHub Copilot and Google's Antigravity.",
     "source_name": "VentureBeat",
@@ -2058,16 +1598,6 @@ export const STATIC_ITEMS = [
     "telegram_message_id": null,
     "published_at": "2026-07-02T04:59:42.000Z",
     "created_at": "2026-07-02T04:59:42.000Z"
-  },
-  {
-    "id": "md-2026-07-02-019",
-    "blurb": "Skyroot Aerospace announced it is preparing for the debut launch of Vikram-1, India's first privately designed and developed orbital rocket, sometime between July 12 and August 4. The launch marks a critical milestone for the country's first space unicorn after several delays. The company said the flight will be partially commercial, with full commercial flights planned after one or two successful demonstrations to orbit. The test flight will carry a mix of domestic and international customers, though Skyroot did not disclose names.",
-    "source_name": "Bloomberg",
-    "source_url": "https://www.bloomberg.com/news/articles/2026-07-02/skyroot-plans-india-s-first-private-sector-rocket-launch-in-july",
-    "category": "Other news",
-    "telegram_message_id": null,
-    "published_at": "2026-07-02T04:59:41.000Z",
-    "created_at": "2026-07-02T04:59:41.000Z"
   },
   {
     "id": "md-2026-07-02-020",
@@ -2160,16 +1690,6 @@ export const STATIC_ITEMS = [
     "created_at": "2026-07-01T04:59:52.000Z"
   },
   {
-    "id": "md-2026-07-01-009",
-    "blurb": "Twelve Labs is raising $100 million from Amazon, NEA and Naver Ventures to expand its AI video search technology. AWS has signed a multiyear deal to host the startup's workloads on Trainium chips, with new models launching for developers on the platform. Founded by Korean engineers and based in San Francisco, the company builds AI that makes video archives searchable and easier to monetize.",
-    "source_name": "Bloomberg",
-    "source_url": "https://www.bloomberg.com/news/articles/2026-07-01/video-search-startup-raises-100-million-from-amazon-vc-funds",
-    "category": "AI",
-    "telegram_message_id": null,
-    "published_at": "2026-07-01T04:59:51.000Z",
-    "created_at": "2026-07-01T04:59:51.000Z"
-  },
-  {
     "id": "md-2026-07-01-010",
     "blurb": "Dream Sports shuts fintech platform Dream Money within a year of launch - The Economic Times",
     "source_name": "Economic Times",
@@ -2180,16 +1700,6 @@ export const STATIC_ITEMS = [
     "created_at": "2026-07-01T04:59:50.000Z"
   },
   {
-    "id": "md-2026-07-01-011",
-    "blurb": "ByteDance has chosen Brazil for its largest data center outside China, a $39 billion project and the latest win from President Lula's push to attract Chinese investment. Hundreds of workers are already building the complex in Ceará state, which will start at 200 megawatts and scale to 1 gigawatt of computing capacity. Brazil's cheap renewable power and strategic location are drawing other Chinese tech giants to the country as well.",
-    "source_name": "Bloomberg",
-    "source_url": "https://www.bloomberg.com/news/articles/2026-07-01/tiktok-creator-bytedance-picks-brazil-for-largest-data-center-outside-china",
-    "category": "AI",
-    "telegram_message_id": null,
-    "published_at": "2026-07-01T04:59:49.000Z",
-    "created_at": "2026-07-01T04:59:49.000Z"
-  },
-  {
     "id": "md-2026-07-01-012",
     "blurb": "South Korea's Financial Services Commission has referred two suspects to prosecution for crypto price manipulation. One allegedly spent tens of billions of won to corner nearly half a token's supply, pumped its price on overseas exchanges, then dumped it and left domestic retail investors with steep losses. The other used API bots to fake trading activity and inflate prices with high limit orders, luring buyers before cashing out gradually.",
     "source_name": "The Block",
@@ -2198,16 +1708,6 @@ export const STATIC_ITEMS = [
     "telegram_message_id": null,
     "published_at": "2026-07-01T04:59:48.000Z",
     "created_at": "2026-07-01T04:59:48.000Z"
-  },
-  {
-    "id": "md-2026-07-01-013",
-    "blurb": "Vietnam’s G-Group Technology Corporation will build its G-Campus Hoa Lac, a high-tech center and Tier III data center complex specializing in artificial intelligence and high-performance computing, with total investment of VND7,600 billion ($300 million). In a statement on Tuesday, G-Group said it received an investment certificate for the project at Hanoi’s investment promotion conference a day earlier.",
-    "source_name": "TechNode",
-    "source_url": "https://technode.global/2026/07/01/vietnams-g-group-to-invest-300m-in-building-ai-data-center-campus-in-hanoi/",
-    "category": "AI",
-    "telegram_message_id": null,
-    "published_at": "2026-07-01T04:59:47.000Z",
-    "created_at": "2026-07-01T04:59:47.000Z"
   },
   {
     "id": "md-2026-07-01-014",
@@ -2380,16 +1880,6 @@ export const STATIC_ITEMS = [
     "created_at": "2026-06-30T04:59:55.000Z"
   },
   {
-    "id": "md-2026-06-30-006",
-    "blurb": "Top Washington lobbying firms are dropping Chinese tech clients including Alibaba and Tencent as a law taking effect Tuesday forces them to choose between Chinese companies and US defense contractors. Alibaba lost five firms and Tencent four, with Brownstein Hyatt Farber Schreck and Mercury Public Affairs among those cutting ties.",
-    "source_name": "Bloomberg",
-    "source_url": "https://www.bloomberg.com/news/articles/2026-06-29/alibaba-tencent-dropped-by-dc-lobbyists-to-comply-with-us-curbs",
-    "category": "Other news",
-    "telegram_message_id": null,
-    "published_at": "2026-06-30T04:59:54.000Z",
-    "created_at": "2026-06-30T04:59:54.000Z"
-  },
-  {
     "id": "md-2026-06-30-007",
     "blurb": "Indonesia jailed former education minister and Gojek founder Nadiem Makarim for 10 years on June 30 over a pandemic-era school laptop procurement scheme, closing one of the country’s most-watched corruption cases. Judges fined him 1 billion rupiah (S$72,105) and ordered 809.6 billion rupiah (S$58.7 million) in restitution, adding five more years in prison if he fails to pay.",
     "source_name": "Straits Times",
@@ -2490,16 +1980,6 @@ export const STATIC_ITEMS = [
     "created_at": "2026-06-30T04:59:44.000Z"
   },
   {
-    "id": "md-2026-06-30-017",
-    "blurb": "Chinese smartphone makers Xiaomi, Oppo and Vivo have told suppliers they're cutting shipment targets again this year, some by up to 30%, as rising costs and severe component shortages squeeze the market. Xiaomi, having already lowered its forecast to 135 million units from 170 million in 2025, has now slashed it a further 30% to roughly 95 million, with more cuts possible if supply doesn't improve; Oppo and Vivo have trimmed their outlooks to under 90 million each, while Honor may struggle to match 2025's record 71 million shipments. One supplier executive said declines of 15% to 30% versus earlier forecasts are now the norm across Chinese clients.",
-    "source_name": "Nikkei Asia",
-    "source_url": "https://asia.nikkei.com/business/technology/china-s-xiaomi-oppo-vivo-cut-2026-smartphone-targets-again-sources",
-    "category": "Other news",
-    "telegram_message_id": null,
-    "published_at": "2026-06-30T04:59:43.000Z",
-    "created_at": "2026-06-30T04:59:43.000Z"
-  },
-  {
     "id": "md-2026-06-30-018",
     "blurb": "Oravel Stays, parent of OYO, has filed updated IPO papers to raise up to 66.5 billion rupees ($703 million), reviving a closely watched Indian listing. The offering will be entirely new shares, with proceeds earmarked for debt repayment, though a pre-IPO placement of up to 13.3 billion rupees could trim its size. SoftBank remains the largest backer, joined by Microsoft, Airbnb, Khazanah Nasional and Lightspeed Venture Partners.",
     "source_name": "Bloomberg",
@@ -2530,26 +2010,6 @@ export const STATIC_ITEMS = [
     "created_at": "2026-06-29T04:59:58.000Z"
   },
   {
-    "id": "md-2026-06-29-003",
-    "blurb": "Blackstone-backed data center operator AirTrunk is nearing a confidential filing for a REIT IPO in Singapore. The offering is targeting around $1.5 billion, which would make it the largest Singapore listing since 2017.",
-    "source_name": "Bloomberg",
-    "source_url": "https://www.bloomberg.com/news/articles/2026-06-29/airtrunk-is-said-to-near-confidential-filing-for-biggest-singapore-ipo-in-years",
-    "category": "AI",
-    "telegram_message_id": null,
-    "published_at": "2026-06-29T04:59:57.000Z",
-    "created_at": "2026-06-29T04:59:57.000Z"
-  },
-  {
-    "id": "md-2026-06-29-004",
-    "blurb": "Apple has accused Indian antitrust investigators of copying rivals' complaints verbatim rather than conducting an independent probe, and is calling for the findings to be quashed. The June 25 filing, its sharpest challenge yet to the Competition Commission of India, puts Apple in direct conflict with opponents including Match Group and a group of Indian startups.",
-    "source_name": "Reuters",
-    "source_url": "https://www.reuters.com/business/media-telecom/apple-accuses-india-copy-pasting-rivals-claims-antitrust-investigation-2026-06-29/",
-    "category": "Startups",
-    "telegram_message_id": null,
-    "published_at": "2026-06-29T04:59:56.000Z",
-    "created_at": "2026-06-29T04:59:56.000Z"
-  },
-  {
     "id": "md-2026-06-29-005",
     "blurb": "Chinese memory chipmaker CXMT has signed a multi-year DRAM supply deal with Tencent worth more than 20 billion yuan ($2.94 billion), ahead of its highly anticipated stock market debut.",
     "source_name": "Reuters",
@@ -2568,16 +2028,6 @@ export const STATIC_ITEMS = [
     "telegram_message_id": null,
     "published_at": "2026-06-29T04:59:54.000Z",
     "created_at": "2026-06-29T04:59:54.000Z"
-  },
-  {
-    "id": "md-2026-06-29-007",
-    "blurb": "China’s DJI and Insta360 now account for nearly 90% of global smart camera shipments, squeezing out US pioneer GoPro as demand for portable imaging devices grows. Worldwide shipments hit 4.14 million units in the first quarter, with sales rising 20% year on year to 10.5 billion yuan ($1.46 billion), according to IDC.",
-    "source_name": "SCMP",
-    "source_url": "https://www.scmp.com/tech/tech-trends/article/3358742/chinas-dji-insta360-tighten-grip-global-smart-camera-market-supply-chain-edge",
-    "category": "Other news",
-    "telegram_message_id": null,
-    "published_at": "2026-06-29T04:59:53.000Z",
-    "created_at": "2026-06-29T04:59:53.000Z"
   },
   {
     "id": "md-2026-06-29-008",
@@ -2618,15 +2068,5 @@ export const STATIC_ITEMS = [
     "telegram_message_id": null,
     "published_at": "2026-06-29T04:59:49.000Z",
     "created_at": "2026-06-29T04:59:49.000Z"
-  },
-  {
-    "id": "md-2026-06-29-012",
-    "blurb": "The US will tighten restrictions on Chinese technology next month after the FCC finalized rules expanding an existing import ban to cover legacy equipment from major manufacturers including Huawei, ZTE, Hytera, Hikvision and Dahua. The new rules target older models used in public safety and telecommunications infrastructure.",
-    "source_name": "SCMP",
-    "source_url": "https://www.scmp.com/tech/policy/article/3358773/us-fcc-expands-import-ban-older-huawei-zte-gear-continued-crackdown-chinese-tech",
-    "category": "Other news",
-    "telegram_message_id": null,
-    "published_at": "2026-06-29T04:59:48.000Z",
-    "created_at": "2026-06-29T04:59:48.000Z"
   }
 ];
