@@ -271,10 +271,12 @@ function localTimeOptions(options = {}) {
   return LOCAL_TIME_ZONE ? { ...options, timeZone: LOCAL_TIME_ZONE } : options;
 }
 
+const THEMES = ["light", "dark", "amoled"];
+
 function getStoredTheme() {
   try {
     const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
-    if (stored === "light" || stored === "dark") {
+    if (THEMES.includes(stored)) {
       return stored;
     }
   } catch (error) {
@@ -293,15 +295,14 @@ function setStoredTheme(theme) {
 }
 
 function applyTheme(theme) {
-  const normalizedTheme = theme === "light" ? "light" : "dark";
+  const normalizedTheme = THEMES.includes(theme) ? theme : "dark";
   document.documentElement.dataset.theme = normalizedTheme;
 
   if (!themeToggle) {
     return;
   }
 
-  const nextTheme = normalizedTheme === "light" ? "dark" : "light";
-  themeToggle.textContent = normalizedTheme === "light" ? "Dark mode" : "Light mode";
+  const nextTheme = THEMES[(THEMES.indexOf(normalizedTheme) + 1) % THEMES.length];
   themeToggle.setAttribute("aria-label", `Switch to ${nextTheme} mode`);
   themeToggle.setAttribute("aria-pressed", normalizedTheme === "light" ? "true" : "false");
 }
@@ -314,7 +315,8 @@ function initThemeToggle() {
   }
 
   themeToggle.addEventListener("click", () => {
-    const nextTheme = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+    const current = document.documentElement.dataset.theme;
+    const nextTheme = THEMES[(THEMES.indexOf(current) + 1) % THEMES.length];
     applyTheme(nextTheme);
     setStoredTheme(nextTheme);
   });

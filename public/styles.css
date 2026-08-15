@@ -56,6 +56,29 @@
   --text: #151713;
 }
 
+:root[data-theme="amoled"] {
+  color-scheme: dark;
+  --bg: #000000;
+  --panel: #050505;
+  --panel-2: #0a0a0a;
+  --sidebar-bg: #020202;
+  --border: #1a1c16;
+  --card-bg: #050505;
+  --card-border: #1a1c16;
+  --newsletter-bg: #040a05;
+  --newsletter-border: #1c2e22;
+  --newsletter-accent: #78b592;
+  --dek: #a7a194;
+  --muted: #9a958a;
+  --quiet: #6d685d;
+  --accent: #78b592;
+  --accent-2: #ddad55;
+  --accent-dim: #2a4a38;
+  --on-text: #000000;
+  --red: #e47058;
+  --text: #ece8dd;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -254,14 +277,53 @@ main {
 }
 
 .theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: 28px;
-  padding: 0 9px;
+  min-width: 32px;
+  padding: 0 8px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--panel);
   color: var(--muted);
   font: 600 11px/1 var(--font-meta);
   cursor: pointer;
+}
+
+.theme-bulb {
+  width: 15px;
+  height: 15px;
+  display: block;
+}
+
+.bulb-rays {
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+:root[data-theme="light"] .theme-toggle {
+  color: var(--accent-2);
+}
+
+:root[data-theme="light"] .bulb-rays {
+  opacity: 1;
+}
+
+:root[data-theme="light"] .bulb-body {
+  fill: var(--accent-2);
+  fill-opacity: 0.35;
+}
+
+:root[data-theme="amoled"] .theme-toggle {
+  color: var(--accent);
+  border-color: var(--accent-dim);
+  box-shadow: 0 0 8px rgba(120, 181, 146, 0.35);
+}
+
+:root[data-theme="amoled"] .bulb-body {
+  fill: var(--accent);
+  fill-opacity: 0.3;
 }
 
 .theme-toggle:hover,
