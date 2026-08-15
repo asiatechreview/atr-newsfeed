@@ -1331,7 +1331,7 @@ function renderList() {
       openLiveEditor(item.id);
     });
     tr.append(cell(String(item.id), "nowrap id-cell", "ID"));
-    tr.append(cell(item.headline || item.title || firstWords(item.blurb, 12), "truncate title-cell", "Title"));
+    tr.append(titleCell(item));
     tr.append(cell(item.source_name || "Source", "truncate", "Publisher"));
 
     const catTd = document.createElement("td");
@@ -1497,6 +1497,32 @@ function formatTags(value) {
   }
   if (Array.isArray(tags)) return tags.filter(Boolean).join(", ");
   return String(tags);
+}
+
+// Title cell with a hover tooltip showing the full blurb, so the operator can
+// take a quick look at the story without opening the editor. Mirrors the tag
+// tooltip pattern: a wrapper chip that reveals a tooltip on hover.
+function titleCell(item) {
+  const td = document.createElement("td");
+  td.dataset.label = "Title";
+  const title = item.headline || item.title || firstWords(item.blurb, 12);
+
+  const chip = document.createElement("span");
+  chip.className = "title-chip";
+  chip.textContent = title;
+  chip.title = title;
+  td.append(chip);
+
+  const blurb = String(item.blurb || "").trim();
+  if (blurb) {
+    const tooltip = document.createElement("span");
+    tooltip.className = "title-tooltip";
+    tooltip.setAttribute("role", "tooltip");
+    tooltip.textContent = blurb;
+    chip.append(tooltip);
+  }
+
+  return td;
 }
 
 // Render tags as a single small icon that reveals all tags on hover.

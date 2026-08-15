@@ -216,6 +216,23 @@ h1, h2, h3 { font-weight: 700; }
 }
 .tags-icon:hover .tags-tooltip { display: flex; }
 
+/* Title chip with blurb tooltip on hover (mirrors the tags tooltip pattern). */
+.title-chip {
+  position: relative; display: block;
+  max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: var(--text); cursor: default;
+}
+.title-tooltip {
+  position: absolute; left: 0; top: calc(100% + 8px); z-index: 60;
+  display: none; max-width: 380px; width: max-content;
+  padding: 10px 12px; border-radius: 8px;
+  background: var(--panel-2); border: 1px solid var(--border-2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .4);
+  font-size: 12px; line-height: 1.5; color: var(--muted); white-space: normal;
+  font-weight: 400; letter-spacing: normal; text-transform: none;
+}
+.title-chip:hover .title-tooltip { display: block; }
+
 /* iOS-style visibility switch in the Live Items table. */
 .vis-switch {
   position: relative; display: inline-block;
