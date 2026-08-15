@@ -889,7 +889,7 @@ function inferTags(item, blurb) {
     item.category,
     item.source_name,
     item.Source,
-    item.source
+    typeof item.source === "string" ? item.source : ""
   ].join(" ").toLowerCase();
 
   const tags = [];
@@ -1386,7 +1386,14 @@ function normalizeItem(item) {
     blurb,
     published_at: parsedDate && !Number.isNaN(parsedDate.getTime()) ? parsedDate.toISOString() : new Date().toISOString(),
     region: String(item.Region || item.region || item.Category || item.category || "").trim(),
-    source_name: String(item.Source || item.source || item.source_name || item.sourceName || "").trim(),
+    source_name: String(
+      item.source_name ||
+      item.sourceName ||
+      item.Source ||
+      (typeof item.source === "string" ? item.source : "") ||
+      (item.source && typeof item.source.name === "string" ? item.source.name : "") ||
+      ""
+    ).trim(),
     source_url: isValidLink(sourceUrl) ? sourceUrl : "",
     headline: HEADLINE_OVERRIDES.get(id) || editorialHeadline(item) || deriveHeadline(blurb),
     tags: itemTags(item, blurb)
