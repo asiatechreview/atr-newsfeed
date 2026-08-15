@@ -195,15 +195,31 @@ h1, h2, h3 { font-weight: 700; }
   max-width: 240px;
 }
 
-/* Tag pills: compact horizontal chips on ONE line. The container clips
-   overflow so rows keep a fixed height regardless of tag count. */
-.tag-pills { display: flex; flex-wrap: nowrap; gap: 4px; align-items: center; overflow: hidden; max-width: 200px; }
+/* Tags: a single small icon in the column. Hover reveals all tags in a
+   tooltip, so rows stay compact no matter how many tags a story has. */
+.tags-icon {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 7px; border-radius: 999px;
+  background: var(--panel-2); border: 1px solid var(--border-2);
+  color: var(--muted); font-size: 11px; line-height: 1; cursor: default;
+}
+.tags-icon svg { width: 13px; height: 13px; }
+.tags-icon-empty { opacity: .45; }
+.tags-count { font-weight: 700; }
+.tags-tooltip {
+  position: absolute; left: 0; top: calc(100% + 8px); z-index: 60;
+  display: none; flex-wrap: wrap; gap: 4px; max-width: 260px;
+  padding: 8px; border-radius: 8px;
+  background: var(--panel-2); border: 1px solid var(--border-2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .4);
+}
+.tags-icon:hover .tags-tooltip { display: flex; }
 .tag-pill {
   font-size: 11px; line-height: 1; padding: 4px 8px; border-radius: 999px;
   background: var(--panel-2); color: var(--muted);
-  border: 1px solid var(--border-2); white-space: nowrap; flex-shrink: 0;
+  border: 1px solid var(--border-2); white-space: nowrap;
 }
-.tag-pill-more { background: transparent; border-style: dashed; color: var(--faint); flex-shrink: 1; }
 .item-pagination { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 14px; }
 .pagination-label { font-size: 12px; color: var(--muted); }
 .item-row { cursor: pointer; }

@@ -1350,7 +1350,7 @@ function renderList() {
     catSelect.addEventListener("click", (event) => event.stopPropagation());
     catTd.append(catSelect);
     tr.append(catTd);
-    tr.append(tagPillsCell(item.tags));
+    tr.append(tagsIconCell(item.tags));
     tr.append(cell(formatDateTime(item.published_at), "nowrap", "Published"));
 
     // Visible toggle: hide/show on the public site.
@@ -1496,10 +1496,9 @@ function formatTags(value) {
   return String(tags);
 }
 
-// Render tags as compact pills that wrap horizontally instead of a raw comma
-// string that stacks vertically and stretches the row. Caps the visible pills
-// at 4 and shows a +N overflow badge.
-function tagPillsCell(value) {
+// Render tags as a single small icon that reveals all tags on hover.
+// Keeps the row compact regardless of tag count; the tooltip lists every tag.
+function tagsIconCell(value) {
   const td = document.createElement("td");
   td.dataset.label = "Tags";
   let tags = value;
@@ -1516,29 +1515,49 @@ function tagPillsCell(value) {
     }
   }
   const list = Array.isArray(tags) ? tags.filter(Boolean) : [];
-  if (!list.length) {
-    td.textContent = "-";
-    return td;
+
+  const chip = document.createElement("span");
+  chip.className = "tags-icon" + (list.length ? "" : " tags-icon-empty");
+
+  const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  icon.setAttribute("viewBox", "0 0 24 24");
+  icon.setAttribute("fill", "none");
+  icon.setAttribute("stroke", "currentColor");
+  icon.setAttribute("stroke-width", "2");
+  icon.setAttribute("stroke-linecap", "round");
+  icon.setAttribute("stroke-linejoin", "round");
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("d", "M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z");
+  const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  line.setAttribute("x1", "7");
+  line.setAttribute("y1", "7");
+  line.setAttribute("x2", "7.01");
+  line.setAttribute("y2", "7");
+  icon.append(path, line);
+  chip.append(icon);
+
+  if (list.length) {
+    const count = document.createElement("span");
+    count.className = "tags-count";
+    count.textContent = String(list.length);
+    chip.append(count);
+    chip.title = list.join(", ");
+
+    const tooltip = document.createElement("span");
+    tooltip.className = "tags-tooltip";
+    tooltip.setAttribute("role", "tooltip");
+    for (const tag of list) {
+      const pill = document.createElement("span");
+      pill.className = "tag-pill";
+      pill.textContent = tag;
+      tooltip.append(pill);
+    }
+    chip.append(tooltip);
+  } else {
+    chip.title = "No tags";
   }
 
-  const pills = document.createElement("div");
-  pills.className = "tag-pills";
-  const visible = list.slice(0, 4);
-  for (const tag of visible) {
-    const pill = document.createElement("span");
-    pill.className = "tag-pill";
-    pill.textContent = tag;
-    pill.title = tag;
-    pills.append(pill);
-  }
-  if (list.length > visible.length) {
-    const more = document.createElement("span");
-    more.className = "tag-pill tag-pill-more";
-    more.textContent = `+${list.length - visible.length}`;
-    more.title = list.slice(visible.length).join(", ");
-    pills.append(more);
-  }
-  td.append(pills);
+  td.append(chip);
   return td;
 }
 
