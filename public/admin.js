@@ -5,7 +5,8 @@ const ITEMS_PER_PAGE = 20;
 // mapped to the category labels ATR actually uses). Pure client-side, no LLM.
 const CATEGORY_RULES = [
   { label: "WAIC 2026", pattern: /\bwaic\b/ },
-  { label: "AI and Chips", pattern: /\b(ai|artificial intelligence|llm|multimodal|foundation model|claude|openai|anthropic|deepseek|minimax|moonshot|agentic|nvidia|distillation|chip|chips|chipmaker|chipmaking|semiconductor|semiconductors|integrated circuit|tsmc|sk hynix|hynix|cxmt|silicon|photonics|fab|foundry|packaging|hbm|gpu|memory chips?)\b/ },
+  { label: "AI", pattern: /\b(ai|artificial intelligence|llm|multimodal|foundation model|claude|openai|anthropic|deepseek|minimax|moonshot|agentic|nvidia|distillation|gpu)\b/ },
+  { label: "Chips", pattern: /\b(chip|chips|chipmaker|chipmaking|semiconductor|semiconductors|integrated circuit|tsmc|sk hynix|hynix|cxmt|silicon|photonics|fab|foundry|packaging|hbm|memory chips?)\b/ },
   { label: "Crypto", pattern: /\b(crypto|bitcoin|stablecoin|stablecoins|blockchain|onchain|token|digital asset|solana)\b/ },
   { label: "Fintech", pattern: /\b(bank|banking|fintech|financial|payments?|qr payment|insurance|lending|digital bank|coinhako)\b/ },
   { label: "Deals", pattern: /\b(fund|funding|raised|raise|secured|series [a-z]|seed|stake|acquisition|buy|bought|deal|invest|investment|grant|equity|debt|convertible|restructuring)\b/ },
