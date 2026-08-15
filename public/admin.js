@@ -178,9 +178,6 @@ const state = {
   currentUser: "",
   selectedIds: new Set(),
   source: "",
-  dateFrom: "",
-  dateTo: "",
-  hiddenOnly: false,
   sort: "newest"
 };
 
@@ -219,10 +216,6 @@ const els = {
   searchInput: document.querySelector("#search-input"),
   categoryFilter: document.querySelector("#category-filter"),
   sourceFilter: document.querySelector("#source-filter"),
-  dateFrom: document.querySelector("#date-from"),
-  dateTo: document.querySelector("#date-to"),
-  hiddenOnly: document.querySelector("#hidden-only"),
-  removedToggle: document.querySelector("#removed-toggle"),
   sortOrder: document.querySelector("#sort-order"),
   bulkBar: document.querySelector("#bulk-bar"),
   bulkCount: document.querySelector("#bulk-count"),
@@ -566,21 +559,6 @@ els.sourceFilter?.addEventListener("change", () => {
   state.source = els.sourceFilter.value;
   filterItems();
 });
-els.dateFrom?.addEventListener("change", () => {
-  state.dateFrom = els.dateFrom.value;
-  filterItems();
-});
-els.dateTo?.addEventListener("change", () => {
-  state.dateTo = els.dateTo.value;
-  filterItems();
-});
-els.hiddenOnly?.addEventListener("change", () => {
-  state.hiddenOnly = els.hiddenOnly.checked;
-  filterItems();
-});
-els.removedToggle?.addEventListener("change", () => {
-  loadItems();
-});
 els.sortOrder?.addEventListener("change", () => {
   state.sort = els.sortOrder.value;
   filterItems();
@@ -707,15 +685,12 @@ async function loadItems() {
   beginLoad();
   setStatus("Loading", "Fetching live D1 items");
 
-  const removedMode = els.removedToggle?.checked;
-  const statusParam = removedMode ? "removed" : "all";
-
   try {
     const pageSize = 500;
     const allItems = [];
     let offset = 0;
     for (;;) {
-      const response = await fetch(`/api/items?status=${statusParam}&limit=${pageSize}&offset=${offset}&_=${Date.now()}`, {
+      const response = await fetch(`/api/items?status=all&limit=${pageSize}&offset=${offset}&_=${Date.now()}`, {
         headers: { accept: "application/json", "cache-control": "no-cache" }
       });
       if (response.status === 401) {
@@ -729,10 +704,32 @@ async function loadItems() {
       if (!page.length || allItems.length >= total) break;
       offset += pageSize;
     }
-    state.items = allItems;
+
+    // Removed items are not returned by status=all (published/hidden/draft
+    // only), so fetch them separately and merge them into the list. They
+    // render inline with a Restore button, so no separate toggle is needed.
+    const removedItems = [];
+    offset = 0;
+    for (;;) {
+      const response = await fetch(`/api/items?status=removed&limit=${pageSize}&offset=${offset}&_=${Date.now()}`, {
+        headers: { accept: "application/json", "cache-control": "no-cache" }
+      });
+      if (response.status === 401) {
+        throw new Error("Admin session expired, sign in again.");
+      }
+      if (!response.ok) throw new Error(`/api/items returned ${response.status}`);
+      const payload = await response.json();
+      const page = Array.isArray(payload.items) ? payload.items : [];
+      removedItems.push(...page);
+      const total = payload.total != null ? payload.total : removedItems.length;
+      if (!page.length || removedItems.length >= total) break;
+      offset += pageSize;
+    }
+
+    state.items = [...removedItems, ...allItems];
     populateCategoryFilter();
     filterItems();
-    setStatus("Ready", `Loaded ${state.items.length} items (published + hidden)`);
+    setStatus("Ready", `Loaded ${state.items.length} items`);
   } catch (error) {
     setStatus("Error", error.message);
   } finally {
@@ -1378,17 +1375,11 @@ function filterItems() {
   const query = els.searchInput.value.trim().toLowerCase();
   const category = state.category;
   const source = state.source;
-  const from = state.dateFrom ? new Date(`${state.dateFrom}T00:00:00`) : null;
-  const to = state.dateTo ? new Date(`${state.dateTo}T23:59:59`) : null;
-  const hiddenOnly = state.hiddenOnly;
 
   state.filtered = state.items.filter((item) => {
     if (category && (item.category || "Other news") !== category) return false;
     if (source && (item.source_name || "") !== source) return false;
-    if (hiddenOnly && item.status !== "hidden") return false;
     const published = item.published_at ? new Date(item.published_at) : null;
-    if (from && published && published < from) return false;
-    if (to && published && published > to) return false;
     if (!query) return true;
     return [
       item.id,
