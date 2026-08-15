@@ -205,6 +205,21 @@
                   </div>
                 </div>
 
+                <div class="row">
+                  <div class="field">
+                    <label for="item-status">Status</label>
+                    <select id="item-status" class="input">
+                      <option value="published">Published</option>
+                      <option value="draft">Draft</option>
+                      <option value="hidden">Hidden</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="item-scheduled-at">Publish at <span class="label-hint">(drafts only)</span></label>
+                    <input id="item-scheduled-at" class="input" type="datetime-local">
+                  </div>
+                </div>
+
                 <div class="field">
                   <label for="source-url-input">Source URL</label>
                   <input id="source-url-input" class="input" type="url" required>
@@ -292,6 +307,21 @@
                   <div class="field">
                     <label for="live-edit-source-url">Source URL</label>
                     <input id="live-edit-source-url" class="input" type="url">
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="field">
+                    <label for="live-edit-status-select">Status</label>
+                    <select id="live-edit-status-select" class="input">
+                      <option value="published">Published</option>
+                      <option value="draft">Draft</option>
+                      <option value="hidden">Hidden</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="live-edit-scheduled-at">Publish at <span class="label-hint">(drafts only)</span></label>
+                    <input id="live-edit-scheduled-at" class="input" type="datetime-local">
                   </div>
                 </div>
 

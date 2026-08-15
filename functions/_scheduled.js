@@ -10,7 +10,8 @@ const DEV_BASE = "https://atr-newsfeed.pages.dev";
 export const CRONS = {
   NEWSLETTER_REFRESH: "0 1 * * *",
   INGEST_RECONCILE: "*/30 * * * *",
-  HEALTH_CHECK: "*/10 * * * *"
+  HEALTH_CHECK: "*/10 * * * *",
+  PUBLISH_SCHEDULED: "* * * * *"
 };
 
 // Admin bundle sentinel: the health cron verifies the deployed admin.js still
@@ -29,7 +30,14 @@ export async function onScheduled({ env, cron }) {
   if (cron === CRONS.INGEST_RECONCILE) {
     return reconcileFailedIngests(env);
   }
+  if (cron === CRONS.PUBLISH_SCHEDULED) {
+    return publishScheduledItems(env);
+  }
   if (cron === CRONS.HEALTH_CHECK) {
+    // Piggyback: publish any due drafts alongside the health pass so
+    // scheduled publishing works even before the minute cron is registered
+    // in the Pages dashboard (Settings -> Functions -> Cron Triggers).
+    await publishScheduledItems(env);
     return runHealthChecks(env);
   }
   return null;
@@ -55,7 +63,52 @@ async function refreshNewsletterCard(env) {
 }
 
 // ---------------------------------------------------------------------------
-// 2. Ingest retry and reconciliation
+// 2. Scheduled draft publishing
+// ---------------------------------------------------------------------------
+
+async function publishScheduledItems(env) {
+  try {
+    await ensureScheduledAtColumn(env);
+    const now = new Date().toISOString();
+    const result = await env.ATR_FEED_DB.prepare(
+      `UPDATE feed_items
+       SET status = 'published', scheduled_at = NULL, updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now')
+       WHERE status = 'draft' AND scheduled_at IS NOT NULL AND scheduled_at <= ?
+       RETURNING id, headline`
+    ).bind(now).all();
+    const published = result.results || [];
+    if (published.length) {
+      await writeOperationalEvent(env, null, {
+        workflow: "bulletin_schedule",
+        action: "publish_due",
+        status: "success",
+        severity: "info",
+        message: `Published ${published.length} scheduled item(s).`,
+        details: { ids: published.map((item) => item.id) }
+      });
+    }
+  } catch (error) {
+    await writeOperationalEvent(env, null, {
+      workflow: "bulletin_schedule",
+      action: "publish_due",
+      status: "error",
+      severity: "error",
+      message: "Scheduled publishing failed.",
+      details: { error: error.message }
+    });
+  }
+}
+
+async function ensureScheduledAtColumn(env) {
+  try {
+    await env.ATR_FEED_DB.prepare("ALTER TABLE feed_items ADD COLUMN scheduled_at TEXT").run();
+  } catch {
+    // D1 throws once the column already exists.
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 3. Ingest retry and reconciliation
 // ---------------------------------------------------------------------------
 
 async function reconcileFailedIngests(env) {

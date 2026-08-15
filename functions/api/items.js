@@ -237,12 +237,12 @@ export async function onRequestGet({ env, request }) {
   }
 
   let select = "id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key";
-  if (authorized) select += ", status, posted_by, posted_via";
+  if (authorized) select += ", status, posted_by, posted_via, scheduled_at";
 
   let query = `SELECT ${select} FROM feed_items WHERE status = ?`;
   const params = ["published"];
   if (authorized) {
-    query = `SELECT ${select} FROM feed_items WHERE status IN ('published','hidden')`;
+    query = `SELECT ${select} FROM feed_items WHERE status IN ('published','hidden','draft')`;
     params.length = 0;
   }
 
@@ -480,6 +480,12 @@ export async function onRequestPost({ env, request }) {
   const publishedAt = clean(body.publishedAt || body.published_at) || new Date().toISOString();
   const postedBy = clean(body.postedBy || body.posted_by) || null;
   const postedVia = clean(body.postedVia || body.posted_via) || null;
+  const statusValue = clean(body.status) || "published";
+  const scheduledAt = clean(body.scheduledAt || body.scheduled_at) || null;
+
+  if (!["published", "hidden", "draft"].includes(statusValue)) {
+    return json({ error: "status must be published, hidden or draft" }, 400);
+  }
 
   if (!blurb) {
     await writeOperationalEvent(env, request, {
@@ -555,37 +561,37 @@ export async function onRequestPost({ env, request }) {
     if (sourceUrl) {
       result = await env.ATR_FEED_DB.prepare(
         `INSERT INTO feed_items
-          (headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, link_key, posted_by, posted_via)
-         SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+          (headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, link_key, posted_by, posted_via, status, scheduled_at)
+         SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
          WHERE NOT EXISTS (
            SELECT 1 FROM feed_items
            WHERE lower(source_url) = lower(?) AND status = ?
          )
-         RETURNING id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key, posted_by, posted_via`
+         RETURNING id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key, posted_by, posted_via, status, scheduled_at`
       )
-        .bind(headline || null, blurb, sourceName, sourceUrl, category, tags, telegramMessageId || null, publishedAt, linkKey, postedBy, postedVia, sourceUrl, "published")
+        .bind(headline || null, blurb, sourceName, sourceUrl, category, tags, telegramMessageId || null, publishedAt, linkKey, postedBy, postedVia, statusValue, scheduledAt, sourceUrl, statusValue)
         .first();
 
       if (!result) {
         result = await env.ATR_FEED_DB.prepare(
-          `SELECT id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key, posted_by, posted_via
+          `SELECT id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key, posted_by, posted_via, status, scheduled_at
            FROM feed_items
            WHERE lower(source_url) = lower(?) AND status = ?
            ORDER BY published_at DESC, id DESC
            LIMIT 1`
         )
-          .bind(sourceUrl, "published")
+          .bind(sourceUrl, statusValue)
           .first();
         status = 200;
       }
     } else {
       result = await env.ATR_FEED_DB.prepare(
         `INSERT INTO feed_items
-          (headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, posted_by, posted_via)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-         RETURNING id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, posted_by, posted_via`
+          (headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, posted_by, posted_via, status, scheduled_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         RETURNING id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, posted_by, posted_via, status, scheduled_at`
       )
-        .bind(headline || null, blurb, sourceName, sourceUrl, category, tags, telegramMessageId || null, publishedAt, postedBy, postedVia)
+        .bind(headline || null, blurb, sourceName, sourceUrl, category, tags, telegramMessageId || null, publishedAt, postedBy, postedVia, statusValue, scheduledAt)
         .first();
     }
   } catch (error) {
@@ -703,9 +709,10 @@ export async function onRequestPatch({ env, request }) {
   const status = body.status === undefined ? undefined : clean(body.status);
   const postedBy = body.postedBy === undefined ? undefined : clean(body.postedBy);
   const postedVia = body.postedVia === undefined ? undefined : clean(body.postedVia);
+  const scheduledAt = body.scheduledAt === undefined ? undefined : clean(body.scheduledAt);
 
-  if (headline === undefined && blurb === undefined && sourceName === undefined && sourceUrl === undefined && category === undefined && tags === undefined && status === undefined && postedBy === undefined && postedVia === undefined) {
-    return json({ error: "headline, blurb, sourceName, sourceUrl, category, tags, status, postedBy or postedVia is required" }, 400);
+  if (headline === undefined && blurb === undefined && sourceName === undefined && sourceUrl === undefined && category === undefined && tags === undefined && status === undefined && postedBy === undefined && postedVia === undefined && scheduledAt === undefined) {
+    return json({ error: "headline, blurb, sourceName, sourceUrl, category, tags, status, postedBy, postedVia or scheduledAt is required" }, 400);
   }
 
   const nextHeadline = headline === undefined ? current.headline : clean(headline);
@@ -717,9 +724,10 @@ export async function onRequestPatch({ env, request }) {
   const nextStatus = status === undefined ? current.status : status;
   const nextPostedBy = postedBy === undefined ? current.posted_by : postedBy;
   const nextPostedVia = postedVia === undefined ? current.posted_via : postedVia;
+  const nextScheduledAt = scheduledAt === undefined ? current.scheduled_at : scheduledAt;
 
-  if (!["published", "hidden"].includes(nextStatus)) {
-    return json({ error: "status must be published or hidden" }, 400);
+  if (!["published", "hidden", "draft"].includes(nextStatus)) {
+    return json({ error: "status must be published, hidden or draft" }, 400);
   }
 
   if (!nextBlurb) {
@@ -740,11 +748,11 @@ export async function onRequestPatch({ env, request }) {
 
   const result = await env.ATR_FEED_DB.prepare(
     `UPDATE feed_items
-       SET headline = ?, blurb = ?, source_name = ?, source_url = ?, category = ?, tags = ?, link_key = ?, status = ?, posted_by = ?, posted_via = ?
-     WHERE id = ? AND status IN ('published','hidden')
-     RETURNING id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key, status, posted_by, posted_via`
+       SET headline = ?, blurb = ?, source_name = ?, source_url = ?, category = ?, tags = ?, link_key = ?, status = ?, posted_by = ?, posted_via = ?, scheduled_at = ?
+     WHERE id = ? AND status IN ('published','hidden','draft')
+     RETURNING id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key, status, posted_by, posted_via, scheduled_at`
   )
-    .bind(nextHeadline || null, nextBlurb, nextSourceName, nextSourceUrl, nextCategory, nextTags, nextLinkKey, nextStatus, nextPostedBy, nextPostedVia, id)
+    .bind(nextHeadline || null, nextBlurb, nextSourceName, nextSourceUrl, nextCategory, nextTags, nextLinkKey, nextStatus, nextPostedBy, nextPostedVia, nextScheduledAt, id)
     .first();
 
   await writeOperationalEvent(env, request, {
@@ -977,6 +985,14 @@ async function ensurePostedColumns(env) {
   }
   try {
     await env.ATR_FEED_DB.prepare("ALTER TABLE feed_items ADD COLUMN posted_via TEXT").run();
+  } catch {
+    // D1 throws once the column already exists.
+  }
+}
+
+async function ensureScheduledAtColumn(env) {
+  try {
+    await env.ATR_FEED_DB.prepare("ALTER TABLE feed_items ADD COLUMN scheduled_at TEXT").run();
   } catch {
     // D1 throws once the column already exists.
   }

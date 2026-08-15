@@ -470,7 +470,7 @@ const patchResponse = await onRequestPatch({
 });
 const patchPayload = await patchResponse.json();
 
-if (patchResponse.status !== 200 || patchPayload.item?.blurb !== "Edited item from the custom bulletin admin." || patchUpdateParams?.[10] !== existingPostItem.id) {
+if (patchResponse.status !== 200 || patchPayload.item?.blurb !== "Edited item from the custom bulletin admin." || patchUpdateParams?.[11] !== existingPostItem.id) {
   console.error("FAILED: PATCH /api/items must update an existing bulletin item for the admin UI");
   process.exit(1);
 }

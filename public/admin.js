@@ -226,6 +226,8 @@ const els = {
   form: document.querySelector("#item-form"),
   itemId: document.querySelector("#item-id"),
   category: document.querySelector("#category-input"),
+  itemStatus: document.querySelector("#item-status"),
+  itemScheduledAt: document.querySelector("#item-scheduled-at"),
   headline: document.querySelector("#headline-input"),
   blurb: document.querySelector("#blurb-input"),
   sourceName: document.querySelector("#source-name-input"),
@@ -352,6 +354,8 @@ const els = {
   liveEditSourceName: document.querySelector("#live-edit-source-name"),
   liveEditSourceUrl: document.querySelector("#live-edit-source-url"),
   liveEditPublishedAt: document.querySelector("#live-edit-published-at"),
+  liveEditScheduledAt: document.querySelector("#live-edit-scheduled-at"),
+  liveEditStatusSelect: document.querySelector("#live-edit-status-select"),
   liveEditTags: document.querySelector("#live-edit-tags"),
   liveEditStatus: document.querySelector("#live-edit-status"),
   liveEditSave: document.querySelector("#live-edit-save"),
@@ -1446,7 +1450,7 @@ function renderList() {
     // Visible toggle: iOS-style switch for hide/show on the public site.
     const visTd = document.createElement("td");
     visTd.dataset.label = "Visible";
-    const visible = item.status !== "hidden";
+    const visible = item.status !== "hidden" && item.status !== "draft";
     const toggle = document.createElement("button");
     toggle.type = "button";
     toggle.className = "vis-switch" + (visible ? " on" : "");
@@ -1461,6 +1465,13 @@ function renderList() {
       toggleItemVisibility(item);
     });
     visTd.append(toggle);
+    if (item.status === "draft") {
+      const draftBadge = document.createElement("span");
+      draftBadge.className = "status-badge status-badge-draft";
+      draftBadge.textContent = item.scheduled_at ? "Scheduled" : "Draft";
+      draftBadge.title = item.scheduled_at ? `Publishes ${formatDateTime(item.scheduled_at)}` : "Draft item";
+      visTd.append(draftBadge);
+    }
     tr.append(visTd);
 
     const linkUrl = `https://bulletin.asiatechreview.com/?item=${encodeURIComponent(item.link_key || item.id)}`;
@@ -1758,6 +1769,8 @@ function fillLiveEditor(item) {
   els.liveEditSourceUrl.value = item.source_url || "";
   els.liveEditPublishedAt.value = formatDateTime(item.published_at);
   els.liveEditTags.value = tagsToInput(item.tags);
+  if (els.liveEditStatusSelect) els.liveEditStatusSelect.value = item.status === "draft" ? "draft" : item.status === "hidden" ? "hidden" : "published";
+  if (els.liveEditScheduledAt) els.liveEditScheduledAt.value = item.scheduled_at ? toLocalDateTime(item.scheduled_at) : "";
 
   const currentCategory = item.category || DEFAULT_CATEGORY;
   const cats = state.categories.length ? state.categories : [currentCategory];
@@ -1825,6 +1838,14 @@ async function saveLiveEditor() {
     category: els.liveEditCategory.value.trim() || DEFAULT_CATEGORY,
     tags: els.liveEditTags.value.split(",").map((tag) => tag.trim()).filter(Boolean)
   };
+
+  if (els.liveEditStatusSelect) payload.status = els.liveEditStatusSelect.value;
+  if (els.liveEditScheduledAt && els.liveEditScheduledAt.value) {
+    payload.scheduledAt = fromLocalDateTime(els.liveEditScheduledAt.value);
+    if (payload.status === "draft") payload.status = "draft";
+  } else if (payload.status === "draft") {
+    payload.scheduledAt = null;
+  }
 
   if (!payload.blurb || !payload.sourceName || !payload.sourceUrl || !payload.category) {
     setLiveEditStatus("Missing fields", "Blurb, source, URL and category are required.");
@@ -1950,6 +1971,8 @@ function fillForm(item) {
   els.sourceName.value = item.source_name || "";
   els.sourceUrl.value = item.source_url || "";
   els.publishedAt.value = toLocalDateTime(item.published_at);
+  if (els.itemStatus) els.itemStatus.value = item.status === "draft" ? "draft" : item.status === "hidden" ? "hidden" : "published";
+  if (els.itemScheduledAt) els.itemScheduledAt.value = item.scheduled_at ? toLocalDateTime(item.scheduled_at) : "";
   els.removeButton.disabled = state.mode === "new";
 }
 
@@ -1967,6 +1990,11 @@ function collectForm() {
   if (state.mode === "new") {
     if (state.currentUser) payload.postedBy = state.currentUser;
     payload.postedVia = "Admin";
+  }
+
+  if (els.itemStatus && els.itemStatus.value) payload.status = els.itemStatus.value;
+  if (els.itemScheduledAt && els.itemScheduledAt.value) {
+    payload.scheduledAt = fromLocalDateTime(els.itemScheduledAt.value);
   }
 
   const publishedAt = fromLocalDateTime(els.publishedAt.value);
