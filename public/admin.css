@@ -291,7 +291,7 @@ select.input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0
    ellipsis/overflow. No fixed widths, so rows stay tight on any screen. */
 .item-table td { vertical-align: middle; }
 .item-table .truncate { max-width: 320px; }
-.item-table td:nth-child(8) a {
+.item-table td[data-label="Link"] a {
   font-family: var(--mono); font-size: 11px; color: var(--muted);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;
   max-width: 240px;
@@ -617,6 +617,77 @@ body.logged-out .auth-panel { min-height: calc(100vh - 48px); }
   }
   .mobile-action-bar button + button { background: var(--surface-2); color: var(--text); border: 1px solid var(--border-2); }
   body.logged-out .mobile-action-bar { display: none; }
+}
+
+/* ============ Mobile card-mode tables ============ */
+/* At <=760px data tables stop scrolling sideways: each row becomes a
+   stacked card, with label/value rows driven by the data-label attribute
+   every cell already carries. Apply to every .table-wrap table (Live
+   Items, Sources, Categories, Ops, Dashboard). */
+@media (max-width: 760px) {
+  .table-wrap { overflow: visible; }
+  .table-wrap table,
+  .table-wrap thead,
+  .table-wrap tbody,
+  .table-wrap tr,
+  .table-wrap td { display: block; }
+  .table-wrap thead { display: none; }
+  .table-wrap tbody { display: grid; gap: 12px; }
+  .table-wrap tr {
+    border: 1px solid var(--border-2);
+    border-radius: var(--radius);
+    background: var(--surface-1);
+    padding: 12px 14px;
+    margin: 0;
+  }
+  .table-wrap td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .table-wrap td:last-child { border-bottom: 0; }
+  .table-wrap td::before {
+    content: attr(data-label);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--faint);
+    flex-shrink: 0;
+  }
+  .table-wrap td:not([data-label])::before { content: none; }
+  .table-wrap td.select-col::before { content: "Select"; }
+  .table-wrap td.select-col { justify-content: flex-start; }
+
+  /* Title: full width, wraps instead of truncating on phones. */
+  .title-chip { max-width: none; white-space: normal; }
+
+  /* In-table category editor fills the card row. */
+  .table-wrap td[data-label="Category"] { align-items: stretch; }
+  .table-wrap .cat-edit { width: 100%; max-width: none; flex: 1; }
+
+  /* Link: wrap instead of ellipsis so the URL stays readable. */
+  .item-table td[data-label="Link"] a {
+    max-width: none;
+    white-space: normal;
+    word-break: break-all;
+    overflow: visible;
+  }
+
+  /* Row hover highlights the whole card, not individual cells. */
+  .item-row:hover td { background: none; }
+  .item-row:hover { background: var(--surface-2); }
+
+  /* IDs and truncating cells stop clipping on cards. */
+  .table-wrap .truncate { max-width: none; white-space: normal; }
+  .id-cell { max-width: none; }
+
+  /* Empty state centers inside its card. */
+  .table-wrap td.muted { justify-content: center; text-align: center; padding: 14px 0; }
 }
 
 /* ============ Light theme ============ */
