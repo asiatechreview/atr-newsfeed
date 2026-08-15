@@ -597,6 +597,10 @@ body.logged-out .auth-panel { min-height: calc(100vh - 48px); }
   .row { grid-template-columns: 1fr; }
   .stats { grid-template-columns: 1fr 1fr; }
   .bar-row { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) 150px; }
+  /* Toolbar: search goes full width on its own line, filters wrap below. */
+  .item-toolbar { gap: 8px; }
+  .item-toolbar #search-input { flex-basis: 100%; min-width: 0; }
+  .item-toolbar .input { height: 36px; }
 }
 
 @media (max-width: 520px) {
