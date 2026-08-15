@@ -1355,14 +1355,16 @@ function fillLiveEditor(item) {
   const currentCategory = item.category || DEFAULT_CATEGORY;
   const cats = state.categories.length ? state.categories : [currentCategory];
   if (!cats.includes(currentCategory)) cats.unshift(currentCategory);
-  els.liveEditCategory.replaceChildren();
-  for (const cat of cats) {
-    const opt = document.createElement("option");
-    opt.value = cat;
-    opt.textContent = cat;
-    if (cat === currentCategory) opt.selected = true;
-    els.liveEditCategory.append(opt);
+  const catOptions = document.querySelector("#live-edit-category-options");
+  if (catOptions) {
+    catOptions.replaceChildren();
+    for (const cat of cats) {
+      const opt = document.createElement("option");
+      opt.value = cat;
+      catOptions.append(opt);
+    }
   }
+  els.liveEditCategory.value = currentCategory;
 
   const controls = [
     els.liveEditHeadline,

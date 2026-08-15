@@ -274,8 +274,9 @@
                     <input id="live-edit-id" class="input" type="text" disabled>
                   </div>
                   <div class="field">
-                    <label for="live-edit-category">Category</label>
-                    <select id="live-edit-category" class="input"></select>
+                    <label for="live-edit-category">Category <span class="label-hint">(pick or type a new one)</span></label>
+                    <input id="live-edit-category" class="input" list="live-edit-category-options" placeholder="Type or pick a category">
+                    <datalist id="live-edit-category-options"></datalist>
                   </div>
                 </div>
 
