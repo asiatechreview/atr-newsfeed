@@ -786,6 +786,7 @@ body.logged-out .auth-panel { min-height: calc(100vh - 48px); }
   min-height: 220px; border: 1px dashed var(--border-2); border-radius: var(--radius);
   text-align: center; padding: 20px;
 }
+.preview-empty[hidden] { display: none; }
 .newsletter-promo {
   display: grid;
   grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
@@ -799,6 +800,7 @@ body.logged-out .auth-panel { min-height: calc(100vh - 48px); }
   border-radius: var(--radius);
   background: linear-gradient(135deg, var(--accent-soft), transparent 42%), var(--surface-2);
 }
+.newsletter-promo[hidden] { display: none; }
 
 .newsletter-image-link {
   display: block;
