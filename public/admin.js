@@ -1501,10 +1501,13 @@ function formatTags(value) {
 
 // Title cell with a hover tooltip showing the full blurb, so the operator can
 // take a quick look at the story without opening the editor. Mirrors the tag
-// tooltip pattern: a wrapper chip that reveals a tooltip on hover.
+// tooltip pattern: a wrapper chip that reveals a tooltip on hover. The tooltip
+// lives OUTSIDE the chip (sibling of it) because the chip clips with
+// overflow:hidden for the ellipsis, which would cut the popup off.
 function titleCell(item) {
   const td = document.createElement("td");
   td.dataset.label = "Title";
+  td.className = "title-cell";
   const title = item.headline || item.title || firstWords(item.blurb, 12);
 
   const chip = document.createElement("span");
@@ -1518,7 +1521,7 @@ function titleCell(item) {
     tooltip.className = "title-tooltip";
     tooltip.setAttribute("role", "tooltip");
     tooltip.textContent = blurb;
-    chip.append(tooltip);
+    td.append(tooltip);
   }
 
   return td;

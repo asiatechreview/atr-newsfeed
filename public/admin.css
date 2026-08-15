@@ -216,9 +216,12 @@ h1, h2, h3 { font-weight: 700; }
 }
 .tags-icon:hover .tags-tooltip { display: flex; }
 
-/* Title chip with blurb tooltip on hover (mirrors the tags tooltip pattern). */
+/* Title cell with blurb tooltip on hover (mirrors the tags tooltip pattern).
+   The tooltip lives OUTSIDE the chip (sibling in the td) because the chip
+   clips with overflow:hidden for the ellipsis, which would cut the popup off. */
+.item-table td.title-cell { position: relative; }
 .title-chip {
-  position: relative; display: block;
+  display: block;
   max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   color: var(--text); cursor: default;
 }
@@ -231,7 +234,7 @@ h1, h2, h3 { font-weight: 700; }
   font-size: 12px; line-height: 1.5; color: var(--muted); white-space: normal;
   font-weight: 400; letter-spacing: normal; text-transform: none;
 }
-.title-chip:hover .title-tooltip { display: block; }
+.title-cell:hover .title-tooltip { display: block; }
 
 /* iOS-style visibility switch in the Live Items table. */
 .vis-switch {
