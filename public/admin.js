@@ -237,6 +237,7 @@ const els = {
   tabPublish: document.querySelector("#tab-publish"),
   tabLive: document.querySelector("#tab-live"),
   tabSources: document.querySelector("#tab-sources"),
+  tabCategories: document.querySelector("#tab-categories"),
   tabOps: document.querySelector("#tab-ops"),
   tabAnalytics: document.querySelector("#tab-analytics"),
   tabNewsletter: document.querySelector("#tab-newsletter"),
@@ -245,6 +246,14 @@ const els = {
   publishView: document.querySelector("#publish-view"),
   liveView: document.querySelector("#live-view"),
   sourcesView: document.querySelector("#sources-view"),
+  categoriesView: document.querySelector("#categories-view"),
+  categoriesCount: document.querySelector("#categories-count"),
+  categoriesUsedCount: document.querySelector("#categories-used-count"),
+  categoriesListCount: document.querySelector("#categories-list-count"),
+  categoriesBody: document.querySelector("#categories-body"),
+  categoryAddForm: document.querySelector("#category-add-form"),
+  categoryNameInput: document.querySelector("#category-name-input"),
+  categoryPatternInput: document.querySelector("#category-pattern-input"),
   sourcesBody: document.querySelector("#sources-body"),
   sourcesCount: document.querySelector("#sources-count"),
   sourcesCountDetail: document.querySelector("#sources-count-detail"),
@@ -344,6 +353,7 @@ function switchTab(name) {
   const publish = name === "publish";
   const live = name === "live";
   const sources = name === "sources";
+  const categories = name === "categories";
   const ops = name === "ops";
   const analytics = name === "analytics";
   const newsletter = name === "newsletter";
@@ -353,6 +363,7 @@ function switchTab(name) {
   els.publishView.hidden = !publish;
   els.liveView.hidden = !live;
   els.sourcesView.hidden = !sources;
+  els.categoriesView.hidden = !categories;
   els.opsView.hidden = !ops;
   els.analyticsView.hidden = !analytics;
   els.newsletterView.hidden = !newsletter;
@@ -362,6 +373,7 @@ function switchTab(name) {
   els.tabPublish.classList.toggle("active", publish);
   els.tabLive.classList.toggle("active", live);
   els.tabSources.classList.toggle("active", sources);
+  els.tabCategories.classList.toggle("active", categories);
   els.tabOps.classList.toggle("active", ops);
   els.tabAnalytics.classList.toggle("active", analytics);
   els.tabNewsletter.classList.toggle("active", newsletter);
@@ -372,6 +384,7 @@ function switchTab(name) {
     publish: ["Publish", "Create and manage bulletin items"],
     live: ["Live Items", "Browse and search published items"],
     sources: ["Sources", "Where each item came from, who posted it and when"],
+    categories: ["Categories", "Create, rename, delete and manage categories"],
     ops: ["Ingest Log", "Automation and manual runs"],
     analytics: ["Analytics", "Traffic and engagement"],
     newsletter: ["Newsletter", "Homepage latest-post card"],
@@ -452,6 +465,10 @@ els.tabSources.addEventListener("click", () => {
   switchTab("sources");
   loadSources();
 });
+els.tabCategories.addEventListener("click", () => {
+  switchTab("categories");
+  loadCategories();
+});
 els.tabDashboard.addEventListener("click", () => switchTab("dashboard"));
 els.tabProfile.addEventListener("click", () => switchTab("profile"));
 els.tabOps.addEventListener("click", () => switchTab("ops"));
@@ -462,6 +479,16 @@ els.tabSponsors.addEventListener("click", () => switchTab("sponsors"));
 els.newsletterForm.addEventListener("submit", (event) => {
   event.preventDefault();
   saveNewsletter();
+});
+els.categoryAddForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const name = els.categoryNameInput.value.trim();
+  const pattern = els.categoryPatternInput.value.trim();
+  if (!name) return;
+  createCategory(name, pattern).then(() => {
+    els.categoryNameInput.value = "";
+    els.categoryPatternInput.value = "";
+  });
 });
 els.newsletterReload.addEventListener("click", loadLatestSubstackPost);
 els.newsletterUpdateNow.addEventListener("click", updateNewsletterNow);
@@ -655,6 +682,154 @@ function renderSources(items) {
     tr.append(cell(formatDateTime(item.published_at || item.created_at), "nowrap", "When"));
     tr.append(cell(item.status === "hidden" ? "Hidden" : "Published", item.status === "hidden" ? "status-error" : "status-ok", "Status"));
     els.sourcesBody.append(tr);
+  }
+}
+
+async function loadCategories() {
+  try {
+    const response = await fetch(`/api/admin/categories?_=${Date.now()}`, {
+      headers: { accept: "application/json", "cache-control": "no-cache" },
+      credentials: "same-origin"
+    });
+    if (response.status === 401) throw new Error("Session expired, sign in again.");
+    if (!response.ok) throw new Error(`/api/admin/categories returned ${response.status}`);
+    const payload = await response.json();
+    const categories = Array.isArray(payload.categories) ? payload.categories : [];
+    renderCategories(categories);
+  } catch (error) {
+    els.categoriesCount.textContent = "Error";
+    els.categoriesListCount.textContent = error.message;
+  }
+}
+
+function renderCategories(categories) {
+  els.categoriesBody.replaceChildren();
+  els.categoriesCount.textContent = String(categories.length);
+  els.categoriesUsedCount.textContent = String(categories.filter((cat) => cat.count > 0).length);
+  els.categoriesListCount.textContent = `${categories.length} total`;
+
+  if (!categories.length) {
+    els.categoriesBody.append(emptyTableRow(5, "No categories found."));
+    return;
+  }
+
+  for (const cat of categories) {
+    const tr = document.createElement("tr");
+    tr.append(cell(cat.name, "truncate", "Name"));
+    tr.append(cell(String(cat.count), "", "Items"));
+    tr.append(cell(cat.pattern || "—", "truncate pattern-cell", "Pattern"));
+    tr.append(cell(cat.legacy ? "Legacy" : "Main", cat.legacy ? "status-error" : "status-ok", "Type"));
+
+    const actions = document.createElement("td");
+    actions.className = "nowrap";
+    actions.dataset.label = "Actions";
+
+    const renameBtn = document.createElement("button");
+    renameBtn.type = "button";
+    renameBtn.className = "btn btn-ghost";
+    renameBtn.textContent = "Rename";
+    renameBtn.style.padding = "4px 8px";
+    renameBtn.style.fontSize = "12px";
+    renameBtn.addEventListener("click", () => renameCategory(cat));
+    actions.append(renameBtn);
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.type = "button";
+    deleteBtn.className = "btn btn-danger";
+    deleteBtn.textContent = "Delete";
+    deleteBtn.style.padding = "4px 8px";
+    deleteBtn.style.fontSize = "12px";
+    deleteBtn.addEventListener("click", () => deleteCategory(cat));
+    actions.append(deleteBtn);
+
+    tr.append(actions);
+    els.categoriesBody.append(tr);
+  }
+}
+
+async function createCategory(name, pattern) {
+  try {
+    const response = await fetch("/api/admin/categories", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({ name, pattern })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || `POST returned ${response.status}`);
+    await loadCategories();
+  } catch (error) {
+    setStatus("Error", `Create category failed: ${error.message}`);
+  }
+}
+
+async function renameCategory(cat) {
+  const newName = window.prompt(`Rename "${cat.name}" to:`, cat.name);
+  if (newName === null) return;
+  const cleanName = newName.trim();
+  if (!cleanName || cleanName === cat.name) return;
+
+  try {
+    const response = await fetch("/api/admin/categories", {
+      method: "PATCH",
+      credentials: "same-origin",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({ name: cat.name, newName: cleanName })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || `PATCH returned ${response.status}`);
+    setStatus("Saved", `Category renamed to ${cleanName}. Items updated.`);
+    await loadCategories();
+    await loadItems();
+  } catch (error) {
+    setStatus("Error", `Rename failed: ${error.message}`);
+  }
+}
+
+async function deleteCategory(cat) {
+  if (cat.count > 0) {
+    const reassign = window.prompt(
+      `"${cat.name}" is on ${cat.count} live item(s). Enter the category to reassign them to, or leave blank to use "Other news":`,
+      "Other news"
+    );
+    if (reassign === null) return;
+    const target = reassign.trim() || "Other news";
+    const confirmed = window.confirm(`Delete "${cat.name}" and move its ${cat.count} item(s) to "${target}"?`);
+    if (!confirmed) return;
+    try {
+      const response = await fetch("/api/admin/categories", {
+        method: "DELETE",
+        credentials: "same-origin",
+        headers: { "content-type": "application/json", accept: "application/json" },
+        body: JSON.stringify({ name: cat.name, reassignTo: target })
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || `DELETE returned ${response.status}`);
+      setStatus("Saved", `Category "${cat.name}" deleted. Items moved to "${target}".`);
+      await loadCategories();
+      await loadItems();
+    } catch (error) {
+      setStatus("Error", `Delete failed: ${error.message}`);
+    }
+    return;
+  }
+
+  const confirmed = window.confirm(`Delete category "${cat.name}"?`);
+  if (!confirmed) return;
+  try {
+    const response = await fetch("/api/admin/categories", {
+      method: "DELETE",
+      credentials: "same-origin",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({ name: cat.name, reassignTo: "Other news" })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || `DELETE returned ${response.status}`);
+    setStatus("Saved", `Category "${cat.name}" deleted.`);
+    await loadCategories();
+    await loadItems();
+  } catch (error) {
+    setStatus("Error", `Delete failed: ${error.message}`);
   }
 }
 

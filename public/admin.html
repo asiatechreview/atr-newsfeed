@@ -41,6 +41,10 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           Sources
         </button>
+        <button id="tab-categories" class="nav-item" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="9" cy="18" r="2"/></svg>
+          Categories
+        </button>
         <button id="tab-newsletter" class="nav-item" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
           Newsletter
@@ -367,6 +371,53 @@
                   </tr>
                 </thead>
                 <tbody id="sources-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ CATEGORIES ============ -->
+        <section id="categories-view" hidden>
+          <div class="stats">
+            <article class="stat">
+              <span class="stat-label">Categories</span>
+              <strong id="categories-count" class="stat-value">-</strong>
+              <span class="stat-note">main + legacy</span>
+            </article>
+            <article class="stat">
+              <span class="stat-label">Used on items</span>
+              <strong id="categories-used-count" class="stat-value">-</strong>
+              <span class="stat-note">non-empty categories on live items</span>
+            </article>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">Add Category</div>
+            </div>
+            <form id="category-add-form" class="form-row">
+              <input id="category-name-input" class="input" type="text" placeholder="Category name" required>
+              <input id="category-pattern-input" class="input" type="text" placeholder="Inference pattern (optional, e.g. \b(robot|humanoid)\b)">
+              <button class="btn btn-primary" type="submit">Add</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">All Categories <small id="categories-list-count">-</small></div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Items</th>
+                    <th>Pattern</th>
+                    <th>Type</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="categories-body"></tbody>
               </table>
             </div>
           </div>
