@@ -9,13 +9,16 @@ const CATEGORY_RULES = [
   { label: "Chips", pattern: /\b(chip|chips|chipmaker|chipmaking|semiconductor|semiconductors|integrated circuit|tsmc|sk hynix|hynix|cxmt|silicon|photonics|fab|foundry|packaging|hbm|memory chips?)\b/ },
   { label: "Crypto", pattern: /\b(crypto|bitcoin|stablecoin|stablecoins|blockchain|onchain|token|digital asset|solana)\b/ },
   { label: "Fintech", pattern: /\b(bank|banking|fintech|financial|payments?|qr payment|insurance|lending|digital bank|coinhako)\b/ },
+  { label: "Venture Capital", pattern: /\b(venture capital|venture-capital|vc firm|vc fund|limited partner|fund of funds|accelerator|incubator)\b/ },
   { label: "Deals", pattern: /\b(fund|funding|raised|raise|secured|series [a-z]|seed|stake|acquisition|buy|bought|deal|invest|investment|grant|equity|debt|convertible|restructuring)\b/ },
   { label: "Markets", pattern: /\b(markets?|shares?|stock|trading|revenue|profit|sales|yield|price|ipo|listing|public listing|investors?|balance sheet|tax)\b/ },
   { label: "Policy", pattern: /\b(regulator|regulators|regulation|regulations|policy|government|ministry|customs|approval|approved|audit|probe|immigration|law|rules|compliance|incentives|public sector|sanctions|tariff|tariffs)\b/ },
   { label: "Cybersecurity", pattern: /\b(cybersecurity|security|hack|hacked|breach|ransomware|data leak|critical infrastructure|export controls?|export-restricted|illicit finance)\b/ },
   { label: "Mobility", pattern: /\b(mobility|electric vehicle|electric vehicles|evs?|ride-hailing|ride hailing|grab|gojek|go-jek|autonomous|self-driving|self driving|carmaker|carmakers|scooters?)\b/ },
   { label: "Gaming", pattern: /\b(gaming|games|esports|e-sports|famitsu)\b/ },
-  { label: "Telecommunications", pattern: /\b(telecom|telecommunications|5g|6g|network operator|spectrum|broadband)\b/ }
+  { label: "Telecommunications", pattern: /\b(telecom|telecommunications|5g|6g|network operator|spectrum|broadband)\b/ },
+  { label: "Startups", pattern: /\b(startup|startups|start-up|start-ups|unicorn)\b/ },
+  { label: "Apps", pattern: /\b(apps?|app store|superapp|super-app)\b/ }
 ];
 
 function inferCategory(text) {
