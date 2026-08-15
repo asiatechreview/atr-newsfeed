@@ -265,6 +265,7 @@ export async function onRequestGet({ env, request }) {
     await ensureHeadlineColumn(env);
     await ensureTagsColumn(env);
     await ensurePostedColumns(env);
+    await ensureScheduledAtColumn(env);
   } catch {
     // Migration attempts are best-effort; the query below is the real check.
   }
@@ -542,6 +543,7 @@ export async function onRequestPost({ env, request }) {
     await ensureTagsColumn(env);
     await ensureLinkKeyColumn(env);
     await ensurePostedColumns(env);
+    await ensureScheduledAtColumn(env);
   } catch (error) {
     await writeOperationalEvent(env, request, {
       workflow: "bulletin_ingest",
@@ -666,6 +668,12 @@ export async function onRequestPatch({ env, request }) {
   // manual-telegram-*, md-*, html-*). The id column stores both forms.
   const numericId = Number(rawIdInput);
   const id = Number.isInteger(numericId) && numericId > 0 ? numericId : rawIdInput;
+
+  try {
+    await ensureScheduledAtColumn(env);
+  } catch {
+    // Best-effort migration; the lookup below is the real check.
+  }
 
   const current = await env.ATR_FEED_DB.prepare(
     "SELECT id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key, status, posted_by, posted_via, scheduled_at FROM feed_items WHERE id = ? AND status IN ('published','hidden','draft','removed')"
