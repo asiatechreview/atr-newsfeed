@@ -108,22 +108,28 @@ export function filterItems(items, options = {}) {
   const query = clean(options.query).toLowerCase();
   const category = clean(options.category).toLowerCase();
   const tag = clean(options.tag).toLowerCase();
+  // Split into terms so multi-word queries match every word anywhere in the
+  // item (AND semantics), matching the site's own search behaviour. A
+  // single-term query behaves exactly as before.
+  const terms = query.split(/\s+/).filter(Boolean);
 
   return items.filter((item) => {
     if (category && clean(item.category).toLowerCase() !== category) return false;
 
     const itemTags = (Array.isArray(item.tags) ? item.tags : []).map((value) => clean(value).toLowerCase());
     if (tag && !itemTags.some((value) => value.includes(tag))) return false;
-    if (!query) return true;
+    if (!terms.length) return true;
 
-    return [
+    const haystack = [
       item.title,
       item.blurb,
       item.source_name,
       item.source_url,
       item.category,
       ...itemTags
-    ].some((value) => clean(value).toLowerCase().includes(query));
+    ].map((value) => clean(value).toLowerCase());
+
+    return terms.every((term) => haystack.some((value) => value.includes(term)));
   });
 }
 

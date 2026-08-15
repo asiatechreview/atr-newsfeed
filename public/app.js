@@ -1891,12 +1891,56 @@ function renderSearch(query, page = currentPage) {
   }
 
   const { tagTerms, textTerms } = parseSearchQuery(currentSearchQuery);
-  const searchItems = allItems.filter((item) => {
+
+  // Instant local results over the loaded window (fast path).
+  const localItems = allItems.filter((item) => {
     if (!itemMatchesTags(item, tagTerms)) return false;
     if (!textTerms.length) return true;
     const text = searchText(item);
     return textTerms.every((term) => text.includes(term));
   });
+  renderSearchResults(localItems, page, localItems.length ? "No matching updates." : "Searching full archive…");
+
+  // Full-archive search: the backend /api/v1/search covers every item (D1
+  // rows + static archive), so searches are not limited to the newest 500
+  // loaded client-side. Results replace the local ones when they arrive.
+  searchFullArchive(currentSearchQuery, tagTerms, textTerms, page);
+}
+
+// Sequence guard so a slow archive response never overwrites a newer query.
+let searchRequestSeq = 0;
+
+async function searchFullArchive(query, tagTerms, textTerms, page) {
+  const seq = ++searchRequestSeq;
+  const params = new URLSearchParams();
+  if (textTerms.length) params.set("q", textTerms.join(" "));
+  else if (tagTerms.length) params.set("tag", tagTerms[0]);
+  params.set("limit", "500");
+
+  try {
+    const response = await fetch(`/api/v1/search?${params.toString()}`, {
+      headers: { accept: "application/json" }
+    });
+    if (!response.ok) throw new Error(`Search API returned ${response.status}`);
+    const payload = await response.json();
+    if (seq !== searchRequestSeq) return; // stale response, newer query in flight
+
+    const archiveItems = (payload.items || [])
+      .map((item) => normalizeItem({ ...item, id: item.raw_id || item.id }))
+      .filter(Boolean)
+      .filter((item) => {
+        if (!itemMatchesTags(item, tagTerms)) return false;
+        if (!textTerms.length) return true;
+        const text = searchText(item);
+        return textTerms.every((term) => text.includes(term));
+      });
+    renderSearchResults(archiveItems, page);
+  } catch {
+    // Archive search is a progressive enhancement; local results stand.
+  }
+}
+
+function renderSearchResults(searchItems, page, emptyMessage = "No matching updates.") {
   const totalPages = Math.max(1, Math.ceil(searchItems.length / ITEMS_PER_PAGE));
   currentPage = Math.min(Math.max(1, page), totalPages);
   updateFeedUrl({ query: currentSearchQuery, page: currentPage });
@@ -1914,7 +1958,7 @@ function renderSearch(query, page = currentPage) {
   if (!pageItems.length) {
     const empty = document.createElement("p");
     empty.className = "empty";
-    empty.textContent = "No matching updates.";
+    empty.textContent = emptyMessage;
     feed.appendChild(empty);
     renderPagination(0);
     return;
