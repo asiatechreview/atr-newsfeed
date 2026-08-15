@@ -277,7 +277,21 @@ export async function onRequestGet({ env, request }) {
     d1Items = await loadD1ItemsWithoutHeadline({ env, category });
   }
 
-  const staticItems = loadStaticItems({ limit: INTERNAL_FETCH_LIMIT, category });
+  // Static archive items (md-*, html-*, manual-telegram-*) live in code and
+  // have no D1 row, so they can never be "removed" and are excluded from the
+  // removed view. Also drop any static item whose source_url already exists
+  // in D1: when a static item is edited, materialiseStaticItemOnEdit creates
+  // a real D1 row (new numeric id, same source_url), so the static original
+  // is a stale twin carrying the old title. Dropping it here stops stale
+  // originals from surfacing next to the fixed D1 rows.
+  const staticItems = statusParam === "removed"
+    ? []
+    : loadStaticItems({ limit: INTERNAL_FETCH_LIMIT, category })
+        .filter((item) => {
+          if (!item?.source_url) return true;
+          const url = String(item.source_url).toLowerCase();
+          return !d1Items.some((d1) => String(d1.source_url || "").toLowerCase() === url);
+        });
   const mergedItems = balanceArchiveDates(rebalanceJulyArchiveDates(mergeItems(d1Items, staticItems)))
     .filter((item) => !date || dateKey(item.published_at) === date);
   const total = mergedItems.length;
