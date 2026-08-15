@@ -1,4 +1,4 @@
-import { isAdmin } from "../../_lib/admin-auth.js";
+import { isAdmin } from "../../../_lib/admin-auth.js";
 
 function json(payload, status = 200) {
   return new Response(JSON.stringify(payload, null, 2), {
