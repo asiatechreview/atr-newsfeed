@@ -1918,7 +1918,10 @@ function renderSearch(query, page = currentPage) {
     const text = searchText(item);
     return textTerms.every((term) => text.includes(term));
   });
-  renderSearchResults(localItems, page, localItems.length ? "No matching updates." : "Searching full archive…");
+  renderSearchResults(localItems, page, {
+    message: localItems.length ? "No matching updates." : "Searching full archive…",
+    state: localItems.length ? "done" : "loading"
+  });
 
   // Full-archive search: the backend /api/v1/search covers every item (D1
   // rows + static archive), so searches are not limited to the newest 500
@@ -1953,13 +1956,22 @@ async function searchFullArchive(query, tagTerms, textTerms, page) {
         const text = searchText(item);
         return textTerms.every((term) => text.includes(term));
       });
-    renderSearchResults(archiveItems, page);
+    renderSearchResults(archiveItems, page, { state: "done" });
   } catch {
-    // Archive search is a progressive enhancement; local results stand.
+    // Only surface an error if the local fast path found nothing and the
+    // loading state is still on screen; otherwise local results stand.
+    const stuck = feed.querySelector(".empty[data-search-state=\"loading\"]");
+    if (stuck) {
+      renderSearchResults([], page, {
+        message: "Search couldn't be completed. Please try again.",
+        state: "error"
+      });
+    }
   }
 }
 
-function renderSearchResults(searchItems, page, emptyMessage = "No matching updates.") {
+function renderSearchResults(searchItems, page, options = {}) {
+  const { message = "No matching updates.", state = "done" } = options;
   const totalPages = Math.max(1, Math.ceil(searchItems.length / ITEMS_PER_PAGE));
   currentPage = Math.min(Math.max(1, page), totalPages);
   updateFeedUrl({ query: currentSearchQuery, page: currentPage });
@@ -1977,7 +1989,12 @@ function renderSearchResults(searchItems, page, emptyMessage = "No matching upda
   if (!pageItems.length) {
     const empty = document.createElement("p");
     empty.className = "empty";
-    empty.textContent = emptyMessage;
+    empty.dataset.searchState = state;
+    if (state === "loading") {
+      empty.setAttribute("role", "status");
+      empty.setAttribute("aria-live", "polite");
+    }
+    empty.textContent = message;
     feed.appendChild(empty);
     renderPagination(0);
     return;

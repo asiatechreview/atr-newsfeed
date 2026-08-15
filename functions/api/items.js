@@ -311,7 +311,7 @@ export async function onRequestGet({ env, request }) {
   });
 }
 
-function withHeadlines(items) {
+export function withHeadlines(items) {
   return items.map((item) => {
     const storedHeadline = clean(item.headline || item.Headline || item.title);
     const headline = normalizeHeadlineMoney(storedHeadline || headlineForItem(item));
@@ -328,7 +328,7 @@ function headlineForItem(item) {
   return HEADLINE_OVERRIDES.get(id) || deriveHeadline(item.blurb || item.Blurb || "");
 }
 
-function mergeItems(...groups) {
+export function mergeItems(...groups) {
   const seen = new Set();
   return groups
     .flat()
@@ -346,7 +346,7 @@ function mergeItems(...groups) {
     });
 }
 
-function loadStaticItems({ limit, category, date }) {
+export function loadStaticItems({ limit, category, date }) {
   return STATIC_ITEMS
     .filter((item) => item && (!category || item.category === category) && (!date || dateKey(item.published_at) === date))
     .sort((a, b) => {
@@ -357,7 +357,7 @@ function loadStaticItems({ limit, category, date }) {
     .slice(0, limit);
 }
 
-function rebalanceJulyArchiveDates(items) {
+export function rebalanceJulyArchiveDates(items) {
   const targetDates = [
     "2026-07-13",
     "2026-07-14",
@@ -392,7 +392,7 @@ function rebalanceJulyArchiveDates(items) {
     });
 }
 
-function balanceArchiveDates(items) {
+export function balanceArchiveDates(items) {
   return [
     ["2026-07-04", "2026-07-03", 5],
     ["2026-07-12", "2026-07-11", 9]
@@ -1320,7 +1320,7 @@ function deriveHeadline(blurb) {
   return limitHeadline(clauses[0].trim());
 }
 
-async function loadSheetItems({ category, date }) {
+export async function loadSheetItems({ category, date }) {
   const response = await fetch(SHEET_CSV_URL);
   if (!response.ok) {
     throw new Error(`Feed sheet returned ${response.status}`);
