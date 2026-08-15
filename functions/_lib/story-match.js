@@ -177,11 +177,12 @@ export function extractCompanies(text) {
   if (!value) return found;
   for (const [alias, canonical] of COMPANY_ALIASES) {
     // Word-ish boundary match: alias must appear as a whole word. Aliases
-    // with spaces are matched as phrases; single words get boundaries.
+    // with spaces are matched as phrases; single words get boundaries on
+    // both sides so "cred" does not match "credit" and "arm" does not
+    // match "farm". Possessives ("Alibaba's") still hit via the leading
+    // boundary + apostrophe.
     const escaped = alias.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const re = alias.includes(" ")
-      ? new RegExp(`\\b${escaped}\\b`, "i")
-      : new RegExp(`\\b${escaped}`, "i");
+    const re = new RegExp(`\\b${escaped}\\b`, "i");
     if (re.test(value)) found.add(canonical);
   }
   return found;
