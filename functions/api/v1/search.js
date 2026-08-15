@@ -1,6 +1,17 @@
-import { clampLimit, filterItems, json, loadAllBulletinItems, summarizeCollection, toPublicItem } from "../../_lib/public-api.js";
+import { clampLimit, filterItems, json, summarizeCollection, toPublicItem } from "../../_lib/public-api.js";
+import {
+  balanceArchiveDates,
+  loadSheetItems,
+  loadStaticItems,
+  mergeItems,
+  rebalanceJulyArchiveDates,
+  withHeadlines
+} from "../items.js";
 
-export async function onRequestGet({ request }) {
+const SEARCH_LIMIT = 10000;
+const SELECT = "id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key";
+
+export async function onRequestGet({ env, request }) {
   const url = new URL(request.url);
   const query = url.searchParams.get("q");
   const category = url.searchParams.get("category");
@@ -15,8 +26,50 @@ export async function onRequestGet({ request }) {
     }, 400, 60);
   }
 
-  const source = await loadAllBulletinItems(request, { category });
-  const filtered = filterItems(source.items.map(toPublicItem), {
+  // Fast path: one direct D1 query over published items. The previous
+  // implementation paged through /api/items via internal HTTP fetches, which
+  // ran the full pipeline (migrations, static merge, date balancing) once per
+  // page and took seconds on the full archive.
+  let d1Items = [];
+  if (env?.ATR_FEED_DB) {
+    const params = ["published"];
+    let sql = `SELECT ${SELECT} FROM feed_items WHERE status = ?`;
+    if (category) {
+      sql += " AND category = ?";
+      params.push(category);
+    }
+    sql += " ORDER BY published_at DESC, id DESC LIMIT ?";
+    params.push(SEARCH_LIMIT);
+
+    try {
+      const result = await env.ATR_FEED_DB.prepare(sql).bind(...params).all();
+      d1Items = result.results || [];
+    } catch (error) {
+      d1Items = [];
+    }
+  }
+
+  // Static archive items (md-*, html-*, manual-telegram-*) live in code.
+  // Drop any static item whose source_url already exists in D1, matching the
+  // dedupe rule in /api/items so stale originals never surface.
+  const staticItems = loadStaticItems({ limit: SEARCH_LIMIT, category }).filter((item) => {
+    if (!item?.source_url) return true;
+    const url = String(item.source_url).toLowerCase();
+    return !d1Items.some((d1) => String(d1.source_url || "").toLowerCase() === url);
+  });
+
+  const merged = balanceArchiveDates(rebalanceJulyArchiveDates(mergeItems(d1Items, staticItems)));
+
+  let publicItems;
+  if (merged.length) {
+    publicItems = withHeadlines(merged);
+  } else {
+    // Fallback mirrors /api/items: the sheet CSV when D1 and static are empty.
+    const sheetItems = await loadSheetItems({ category });
+    publicItems = withHeadlines(sheetItems);
+  }
+
+  const filtered = filterItems(publicItems.map(toPublicItem), {
     query,
     category,
     tag

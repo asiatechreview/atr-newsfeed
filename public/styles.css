@@ -799,6 +799,34 @@ main {
   font-size: 16px;
 }
 
+.empty[data-search-state="loading"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--accent);
+}
+
+.empty[data-search-state="loading"]::before {
+  content: "";
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--accent-dim);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: search-spin 700ms linear infinite;
+  flex: none;
+}
+
+@keyframes search-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.empty[data-search-state="error"] {
+  color: var(--red);
+}
+
 .rail-card {
   background: var(--panel);
   border: 1px solid var(--border);
