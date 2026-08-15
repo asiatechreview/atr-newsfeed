@@ -1097,7 +1097,7 @@ function populateCategoryFilter() {
   const extras = [...counts.keys()]
     .filter((cat) => !canonical.includes(cat))
     .sort((a, b) => (counts.get(b) || 0) - (counts.get(a) || 0) || a.localeCompare(b));
-  state.categories = [...canonical, ...extras];
+  state.categories = [...canonical, ...extras].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
 
   els.categoryFilter.replaceChildren();
   const all = document.createElement("option");
