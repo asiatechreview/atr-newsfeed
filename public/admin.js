@@ -2748,23 +2748,33 @@ if (scrim) {
 const themeToggle = document.querySelector("#theme-toggle");
 const themeLabel = document.querySelector("#theme-label");
 
+const THEMES = ["light", "dark", "amoled"];
+const THEME_LABELS = {
+  light: "Light mode",
+  dark: "Dark mode",
+  amoled: "AMOLED dark"
+};
+
 function applyTheme(theme) {
   document.documentElement.dataset.theme = theme;
   try {
     localStorage.setItem("atr-admin-theme", theme);
   } catch (error) {}
-  if (themeLabel) themeLabel.textContent = theme === "light" ? "Dark mode" : "Light mode";
+  if (themeLabel) themeLabel.textContent = THEME_LABELS[theme] || "Dark mode";
 }
 
 if (themeToggle) {
   themeToggle.addEventListener("click", () => {
-    const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+    const current = document.documentElement.dataset.theme || "dark";
+    const index = THEMES.indexOf(current);
+    const next = THEMES[(index + 1) % THEMES.length];
     applyTheme(next);
   });
 }
 
 if (themeLabel) {
-  themeLabel.textContent = document.documentElement.dataset.theme === "light" ? "Dark mode" : "Light mode";
+  const current = document.documentElement.dataset.theme || "dark";
+  themeLabel.textContent = THEME_LABELS[current] || "Dark mode";
 }
 
 sidebar?.addEventListener("click", (event) => {

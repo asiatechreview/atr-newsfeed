@@ -777,6 +777,41 @@ body.logged-out .auth-panel { min-height: calc(100vh - 48px); }
   --panel-2: var(--surface-2);
 }
 
+/* ============ AMOLED theme (pure black) ============ */
+:root[data-theme="amoled"] {
+  color-scheme: dark;
+  --bg: #000000;
+  --surface-1: #050607;
+  --surface-2: #0a0c0e;
+  --surface-3: #101317;
+  --border: #12151a;
+  --border-2: #1c2026;
+  --text: #e8eaed;
+  --muted: #9aa3ad;
+  --faint: #5f6771;
+  --accent: #7a9cc0;
+  --accent-strong: #9cbcdd;
+  --accent-dim: rgba(122,156,192,.14);
+  --amber: #ddad55;
+  --amber-dim: rgba(221,173,85,.12);
+  --red: #e07a6a;
+  --red-dim: rgba(224,122,106,.12);
+  --green: #34c759;
+  --panel: var(--surface-1);
+  --panel-2: var(--surface-2);
+}
+
+/* Theme toggle bulb glyph: the bulb reflects the active mode.
+   Light = rays + warm fill (bulb on). Dark = dim outline (bulb off).
+   AMOLED = cool accent glow on true black. */
+.bulb-rays { opacity: 0; transition: opacity var(--dur) var(--ease); }
+.bulb-body { fill: none; transition: fill var(--dur) var(--ease); }
+html[data-theme="light"] .bulb-rays { opacity: 1; }
+html[data-theme="light"] .bulb-body { fill: rgba(221,173,85,.35); }
+html[data-theme="light"] #theme-toggle { color: var(--amber); }
+html[data-theme="amoled"] .bulb-body { fill: rgba(122,156,192,.3); }
+html[data-theme="amoled"] #theme-toggle { color: var(--accent-strong); }
+
 /* ============ Newsletter live preview ============ */
 .newsletter-grid { align-items: stretch; }
 .newsletter-grid > .card { display: flex; flex-direction: column; }
