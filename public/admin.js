@@ -5,6 +5,7 @@ const ITEMS_PER_PAGE = 20;
 // mapped to the category labels ATR actually uses). Pure client-side, no LLM.
 const CATEGORY_RULES = [
   { label: "WAIC 2026", pattern: /\bwaic\b/ },
+  { label: "Cloud", pattern: /\b(cloud|data centre|data center|data centres|data centers|hyperscaler|hyperscalers|aws|azure|google cloud|alibaba cloud|tencent cloud|huawei cloud|cloud computing|cloud services|cloud infrastructure|infrastructure-as-a-service|iaas|saas|paas)\b/ },
   { label: "AI", pattern: /\b(ai|artificial intelligence|llm|multimodal|foundation model|claude|openai|anthropic|deepseek|minimax|moonshot|agentic|nvidia|distillation|gpu)\b/ },
   { label: "Chips", pattern: /\b(chip|chips|chipmaker|chipmaking|semiconductor|semiconductors|integrated circuit|tsmc|sk hynix|hynix|cxmt|silicon|photonics|fab|foundry|packaging|hbm|memory chips?)\b/ },
   { label: "Robotics", pattern: /\b(robot|robots|robotics|humanoid|robotaxi|robotaxis|unitree|agibot|ubtech|boston dynamics|figure|digit robot)\b/ },

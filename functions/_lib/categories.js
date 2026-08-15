@@ -24,6 +24,7 @@ export async function ensureCategoriesTable(env) {
 // Order matters: earlier rules win when multiple patterns match.
 const SEED_CATEGORIES = [
   { name: "WAIC 2026", pattern: "\\bwaic\\b" },
+  { name: "Cloud", pattern: "\\b(cloud|data centre|data center|data centres|data centers|hyperscaler|hyperscalers|aws|azure|google cloud|alibaba cloud|tencent cloud|huawei cloud|cloud computing|cloud services|cloud infrastructure|infrastructure-as-a-service|iaas|saas|paas)\\b" },
   { name: "AI", pattern: "\\b(ai|artificial intelligence|llm|multimodal|foundation model|claude|openai|anthropic|deepseek|minimax|moonshot|agentic|nvidia|distillation|gpu)\\b" },
   { name: "Chips", pattern: "\\b(chip|chips|chipmaker|chipmaking|semiconductor|semiconductors|integrated circuit|tsmc|sk hynix|hynix|cxmt|silicon|photonics|fab|foundry|packaging|hbm|memory chips?)\\b" },
   { name: "Robotics", pattern: "\\b(robot|robots|robotics|humanoid|robotaxi|robotaxis|unitree|agibot|ubtech|boston dynamics|figure|digit robot)\\b" },
