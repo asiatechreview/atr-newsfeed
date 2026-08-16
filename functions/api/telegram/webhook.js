@@ -319,7 +319,7 @@ async function generateHeadline(env, blurb) {
       temperature: 0.3
     });
     const response = await fetch(
-      `https://api.cloudflare.com/client/v4/accounts/${account}/ai/run/@cf/meta/llama-3.3-70b-instruct-fp8-fast`,
+      `https://api.cloudflare.com/client/v4/accounts/${account}/ai/run/@cf/qwen/qwen2.5-coder-32b-instruct`,
       {
         method: "POST",
         headers: {
