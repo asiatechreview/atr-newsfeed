@@ -179,16 +179,20 @@ function inferCategory(blurb) {
   return "";
 }
 
-async function sendGroupMessage(env, chatId, text, replyTo = null) {
+async function sendGroupMessage(env, chatId, text, replyTo = null, entities = null) {
   const token = env.TELEGRAM_BACKUP_BOT_TOKEN;
   if (!token) return false;
   try {
     const body = {
       chat_id: chatId,
       text,
-      parse_mode: "Markdown",
       disable_web_page_preview: true
     };
+    if (Array.isArray(entities) && entities.length) {
+      body.entities = entities;
+    } else {
+      body.parse_mode = "Markdown";
+    }
     if (replyTo) body.reply_to_message_id = replyTo;
     const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: "POST",
@@ -388,8 +392,10 @@ function senderName(message) {
 }
 
 async function processPost(env, request, chatId, url, blurb, label, replyTo = null, postedBy = null) {
-  const formatted = `${blurb} \\[[${label}](${url})\\]`;
-  await sendGroupMessage(env, chatId, formatted, replyTo);
+  const visibleText = `${blurb} [${label}]`;
+  const labelOffset = blurb.length + 2;
+  const entities = [{ type: "text_link", offset: labelOffset, length: label.length, url }];
+  await sendGroupMessage(env, chatId, visibleText, replyTo, entities);
 
   // Generate a scan-first headline from the supplied blurb. This is
   // compression, not creation: the blurb is the only input. If the LLM is
