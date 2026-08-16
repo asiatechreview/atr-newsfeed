@@ -23,7 +23,10 @@ const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000; // UTC+5:30
 const GATHER_STATE_KEY = "daily_gather";
 const SCHEDULE_KEY = "gather_schedule";
 
-export const DEFAULT_DOC_ID = "1CIN0zFoTDApime7_Z9gwT96HBlrE7ystQnFUKtFe-2w";
+// Default doc used on first run / cleared state. Sai confirmed (Aug 16 2026)
+// the gather should stay on the doc it created for the month, not revert to
+// the older DNG August doc, to avoid confusion.
+export const DEFAULT_DOC_ID = "1COqiUNh442OpaTokqswveXd-cng1O3S2Iexye3eR26Q";
 
 // ---------------------------------------------------------------------------
 // Dates (IST)
