@@ -190,7 +190,74 @@ async function sendGroupMessage(env, chatId, text, replyTo = null) {
   }
 }
 
-async function ingestItem(env, request, { blurb, url, label }) {
+const HEADLINE_STYLE = `You write scan-first headlines for ATR (Asia Tech Review).
+Rules:
+- 7-13 words, 35-60 characters.
+- Lead with company/country + concrete action. Present tense.
+- KEEP the key number or stat from the blurb (financing size, downloads, valuation, percent, robots sold, etc). The number is the news.
+- Compress everything else. NEVER add facts not in the blurb.
+- No "The" unless essential. No trailing period.
+- Examples: "DeepSeek pushes China AI price war into enterprise adoption", "Unitree raises $904m in STAR Market IPO", "Alibaba Qwen models pass 3bn global downloads".
+- Output ONLY the headline.`;
+
+function cleanHeadlineOutput(value) {
+  return String(value || "")
+    .replace(/^[\s"'“”‘’]+|[\s"'“”‘’]+$/g, "")
+    .replace(/^Headline:?\s*/i, "")
+    .replace(/\.+$/g, "")
+    .trim();
+}
+
+function headlineLooksValid(headline) {
+  const value = cleanHeadlineOutput(headline);
+  const words = value.split(/\s+/).filter(Boolean);
+  if (words.length < 4 || words.length > 14) return false;
+  if (value.length > 72) return false;
+  if (/\$[0-9.]+$/.test(value)) return false;
+  if (/\b(?:a|an|the|to|for|from|of|in|on|at|by|with|into|as|and|or|but|after|before|while|amid|among|including|through|using|than|more|less|around|roughly|nearly|over|under|about|its|their|his|her|this|that|which|who|what|where|when|why|how|would|will|could|should|has|have|had|is|are|be|was|were|being|been|called|known|also|first|new)\s*$/i.test(value)) return false;
+  return true;
+}
+
+async function generateHeadline(env, blurb) {
+  const account = env.WORKERS_AI_ACCOUNT_ID;
+  const token = env.WORKERS_AI_TOKEN;
+  if (!account || !token) return null;
+
+  try {
+    const body = JSON.stringify({
+      messages: [
+        { role: "system", content: HEADLINE_STYLE },
+        { role: "user", content: `Blurb: ${blurb}\n\nWrite the headline.` }
+      ],
+      max_tokens: 80,
+      temperature: 0.3
+    });
+    const response = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${account}/ai/run/@cf/meta/llama-3.3-70b-instruct-fp8-fast`,
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          authorization: `Bearer ${token}`
+        },
+        body
+      }
+    );
+    if (!response.ok) return null;
+    const payload = await response.json();
+    const result = payload?.result || {};
+    const choices = result.choices || [];
+    const text = choices.length
+      ? choices[0].message.content
+      : result.response;
+    const headline = cleanHeadlineOutput(text);
+    return headlineLooksValid(headline) ? headline : null;
+  } catch {
+    return null;
+  }
+}
+
+async function ingestItem(env, request, { blurb, url, label, headline }) {
   const origin = new URL(request.url).origin;
   const category = inferCategory(blurb) || undefined;
   const ingestBody = {
@@ -203,6 +270,9 @@ async function ingestItem(env, request, { blurb, url, label }) {
     postedVia: "telegram_rapid_transit",
     status: "published"
   };
+  if (headline) {
+    ingestBody.headline = headline;
+  }
 
   const response = await fetch(`${origin}/api/items`, {
     method: "POST",
@@ -221,7 +291,13 @@ async function processPost(env, request, chatId, url, blurb, label, replyTo = nu
   const formatted = `${blurb} [[${label}](${url})]`;
   await sendGroupMessage(env, chatId, formatted, replyTo);
 
-  const result = await ingestItem(env, request, { blurb, url, label });
+  // Generate a scan-first headline from the supplied blurb. This is
+  // compression, not creation: the blurb is the only input, so no new facts
+  // can appear. If the LLM is unavailable or produces an invalid headline,
+  // we ingest without one and the site derives a mechanical title.
+  const headline = await generateHeadline(env, blurb);
+
+  const result = await ingestItem(env, request, { blurb, url, label, headline });
   if (result.ok) {
     await sendGroupMessage(env, chatId, "🟢");
   } else {
