@@ -504,7 +504,21 @@ export async function monthlyDocInfo(env, state, notifyFn) {
     return { docId: state.doc.docId, created: false };
   }
 
-  // Create the new monthly doc: "DNG <Month>, <YYYY>"
+  // First run / no recorded doc: use the default doc for the current month
+  // instead of creating a new one. Only a real month rollover (the recorded
+  // doc belongs to an earlier month) creates a fresh doc.
+  if (!state.doc) {
+    state.doc = {
+      month: monthKey,
+      docId: DEFAULT_DOC_ID,
+      title: "Default",
+      created_at: new Date().toISOString()
+    };
+    await writeGatherState(env, state);
+    return { docId: DEFAULT_DOC_ID, created: false };
+  }
+
+  // Month rollover: create the new monthly doc: "DNG <Month>, <YYYY>"
   const title = `DNG ${monthName}, ${year}`;
   const created = await driveCreateDoc(accessToken, title);
   const docId = created.id;
