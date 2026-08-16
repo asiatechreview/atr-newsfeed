@@ -388,7 +388,7 @@ function senderName(message) {
 }
 
 async function processPost(env, request, chatId, url, blurb, label, replyTo = null, postedBy = null) {
-  const formatted = `${blurb} [[${label}](${url})]`;
+  const formatted = `${blurb} \\[[${label}](${url})\\]`;
   await sendGroupMessage(env, chatId, formatted, replyTo);
 
   // Generate a scan-first headline from the supplied blurb. This is
