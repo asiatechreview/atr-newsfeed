@@ -193,17 +193,53 @@ async function sendGroupMessage(env, chatId, text, replyTo = null) {
   }
 }
 
-const HEADLINE_STYLE = `You write telegraphic scan-first headlines for ATR (Asia Tech Review).
-Rules:
-- 6-12 words, 30-58 characters.
-- Telegraphic: drop articles, prepositions and filler where possible.
-- Lead with the subject noun from the blurb (firms, companies, startups, makers - keep the blurb's actor, do not swap it for a country adjective alone).
-- Prefer the blurb's own action verb where it works (turn to, raise, delay, oppose).
-- KEEP specific subject nouns and figures (memory chips, funding, valuation, downloads, percent). KEEP framing nouns like plan, push, deal, fund, IPO.
-- NEVER add facts not in the blurb.
-- No trailing period.
-- Examples: "US opposes Apple China memory chip plan", "European firms turn to Chinese AI models", "Alibaba Qwen models pass 3bn downloads", "Unitree raises $904m STAR Market IPO".
-- Output ONLY the headline.`;
+const HEADLINE_EXAMPLES = [
+  {
+    blurb: "A surge in investor enthusiasm and strong backing from Beijing have pushed valuations of Chinese tech stocks far above US peers as the country's AI sector emerges as a credible challenger to Silicon Valley. Shanghai's Star 50 index has gained 29% this year and trades at more than 150 times earnings, compared with about 35 times for the Nasdaq 100.",
+    title: "Chinese tech valuations outstrip US peers"
+  },
+  {
+    blurb: "European businesses are increasingly turning to low-cost Chinese AI models, sparking debate over whether the technology threatens the continent's digital sovereignty or could help strengthen it. Some companies argue that running open-weight Chinese models on local servers offers greater control than relying on proprietary AI services from US tech groups.",
+    title: "European firms turn to Chinese AI models"
+  },
+  {
+    blurb: "The Trump administration is opposing Apple's plans to source memory chips from China, as soaring AI-driven demand creates shortages and pushes up component prices. Commerce Secretary Howard Lutnick said Washington wants US companies to find alternatives even as Apple explores Chinese suppliers to ease supply constraints.",
+    title: "US opposes Apple China memory chip plan"
+  },
+  {
+    blurb: "China's Unitree is raising ¥6.10 billion ($904 million) in a STAR Market IPO at an implied ¥61 billion ($9.04 billion) market cap, after selling 5,215 humanoid robots last year. The prospectus allocates $300 million, or 48% of the plan, to AI models as Unitree tries to move beyond low-cost hardware.",
+    title: "Unitree's $904 million IPO puts AI models in focus"
+  },
+  {
+    blurb: "Beijing is set to lift travel restrictions on Manus founders as the Chinese AI agent startup unwinds its $2 billion acquisition by Meta, paving the way for chief executive and co-founder Xiao Hong to return to Singapore, where the company is based.",
+    title: "Beijing set to lift travel curbs on Manus founders"
+  },
+  {
+    blurb: "A profile of Sony CEO Hiroki Totoki, the company veteran leading the Japanese conglomerate's shift from an electronics giant to an entertainment powerhouse as it bets on gaming, music and film to fuel its next phase of growth.",
+    title: "Sony CEO Totoki bets on entertainment"
+  },
+  {
+    blurb: "The US is preparing to pressure dozens of countries to choose between rival American and Chinese AI blocs, warning they could be excluded from Washington's Pax Silica coalition if they also join Beijing's competing framework.",
+    title: "US tells partners to pick sides in AI race"
+  },
+  {
+    blurb: "DeepSeek has released a developer preview of Harness, a software framework designed to help developers turn AI models into autonomous agents capable of running software, writing code and completing complex tasks.",
+    title: "DeepSeek releases Harness agent framework"
+  }
+];
+
+function buildHeadlinePrompt(blurb) {
+  const examples = HEADLINE_EXAMPLES.map(
+    (e) => `Blurb: ${e.blurb}\nTitle: ${e.title}`
+  ).join("\n\n");
+  return `You write scan-first headlines for ATR (Asia Tech Review), a daily Asia tech news bulletin.
+
+Study these real examples of blurb-to-title pairs produced by ATR's editor:
+
+${examples}
+
+Now write the title for the new blurb below. Match the style of the examples: telegraphic, lead with the actor and action, keep the key figure or subject noun, use the blurb's own verb where it works, never add facts not in the blurb, no trailing period. Output ONLY the title.`;
+}
 
 function cleanHeadlineOutput(value) {
   return String(value || "")
@@ -268,8 +304,8 @@ async function generateHeadline(env, blurb) {
   try {
     const body = JSON.stringify({
       messages: [
-        { role: "system", content: HEADLINE_STYLE },
-        { role: "user", content: `Blurb: ${blurb}\n\nWrite the headline.` }
+        { role: "system", content: buildHeadlinePrompt(blurb) },
+        { role: "user", content: `Blurb: ${blurb}\nTitle:` }
       ],
       max_tokens: 80,
       temperature: 0.3
