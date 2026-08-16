@@ -872,13 +872,32 @@ async function loadSources() {
   }
 }
 
+const POSTER_LABELS = {
+  telegram_rapid_transit: "Rapid Transit",
+  telegram_backup_bot: "Backup bot",
+  daily_news_automation: "Daily News Automation",
+  "": "Not recorded"
+};
+
+function displayPoster(value) {
+  const v = String(value || "").trim();
+  if (!v) return "Not recorded";
+  return POSTER_LABELS[v] || v;
+}
+
+function displayVia(value) {
+  const v = String(value || "").trim();
+  if (!v) return "-";
+  return POSTER_LABELS[v] || v;
+}
+
 function renderSources(items) {
   els.sourcesBody.replaceChildren();
   const total = items.length;
   const hidden = items.filter((item) => item.status === "hidden").length;
   const actors = new Map();
   for (const item of items) {
-    const actor = item.posted_by || "Unknown";
+    const actor = displayPoster(item.posted_by);
     actors.set(actor, (actors.get(actor) || 0) + 1);
   }
   const actorSummary = [...actors.entries()]
@@ -903,8 +922,8 @@ function renderSources(items) {
     tr.append(cell(String(item.id), "nowrap id-cell", "ID"));
     tr.append(cell(item.headline || item.title || firstWords(item.blurb, 12), "truncate", "Title"));
     tr.append(cell(item.source_name || "-", "truncate", "Source"));
-    tr.append(cell(item.posted_by || "-", "", "Posted by"));
-    tr.append(cell(item.posted_via || "-", "", "Via"));
+    tr.append(cell(displayPoster(item.posted_by), "", "Posted by"));
+    tr.append(cell(displayVia(item.posted_via), "", "Via"));
     tr.append(cell(formatDateTime(item.published_at || item.created_at), "nowrap", "When"));
     tr.append(cell(item.status === "hidden" ? "Hidden" : "Published", item.status === "hidden" ? "status-error" : "status-ok", "Status"));
     els.sourcesBody.append(tr);

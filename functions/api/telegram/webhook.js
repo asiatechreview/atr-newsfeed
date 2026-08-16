@@ -347,7 +347,7 @@ async function generateHeadline(env, blurb) {
   }
 }
 
-async function ingestItem(env, request, { blurb, url, label, headline }) {
+async function ingestItem(env, request, { blurb, url, label, headline, postedBy }) {
   const origin = new URL(request.url).origin;
   const category = inferCategory(blurb) || undefined;
   const ingestBody = {
@@ -356,7 +356,7 @@ async function ingestItem(env, request, { blurb, url, label, headline }) {
     sourceUrl: url,
     category,
     tags: [],
-    postedBy: "telegram_rapid_transit",
+    postedBy: postedBy || "telegram_rapid_transit",
     postedVia: "telegram_rapid_transit",
     status: "published"
   };
@@ -377,7 +377,17 @@ async function ingestItem(env, request, { blurb, url, label, headline }) {
   return { ok: false, detail: (await response.text()).slice(0, 200), status: response.status };
 }
 
-async function processPost(env, request, chatId, url, blurb, label, replyTo = null) {
+function senderName(message) {
+  const from = message?.from;
+  if (!from) return null;
+  if (from.first_name) {
+    const last = from.last_name ? ` ${from.last_name}` : "";
+    return `${from.first_name}${last}`.trim();
+  }
+  return from.username || null;
+}
+
+async function processPost(env, request, chatId, url, blurb, label, replyTo = null, postedBy = null) {
   const formatted = `${blurb} [[${label}](${url})]`;
   await sendGroupMessage(env, chatId, formatted, replyTo);
 
@@ -387,7 +397,7 @@ async function processPost(env, request, chatId, url, blurb, label, replyTo = nu
   // without one and the site derives a mechanical title.
   const headline = await generateHeadline(env, blurb);
 
-  const result = await ingestItem(env, request, { blurb, url, label, headline });
+  const result = await ingestItem(env, request, { blurb, url, label, headline, postedBy });
   if (result.ok) {
     await sendGroupMessage(env, chatId, "🟢");
   } else {
@@ -546,7 +556,7 @@ export async function onRequestPost({ env, request }) {
     }
     await saveLabel(env, pending.domain, label);
     await markPendingProcessed(env, pending.id);
-    await processPost(env, request, chatId, pending.url, pending.blurb, label, message.message_id);
+    await processPost(env, request, chatId, pending.url, pending.blurb, label, message.message_id, senderName(message));
 
     // If another unmapped publisher is queued, ask for the next label.
     const next = await oldestPending(env);
@@ -582,7 +592,7 @@ export async function onRequestPost({ env, request }) {
 
   if (label) {
     // Known publisher: process immediately.
-    await processPost(env, request, chatId, url, blurb, label);
+    await processPost(env, request, chatId, url, blurb, label, null, senderName(message));
     return json({ ok: true });
   }
 
