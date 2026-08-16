@@ -336,6 +336,14 @@ const els = {
   headline: document.querySelector("#headline-input"),
   headlineSimilarWarning: document.querySelector("#headline-similar-warning"),
   blurb: document.querySelector("#blurb-input"),
+  tags: document.querySelector("#tags-input"),
+  aiHeadlineBtn: document.querySelector("#ai-headline-btn"),
+  aiCategoryBtn: document.querySelector("#ai-category-btn"),
+  aiBlurbBtn: document.querySelector("#ai-blurb-btn"),
+  aiTagsBtn: document.querySelector("#ai-tags-btn"),
+  aiDupesBtn: document.querySelector("#ai-dupes-btn"),
+  aiDupesWarning: document.querySelector("#ai-dupes-warning"),
+  aiBlurbNote: document.querySelector("#ai-blurb-note"),
   sourceName: document.querySelector("#source-name-input"),
   sourceUrl: document.querySelector("#source-url-input"),
   publishedAt: document.querySelector("#published-at-input"),
@@ -586,6 +594,147 @@ els.tokenButton.addEventListener("click", () => {
 
 els.tabPublish.addEventListener("click", () => switchTab("publish"));
 els.tabLive.addEventListener("click", () => switchTab("live"));
+// ---------------------------------------------------------------------------
+// AI assist (Qwen via /api/ai-assist). Advisory only; every result is
+// inserted into the form for Sai/Jon to review before saving.
+// ---------------------------------------------------------------------------
+
+async function runAiAssist(action, payload) {
+  const response = await fetch("/api/ai-assist", {
+    method: "POST",
+    headers: { "content-type": "application/json", accept: "application/json" },
+    credentials: "same-origin",
+    body: JSON.stringify({ action, ...payload })
+  });
+  if (response.status === 401) throw new Error("Session expired, sign in again.");
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.error || `AI assist returned ${response.status}`);
+  }
+  return response.json();
+}
+
+function setAiButtonBusy(button, busy, label) {
+  if (!button) return;
+  if (busy) {
+    button.dataset.originalLabel = label || button.textContent;
+    button.textContent = "…";
+    button.disabled = true;
+  } else {
+    button.textContent = button.dataset.originalLabel || button.textContent;
+    button.disabled = false;
+  }
+}
+
+function aiError(button, message) {
+  setAiButtonBusy(button, false);
+  console.error("AI assist:", message);
+  const warning = els.aiDupesWarning;
+  if (warning) {
+    warning.textContent = `AI assist error: ${message}`;
+    warning.hidden = false;
+  }
+}
+
+function wireAiAssist() {
+  // Suggest headline from the blurb.
+  els.aiHeadlineBtn?.addEventListener("click", async () => {
+    const blurb = (els.blurb.value || "").trim();
+    if (!blurb) return;
+    setAiButtonBusy(els.aiHeadlineBtn, true);
+    try {
+      const data = await runAiAssist("suggest_headline", { blurb });
+      if (data.result) els.headline.value = data.result;
+    } catch (error) {
+      aiError(els.aiHeadlineBtn, error.message);
+    } finally {
+      setAiButtonBusy(els.aiHeadlineBtn, false);
+    }
+  });
+
+  // Suggest category from the blurb.
+  els.aiCategoryBtn?.addEventListener("click", async () => {
+    const blurb = (els.blurb.value || "").trim();
+    if (!blurb) return;
+    setAiButtonBusy(els.aiCategoryBtn, true);
+    try {
+      const data = await runAiAssist("suggest_category", { blurb, headline: els.headline.value });
+      if (data.result) els.category.value = data.result;
+    } catch (error) {
+      aiError(els.aiCategoryBtn, error.message);
+    } finally {
+      setAiButtonBusy(els.aiCategoryBtn, false);
+    }
+  });
+
+  // Tighten the blurb.
+  els.aiBlurbBtn?.addEventListener("click", async () => {
+    const blurb = (els.blurb.value || "").trim();
+    if (!blurb) return;
+    setAiButtonBusy(els.aiBlurbBtn, true);
+    try {
+      const data = await runAiAssist("tighten_blurb", { blurb });
+      if (data.result) {
+        els.blurb.value = data.result;
+        if (els.aiBlurbNote) {
+          els.aiBlurbNote.innerHTML = "<strong>Tightened.</strong> Review before saving.";
+          els.aiBlurbNote.hidden = false;
+        }
+      }
+    } catch (error) {
+      aiError(els.aiBlurbBtn, error.message);
+    } finally {
+      setAiButtonBusy(els.aiBlurbBtn, false);
+    }
+  });
+
+  // Suggest tags from the blurb.
+  els.aiTagsBtn?.addEventListener("click", async () => {
+    const blurb = (els.blurb.value || "").trim();
+    if (!blurb) return;
+    setAiButtonBusy(els.aiTagsBtn, true);
+    try {
+      const data = await runAiAssist("suggest_tags", { blurb, headline: els.headline.value });
+      if (Array.isArray(data.tags) && data.tags.length) {
+        els.tags.value = data.tags.join(", ");
+      }
+    } catch (error) {
+      aiError(els.aiTagsBtn, error.message);
+    } finally {
+      setAiButtonBusy(els.aiTagsBtn, false);
+    }
+  });
+
+  // Semantic duplicate check against the bulletin.
+  els.aiDupesBtn?.addEventListener("click", async () => {
+    const blurb = (els.blurb.value || "").trim();
+    const headline = (els.headline.value || "").trim();
+    if (!blurb && !headline) return;
+    setAiButtonBusy(els.aiDupesBtn, true);
+    try {
+      const data = await runAiAssist("check_duplicates", { blurb, headline, sourceUrl: els.sourceUrl.value });
+      const matches = Array.isArray(data.matches) ? data.matches : [];
+      if (els.aiDupesWarning) {
+        if (!matches.length) {
+          els.aiDupesWarning.textContent = `No same-story matches found across ${data.checked ?? 0} recent items.`;
+          els.aiDupesWarning.classList.add("ok");
+        } else {
+          const lines = matches.map((m) => `"${m.headline}" (${m.source_name || "?"}, id ${m.id})`).join(" | ");
+          els.aiDupesWarning.textContent = `Possible same story (${matches.length}): ${lines}`;
+          els.aiDupesWarning.classList.remove("ok");
+        }
+        els.aiDupesWarning.hidden = false;
+      }
+    } catch (error) {
+      aiError(els.aiDupesBtn, error.message);
+    } finally {
+      setAiButtonBusy(els.aiDupesBtn, false);
+    }
+  });
+}
+
+wireAiAssist();
+
 els.tabSources.addEventListener("click", () => {
   switchTab("sources");
   loadSources();
@@ -2319,6 +2468,10 @@ function collectForm() {
     sourceUrl: els.sourceUrl.value.trim(),
     category: els.category.value.trim() || DEFAULT_CATEGORY,
   };
+
+  if (els.tags && els.tags.value.trim()) {
+    payload.tags = els.tags.value.split(",").map((tag) => tag.trim()).filter(Boolean);
+  }
 
   // Provenance is grabbed automatically from the session, never typed in.
   // Only set it for new items; edits keep the original provenance.

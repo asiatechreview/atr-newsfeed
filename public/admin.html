@@ -179,20 +179,40 @@
                   </div>
                   <div class="field">
                     <label for="category-input">Category <span class="label-hint">(auto-suggested, editable)</span></label>
-                    <input id="category-input" class="input" type="text" placeholder="e.g. Markets, AI, Crypto" list="category-options">
+                    <div class="ai-assist-row">
+                      <input id="category-input" class="input" type="text" placeholder="e.g. Markets, AI, Crypto" list="category-options">
+                      <button id="ai-category-btn" class="btn btn-ghost" type="button" title="Suggest a category with Qwen">✨ Suggest</button>
+                    </div>
                     <datalist id="category-options"></datalist>
                   </div>
                 </div>
 
                 <div class="field">
                   <label for="headline-input">Headline</label>
-                  <input id="headline-input" class="input" type="text" maxlength="120" placeholder="Clean ATR-style scan title">
+                  <div class="ai-assist-row">
+                    <input id="headline-input" class="input" type="text" maxlength="120" placeholder="Clean ATR-style scan title">
+                    <button id="ai-headline-btn" class="btn btn-ghost" type="button" title="Suggest a headline with Qwen">✨ Suggest</button>
+                    <button id="ai-dupes-btn" class="btn btn-ghost" type="button" title="Check for the same story already in the bulletin (semantic)">🔍 Check dupes</button>
+                  </div>
                   <div id="headline-similar-warning" class="dupe-warning" hidden></div>
+                  <div id="ai-dupes-warning" class="dupe-warning" hidden></div>
                 </div>
 
                 <div class="field">
                   <label for="blurb-input">Blurb</label>
-                  <textarea id="blurb-input" class="textarea" rows="8" required placeholder="Bulletin blurb"></textarea>
+                  <div class="ai-assist-row ai-assist-top">
+                    <textarea id="blurb-input" class="textarea" rows="8" required placeholder="Bulletin blurb"></textarea>
+                    <button id="ai-blurb-btn" class="btn btn-ghost" type="button" title="Tighten the blurb with Qwen">✨ Tighten</button>
+                  </div>
+                  <div id="ai-blurb-note" class="ai-note" hidden></div>
+                </div>
+
+                <div class="field">
+                  <label for="tags-input">Tags <span class="label-hint">(comma separated)</span></label>
+                  <div class="ai-assist-row">
+                    <input id="tags-input" class="input" type="text" placeholder="e.g. China, AI, DeepSeek">
+                    <button id="ai-tags-btn" class="btn btn-ghost" type="button" title="Suggest tags with Qwen">✨ Suggest</button>
+                  </div>
                 </div>
 
                 <div class="row">
