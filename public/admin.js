@@ -387,8 +387,6 @@ const els = {
   sourcesCountDetail: document.querySelector("#sources-count-detail"),
   sourcesHiddenCount: document.querySelector("#sources-hidden-count"),
   sourcesHiddenDetail: document.querySelector("#sources-hidden-detail"),
-  sourcesActorSummary: document.querySelector("#sources-actor-summary"),
-  sourcesActorDetail: document.querySelector("#sources-actor-detail"),
   opsView: document.querySelector("#ops-view"),
   analyticsView: document.querySelector("#analytics-view"),
   newsletterView: document.querySelector("#newsletter-view"),
@@ -1044,21 +1042,10 @@ function renderSources(items) {
   els.sourcesBody.replaceChildren();
   const total = items.length;
   const hidden = items.filter((item) => item.status === "hidden").length;
-  const actors = new Map();
-  for (const item of items) {
-    const actor = displayPoster(item.posted_by);
-    actors.set(actor, (actors.get(actor) || 0) + 1);
-  }
-  const actorSummary = [...actors.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .map(([name, count]) => `${name} ${count}`)
-    .join(" · ");
   els.sourcesCount.textContent = String(total);
   els.sourcesCountDetail.textContent = `${hidden} hidden`;
   els.sourcesHiddenCount.textContent = String(hidden);
   els.sourcesHiddenDetail.textContent = `${total - hidden} visible`;
-  els.sourcesActorSummary.textContent = actorSummary || "-";
-  els.sourcesActorDetail.textContent = "Sai / Jon / JR";
 
   if (!total) {
     els.sourcesBody.append(emptyTableRow(7, "No items tracked yet."));
