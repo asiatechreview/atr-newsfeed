@@ -1273,11 +1273,16 @@ function headlineFromPattern(sentence) {
   return "";
 }
 
-function limitHeadline(text, maxLength = 58) {
+function limitHeadline(text, maxLength = 70) {
   const words = stripAttribution(text)
     .replace(/\$([0-9.]+)billion\b/gi, "$$$1bn")
     .replace(/\$([0-9.]+)million\b/gi, "$$$1m")
-    .replace(/\s+(?:that|which|while|warning|after|before|as|with|where|including|using|following)\b.*$/i, "")
+    // Drop trailing temporal and context clauses that repeat the lede, so
+    // truncation never swallows the key figures: "in the past six months",
+    // "over the past year", "during Q3", "overtaking rivals", "surpassing
+    // expectations" and similar.
+    .replace(/\s+(?:in the past|over the past|in the last|over the last|during|since|throughout)\b.*$/i, "")
+    .replace(/\s+(?:overtaking|surpassing|outpacing|beating|eclipsing|topping|exceeding|including|marking|making|as|with|where|while|warning|after|before|following|using)\b.*$/i, "")
     .replace(/\s+and\s*$/i, "")
     .replace(/[,:;.-]+$/, "")
     .split(/\s+/)
@@ -1290,7 +1295,21 @@ function limitHeadline(text, maxLength = 58) {
     kept.push(word);
   }
 
-  return trimWeakEnding(kept.length ? kept.join(" ") : words.slice(0, 8).join(" ")).replace(/[,:;.-]+$/, "");
+  let result = kept.length ? kept.join(" ") : words.slice(0, 8).join(" ");
+
+  // Never end on a bare number or currency figure: pull in the unit word
+  // ("billion", "million") when it directly follows, otherwise drop the
+  // dangling figure so titles never cut mid-number ("surpassed 3").
+  if (/[0-9]$/.test(result)) {
+    const idx = kept.length;
+    if (words[idx] && /^(billion|million|bn|m|trillion|tn)$/i.test(words[idx])) {
+      result = `${result} ${words[idx]}`;
+    } else {
+      result = result.replace(/\s*[\d.,]+$/, "");
+    }
+  }
+
+  return trimWeakEnding(result).replace(/[,:;.-]+$/, "");
 }
 
 function trimWeakEnding(text) {
@@ -1316,7 +1335,7 @@ function deriveHeadline(blurb) {
     return limitHeadline(patterned, 62);
   }
 
-  const clauses = sentence.split(/,\s+(?:with|as|while|after|amid|according to|marking|making|in a move|where|before|part of)\b/i);
+  const clauses = sentence.split(/,\s+(?:with|as|while|after|amid|according to|marking|making|in a move|where|before|part of|overtaking|surpassing|outpacing|beating|eclipsing|topping|exceeding)\b/i);
   return limitHeadline(clauses[0].trim());
 }
 
