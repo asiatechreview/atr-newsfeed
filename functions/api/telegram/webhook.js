@@ -112,17 +112,17 @@ export async function onRequestPost({ env, request }) {
     return json({ ok: true }); // Not the backup group; ignore silently.
   }
 
-  // 4. Extract URL and blurb from the message text.
+  // 4. Extract URL and blurb from the message text. Messages without a
+  //    valid URL+blurb pair are ignored silently: the group is a posting
+  //    pipe, not a chat, so the bot stays quiet unless there is a real post.
   const text = String(message.text || "").trim();
   const urlMatch = text.match(/https?:\/\/[^\s]+/);
   if (!urlMatch) {
-    await sendGroupMessage(env, chatId, "Send a story URL plus your blurb.");
     return json({ ok: true });
   }
   const url = urlMatch[0].replace(/[),.;!?]+$/, "");
   const blurb = text.replace(urlMatch[0], "").trim();
   if (!blurb) {
-    await sendGroupMessage(env, chatId, "Add your blurb after the URL.");
     return json({ ok: true });
   }
 
