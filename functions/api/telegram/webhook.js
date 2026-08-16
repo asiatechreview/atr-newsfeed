@@ -1,5 +1,13 @@
 import { json } from "../../_lib/public-api.js";
 import { SEED_CATEGORIES } from "../../_lib/categories.js";
+import {
+  clearSchedule,
+  istDateKey,
+  previousIstDayKey,
+  readSchedule,
+  runGather,
+  writeSchedule
+} from "../../_lib/daily-gather.js";
 
 // ATR Rapid Transit — Telegram posting pipeline for the ATR bulletin site.
 //
@@ -391,6 +399,95 @@ async function processPost(env, request, chatId, url, blurb, label, replyTo = nu
   }
 }
 
+// ---------------------------------------------------------------------------
+// /gather command handler (Daily Gather control)
+// ---------------------------------------------------------------------------
+
+function parseGatherDate(value) {
+  const v = String(value || "").trim().toLowerCase();
+  if (!v) return null;
+  if (v === "today") return istDateKey();
+  if (v === "yesterday") return previousIstDayKey();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+  // Natural language: "august 10" or "august 10th, 2026"
+  const monthMatch = v.match(/^([a-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?(?:,?\s*(\d{4}))?$/);
+  if (monthMatch) {
+    const months = ["january","february","march","april","may","june","july","august","september","october","november","december"];
+    const monthIndex = months.indexOf(monthMatch[1]);
+    if (monthIndex >= 0) {
+      const day = String(monthMatch[2]).padStart(2, "0");
+      const year = monthMatch[3] || String(new Date().getUTCFullYear());
+      return `${year}-${String(monthIndex + 1).padStart(2, "0")}-${day}`;
+    }
+  }
+  return null;
+}
+
+async function handleGatherCommand(env, request, chatId, text, replyTo = null) {
+  const parts = text.split(/\s+/);
+  const sub = (parts[1] || "").toLowerCase();
+  const arg = parts.slice(2).join(" ");
+
+  // Schedule management (off by default).
+  if (sub === "schedule") {
+    if (!arg) {
+      const schedule = await readSchedule(env);
+      await sendGroupMessage(
+        env,
+        chatId,
+        schedule && schedule.time
+          ? `Gather schedule: daily at ${schedule.time} (Bangkok).`
+          : "No gather schedule set. Use /gather schedule HH:MM to set one.",
+        replyTo
+      );
+      return;
+    }
+    const timeMatch = String(arg).match(/^([01]?\d|2[0-3]):([0-5]\d)$/);
+    if (!timeMatch) {
+      await sendGroupMessage(env, chatId, "Use /gather schedule HH:MM (24-hour Bangkok time).", replyTo);
+      return;
+    }
+    const time = `${String(timeMatch[1]).padStart(2, "0")}:${timeMatch[2]}`;
+    await writeSchedule(env, { time, set_at: new Date().toISOString() });
+    await sendGroupMessage(env, chatId, `Gather scheduled daily at ${time} (Bangkok).`, replyTo);
+    return;
+  }
+
+  if (sub === "unschedule") {
+    await clearSchedule(env);
+    await sendGroupMessage(env, chatId, "Gather schedule cleared. No more scheduled runs.", replyTo);
+    return;
+  }
+
+  // Manual runs: /gather, /gather today, /gather yesterday, /gather YYYY-MM-DD.
+  const date = sub && sub !== "run" ? parseGatherDate(sub + (arg ? ` ${arg}` : "")) : parseGatherDate(arg);
+  const explicit = Boolean(date);
+  await sendGroupMessage(env, chatId, `Running daily gather${explicit ? ` for ${date}` : ""}…`, replyTo);
+
+  try {
+    const summary = await runGather(env, {
+      date,
+      mode: "manual",
+      notifyFn: (msg) => sendGroupMessage(env, chatId, msg)
+    });
+    const dateLine = summary.explicit_date
+      ? `Gathered ${summary.explicit_date}: ${summary.dates?.[summary.explicit_date] || 0} items`
+      : `Gathered ${Object.keys(summary.dates || {}).length} date(s): ` +
+        Object.entries(summary.dates || {})
+          .map(([d, n]) => `${d} (${n})`)
+          .join(", ") || "No new items";
+    const linkLine = summary.links_read_back != null ? ` | ${summary.links_read_back} source links written` : "";
+    await sendGroupMessage(env, chatId, `✅ ${dateLine}${linkLine}`, replyTo);
+  } catch (error) {
+    await sendGroupMessage(
+      env,
+      chatId,
+      `❌ Gather failed: ${String(error.message || error).slice(0, 300)}`,
+      replyTo
+    );
+  }
+}
+
 export async function onRequestPost({ env, request }) {
   // 1. Validate the webhook secret token (set via setWebhook secret_token).
   const secretHeader = request.headers.get("X-Telegram-Bot-Api-Secret-Token");
@@ -421,6 +518,13 @@ export async function onRequestPost({ env, request }) {
   await ensureTables(env);
 
   const text = String(message.text || "").trim();
+
+  // 4a. /gather commands: daily gather control from the group.
+  if (text.startsWith("/gather")) {
+    await handleGatherCommand(env, request, chatId, text, message.message_id);
+    return json({ ok: true });
+  }
+
   const urlMatch = text.match(/https?:\/\/[^\s]+/);
 
   // 4a. Plain text with no URL: treat it as the answer to a pending
