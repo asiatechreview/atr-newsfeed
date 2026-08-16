@@ -208,6 +208,97 @@ function cleanHeadlineOutput(value) {
     .trim();
 }
 
+const HEADLINE_STOPWORDS = new Set([
+  "a", "an", "the", "to", "for", "from", "of", "in", "on", "at", "by", "with",
+  "into", "as", "and", "or", "but", "after", "before", "while", "amid", "among",
+  "including", "through", "using", "than", "more", "less", "around", "roughly",
+  "nearly", "over", "under", "about", "its", "their", "his", "her", "this",
+  "that", "which", "who", "what", "where", "when", "why", "how", "would",
+  "will", "could", "should", "has", "have", "had", "is", "are", "was",
+  "were", "be", "been", "being", "called", "known", "also", "first", "new",
+  "world", "world's", "says", "said"
+]);
+
+// Pure compression verbs: they paraphrase an action already in the blurb
+// without introducing a new fact. Everything else must appear in the blurb.
+const HEADLINE_ALLOWED_VERBS = new Set([
+  "becomes", "become", "pass", "passes", "tops", "hits", "hit", "nears",
+  "lifts", "cuts", "adds", "unveils", "unveil", "boosts", "pushes",
+  "eyes", "sets", "plans", "plan", "moves", "move", "wins", "win"
+]);
+
+function stemWord(word) {
+  let w = String(word).toLowerCase().replace(/[^a-z0-9]/g, "");
+  if (w.length <= 3) return w;
+  if (w.endsWith("ies") && w.length > 4) return w.slice(0, -3) + "y";
+  if (w.endsWith("es") && w.length > 4) return w.slice(0, -2);
+  if (w.endsWith("ed") && w.length > 4) return w.slice(0, -2);
+  if (w.endsWith("ing") && w.length > 5) return w.slice(0, -3);
+  if (w.endsWith("s") && w.length > 4 && !w.endsWith("ss")) return w.slice(0, -1);
+  return w;
+}
+
+function extractNumbers(text) {
+  const out = [];
+  const re = /(\d[\d,.]*)\s*(billion|bn|million|m|tn|trillion|thousand|k)?/gi;
+  let match;
+  while ((match = re.exec(text))) {
+    const raw = match[1].replace(/,/g, "");
+    const unitRaw = (match[2] || "").toLowerCase();
+    const unit = unitRaw.startsWith("b")
+      ? "b"
+      : unitRaw.startsWith("m")
+        ? "m"
+        : unitRaw.startsWith("t")
+          ? "t"
+          : unitRaw.startsWith("k")
+            ? "k"
+            : "";
+    out.push({ value: parseFloat(raw), unit });
+  }
+  return out;
+}
+
+// Every significant word and every figure in the headline must be traceable
+// to the supplied blurb. This rejects fabricated headlines like "sells the
+// robot to influencers" when the blurb only says it became a sensation.
+function headlineFactsConsistent(headline, blurb) {
+  // Normalise possessives away so "Kong's" and "Unitree's" tokenise cleanly
+  // instead of leaving a stray "s" behind.
+  const norm = (value) => String(value || "").toLowerCase().replace(/'s\b/g, "");
+  const headlineWords = norm(headline).split(/[^a-z0-9]+/).filter(Boolean);
+  const blurbWords = new Set(norm(blurb).split(/[^a-z0-9]+/).filter(Boolean));
+  const blurbStems = new Set();
+  for (const word of blurbWords) blurbStems.add(stemWord(word));
+
+  // Every non-stopword must either be a safe compression verb or appear in
+  // the blurb (stem match allows tense and plural variants: "raises" matches
+  // "raising", "robots" matches "robot"). This rejects fabricated actions
+  // like "sells the robot" when the blurb only says it became a sensation.
+  // Tokens containing digits are handled by the number matcher below, so
+  // "3bn" and "$904m" are skipped here even though "bn"/"m" are not words.
+  for (const word of headlineWords) {
+    if (/\d/.test(word)) continue;
+    if (HEADLINE_STOPWORDS.has(word)) continue;
+    if (HEADLINE_ALLOWED_VERBS.has(word)) continue;
+    const stem = stemWord(word);
+    if (!blurbWords.has(word) && !blurbStems.has(stem)) return false;
+  }
+
+  // Every number in the headline must match a number in the blurb with the
+  // same unit scale ("3bn" matches "3 billion", "$904m" matches "$904 million").
+  const headlineNumbers = extractNumbers(headline);
+  const blurbNumbers = extractNumbers(blurb);
+  for (const hn of headlineNumbers) {
+    const matched = blurbNumbers.some(
+      (bn) => bn.unit === hn.unit && Math.abs(bn.value - hn.value) < 0.01
+    );
+    if (!matched) return false;
+  }
+
+  return true;
+}
+
 function headlineLooksValid(headline) {
   const value = cleanHeadlineOutput(headline);
   const words = value.split(/\s+/).filter(Boolean);
@@ -251,7 +342,11 @@ async function generateHeadline(env, blurb) {
       ? choices[0].message.content
       : result.response;
     const headline = cleanHeadlineOutput(text);
-    return headlineLooksValid(headline) ? headline : null;
+    if (!headlineLooksValid(headline)) return null;
+    // Mechanical fact-check: reject any headline with words or figures that
+    // cannot be traced to the supplied blurb. This is the guard that stops
+    // fabricated headlines ("sells the robot to influencers") from going live.
+    return headlineFactsConsistent(headline, blurb) ? headline : null;
   } catch {
     return null;
   }
