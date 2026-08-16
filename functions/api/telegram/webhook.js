@@ -303,7 +303,16 @@ export async function onRequestPost({ env, request }) {
   const url = urlMatch[0].replace(/[),.;!?]+$/, "");
   const blurb = text.replace(urlMatch[0], "").trim();
   if (!blurb) {
-    return json({ ok: true }); // URL without blurb: stay silent.
+    // Naked URL: one gentle nudge, then nothing. Unlike casual chat (which
+    // stays silent), this is a malformed post, so a single prompt helps
+    // avoid silently losing the story.
+    await sendGroupMessage(
+      env,
+      chatId,
+      "Add a blurb to post this story.",
+      message.message_id
+    );
+    return json({ ok: true });
   }
 
   const domain = hostOf(url);
