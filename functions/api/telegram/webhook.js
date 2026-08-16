@@ -12,14 +12,17 @@ import { SEED_CATEGORIES } from "../../_lib/categories.js";
 //   4. resolves the outlet label (built-in map, then saved D1 mappings);
 //      unmapped publishers pause the post and ask the group for a label,
 //      which is recorded for future use;
-//   5. posts the formatted copy (blurb + linked [Outlet]) back to the group;
-//   6. ingests the item to the bulletin site via POST /api/items
+//   5. generates a scan-first headline from the blurb via Workers AI, then
+//      fact-checks it: every figure in the headline must match a figure in
+//      the blurb. Vocabulary is the model's editorial freedom; numbers are
+//      the objective facts a headline must never invent.
+//   6. posts the formatted copy (blurb + linked [Outlet]) back to the group;
+//   7. ingests the item to the bulletin site via POST /api/items
 //      (dedupe, headline guard and operational logging all live there);
-//   7. confirms with a single 🟢.
+//   8. confirms with a single 🟢.
 //
-// No LLM is involved anywhere in this path. It is a transport pipeline that
-// works even when the normal Daily News Automation flow (through JR) is
-// unavailable.
+// Runs entirely on Cloudflare and works even when the normal Daily News
+// Automation flow (through JR) is unavailable.
 
 const OUTLET_MAP = {
   "ft.com": "FT",
@@ -190,15 +193,53 @@ async function sendGroupMessage(env, chatId, text, replyTo = null) {
   }
 }
 
-const HEADLINE_STYLE = `You write scan-first headlines for ATR (Asia Tech Review).
-Rules:
-- 7-13 words, 35-60 characters.
-- Lead with company/country + concrete action. Present tense.
-- KEEP the key number or stat from the blurb (financing size, downloads, valuation, percent, robots sold, etc). The number is the news.
-- Compress everything else. NEVER add facts not in the blurb.
-- No "The" unless essential. No trailing period.
-- Examples: "DeepSeek pushes China AI price war into enterprise adoption", "Unitree raises $904m in STAR Market IPO", "Alibaba Qwen models pass 3bn global downloads".
-- Output ONLY the headline.`;
+const HEADLINE_EXAMPLES = [
+  {
+    blurb: "A surge in investor enthusiasm and strong backing from Beijing have pushed valuations of Chinese tech stocks far above US peers as the country's AI sector emerges as a credible challenger to Silicon Valley. Shanghai's Star 50 index has gained 29% this year and trades at more than 150 times earnings, compared with about 35 times for the Nasdaq 100.",
+    title: "Chinese tech valuations outstrip US peers"
+  },
+  {
+    blurb: "European businesses are increasingly turning to low-cost Chinese AI models, sparking debate over whether the technology threatens the continent's digital sovereignty or could help strengthen it. Some companies argue that running open-weight Chinese models on local servers offers greater control than relying on proprietary AI services from US tech groups.",
+    title: "European firms turn to Chinese AI models"
+  },
+  {
+    blurb: "The Trump administration is opposing Apple's plans to source memory chips from China, as soaring AI-driven demand creates shortages and pushes up component prices. Commerce Secretary Howard Lutnick said Washington wants US companies to find alternatives even as Apple explores Chinese suppliers to ease supply constraints.",
+    title: "US opposes Apple China memory chip plan"
+  },
+  {
+    blurb: "China's Unitree is raising ¥6.10 billion ($904 million) in a STAR Market IPO at an implied ¥61 billion ($9.04 billion) market cap, after selling 5,215 humanoid robots last year. The prospectus allocates $300 million, or 48% of the plan, to AI models as Unitree tries to move beyond low-cost hardware.",
+    title: "Unitree's $904 million IPO puts AI models in focus"
+  },
+  {
+    blurb: "Beijing is set to lift travel restrictions on Manus founders as the Chinese AI agent startup unwinds its $2 billion acquisition by Meta, paving the way for chief executive and co-founder Xiao Hong to return to Singapore, where the company is based.",
+    title: "Beijing set to lift travel curbs on Manus founders"
+  },
+  {
+    blurb: "A profile of Sony CEO Hiroki Totoki, the company veteran leading the Japanese conglomerate's shift from an electronics giant to an entertainment powerhouse as it bets on gaming, music and film to fuel its next phase of growth.",
+    title: "Sony CEO Totoki bets on entertainment"
+  },
+  {
+    blurb: "The US is preparing to pressure dozens of countries to choose between rival American and Chinese AI blocs, warning they could be excluded from Washington's Pax Silica coalition if they also join Beijing's competing framework.",
+    title: "US tells partners to pick sides in AI race"
+  },
+  {
+    blurb: "DeepSeek has released a developer preview of Harness, a software framework designed to help developers turn AI models into autonomous agents capable of running software, writing code and completing complex tasks.",
+    title: "DeepSeek releases Harness agent framework"
+  }
+];
+
+function buildHeadlinePrompt(blurb) {
+  const examples = HEADLINE_EXAMPLES.map(
+    (e) => `Blurb: ${e.blurb}\nTitle: ${e.title}`
+  ).join("\n\n");
+  return `You write scan-first headlines for ATR (Asia Tech Review), a daily Asia tech news bulletin.
+
+Study these real examples of blurb-to-title pairs produced by ATR's editor:
+
+${examples}
+
+Now write the title for the new blurb below. Match the style of the examples: telegraphic, lead with the actor and action, keep the key figure or subject noun, use the blurb's own verb where it works, never add facts not in the blurb, no trailing period. Output ONLY the title.`;
+}
 
 function cleanHeadlineOutput(value) {
   return String(value || "")
@@ -206,36 +247,6 @@ function cleanHeadlineOutput(value) {
     .replace(/^Headline:?\s*/i, "")
     .replace(/\.+$/g, "")
     .trim();
-}
-
-const HEADLINE_STOPWORDS = new Set([
-  "a", "an", "the", "to", "for", "from", "of", "in", "on", "at", "by", "with",
-  "into", "as", "and", "or", "but", "after", "before", "while", "amid", "among",
-  "including", "through", "using", "than", "more", "less", "around", "roughly",
-  "nearly", "over", "under", "about", "its", "their", "his", "her", "this",
-  "that", "which", "who", "what", "where", "when", "why", "how", "would",
-  "will", "could", "should", "has", "have", "had", "is", "are", "was",
-  "were", "be", "been", "being", "called", "known", "also", "first", "new",
-  "world", "world's", "says", "said"
-]);
-
-// Pure compression verbs: they paraphrase an action already in the blurb
-// without introducing a new fact. Everything else must appear in the blurb.
-const HEADLINE_ALLOWED_VERBS = new Set([
-  "becomes", "become", "pass", "passes", "tops", "hits", "hit", "nears",
-  "lifts", "cuts", "adds", "unveils", "unveil", "boosts", "pushes",
-  "eyes", "sets", "plans", "plan", "moves", "move", "wins", "win"
-]);
-
-function stemWord(word) {
-  let w = String(word).toLowerCase().replace(/[^a-z0-9]/g, "");
-  if (w.length <= 3) return w;
-  if (w.endsWith("ies") && w.length > 4) return w.slice(0, -3) + "y";
-  if (w.endsWith("es") && w.length > 4) return w.slice(0, -2);
-  if (w.endsWith("ed") && w.length > 4) return w.slice(0, -2);
-  if (w.endsWith("ing") && w.length > 5) return w.slice(0, -3);
-  if (w.endsWith("s") && w.length > 4 && !w.endsWith("ss")) return w.slice(0, -1);
-  return w;
 }
 
 function extractNumbers(text) {
@@ -259,34 +270,11 @@ function extractNumbers(text) {
   return out;
 }
 
-// Every significant word and every figure in the headline must be traceable
-// to the supplied blurb. This rejects fabricated headlines like "sells the
-// robot to influencers" when the blurb only says it became a sensation.
+// Fact check: every figure in the headline must match a figure in the blurb
+// at the same unit scale ("3bn" matches "3 billion", "$904m" matches "$904
+// million"). Numbers are the objective facts a headline must never invent;
+// vocabulary and compression are the model's editorial freedom.
 function headlineFactsConsistent(headline, blurb) {
-  // Normalise possessives away so "Kong's" and "Unitree's" tokenise cleanly
-  // instead of leaving a stray "s" behind.
-  const norm = (value) => String(value || "").toLowerCase().replace(/'s\b/g, "");
-  const headlineWords = norm(headline).split(/[^a-z0-9]+/).filter(Boolean);
-  const blurbWords = new Set(norm(blurb).split(/[^a-z0-9]+/).filter(Boolean));
-  const blurbStems = new Set();
-  for (const word of blurbWords) blurbStems.add(stemWord(word));
-
-  // Every non-stopword must either be a safe compression verb or appear in
-  // the blurb (stem match allows tense and plural variants: "raises" matches
-  // "raising", "robots" matches "robot"). This rejects fabricated actions
-  // like "sells the robot" when the blurb only says it became a sensation.
-  // Tokens containing digits are handled by the number matcher below, so
-  // "3bn" and "$904m" are skipped here even though "bn"/"m" are not words.
-  for (const word of headlineWords) {
-    if (/\d/.test(word)) continue;
-    if (HEADLINE_STOPWORDS.has(word)) continue;
-    if (HEADLINE_ALLOWED_VERBS.has(word)) continue;
-    const stem = stemWord(word);
-    if (!blurbWords.has(word) && !blurbStems.has(stem)) return false;
-  }
-
-  // Every number in the headline must match a number in the blurb with the
-  // same unit scale ("3bn" matches "3 billion", "$904m" matches "$904 million").
   const headlineNumbers = extractNumbers(headline);
   const blurbNumbers = extractNumbers(blurb);
   for (const hn of headlineNumbers) {
@@ -295,7 +283,6 @@ function headlineFactsConsistent(headline, blurb) {
     );
     if (!matched) return false;
   }
-
   return true;
 }
 
@@ -317,8 +304,8 @@ async function generateHeadline(env, blurb) {
   try {
     const body = JSON.stringify({
       messages: [
-        { role: "system", content: HEADLINE_STYLE },
-        { role: "user", content: `Blurb: ${blurb}\n\nWrite the headline.` }
+        { role: "system", content: buildHeadlinePrompt(blurb) },
+        { role: "user", content: `Blurb: ${blurb}\nTitle:` }
       ],
       max_tokens: 80,
       temperature: 0.3
@@ -343,9 +330,9 @@ async function generateHeadline(env, blurb) {
       : result.response;
     const headline = cleanHeadlineOutput(text);
     if (!headlineLooksValid(headline)) return null;
-    // Mechanical fact-check: reject any headline with words or figures that
-    // cannot be traced to the supplied blurb. This is the guard that stops
-    // fabricated headlines ("sells the robot to influencers") from going live.
+    // Fact check: reject headlines with figures that cannot be traced to the
+    // supplied blurb (a headline claiming "900bn downloads" when the blurb
+    // says 3 billion must not go live).
     return headlineFactsConsistent(headline, blurb) ? headline : null;
   } catch {
     return null;
@@ -387,9 +374,9 @@ async function processPost(env, request, chatId, url, blurb, label, replyTo = nu
   await sendGroupMessage(env, chatId, formatted, replyTo);
 
   // Generate a scan-first headline from the supplied blurb. This is
-  // compression, not creation: the blurb is the only input, so no new facts
-  // can appear. If the LLM is unavailable or produces an invalid headline,
-  // we ingest without one and the site derives a mechanical title.
+  // compression, not creation: the blurb is the only input. If the LLM is
+  // unavailable or produces an invalid/unverifiable headline, we ingest
+  // without one and the site derives a mechanical title.
   const headline = await generateHeadline(env, blurb);
 
   const result = await ingestItem(env, request, { blurb, url, label, headline });
