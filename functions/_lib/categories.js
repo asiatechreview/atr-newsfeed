@@ -22,7 +22,7 @@ export async function ensureCategoriesTable(env) {
 
 // Seed data mirrors the inference rules that previously lived in admin.js.
 // Order matters: earlier rules win when multiple patterns match.
-const SEED_CATEGORIES = [
+export const SEED_CATEGORIES = [
   { name: "WAIC 2026", pattern: "\\bwaic\\b" },
   { name: "Cloud", pattern: "\\b(cloud|data centre|data center|data centres|data centers|hyperscaler|hyperscalers|aws|azure|google cloud|alibaba cloud|tencent cloud|huawei cloud|cloud computing|cloud services|cloud infrastructure|infrastructure-as-a-service|iaas|saas|paas)\\b" },
   { name: "AI", pattern: "\\b(ai|artificial intelligence|llm|multimodal|foundation model|claude|openai|anthropic|deepseek|minimax|moonshot|agentic|nvidia|distillation|gpu)\\b" },
