@@ -377,7 +377,14 @@ async function ingestItem(env, request, { blurb, url, label, headline, postedBy 
     body: JSON.stringify(ingestBody)
   });
 
-  if (response.ok) return { ok: true };
+  if (response.ok) {
+    const payload = await response.json().catch(() => ({}));
+    return {
+      ok: true,
+      duplicate: Boolean(payload?.duplicate),
+      item: payload?.item || null
+    };
+  }
   return { ok: false, detail: (await response.text()).slice(0, 200), status: response.status };
 }
 
@@ -404,7 +411,10 @@ async function processPost(env, request, chatId, url, blurb, label, replyTo = nu
   const headline = await generateHeadline(env, blurb);
 
   const result = await ingestItem(env, request, { blurb, url, label, headline, postedBy });
-  if (result.ok) {
+  if (result.ok && result.duplicate) {
+    const itemId = result.item?.id ? ` (id ${result.item.id})` : "";
+    await sendGroupMessage(env, chatId, `⚠️ Already posted${itemId}`);
+  } else if (result.ok) {
     await sendGroupMessage(env, chatId, "🟢");
   } else {
     await sendGroupMessage(
