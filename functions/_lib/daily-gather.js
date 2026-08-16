@@ -391,7 +391,7 @@ async function writeTab(accessToken, docId, target, items, replace = false) {
     items = missing;
   }
 
-  const { text, linkRanges } = buildDocText(items);
+  let { text, linkRanges } = buildDocText(items);
   const requests = [];
   let insertIndex;
 
