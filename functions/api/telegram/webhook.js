@@ -216,12 +216,23 @@ async function sendGroupMessage(env, chatId, text, replyTo = null, entities = nu
       body.parse_mode = "Markdown";
     }
     if (replyTo) body.reply_to_message_id = replyTo;
-    const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(body)
-    });
-    return response.ok;
+    const send = async (payload) => {
+      const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      return response.ok ? true : { ok: false, status: response.status, text: (await response.text()).slice(0, 200) };
+    };
+    let result = await send(body);
+    if (result !== true && body.parse_mode === "Markdown") {
+      // Markdown can fail on titles containing special characters. Retry as
+      // plain text so the reply always lands.
+      const plain = { ...body };
+      delete plain.parse_mode;
+      result = await send(plain);
+    }
+    return result === true;
   } catch {
     return false;
   }

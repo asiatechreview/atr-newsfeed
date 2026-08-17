@@ -62,7 +62,14 @@ export async function runQwen(env, systemPrompt, userContent, maxTokens = 200) {
     const payload = await response.json();
     const result = payload?.result || {};
     const choices = result.choices || [];
-    const text = choices.length ? choices[0].message?.content : result.response;
+    let text = choices.length ? choices[0].message?.content : result.response;
+    // This Workers AI model returns structured output as a parsed object or
+    // array (e.g. a JSON array for tags), not a JSON string. String() would
+    // destroy it ("a,b" or "[object Object]"), so serialise it back so the
+    // JSON extractors below can parse it.
+    if (text && typeof text === "object") {
+      text = JSON.stringify(text);
+    }
     return String(text || "").trim() || null;
   } catch {
     return null;
@@ -110,7 +117,16 @@ export function cleanAssistText(text) {
 export async function suggestHeadline(env, blurb) {
   const system = `You write scan-first headlines for ATR (Asia Tech Review), a daily Asia tech news bulletin. Match this style: telegraphic, lead with the actor and action, keep the key figure or subject noun, use the blurb's own verb where it works, never add facts not in the blurb, no trailing period. Output ONLY the title, 4-14 words.`;
   const text = await runQwen(env, system, `Blurb: ${blurb}\nTitle:`, 80);
-  return cleanAssistText(text);
+  const cleaned = cleanAssistText(text);
+  if (cleaned.startsWith("{")) {
+    try {
+      const parsed = JSON.parse(cleaned);
+      if (parsed && typeof parsed.title === "string") return cleanAssistText(parsed.title);
+    } catch {
+      // Not JSON; fall through to the cleaned text.
+    }
+  }
+  return cleaned;
 }
 
 // Suggest a single canonical category for a blurb.
