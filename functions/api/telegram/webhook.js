@@ -102,10 +102,16 @@ async function ensureTables(env) {
       url TEXT NOT NULL,
       blurb TEXT NOT NULL,
       domain TEXT NOT NULL,
+      label TEXT,
       status TEXT NOT NULL DEFAULT 'awaiting_label',
       created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
     )`
   ).run();
+  try {
+    await env.ATR_FEED_DB.prepare("ALTER TABLE rapid_transit_pending ADD COLUMN label TEXT").run();
+  } catch {
+    // Existing table already has the optional label column.
+  }
 }
 
 async function savedLabel(env, domain) {
@@ -157,11 +163,27 @@ async function oldestPending(env) {
   return row || null;
 }
 
+async function oldestPendingTitle(env) {
+  if (!env?.ATR_FEED_DB) return null;
+  const row = await env.ATR_FEED_DB.prepare(
+    "SELECT * FROM rapid_transit_pending WHERE status = 'awaiting_title' ORDER BY id ASC LIMIT 1"
+  ).first();
+  return row || null;
+}
+
 async function markPendingProcessed(env, id) {
   if (!env?.ATR_FEED_DB) return;
   await env.ATR_FEED_DB.prepare(
     "UPDATE rapid_transit_pending SET status = 'processed' WHERE id = ?"
   ).bind(id).run();
+}
+
+async function savePendingTitleRequest(env, chatId, url, blurb, domain, label) {
+  if (!env?.ATR_FEED_DB) return;
+  await env.ATR_FEED_DB.prepare(
+    `INSERT INTO rapid_transit_pending (chat_id, url, blurb, domain, label, status, created_at)
+     VALUES (?, ?, ?, ?, ?, 'awaiting_title', strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))`
+  ).bind(String(chatId), url, blurb, domain, label).run();
 }
 
 function inferCategory(blurb) {
@@ -458,6 +480,21 @@ async function ingestItem(env, request, { blurb, url, label, headline, postedBy 
   return { ok: false, detail: (await response.text()).slice(0, 200), status: response.status };
 }
 
+async function sendIngestResult(env, chatId, result) {
+  if (result.ok && result.duplicate) {
+    const itemId = result.item?.id ? ` (id ${result.item.id})` : "";
+    await sendGroupMessage(env, chatId, `⚠️ Already posted${itemId}`);
+  } else if (result.ok) {
+    await sendGroupMessage(env, chatId, "🟢");
+  } else {
+    await sendGroupMessage(
+      env,
+      chatId,
+      `❌ Ingest failed (${result.status || "error"}). ${result.detail || ""}`
+    );
+  }
+}
+
 function senderName(message) {
   const from = message?.from;
   if (!from) return null;
@@ -480,27 +517,46 @@ async function processPost(env, request, chatId, url, blurb, label, replyTo = nu
   // mechanically truncated fallback title.
   const headline = await generateHeadline(env, blurb);
   if (!headline) {
+    await savePendingTitleRequest(env, chatId, url, blurb, hostOf(url), label);
     await sendGroupMessage(
       env,
       chatId,
-      "❌ Title generation failed validation. Not published."
+      "Qwen couldn't produce a safe title. Reply with the title for this item."
     );
     return;
   }
 
   const result = await ingestItem(env, request, { blurb, url, label, headline, postedBy });
-  if (result.ok && result.duplicate) {
-    const itemId = result.item?.id ? ` (id ${result.item.id})` : "";
-    await sendGroupMessage(env, chatId, `⚠️ Already posted${itemId}`);
-  } else if (result.ok) {
-    await sendGroupMessage(env, chatId, "🟢");
-  } else {
+  await sendIngestResult(env, chatId, result);
+}
+
+async function processPendingTitle(env, request, chatId, message, pending) {
+  const headline = cleanHeadlineOutput(message.text);
+  const validation = validateHeadlineObject(
+    { title: headline, confidence: 1, needs_review: false },
+    pending.blurb
+  );
+
+  if (!validation.ok) {
     await sendGroupMessage(
       env,
       chatId,
-      `❌ Ingest failed (${result.status || "error"}). ${result.detail || ""}`
+      `That title failed validation (${validation.reason}). Reply with a 4-14 word title derived from the blurb.`,
+      message.message_id
     );
+    return;
   }
+
+  await markPendingProcessed(env, pending.id);
+  const label = pending.label || await resolveLabel(env, pending.domain) || fallbackLabel(pending.domain);
+  const result = await ingestItem(env, request, {
+    blurb: pending.blurb,
+    url: pending.url,
+    label,
+    headline: validation.headline,
+    postedBy: senderName(message)
+  });
+  await sendIngestResult(env, chatId, result);
 }
 
 export const __rapidTransitHeadlineTest = {
@@ -637,8 +693,14 @@ export async function onRequestPost({ env, request }) {
   const urlMatch = text.match(/https?:\/\/[^\s]+/);
 
   // 4a. Plain text with no URL: treat it as the answer to a pending
-  //     "how should I mention this publisher?" question.
+  //     title request first, then a publisher-label question.
   if (!urlMatch) {
+    const pendingTitle = await oldestPendingTitle(env);
+    if (pendingTitle) {
+      await processPendingTitle(env, request, chatId, message, pendingTitle);
+      return json({ ok: true });
+    }
+
     const pending = await oldestPending(env);
     if (!pending) {
       return json({ ok: true }); // No open question; stay silent.
