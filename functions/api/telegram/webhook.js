@@ -418,10 +418,15 @@ async function requestHeadlineObject(env, blurb, repairReason = null, useSchema 
     const payload = await response.json();
     const result = payload?.result || {};
     const choices = result.choices || [];
-    const text = choices.length
-      ? choices[0].message.content
-      : result.response;
-    return extractJsonObject(text);
+    if (choices.length) {
+      return extractJsonObject(choices[0].message.content);
+    }
+    // This Workers AI model returns result.response as an already-parsed
+    // object ({title, confidence, needs_review}), not a JSON string.
+    if (result.response && typeof result.response === "object" && !Array.isArray(result.response)) {
+      return result.response;
+    }
+    return extractJsonObject(result.response);
   } catch {
     return null;
   }
