@@ -13,7 +13,10 @@ export async function refreshNewsletterCardFromFeed(env, request = null) {
   await ensureOperationalEventsTable(env);
 
   const feedResponse = await fetch(SUBSTACK_FEED_URL, {
-    headers: { accept: "application/xml" }
+    headers: {
+      accept: "application/xml",
+      "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"
+    }
   });
   if (!feedResponse.ok) {
     await writeOperationalEvent(env, request, {
