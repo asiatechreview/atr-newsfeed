@@ -357,6 +357,11 @@ function headlineLooksValid(headline) {
   if (/[\r\n\t]/.test(value)) return false;
   if (/https?:\/\/|www\./i.test(value)) return false;
   if (/\$[0-9.]+$/.test(value)) return false;
+  // Truncation markers: a complete title never contains ellipses or dangling hyphens.
+  if (/\.\.\.|\.\.|…/.test(value)) return false;
+  if (/[-:;,]\s*$/.test(value)) return false;
+  // Fragment starts: a scan title leads with the actor/action, not a joining word.
+  if (/^(?:as|while|after|before|with|when|amid|among|though|although|despite|and|but|so|because|since|if|that|which|who|where|how|why|the|a|an)\b/i.test(value)) return false;
   if (/\b(?:a|an|the|to|for|from|of|in|on|at|by|with|into|as|and|or|but|after|before|while|amid|among|including|through|using|than|more|less|around|roughly|nearly|over|under|about|its|their|his|her|this|that|which|who|what|where|when|why|how|would|will|could|should|has|have|had|is|are|be|was|were|being|been|called|known|also|first|new)\s*$/i.test(value)) return false;
   return true;
 }
@@ -390,7 +395,7 @@ async function requestHeadlineObject(env, blurb, repairReason = null, useSchema 
       { role: "system", content: buildHeadlinePrompt() },
       { role: "user", content: userContent }
     ],
-    max_tokens: 120,
+    max_tokens: 200,
     temperature: 0.2
   };
   if (useSchema) {
