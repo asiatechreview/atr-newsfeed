@@ -14,6 +14,7 @@ import { onRequestGet as onDashboardRequestGet } from "../functions/api/dashboar
 import { onRequestGet as onJsonFeedRequestGet } from "../functions/feed.json.js";
 import { onRequestGet as onRssRequestGet } from "../functions/rss.xml.js";
 import { onRequest as onMiddlewareRequest } from "../functions/_middleware.js";
+import { __rapidTransitHeadlineTest } from "../functions/api/telegram/webhook.js";
 
 const root = new URL("..", import.meta.url).pathname;
 const required = [
@@ -360,6 +361,20 @@ if (openApiResponse.status !== 200 || openApiPayload.openapi !== "3.1.0" || !ope
 }
 
 globalThis.fetch = originalFetch;
+
+const headlineBlurb = "China's Unitree is raising ¥6.10 billion ($904 million) in a STAR Market IPO at an implied ¥61 billion ($9.04 billion) market cap, after selling 5,215 humanoid robots last year.";
+const goodHeadlineObject = __rapidTransitHeadlineTest.extractJsonObject('{"title":"Unitree raises $904 million in STAR Market IPO","confidence":0.92,"needs_review":false}');
+const goodHeadlineValidation = __rapidTransitHeadlineTest.validateHeadlineObject(goodHeadlineObject, headlineBlurb);
+const freeTextHeadlineValidation = __rapidTransitHeadlineTest.validateHeadlineObject(null, headlineBlurb);
+const inventedNumberValidation = __rapidTransitHeadlineTest.validateHeadlineObject(
+  { title: "Unitree raises $999 million in STAR Market IPO", confidence: 0.92, needs_review: false },
+  headlineBlurb
+);
+
+if (!goodHeadlineValidation.ok || freeTextHeadlineValidation.ok || inventedNumberValidation.ok) {
+  console.error("FAILED: Rapid Transit headline validation must require structured JSON and reject invented figures");
+  process.exit(1);
+}
 
 const existingPostItem = {
   id: 999,

@@ -240,9 +240,20 @@ const HEADLINE_EXAMPLES = [
   }
 ];
 
-function buildHeadlinePrompt(blurb) {
+const HEADLINE_SCHEMA = {
+  type: "object",
+  properties: {
+    title: { type: "string" },
+    confidence: { type: "number" },
+    needs_review: { type: "boolean" }
+  },
+  required: ["title", "confidence", "needs_review"],
+  additionalProperties: false
+};
+
+function buildHeadlinePrompt() {
   const examples = HEADLINE_EXAMPLES.map(
-    (e) => `Blurb: ${e.blurb}\nTitle: ${e.title}`
+    (e) => `Blurb: ${e.blurb}\nObject: {"title":${JSON.stringify(e.title)},"confidence":0.95,"needs_review":false}`
   ).join("\n\n");
   return `You write scan-first headlines for ATR (Asia Tech Review), a daily Asia tech news bulletin.
 
@@ -250,7 +261,12 @@ Study these real examples of blurb-to-title pairs produced by ATR's editor:
 
 ${examples}
 
-Now write the title for the new blurb below. Match the style of the examples: telegraphic, lead with the actor and action, keep the key figure or subject noun, use the blurb's own verb where it works, never add facts not in the blurb, no trailing period. Output ONLY the title.`;
+Now write the title for the new blurb below. Match the style of the examples: telegraphic, lead with the actor and action, keep the key figure or subject noun, use the blurb's own verb where it works, never add facts not in the blurb, no trailing period.
+
+Return ONLY a JSON object with:
+- title: the headline, 4-14 words
+- confidence: 0 to 1
+- needs_review: true only if you cannot derive a clean title from the blurb`;
 }
 
 function cleanHeadlineOutput(value) {
@@ -259,6 +275,19 @@ function cleanHeadlineOutput(value) {
     .replace(/^Headline:?\s*/i, "")
     .replace(/\.+$/g, "")
     .trim();
+}
+
+function extractJsonObject(text) {
+  const value = String(text || "").trim();
+  const start = value.indexOf("{");
+  const end = value.lastIndexOf("}");
+  if (start === -1 || end === -1 || end <= start) return null;
+  try {
+    const parsed = JSON.parse(value.slice(start, end + 1));
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
 }
 
 function extractNumbers(text) {
@@ -303,25 +332,57 @@ function headlineLooksValid(headline) {
   const words = value.split(/\s+/).filter(Boolean);
   if (words.length < 4 || words.length > 14) return false;
   if (value.length > 72) return false;
+  if (/[\r\n\t]/.test(value)) return false;
+  if (/https?:\/\/|www\./i.test(value)) return false;
   if (/\$[0-9.]+$/.test(value)) return false;
   if (/\b(?:a|an|the|to|for|from|of|in|on|at|by|with|into|as|and|or|but|after|before|while|amid|among|including|through|using|than|more|less|around|roughly|nearly|over|under|about|its|their|his|her|this|that|which|who|what|where|when|why|how|would|will|could|should|has|have|had|is|are|be|was|were|being|been|called|known|also|first|new)\s*$/i.test(value)) return false;
   return true;
 }
 
-async function generateHeadline(env, blurb) {
+function validateHeadlineObject(candidate, blurb) {
+  if (!candidate || typeof candidate !== "object") {
+    return { ok: false, reason: "model did not return JSON" };
+  }
+  if (candidate.needs_review === true) {
+    return { ok: false, reason: "model marked title for review" };
+  }
+  if (typeof candidate.confidence === "number" && candidate.confidence < 0.6) {
+    return { ok: false, reason: "model confidence too low" };
+  }
+
+  const headline = cleanHeadlineOutput(candidate.title);
+  if (!headlineLooksValid(headline)) {
+    return { ok: false, reason: "title failed shape check" };
+  }
+  if (!headlineFactsConsistent(headline, blurb)) {
+    return { ok: false, reason: "title number not found in blurb" };
+  }
+
+  return { ok: true, headline };
+}
+
+async function requestHeadlineObject(env, blurb, repairReason = null, useSchema = true) {
   const account = env.WORKERS_AI_ACCOUNT_ID;
   const token = env.WORKERS_AI_TOKEN;
   if (!account || !token) return null;
 
+  const userContent = repairReason
+    ? `The previous title failed validation: ${repairReason}\n\nBlurb: ${blurb}\nReturn a corrected JSON object only.`
+    : `Blurb: ${blurb}\nReturn the JSON object only.`;
+
+  const requestBody = {
+    messages: [
+      { role: "system", content: buildHeadlinePrompt() },
+      { role: "user", content: userContent }
+    ],
+    max_tokens: 120,
+    temperature: 0.2
+  };
+  if (useSchema) {
+    requestBody.guided_json = HEADLINE_SCHEMA;
+  }
+
   try {
-    const body = JSON.stringify({
-      messages: [
-        { role: "system", content: buildHeadlinePrompt(blurb) },
-        { role: "user", content: `Blurb: ${blurb}\nTitle:` }
-      ],
-      max_tokens: 80,
-      temperature: 0.3
-    });
     const response = await fetch(
       `https://api.cloudflare.com/client/v4/accounts/${account}/ai/run/@cf/qwen/qwen2.5-coder-32b-instruct`,
       {
@@ -330,7 +391,7 @@ async function generateHeadline(env, blurb) {
           "content-type": "application/json",
           authorization: `Bearer ${token}`
         },
-        body
+        body: JSON.stringify(requestBody)
       }
     );
     if (!response.ok) return null;
@@ -340,15 +401,24 @@ async function generateHeadline(env, blurb) {
     const text = choices.length
       ? choices[0].message.content
       : result.response;
-    const headline = cleanHeadlineOutput(text);
-    if (!headlineLooksValid(headline)) return null;
-    // Fact check: reject headlines with figures that cannot be traced to the
-    // supplied blurb (a headline claiming "900bn downloads" when the blurb
-    // says 3 billion must not go live).
-    return headlineFactsConsistent(headline, blurb) ? headline : null;
+    return extractJsonObject(text);
   } catch {
     return null;
   }
+}
+
+async function generateHeadline(env, blurb) {
+  let candidate = await requestHeadlineObject(env, blurb, null, true);
+  if (!candidate) {
+    candidate = await requestHeadlineObject(env, blurb, null, false);
+  }
+
+  let validation = validateHeadlineObject(candidate, blurb);
+  if (validation.ok) return validation.headline;
+
+  candidate = await requestHeadlineObject(env, blurb, validation.reason, false);
+  validation = validateHeadlineObject(candidate, blurb);
+  return validation.ok ? validation.headline : null;
 }
 
 async function ingestItem(env, request, { blurb, url, label, headline, postedBy }) {
@@ -405,10 +475,18 @@ async function processPost(env, request, chatId, url, blurb, label, replyTo = nu
   await sendGroupMessage(env, chatId, visibleText, replyTo, entities);
 
   // Generate a scan-first headline from the supplied blurb. This is
-  // compression, not creation: the blurb is the only input. If the LLM is
-  // unavailable or produces an invalid/unverifiable headline, we ingest
-  // without one and the site derives a mechanical title.
+  // compression, not creation: the blurb is the only input. If Qwen cannot
+  // return a validated title, stop here so the site never publishes a
+  // mechanically truncated fallback title.
   const headline = await generateHeadline(env, blurb);
+  if (!headline) {
+    await sendGroupMessage(
+      env,
+      chatId,
+      "❌ Title generation failed validation. Not published."
+    );
+    return;
+  }
 
   const result = await ingestItem(env, request, { blurb, url, label, headline, postedBy });
   if (result.ok && result.duplicate) {
@@ -424,6 +502,11 @@ async function processPost(env, request, chatId, url, blurb, label, replyTo = nu
     );
   }
 }
+
+export const __rapidTransitHeadlineTest = {
+  extractJsonObject,
+  validateHeadlineObject
+};
 
 // ---------------------------------------------------------------------------
 // /gather command handler (Daily Gather control)
