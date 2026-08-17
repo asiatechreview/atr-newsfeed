@@ -427,18 +427,25 @@ async function requestHeadlineObject(env, blurb, repairReason = null, useSchema 
   }
 }
 
-async function generateHeadline(env, blurb) {
+async function generateHeadlineWithReason(env, blurb) {
   let candidate = await requestHeadlineObject(env, blurb, null, true);
   if (!candidate) {
     candidate = await requestHeadlineObject(env, blurb, null, false);
   }
 
   let validation = validateHeadlineObject(candidate, blurb);
-  if (validation.ok) return validation.headline;
+  if (validation.ok) return { ok: true, headline: validation.headline };
 
   candidate = await requestHeadlineObject(env, blurb, validation.reason, false);
   validation = validateHeadlineObject(candidate, blurb);
-  return validation.ok ? validation.headline : null;
+  return validation.ok
+    ? { ok: true, headline: validation.headline }
+    : { ok: false, reason: validation.reason };
+}
+
+async function generateHeadline(env, blurb) {
+  const result = await generateHeadlineWithReason(env, blurb);
+  return result.ok ? result.headline : null;
 }
 
 async function ingestItem(env, request, { blurb, url, label, headline, postedBy }) {
@@ -686,6 +693,27 @@ export async function onRequestPost({ env, request }) {
   }
 
   const urlMatch = text.match(/https?:\/\/[^\s]+/);
+
+  // 4a. /testtitle dry run: run Qwen title generation + validation and
+  //     reply with the result. Never ingests, never posts to the site.
+  if (text.startsWith("/testtitle")) {
+    const testBlurb = text.replace(/^\/testtitle\s*/, "").trim();
+    if (!testBlurb) {
+      await sendGroupMessage(
+        env,
+        chatId,
+        "Send a blurb with the command, e.g. /testtitle GoTo posted a second straight quarterly profit.",
+        message.message_id
+      );
+      return json({ ok: true });
+    }
+    const result = await generateHeadlineWithReason(env, testBlurb);
+    const reply = result.ok
+      ? `✅ Test title: ${result.headline}`
+      : `❌ Title failed: ${result.reason}`;
+    await sendGroupMessage(env, chatId, reply, message.message_id);
+    return json({ ok: true });
+  }
 
   // 4a. Plain text with no URL: treat it as the answer to a pending
   //     title request first, then a publisher-label question.
