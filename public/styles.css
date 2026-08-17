@@ -1431,3 +1431,18 @@ footer {
   .newsletter-promo h3 { font-size: calc(22px * var(--font-scale, 1)); }
   .newsletter-promo p:not(.eyebrow) { font-size: calc(17px * var(--font-scale, 1)); }
 }
+
+/* Hide topbar title block until further notice (Sai, Aug 17 2026) */
+.topbar-title { display: none !important; }
+.topbar { justify-content: center !important; }
+.topbar-actions { align-items: center !important; }
+@media (max-width: 640px) {
+  .topbar { display: block; }
+  .topbar-actions { align-items: center !important; }
+  .status { text-align: center !important; }
+}
+@media (min-width: 641px) and (max-width: 1024px) {
+  .topbar { justify-content: center !important; }
+  .topbar-actions { align-items: center !important; }
+  .status { text-align: center !important; }
+}
