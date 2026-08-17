@@ -537,7 +537,11 @@ export async function onRequestPost({ env, request }) {
     return json({ error: "sourceUrl must be an http(s) URL" }, 400);
   }
 
-  if (headline && isWeakHeadline(headline)) {
+  // Headline quality is an editorial concern, not an ingest hard stop. Rapid
+  // Transit already validates generated titles and authenticated admin users
+  // must be able to save the concise titles they choose. Reject only malformed
+  // transport input here; do not guess whether valid copy is "ATR-style".
+  if (headline && isMalformedHeadline(headline)) {
     await writeOperationalEvent(env, request, {
       workflow: "bulletin_ingest",
       action: "create_item",
@@ -546,10 +550,10 @@ export async function onRequestPost({ env, request }) {
       http_status: 400,
       source_name: sourceName,
       source_url: sourceUrl,
-      message: "Bulletin item create failed: headline guard rejected the title.",
+      message: "Bulletin item create failed: malformed headline input.",
       details: { category, headline }
     });
-    return json({ error: "headline must be a clean ATR-style scan title" }, 400);
+    return json({ error: "headline must be 120 characters or fewer and contain no links or line breaks" }, 400);
   }
 
   try {
@@ -1092,20 +1096,13 @@ function clean(value) {
   return typeof value === "string" ? value.trim() : "";
 }
 
-function isWeakHeadline(headline) {
-  const value = clean(headline).replace(/\bU\.S\./g, "US");
-  const words = value.split(/\s+/).filter(Boolean);
+function isMalformedHeadline(headline) {
+  const value = clean(headline);
 
-  if (!value) return true;
-  if (value.length > 72) return true;
-  if (words.length < 4 || words.length > 14) return true;
-  if (/\$[0-9][0-9.,]*(?:\.[0-9]+)?(?:m|bn|tn)\+?\b/.test(value)) return true;
-  if (/\b(?:a|an|the|to|for|from|of|in|on|at|by|with|into|as|and|or|but|after|before|while|amid|among|including|through|using|than|more|less|around|roughly|nearly|over|under|about|its|their|his|her|this|that|which|who|what|where|when|why|how|would|will|could|should|has|have|had|is|are|be|was|were|being|been|called|known|also|first|new|world's|yuan|chipmaker|prime minister anwar)\s*$/i.test(value)) return true;
-  if (/\$[0-9.]+$/.test(value)) return true;
-  if (/\b(?:is in talks|has held talks|has started preparing|is preparing|plans to file|will show|will debut|are expected|are set to be|is previewing|is pushing|began auditing|declined to stay|opened an immigration|marked its|launched a nationwide|is building|said residents|begins trading|told staff|plans to spend|approved a manufacturing|has been supplying|has won|raised a \$|targeted a valuation|reported a |closed down|outlined several|are leaning|begins shipping|is shutting|pledged another|will feature|has closed|has told Meta|is expanding|will invest|are leading|is in talks to buy|will begin renting|launched ZCode|has narrowed|has referred|sentenced five|has passed|will pour|has laid out|is nearing|launches investor|has ramped|has stalled|jailed former|announced|has filed|has open-sourced|launched Hong|finalized rules|has accused|has signed|now account|aims to finalize|will tighten|has chosen)\b/i.test(value)) return true;
-  if (/^(?:Sources:|A look at|How |More numbers|India:)/i.test(value)) return true;
-  if (/\b(?:inside the story|The Economic Times|surfacing|front and center)\b/i.test(value)) return true;
-  if (/(?:\$[0-9.]+ billion|[0-9]+ trillion rupees|T\$|HK\$|\bRs\s)/i.test(value)) return true;
+  if (!value) return false;
+  if (value.length > 120) return true;
+  if (/[\r\n\t]/.test(value)) return true;
+  if (/https?:\/\/|www\./i.test(value)) return true;
 
   return false;
 }

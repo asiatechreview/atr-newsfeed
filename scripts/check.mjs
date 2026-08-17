@@ -413,7 +413,7 @@ const duplicatePostResponse = await onRequestPost({
       "content-type": "application/json"
     },
     body: JSON.stringify({
-      headline: "Replay duplicate guard item",
+      headline: "Finnomena has filed for a $250 million Thai IPO",
       blurb: "Replay item that should not create a duplicate.",
       sourceName: "FT",
       sourceUrl: existingPostItem.source_url,
@@ -424,7 +424,7 @@ const duplicatePostResponse = await onRequestPost({
 const duplicatePostPayload = await duplicatePostResponse.json();
 
 if (duplicatePostResponse.status !== 200 || duplicatePostPayload.duplicate !== true || duplicatePostPayload.item?.id !== existingPostItem.id || insertAttempts !== 1) {
-  console.error("FAILED: duplicate source URL POST must return the existing item without creating a duplicate");
+  console.error("FAILED: POST must accept a legitimate editorial headline and return the existing duplicate without inserting another item");
   process.exit(1);
 }
 
