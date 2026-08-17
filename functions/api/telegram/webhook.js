@@ -286,7 +286,7 @@ ${examples}
 Now write the title for the new blurb below. Match the style of the examples: telegraphic, lead with the actor and action, keep the key figure or subject noun, use the blurb's own verb where it works, never add facts not in the blurb, no trailing period.
 
 Return ONLY a JSON object with:
-- title: the headline, 4-14 words
+- title: the headline, short and scan-first, 2-14 words (usually 4-10)
 - confidence: 0 to 1
 - needs_review: true only if you cannot derive a clean title from the blurb`;
 }
@@ -352,7 +352,7 @@ function headlineFactsConsistent(headline, blurb) {
 function headlineLooksValid(headline) {
   const value = cleanHeadlineOutput(headline);
   const words = value.split(/\s+/).filter(Boolean);
-  if (words.length < 4 || words.length > 14) return false;
+  if (words.length < 2 || words.length > 14) return false;
   if (value.length > 72) return false;
   if (/[\r\n\t]/.test(value)) return false;
   if (/https?:\/\/|www\./i.test(value)) return false;
@@ -365,13 +365,6 @@ function validateHeadlineObject(candidate, blurb) {
   if (!candidate || typeof candidate !== "object") {
     return { ok: false, reason: "model did not return JSON" };
   }
-  if (candidate.needs_review === true) {
-    return { ok: false, reason: "model marked title for review" };
-  }
-  if (typeof candidate.confidence === "number" && candidate.confidence < 0.6) {
-    return { ok: false, reason: "model confidence too low" };
-  }
-
   const headline = cleanHeadlineOutput(candidate.title);
   if (!headlineLooksValid(headline)) {
     return { ok: false, reason: "title failed shape check" };
@@ -531,17 +524,14 @@ async function processPost(env, request, chatId, url, blurb, label, replyTo = nu
 }
 
 async function processPendingTitle(env, request, chatId, message, pending) {
+  // Human-supplied titles bypass the Qwen style gates (Sai/Jon rule):
+  // the operator's editorial call stands. Only reject transport junk.
   const headline = cleanHeadlineOutput(message.text);
-  const validation = validateHeadlineObject(
-    { title: headline, confidence: 1, needs_review: false },
-    pending.blurb
-  );
-
-  if (!validation.ok) {
+  if (!headline || headline.length > 120 || /[\r\n\t]/.test(headline) || /https?:\/\/|www\./i.test(headline)) {
     await sendGroupMessage(
       env,
       chatId,
-      `That title failed validation (${validation.reason}). Reply with a 4-14 word title derived from the blurb.`,
+      "That doesn't look like a usable title. Reply with just the headline text.",
       message.message_id
     );
     return;
@@ -553,7 +543,7 @@ async function processPendingTitle(env, request, chatId, message, pending) {
     blurb: pending.blurb,
     url: pending.url,
     label,
-    headline: validation.headline,
+    headline,
     postedBy: senderName(message)
   });
   await sendIngestResult(env, chatId, result);
