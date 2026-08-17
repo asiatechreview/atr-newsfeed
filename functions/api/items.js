@@ -1,5 +1,5 @@
 import { STATIC_ITEMS } from "../_data/static-items.js";
-import { isAdmin } from "../_lib/admin-auth.js";
+import { getActor, isAdmin } from "../_lib/admin-auth.js";
 import { ensureLinkKeyColumn, linkKeyFor } from "../_lib/link-key.js";
 import { writeOperationalEvent } from "../_lib/operational-log.js";
 
@@ -474,6 +474,8 @@ export async function onRequestPost({ env, request }) {
     });
     return json({ error: "Unauthorized" }, 401);
   }
+  const actor = await getActor(env, request);
+  const isHumanAdmin = Boolean(actor && actor !== "automation");
 
   let body;
   try {
@@ -537,11 +539,11 @@ export async function onRequestPost({ env, request }) {
     return json({ error: "sourceUrl must be an http(s) URL" }, 400);
   }
 
-  // Headline quality is an editorial concern, not an ingest hard stop. Rapid
-  // Transit already validates generated titles and authenticated admin users
-  // must be able to save the concise titles they choose. Reject only malformed
-  // transport input here; do not guess whether valid copy is "ATR-style".
-  if (headline && isMalformedHeadline(headline)) {
+  // Headline quality is an editorial concern, not an ingest hard stop. Human
+  // admins may override title rules completely from the CMS. Automation still
+  // gets a narrow malformed-input guard so Rapid Transit cannot send links or
+  // broken multiline transport as a title.
+  if (!isHumanAdmin && headline && isMalformedHeadline(headline)) {
     await writeOperationalEvent(env, request, {
       workflow: "bulletin_ingest",
       action: "create_item",

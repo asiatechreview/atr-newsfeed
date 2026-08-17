@@ -428,6 +428,80 @@ if (duplicatePostResponse.status !== 200 || duplicatePostPayload.duplicate !== t
   process.exit(1);
 }
 
+let adminCreateParams = null;
+const adminCreateResponse = await onRequestPost({
+  env: {
+    FEED_INGEST_TOKEN: "test-token",
+    ATR_FEED_DB: {
+      prepare(query) {
+        return {
+          bind(...params) {
+            if (query.includes("INSERT INTO feed_items")) {
+              adminCreateParams = params;
+            }
+            return {
+              async first() {
+                if (query.includes("FROM admin_sessions")) {
+                  return { username: "sai", expires_at: new Date(Date.now() + 60000).toISOString() };
+                }
+                if (query.includes("FROM admin_users")) {
+                  return { role: "super_admin", display_name: "Sai Narayan" };
+                }
+                if (query.includes("INSERT INTO feed_items")) {
+                  return {
+                    id: 1001,
+                    headline: params[0],
+                    blurb: params[1],
+                    source_name: params[2],
+                    source_url: params[3],
+                    category: params[4],
+                    tags: params[5],
+                    telegram_message_id: params[6],
+                    published_at: params[7],
+                    created_at: "2026-08-17T08:00:00Z",
+                    posted_by: params[8],
+                    posted_via: params[9],
+                    status: params[10],
+                    scheduled_at: params[11]
+                  };
+                }
+                return null;
+              },
+              async all() {
+                return { results: [] };
+              },
+              async run() {}
+            };
+          },
+          async run() {}
+        };
+      }
+    }
+  },
+  request: new Request("https://local.test/api/items", {
+    method: "POST",
+    headers: {
+      cookie: "atr_admin_session=test-session",
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      headline: "Manual CMS title with https://example.com and\nan editor override",
+      blurb: "Human admin item that should bypass automated title rules.",
+      sourceName: "Manual",
+      sourceUrl: "",
+      category: "Markets",
+      postedBy: "Sai Narayan",
+      postedVia: "Admin"
+    })
+  })
+});
+const adminCreatePayload = await adminCreateResponse.json();
+
+if (adminCreateResponse.status !== 201 || adminCreatePayload.item?.id !== 1001 || adminCreateParams?.[0] !== "Manual CMS title with https://example.com and\nan editor override") {
+  console.error("FAILED: session-authenticated CMS creates must bypass automated title rules");
+  process.exit(1);
+}
+
 let patchUpdateParams = null;
 const patchResponse = await onRequestPatch({
   env: {
