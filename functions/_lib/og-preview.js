@@ -79,7 +79,7 @@ export async function lookupItem(env, itemParam) {
   if (!raw || (!isNumericId(raw) && !isLinkKey(raw))) return null;
   try {
     const row = await env.ATR_FEED_DB.prepare(
-      "SELECT id, headline, blurb, source_name, source_url, link_key FROM feed_items WHERE status = 'published' AND (id = ?1 OR LOWER(link_key) = LOWER(?2)) LIMIT 1"
+      "SELECT id, headline, blurb, source_name, source_url, link_key, published_at, region, category FROM feed_items WHERE status = 'published' AND (id = ?1 OR LOWER(link_key) = LOWER(?2)) LIMIT 1"
     )
       .bind(isNumericId(raw) ? Number(raw) : 0, raw)
       .first();

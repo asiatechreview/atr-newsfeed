@@ -1,6 +1,6 @@
 import { shouldLogCrawlerPath, writeCrawlerAccessLog } from "./_lib/crawler-log.js";
 import { ensureSiteContentTable, readSiteContent } from "./_lib/site-content.js";
-import { ogMetaBlock } from "./_lib/og-preview.js";
+import { ogMetaBlock, lookupItem } from "./_lib/og-preview.js";
 
 const PUBLIC_HOST = "bulletin.asiatechreview.com";
 const HOMEPAGE_PATHS = new Set(["/", "/index.html"]);
@@ -77,11 +77,60 @@ function insertBeforeHeadClose(html, metaBlock) {
 
 // Compose OG/Twitter meta injection and the newsletter card swap on the same
 // homepage HTML. Returns a new Response when anything changed, else null.
+
+function formatItemTime(publishedAt) {
+  try {
+    const d = new Date(publishedAt);
+    return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "Asia/Bangkok" });
+  } catch {
+    return "";
+  }
+}
+
+function preRenderItemCard(item) {
+  if (!item) return "";
+  const primaryTag = escapeHtml(item.region || item.category || "Tech");
+  const headline = escapeHtml(item.headline || "");
+  const blurb = escapeHtml(item.blurb || "");
+  const sourceName = escapeHtml(item.source_name || "Source");
+  const sourceUrl = escapeHtml(item.source_url || "#");
+  const timeStr = escapeHtml(formatItemTime(item.published_at));
+  const itemKey = `item-${item.id}`;
+
+  return `
+    <article class="item item-flash" data-item-key="${itemKey}">
+      <div class="meta">
+        <time class="item-time">${timeStr}</time>
+        <a class="item-primary-tag" href="?tag=${encodeURIComponent(primaryTag)}">${primaryTag}</a>
+      </div>
+      <div class="item-main">
+        <h3 class="headline">${headline}</h3>
+        <p class="blurb">${blurb} <a href="${sourceUrl}" target="_blank" rel="noopener">[${sourceName}]</a></p>
+      </div>
+    </article>
+  `;
+}
+
 async function injectHomepageMeta(response, env, url) {
   try {
     const original = await response.text();
     let html = original;
     let changed = false;
+
+    const itemParam = url.searchParams.get("item");
+    if (itemParam) {
+      const item = await lookupItem(env, itemParam);
+      if (item) {
+        const itemCardHtml = preRenderItemCard(item);
+        if (itemCardHtml) {
+          html = html.replace(
+            '<section id="feed-list" class="feed"></section>',
+            `<section id="feed-list" class="feed">${itemCardHtml}</section>`
+          );
+          changed = true;
+        }
+      }
+    }
 
     const ogTags = await ogMetaBlock(env, url);
     if (ogTags && !html.includes('property="og:title"')) {
