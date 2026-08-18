@@ -80,7 +80,9 @@ function insertBeforeHeadClose(html, metaBlock) {
 
 function formatItemTime(publishedAt) {
   try {
-    const d = new Date(publishedAt);
+    const raw = String(publishedAt || "").trim().replace(" ", "T");
+    const d = new Date(raw.endsWith("Z") || raw.includes("+") ? raw : raw + "Z");
+    if (isNaN(d.getTime())) return "";
     return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "Asia/Bangkok" });
   } catch {
     return "";
