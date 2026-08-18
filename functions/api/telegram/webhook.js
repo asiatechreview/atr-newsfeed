@@ -1,4 +1,5 @@
 import { json } from "../../_lib/public-api.js";
+import { linkKeyFor } from "../../_lib/link-key.js";
 import { SEED_CATEGORIES } from "../../_lib/categories.js";
 import {
   clearSchedule,
@@ -529,9 +530,13 @@ function senderName(message) {
 }
 
 async function processPost(env, request, chatId, url, blurb, label, replyTo = null, postedBy = null) {
+  const linkKey = await linkKeyFor(url);
+  const deepLink = linkKey
+    ? `https://bulletin.asiatechreview.com/?item=${encodeURIComponent(linkKey)}`
+    : url;
   const visibleText = `${blurb} [${label}]`;
   const labelOffset = blurb.length + 2;
-  const entities = [{ type: "text_link", offset: labelOffset, length: label.length, url }];
+  const entities = [{ type: "text_link", offset: labelOffset, length: label.length, url: deepLink }];
   await sendGroupMessage(env, chatId, visibleText, replyTo, entities);
 
   // Generate a scan-first headline from the supplied blurb. This is
