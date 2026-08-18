@@ -2169,8 +2169,8 @@ function mergeIncomingItems(items) {
   };
 }
 
-async function fetchFeedItems() {
-  const response = await fetch(`/api/items?limit=500&_=${Date.now()}`, {
+async function fetchFeedItems(limit = 50) {
+  const response = await fetch(`/api/items?limit=${limit}&_=${Date.now()}`, {
     headers: { Accept: "application/json" }
   });
 
@@ -2182,6 +2182,17 @@ async function fetchFeedItems() {
   return payload.items || [];
 }
 
+async function loadBackgroundFullFeed() {
+  try {
+    const fullItems = await fetchFeedItems(500);
+    if (fullItems && fullItems.length) {
+      mergeIncomingItems(fullItems);
+    }
+  } catch {
+    // Silent failover; initial 50 items remain active.
+  }
+}
+
 async function refreshFeed(options = {}) {
   if (isFetchingFeed) {
     return;
@@ -2190,11 +2201,13 @@ async function refreshFeed(options = {}) {
   isFetchingFeed = true;
 
   try {
-    const items = await fetchFeedItems();
+    const items = await fetchFeedItems(options.initial ? 50 : 500);
 
     if (options.initial) {
       render(items, { statusText: "" });
       handleRequestedItem();
+      // Silently fetch full 500-item window in background after initial paint
+      window.setTimeout(loadBackgroundFullFeed, 1000);
       return;
     }
 
