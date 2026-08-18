@@ -1613,7 +1613,6 @@ async function handleRequestedItem() {
     // Beyond the 500-item window: resolve by id through the API.
     try {
       const response = await fetch(`/api/v1/items/${encodeURIComponent(itemId)}`, {
-        cache: "no-store",
         headers: { Accept: "application/json" }
       });
       if (!response.ok) return;
@@ -1637,7 +1636,7 @@ async function handleRequestedItem() {
 
   const targetDate = dateKey(item.published_at);
   const dateItems = allItems.filter((candidate) => dateKey(candidate.published_at) === targetDate);
-  const index = dateItems.findIndex((candidate) => String(candidate.id) === String(itemId));
+  const index = dateItems.findIndex((candidate) => String(candidate.id) === String(itemId) || (candidate.link_key && candidate.link_key.toLowerCase() === String(itemId).toLowerCase()));
   const page = index >= 0 ? Math.floor(index / ITEMS_PER_PAGE) + 1 : 1;
 
   currentDateFilter = targetDate;
@@ -1652,9 +1651,11 @@ async function handleRequestedItem() {
 }
 
 function flashItem(node) {
-  node.scrollIntoView({ block: "start", behavior: "smooth" });
-  node.classList.add("item-flash");
-  window.setTimeout(() => node.classList.remove("item-flash"), 3200);
+  window.setTimeout(() => {
+    node.scrollIntoView({ block: "center", behavior: "smooth" });
+    node.classList.add("item-flash");
+    window.setTimeout(() => node.classList.remove("item-flash"), 3200);
+  }, 100);
 }
 
 if (newItemToastRead) {
@@ -2170,7 +2171,6 @@ function mergeIncomingItems(items) {
 
 async function fetchFeedItems() {
   const response = await fetch(`/api/items?limit=500&_=${Date.now()}`, {
-    cache: "no-store",
     headers: { Accept: "application/json" }
   });
 
@@ -2297,7 +2297,7 @@ if (searchToggle && mobileSearchForm && mobileSearchInput) {
 
 async function loadNewsletterCard() {
   try {
-    const response = await fetch("/api/site-content", { cache: "no-store" });
+    const response = await fetch("/api/site-content");
     if (!response.ok) return;
     const content = await response.json();
     const newsletter = content.newsletter || {};
