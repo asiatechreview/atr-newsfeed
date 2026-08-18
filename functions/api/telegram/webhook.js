@@ -501,12 +501,14 @@ async function ingestItem(env, request, { blurb, url, label, headline, postedBy 
   return { ok: false, detail: (await response.text()).slice(0, 200), status: response.status };
 }
 
-async function sendIngestResult(env, chatId, result) {
+async function sendIngestResult(env, chatId, result, headline = null) {
   if (result.ok && result.duplicate) {
     const itemId = result.item?.id ? ` (id ${result.item.id})` : "";
     await sendGroupMessage(env, chatId, `⚠️ Already posted${itemId}`);
   } else if (result.ok) {
-    await sendGroupMessage(env, chatId, "🟢");
+    const titleText = headline || result.item?.headline || "";
+    const msg = titleText ? `🟢 ${titleText}` : "🟢";
+    await sendGroupMessage(env, chatId, msg);
   } else {
     await sendGroupMessage(
       env,
@@ -548,7 +550,7 @@ async function processPost(env, request, chatId, url, blurb, label, replyTo = nu
   }
 
   const result = await ingestItem(env, request, { blurb, url, label, headline, postedBy });
-  await sendIngestResult(env, chatId, result);
+  await sendIngestResult(env, chatId, result, headline);
 }
 
 async function processPendingTitle(env, request, chatId, message, pending) {
@@ -574,7 +576,7 @@ async function processPendingTitle(env, request, chatId, message, pending) {
     headline,
     postedBy: senderName(message)
   });
-  await sendIngestResult(env, chatId, result);
+  await sendIngestResult(env, chatId, result, headline);
 }
 
 export const __rapidTransitHeadlineTest = {
