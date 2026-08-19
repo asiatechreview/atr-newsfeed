@@ -727,7 +727,7 @@ main {
 
 .share-menu {
   z-index: 1000;
-  min-width: 104px;
+  width: max-content;
   padding: 3px;
   background: var(--panel);
   border: 1px solid var(--border);

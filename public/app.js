@@ -2112,13 +2112,14 @@ function toggleShareMenu(item, button) {
   const rect = button.getBoundingClientRect();
   menu.hidden = false;
   const menuHeight = menu.offsetHeight;
+  const menuWidth = menu.offsetWidth;
   let top = rect.bottom + 6;
   if (top + menuHeight > window.innerHeight - 8) {
     top = Math.max(8, rect.top - menuHeight - 6);
   }
   menu.style.position = "fixed";
   menu.style.top = `${top}px`;
-  menu.style.left = `${Math.max(8, Math.min(rect.right - 140, window.innerWidth - 148))}px`;
+  menu.style.left = `${Math.max(8, Math.min(rect.right - menuWidth, window.innerWidth - menuWidth - 8))}px`;
 
   openShareMenu = menu;
   openShareMenuButton = button;
