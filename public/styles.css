@@ -671,41 +671,16 @@ main {
 
 .item-copy-link {
   margin-left: auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-  min-width: 26px;
-  height: 26px;
-  padding: 0;
   background: none;
   border: 1px solid var(--border);
   border-radius: 5px;
   color: var(--quiet);
+  font: 600 11px/1 var(--font-meta);
+  padding: 4px 8px;
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
-  overflow: hidden;
-  transition: gap 0.25s ease, padding 0.25s ease, color 0.2s ease, border-color 0.2s ease;
-}
-
-.item-share-icon {
-  width: 14px;
-  height: 14px;
-  flex: 0 0 auto;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2.3;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.item-copy-label {
-  max-width: 0;
-  overflow: hidden;
-  opacity: 0;
-  font: 600 11px/1 var(--font-meta);
-  transition: max-width 0.25s ease, opacity 0.2s ease;
+  transition: color 0.2s ease, border-color 0.2s ease;
 }
 
 .item-copy-link:hover {
@@ -716,13 +691,6 @@ main {
 .item-copy-link.copied {
   color: var(--accent);
   border-color: var(--accent);
-  gap: 4px;
-  padding: 0 8px;
-}
-
-.item-copy-link.copied .item-copy-label {
-  max-width: 90px;
-  opacity: 1;
 }
 
 
