@@ -676,13 +676,10 @@ main {
   border-radius: 5px;
   color: var(--quiet);
   font: 600 11px/1 var(--font-meta);
-  padding: 4px 0;
-  width: 64px;
-  box-sizing: border-box;
-  text-align: center;
+  padding: 4px 8px;
+  cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
-  cursor: pointer;
   transition: color 0.2s ease, border-color 0.2s ease;
 }
 
@@ -945,6 +942,18 @@ main {
 @media (max-width: 640px) {
   .item-headline-row {
     align-items: flex-start;
+    gap: 10px;
+  }
+
+  .item-copy-link {
+    padding: 4px 0;
+    width: 50px;
+    box-sizing: border-box;
+    text-align: center;
+  }
+
+  .item-copy-link.copied {
+    font-size: 9px;
   }
 
   .newsletter-promo {
