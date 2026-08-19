@@ -2039,7 +2039,14 @@ function renderItems(items) {
     itemNode.querySelector(".item").dataset.itemKey = stableItemKey(item);
     primaryTagLink.href = `?tag=${encodeURIComponent(primaryTag)}`;
     primaryTagLink.textContent = titleCaseTag(primaryTag);
-    itemNode.querySelector(".headline").textContent = item.headline;
+    const headlineNode = itemNode.querySelector(".headline");
+    if (headlineNode) {
+      const headlineLink = document.createElement("a");
+      headlineLink.href = `?item=${encodeURIComponent(item.link_key || item.id)}`;
+      headlineLink.textContent = item.headline;
+      headlineNode.textContent = "";
+      headlineNode.appendChild(headlineLink);
+    }
     appendItemText(itemNode.querySelector(".blurb"), item);
     renderTags(itemNode.querySelector(".tags"), item);
 
@@ -2049,14 +2056,12 @@ function renderItems(items) {
       copyButton.type = "button";
       copyButton.className = "item-copy-link";
       copyButton.setAttribute("aria-label", "Share story");
-      copyButton.setAttribute("aria-haspopup", "menu");
-      copyButton.setAttribute("aria-expanded", "false");
       copyButton.title = "Share story";
       copyButton.innerHTML = SHARE_ICON_SVG + '<span class="item-copy-label" aria-hidden="true">Copied</span>';
       copyButton.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
-        toggleShareMenu(item, copyButton);
+        copyItemLink(item, copyButton);
       });
       meta.appendChild(copyButton);
     }
@@ -2068,102 +2073,12 @@ function renderItems(items) {
 const SHARE_ICON_SVG = '<svg class="item-share-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>';
 const CHECK_ICON_SVG = '<svg class="item-share-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 12l5 5L20 6"/></svg>';
 
-let openShareMenu = null;
-let openShareMenuButton = null;
-
-function toggleShareMenu(item, button) {
-  if (openShareMenu) {
-    closeShareMenu();
-    return;
-  }
-
-  const menu = document.createElement("div");
-  menu.className = "share-menu";
-  menu.setAttribute("role", "menu");
-  menu.setAttribute("aria-label", "Share options");
-  menu.hidden = true;
-
-  const quoteItem = document.createElement("button");
-  quoteItem.type = "button";
-  quoteItem.className = "share-menu-item";
-  quoteItem.setAttribute("role", "menuitem");
-  quoteItem.textContent = "Quote";
-  quoteItem.addEventListener("click", (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    copyItemLink(item, button, "quote");
-  });
-
-  const urlItem = document.createElement("button");
-  urlItem.type = "button";
-  urlItem.className = "share-menu-item";
-  urlItem.setAttribute("role", "menuitem");
-  urlItem.textContent = "URL";
-  urlItem.addEventListener("click", (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    copyItemLink(item, button, "url");
-  });
-
-  menu.appendChild(quoteItem);
-  menu.appendChild(urlItem);
-  document.body.appendChild(menu);
-
-  const rect = button.getBoundingClientRect();
-  menu.hidden = false;
-  const menuHeight = menu.offsetHeight;
-  const menuWidth = menu.offsetWidth;
-  let top = rect.bottom + 6;
-  if (top + menuHeight > window.innerHeight - 8) {
-    top = Math.max(8, rect.top - menuHeight - 6);
-  }
-  menu.style.position = "fixed";
-  menu.style.top = `${top}px`;
-  menu.style.left = `${Math.max(8, Math.min(rect.right - menuWidth, window.innerWidth - menuWidth - 8))}px`;
-
-  openShareMenu = menu;
-  openShareMenuButton = button;
-  button.setAttribute("aria-expanded", "true");
-}
-
-function closeShareMenu() {
-  if (openShareMenu) {
-    openShareMenu.remove();
-    openShareMenu = null;
-  }
-  if (openShareMenuButton) {
-    openShareMenuButton.setAttribute("aria-expanded", "false");
-    openShareMenuButton = null;
-  }
-}
-
-document.addEventListener("click", (event) => {
-  if (
-    openShareMenu &&
-    !openShareMenu.contains(event.target) &&
-    !(openShareMenuButton && openShareMenuButton.contains(event.target))
-  ) {
-    closeShareMenu();
-  }
-});
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") closeShareMenu();
-});
-window.addEventListener("scroll", closeShareMenu, true);
-window.addEventListener("resize", closeShareMenu);
-
-function copyItemLink(item, button, mode) {
+function copyItemLink(item, button) {
   const url = `${window.location.origin}/?item=${encodeURIComponent(item.link_key || item.id)}`;
-  let text;
-  if (mode === "url") {
-    text = url;
-  } else {
-    const blurb = String(item.blurb || "").trim();
-    const source = String(item.source_name || "").trim();
-    text = [blurb, `Source: ${source}`, url].filter(Boolean).join("\n\n");
-  }
+  const blurb = String(item.blurb || "").trim();
+  const source = String(item.source_name || "").trim();
+  const text = [blurb, `Source: ${source}`, url].filter(Boolean).join("\n\n");
   const done = () => {
-    closeShareMenu();
     button.setAttribute("aria-label", "Copied to clipboard");
     button.innerHTML = CHECK_ICON_SVG + '<span class="item-copy-label" aria-hidden="true">Copied</span>';
     button.classList.add("copied");

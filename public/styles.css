@@ -725,41 +725,6 @@ main {
   opacity: 1;
 }
 
-.share-menu {
-  z-index: 1000;
-  width: max-content;
-  padding: 3px;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
-  font: 600 11px/1 var(--font-meta);
-}
-
-.share-menu[hidden] {
-  display: none;
-}
-
-.share-menu-item {
-  display: block;
-  width: 100%;
-  padding: 6px 8px;
-  background: none;
-  border: none;
-  border-radius: 3px;
-  color: var(--text);
-  text-align: left;
-  font: 600 11px/1 var(--font-meta);
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.share-menu-item:hover,
-.share-menu-item:focus-visible {
-  background: var(--accent-dim);
-  color: var(--accent);
-  outline: none;
-}
 
 .date + .item {
   border-top: 0;
