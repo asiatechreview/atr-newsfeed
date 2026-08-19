@@ -2050,7 +2050,7 @@ function renderItems(items) {
       copyButton.className = "item-copy-link";
       copyButton.setAttribute("aria-label", "Share story");
       copyButton.title = "Share story";
-      copyButton.textContent = "Share";
+      copyButton.innerHTML = SHARE_ICON_SVG + '<span class="item-copy-label">Share</span>';
       copyButton.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -2063,6 +2063,9 @@ function renderItems(items) {
   }
 }
 
+const SHARE_ICON_SVG = '<svg class="item-share-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>';
+const CHECK_ICON_SVG = '<svg class="item-share-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 12l5 5L20 6"/></svg>';
+
 function copyItemLink(item, button) {
   const url = `${window.location.origin}/?item=${encodeURIComponent(item.link_key || item.id)}`;
   const blurb = String(item.blurb || "").trim();
@@ -2070,11 +2073,11 @@ function copyItemLink(item, button) {
   const text = [blurb, `Source: ${source}`, url].filter(Boolean).join("\n\n");
   const done = () => {
     button.setAttribute("aria-label", "Copied to clipboard");
-    button.textContent = "Copied ✓";
+    button.innerHTML = CHECK_ICON_SVG + '<span class="item-copy-label">Copied</span>';
     button.classList.add("copied");
     window.setTimeout(() => {
       button.setAttribute("aria-label", "Share story");
-      button.textContent = "Share";
+      button.innerHTML = SHARE_ICON_SVG + '<span class="item-copy-label">Share</span>';
       button.classList.remove("copied");
     }, 1800);
   };
