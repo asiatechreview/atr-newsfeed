@@ -2087,7 +2087,7 @@ function toggleShareMenu(item, button) {
   quoteItem.type = "button";
   quoteItem.className = "share-menu-item";
   quoteItem.setAttribute("role", "menuitem");
-  quoteItem.textContent = "Copy quote";
+  quoteItem.textContent = "Quote";
   quoteItem.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -2098,7 +2098,7 @@ function toggleShareMenu(item, button) {
   urlItem.type = "button";
   urlItem.className = "share-menu-item";
   urlItem.setAttribute("role", "menuitem");
-  urlItem.textContent = "URL only";
+  urlItem.textContent = "URL";
   urlItem.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
