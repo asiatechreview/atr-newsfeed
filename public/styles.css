@@ -23,7 +23,7 @@
   --muted: #a7a194;
   --quiet: #777267;
   --accent: #78b592;
-  --accent-2: #ddad55;
+  --accent-2: #E8BC5A;
   --accent-dim: #486a56;
   --on-text: #0d0e0c;
   --red: #e47058;
@@ -49,7 +49,7 @@
   --muted: #646a60;
   --quiet: #858b80;
   --accent: #2f6f50;
-  --accent-2: #8f641c;
+  --accent-2: #9A6B1E;
   --accent-dim: #89ad9a;
   --on-text: #ffffff;
   --red: #b23f2c;
@@ -72,7 +72,7 @@
   --muted: #9a958a;
   --quiet: #6d685d;
   --accent: #78b592;
-  --accent-2: #ddad55;
+  --accent-2: #E8BC5A;
   --accent-dim: #2a4a38;
   --on-text: #000000;
   --red: #e47058;
@@ -661,7 +661,7 @@ main {
 }
 
 .item-flash {
-  animation: item-flash 3.2s ease-out;
+  animation: item-flash 4.2s ease-out;
 }
 
 @keyframes item-flash {

@@ -1654,7 +1654,7 @@ function flashItem(node) {
   window.setTimeout(() => {
     node.scrollIntoView({ block: "center", behavior: "smooth" });
     node.classList.add("item-flash");
-    window.setTimeout(() => node.classList.remove("item-flash"), 3200);
+    window.setTimeout(() => node.classList.remove("item-flash"), 4200);
   }, 100);
 }
 
