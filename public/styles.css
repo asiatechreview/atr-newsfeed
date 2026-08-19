@@ -940,6 +940,10 @@ main {
 }
 
 @media (max-width: 640px) {
+  .item-headline-row {
+    align-items: flex-start;
+  }
+
   .newsletter-promo {
     grid-template-columns: 1fr;
     align-items: center;
