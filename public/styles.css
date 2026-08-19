@@ -1474,6 +1474,9 @@ footer {
   .topbar { display: block; }
   .topbar-actions { align-items: center !important; }
   .status { text-align: center !important; }
+  main {
+    padding: 18px 22px;
+  }
 }
 @media (min-width: 641px) and (max-width: 1024px) {
   .topbar { justify-content: center !important; }
