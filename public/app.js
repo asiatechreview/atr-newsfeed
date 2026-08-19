@@ -2050,7 +2050,7 @@ function renderItems(items) {
       copyButton.className = "item-copy-link";
       copyButton.setAttribute("aria-label", "Copy story text and link");
       copyButton.title = "Share story";
-      copyButton.innerHTML = SHARE_ICON_SVG;
+      copyButton.innerHTML = SHARE_ICON_SVG + '<span class="item-copy-label" aria-hidden="true">Copied</span>';
       copyButton.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -2072,10 +2072,12 @@ function copyItemLink(item, button) {
   const source = String(item.source_name || "").trim();
   const text = [blurb, `Source: ${source}`, url].filter(Boolean).join("\n\n");
   const done = () => {
-    button.innerHTML = CHECK_ICON_SVG;
+    button.setAttribute("aria-label", "Copied to clipboard");
+    button.innerHTML = CHECK_ICON_SVG + '<span class="item-copy-label" aria-hidden="true">Copied</span>';
     button.classList.add("copied");
     window.setTimeout(() => {
-      button.innerHTML = SHARE_ICON_SVG;
+      button.setAttribute("aria-label", "Copy story text and link");
+      button.innerHTML = SHARE_ICON_SVG + '<span class="item-copy-label" aria-hidden="true">Copied</span>';
       button.classList.remove("copied");
     }, 1800);
   };
