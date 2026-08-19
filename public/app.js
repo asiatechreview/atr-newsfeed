@@ -2039,14 +2039,7 @@ function renderItems(items) {
     itemNode.querySelector(".item").dataset.itemKey = stableItemKey(item);
     primaryTagLink.href = `?tag=${encodeURIComponent(primaryTag)}`;
     primaryTagLink.textContent = titleCaseTag(primaryTag);
-    const headlineNode = itemNode.querySelector(".headline");
-    if (headlineNode) {
-      const headlineLink = document.createElement("a");
-      headlineLink.href = `?item=${encodeURIComponent(item.link_key || item.id)}`;
-      headlineLink.textContent = item.headline;
-      headlineNode.textContent = "";
-      headlineNode.appendChild(headlineLink);
-    }
+    itemNode.querySelector(".headline").textContent = item.headline;
     appendItemText(itemNode.querySelector(".blurb"), item);
     renderTags(itemNode.querySelector(".tags"), item);
 
