@@ -752,6 +752,17 @@ main {
   text-decoration: none;
 }
 
+.item-headline-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.item-headline-row .headline {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .headline {
   margin: 0 0 7px;
   color: var(--text);

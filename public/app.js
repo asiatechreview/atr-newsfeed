@@ -2043,8 +2043,8 @@ function renderItems(items) {
     appendItemText(itemNode.querySelector(".blurb"), item);
     renderTags(itemNode.querySelector(".tags"), item);
 
-    const meta = itemNode.querySelector(".meta");
-    if (meta && item.link_key) {
+    const headlineRow = itemNode.querySelector(".item-headline-row");
+    if (headlineRow && item.link_key) {
       const copyButton = document.createElement("button");
       copyButton.type = "button";
       copyButton.className = "item-copy-link";
@@ -2056,7 +2056,7 @@ function renderItems(items) {
         event.stopPropagation();
         copyItemLink(item, copyButton);
       });
-      meta.appendChild(copyButton);
+      headlineRow.appendChild(copyButton);
     }
 
     feed.appendChild(itemNode);
