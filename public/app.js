@@ -2048,9 +2048,9 @@ function renderItems(items) {
       const copyButton = document.createElement("button");
       copyButton.type = "button";
       copyButton.className = "item-copy-link";
-      copyButton.setAttribute("aria-label", "Copy link to this story");
-      copyButton.title = "Copy link";
-      copyButton.textContent = "Copy link";
+      copyButton.setAttribute("aria-label", "Copy story text and link");
+      copyButton.title = "Share story";
+      copyButton.innerHTML = SHARE_ICON_SVG;
       copyButton.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -2063,22 +2063,27 @@ function renderItems(items) {
   }
 }
 
+const SHARE_ICON_SVG = '<svg class="item-share-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>';
+const CHECK_ICON_SVG = '<svg class="item-share-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 12l5 5L20 6"/></svg>';
+
 function copyItemLink(item, button) {
   const url = `${window.location.origin}/?item=${encodeURIComponent(item.link_key || item.id)}`;
+  const blurb = String(item.blurb || "").trim();
+  const source = String(item.source_name || "").trim();
+  const text = [blurb, `Source: ${source}`, url].filter(Boolean).join("\n\n");
   const done = () => {
-    const original = button.textContent;
-    button.textContent = "Copied ✓";
+    button.innerHTML = CHECK_ICON_SVG;
     button.classList.add("copied");
     window.setTimeout(() => {
-      button.textContent = original;
+      button.innerHTML = SHARE_ICON_SVG;
       button.classList.remove("copied");
     }, 1800);
   };
 
   if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(url).then(done, () => fallbackCopy(url, done));
+    navigator.clipboard.writeText(text).then(done, () => fallbackCopy(text, done));
   } else {
-    fallbackCopy(url, done);
+    fallbackCopy(text, done);
   }
 }
 
