@@ -104,6 +104,7 @@ async function ensureTables(env) {
       blurb TEXT NOT NULL,
       domain TEXT NOT NULL,
       label TEXT,
+      supplied_headline TEXT,
       status TEXT NOT NULL DEFAULT 'awaiting_label',
       created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
     )`
@@ -112,6 +113,11 @@ async function ensureTables(env) {
     await env.ATR_FEED_DB.prepare("ALTER TABLE rapid_transit_pending ADD COLUMN label TEXT").run();
   } catch {
     // Existing table already has the optional label column.
+  }
+  try {
+    await env.ATR_FEED_DB.prepare("ALTER TABLE rapid_transit_pending ADD COLUMN supplied_headline TEXT").run();
+  } catch {
+    // Existing table already has the optional supplied headline column.
   }
 }
 
@@ -307,8 +313,41 @@ function cleanHeadlineOutput(value) {
   return String(value || "")
     .replace(/^[\s"'“”‘’]+|[\s"'“”‘’]+$/g, "")
     .replace(/^Headline:?\s*/i, "")
+    .replace(/^Title:?\s*/i, "")
     .replace(/\.+$/g, "")
     .trim();
+}
+
+function suppliedHeadlineLooksUsable(value) {
+  const headline = cleanHeadlineOutput(value);
+  return Boolean(headline && headline.length <= 120 && !/[\r\n\t]/.test(headline) && !/https?:\/\/|www\./i.test(headline));
+}
+
+function parseRapidTransitPost(text, urlMatch) {
+  const url = urlMatch[0].replace(/[),.;!?]+$/, "");
+  const lines = String(text || "")
+    .replace(urlMatch[0], "")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  let suppliedHeadline = null;
+  const blurbLines = [];
+
+  for (const line of lines) {
+    const titleMatch = line.match(/^(?:title|headline)\s*[:\-–]\s*(.+)$/i);
+    if (titleMatch && !suppliedHeadline) {
+      suppliedHeadline = cleanHeadlineOutput(titleMatch[1]);
+      continue;
+    }
+    const blurbMatch = line.match(/^(?:blurb|copy)\s*[:\-–]\s*(.+)$/i);
+    blurbLines.push(blurbMatch ? blurbMatch[1].trim() : line);
+  }
+
+  return {
+    url,
+    blurb: blurbLines.join(" ").replace(/\s+/g, " ").trim(),
+    suppliedHeadline
+  };
 }
 
 function extractJsonObject(text) {
@@ -529,7 +568,7 @@ function senderName(message) {
   return from.username || null;
 }
 
-async function processPost(env, request, chatId, url, blurb, label, replyTo = null, postedBy = null) {
+async function processPost(env, request, chatId, url, blurb, label, replyTo = null, postedBy = null, suppliedHeadline = null) {
   const linkKey = await linkKeyFor(url);
   const deepLink = linkKey
     ? `https://bulletin.asiatechreview.com/?item=${encodeURIComponent(linkKey)}`
@@ -539,11 +578,25 @@ async function processPost(env, request, chatId, url, blurb, label, replyTo = nu
   const entities = [{ type: "text_link", offset: labelOffset, length: label.length, url: deepLink }];
   await sendGroupMessage(env, chatId, visibleText, replyTo, entities);
 
-  // Generate a scan-first headline from the supplied blurb. This is
-  // compression, not creation: the blurb is the only input. If Qwen cannot
-  // return a validated title, stop here so the site never publishes a
-  // mechanically truncated fallback title.
-  const headline = await generateHeadline(env, blurb);
+  // Use an editor-supplied title when present; otherwise generate a
+  // scan-first headline from the supplied blurb.
+  let headline = suppliedHeadline ? cleanHeadlineOutput(suppliedHeadline) : "";
+  if (headline && !suppliedHeadlineLooksUsable(headline)) {
+    await sendGroupMessage(
+      env,
+      chatId,
+      "That title doesn't look usable. Reply with just the headline text.",
+      replyTo
+    );
+    await savePendingTitleRequest(env, chatId, url, blurb, hostOf(url), label);
+    return;
+  }
+  if (!headline) {
+    // This is compression, not creation: the blurb is the only input. If
+    // Qwen cannot return a validated title, stop here so the site never
+    // publishes a mechanically truncated fallback title.
+    headline = await generateHeadline(env, blurb);
+  }
   if (!headline) {
     await savePendingTitleRequest(env, chatId, url, blurb, hostOf(url), label);
     await sendGroupMessage(
@@ -586,7 +639,8 @@ async function processPendingTitle(env, request, chatId, message, pending) {
 
 export const __rapidTransitHeadlineTest = {
   extractJsonObject,
-  validateHeadlineObject
+  validateHeadlineObject,
+  parseRapidTransitPost
 };
 
 // ---------------------------------------------------------------------------
@@ -763,7 +817,17 @@ export async function onRequestPost({ env, request }) {
     }
     await saveLabel(env, pending.domain, label);
     await markPendingProcessed(env, pending.id);
-    await processPost(env, request, chatId, pending.url, pending.blurb, label, message.message_id, senderName(message));
+    await processPost(
+      env,
+      request,
+      chatId,
+      pending.url,
+      pending.blurb,
+      label,
+      message.message_id,
+      senderName(message),
+      pending.supplied_headline || null
+    );
 
     // If another unmapped publisher is queued, ask for the next label.
     const next = await oldestPending(env);
@@ -779,8 +843,8 @@ export async function onRequestPost({ env, request }) {
   }
 
   // 4b. Message with a URL: extract the blurb and resolve the outlet.
-  const url = urlMatch[0].replace(/[),.;!?]+$/, "");
-  const blurb = text.replace(urlMatch[0], "").trim();
+  const parsedPost = parseRapidTransitPost(text, urlMatch);
+  const { url, blurb, suppliedHeadline } = parsedPost;
   if (!blurb) {
     // Naked URL: one gentle nudge, then nothing. Unlike casual chat (which
     // stays silent), this is a malformed post, so a single prompt helps
@@ -799,7 +863,7 @@ export async function onRequestPost({ env, request }) {
 
   if (label) {
     // Known publisher: process immediately.
-    await processPost(env, request, chatId, url, blurb, label, null, senderName(message));
+    await processPost(env, request, chatId, url, blurb, label, null, senderName(message), suppliedHeadline);
     return json({ ok: true });
   }
 
@@ -807,8 +871,8 @@ export async function onRequestPost({ env, request }) {
   const existing = await pendingAwaitingLabel(env, domain);
   if (!existing) {
     await env.ATR_FEED_DB.prepare(
-      "INSERT INTO rapid_transit_pending (chat_id, url, blurb, domain, status, created_at) VALUES (?, ?, ?, ?, 'awaiting_label', strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))"
-    ).bind(String(chatId), url, blurb, domain).run();
+      "INSERT INTO rapid_transit_pending (chat_id, url, blurb, domain, supplied_headline, status, created_at) VALUES (?, ?, ?, ?, ?, 'awaiting_label', strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))"
+    ).bind(String(chatId), url, blurb, domain, suppliedHeadline || null).run();
   }
   await sendGroupMessage(
     env,

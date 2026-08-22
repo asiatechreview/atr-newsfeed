@@ -370,9 +370,21 @@ const inventedNumberValidation = __rapidTransitHeadlineTest.validateHeadlineObje
   { title: "Unitree raises $999 million in STAR Market IPO", confidence: 0.92, needs_review: false },
   headlineBlurb
 );
+const titledRapidTransitPost = __rapidTransitHeadlineTest.parseRapidTransitPost(
+  "Title: Unitree files for STAR Market IPO\nBlurb: China's Unitree is raising ¥6.10 billion ($904 million) in a STAR Market IPO.\nhttps://www.ft.com/content/unitree-test",
+  ["https://www.ft.com/content/unitree-test"]
+);
 
 if (!goodHeadlineValidation.ok || freeTextHeadlineValidation.ok || inventedNumberValidation.ok) {
   console.error("FAILED: Rapid Transit headline validation must require structured JSON and reject invented figures");
+  process.exit(1);
+}
+if (
+  titledRapidTransitPost.url !== "https://www.ft.com/content/unitree-test" ||
+  titledRapidTransitPost.suppliedHeadline !== "Unitree files for STAR Market IPO" ||
+  titledRapidTransitPost.blurb !== "China's Unitree is raising ¥6.10 billion ($904 million) in a STAR Market IPO."
+) {
+  console.error("FAILED: Rapid Transit must support optional supplied title without folding it into the blurb");
   process.exit(1);
 }
 
