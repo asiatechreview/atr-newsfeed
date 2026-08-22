@@ -325,13 +325,32 @@ function suppliedHeadlineLooksUsable(value) {
 
 function parseRapidTransitPost(text, urlMatch) {
   const url = urlMatch[0].replace(/[),.;!?]+$/, "");
-  const lines = String(text || "")
-    .replace(urlMatch[0], "")
+  const rawText = String(text || "").replace(urlMatch[0], "").trim();
+  const blocks = rawText
+    .split(/\r?\n\s*\r?\n/)
+    .map((block) => block.trim())
+    .filter(Boolean);
+  const lines = rawText
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter(Boolean);
   let suppliedHeadline = null;
   const blurbLines = [];
+
+  if (blocks.length >= 2) {
+    const firstBlockLines = blocks[0].split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+    const markdownTitleMatch = firstBlockLines.length === 1
+      ? firstBlockLines[0].match(/^(?:\*\*|__)(.+?)(?:\*\*|__)$/)
+      : null;
+    const possibleTitle = markdownTitleMatch ? markdownTitleMatch[1] : firstBlockLines[0];
+    if (firstBlockLines.length === 1 && suppliedHeadlineLooksUsable(possibleTitle)) {
+      return {
+        url,
+        blurb: blocks.slice(1).join(" ").replace(/\s+/g, " ").trim(),
+        suppliedHeadline: cleanHeadlineOutput(possibleTitle)
+      };
+    }
+  }
 
   for (const line of lines) {
     const titleMatch = line.match(/^(?:title|headline)\s*[:\-–]\s*(.+)$/i);

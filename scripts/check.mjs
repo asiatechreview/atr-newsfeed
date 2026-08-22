@@ -374,6 +374,10 @@ const titledRapidTransitPost = __rapidTransitHeadlineTest.parseRapidTransitPost(
   "Title: Unitree files for STAR Market IPO\nBlurb: China's Unitree is raising ¥6.10 billion ($904 million) in a STAR Market IPO.\nhttps://www.ft.com/content/unitree-test",
   ["https://www.ft.com/content/unitree-test"]
 );
+const boldTitledRapidTransitPost = __rapidTransitHeadlineTest.parseRapidTransitPost(
+  "**YMTC takes key step toward $4.9 billion Shanghai IPO**\n\nChina’s YMTC moved closer to a 33 billion yuan ($4.9 billion) Shanghai listing after the STAR Market accepted its IPO application, as an AI-driven boom boosts the country’s memory chip sector.\nhttps://www.ft.com/content/ymtc-test",
+  ["https://www.ft.com/content/ymtc-test"]
+);
 
 if (!goodHeadlineValidation.ok || freeTextHeadlineValidation.ok || inventedNumberValidation.ok) {
   console.error("FAILED: Rapid Transit headline validation must require structured JSON and reject invented figures");
@@ -385,6 +389,14 @@ if (
   titledRapidTransitPost.blurb !== "China's Unitree is raising ¥6.10 billion ($904 million) in a STAR Market IPO."
 ) {
   console.error("FAILED: Rapid Transit must support optional supplied title without folding it into the blurb");
+  process.exit(1);
+}
+if (
+  boldTitledRapidTransitPost.url !== "https://www.ft.com/content/ymtc-test" ||
+  boldTitledRapidTransitPost.suppliedHeadline !== "YMTC takes key step toward $4.9 billion Shanghai IPO" ||
+  boldTitledRapidTransitPost.blurb !== "China’s YMTC moved closer to a 33 billion yuan ($4.9 billion) Shanghai listing after the STAR Market accepted its IPO application, as an AI-driven boom boosts the country’s memory chip sector."
+) {
+  console.error("FAILED: Rapid Transit must support bold first-line supplied titles");
   process.exit(1);
 }
 
