@@ -939,50 +939,23 @@ async function loadItems() {
   setStatus("Loading", "Fetching live D1 items");
 
   try {
-    const pageSize = 500;
-    const allItems = [];
-    let offset = 0;
-    for (;;) {
-      const response = await fetch(`/api/items?status=all&limit=${pageSize}&offset=${offset}&_=${Date.now()}`, {
-        headers: { accept: "application/json", "cache-control": "no-cache" }
-      });
-      if (response.status === 401) {
-        throw new Error("Admin session expired, sign in again.");
-      }
-      if (!response.ok) throw new Error(`/api/items returned ${response.status}`);
-      const payload = await response.json();
-      const page = Array.isArray(payload.items) ? payload.items : [];
-      allItems.push(...page);
-      const total = payload.total != null ? payload.total : allItems.length;
-      if (!page.length || allItems.length >= total) break;
-      offset += pageSize;
+    // Load only the latest batch on first paint so the page renders
+    // instantly instead of paging through the whole archive first.
+    const pageSize = 50;
+    const response = await fetch(`/api/items?status=all&limit=${pageSize}&offset=0&_=${Date.now()}`, {
+      headers: { accept: "application/json", "cache-control": "no-cache" }
+    });
+    if (response.status === 401) {
+      throw new Error("Admin session expired, sign in again.");
     }
+    if (!response.ok) throw new Error(`/api/items returned ${response.status}`);
+    const payload = await response.json();
+    const allItems = Array.isArray(payload.items) ? payload.items : [];
 
-    // Removed items are not returned by status=all (published/hidden/draft
-    // only), so fetch them separately and merge them into the list. They
-    // render inline with a Restore button, so no separate toggle is needed.
-    const removedItems = [];
-    offset = 0;
-    for (;;) {
-      const response = await fetch(`/api/items?status=removed&limit=${pageSize}&offset=${offset}&_=${Date.now()}`, {
-        headers: { accept: "application/json", "cache-control": "no-cache" }
-      });
-      if (response.status === 401) {
-        throw new Error("Admin session expired, sign in again.");
-      }
-      if (!response.ok) throw new Error(`/api/items returned ${response.status}`);
-      const payload = await response.json();
-      const page = Array.isArray(payload.items) ? payload.items : [];
-      removedItems.push(...page);
-      const total = payload.total != null ? payload.total : removedItems.length;
-      if (!page.length || removedItems.length >= total) break;
-      offset += pageSize;
-    }
-
-    state.items = [...removedItems, ...allItems];
+    state.items = allItems;
     populateCategoryFilter();
     filterItems();
-    setStatus("Ready", `Loaded ${state.items.length} items`);
+    setStatus("Ready", `Loaded ${allItems.length} items`);
   } catch (error) {
     setStatus("Error", error.message);
   } finally {
