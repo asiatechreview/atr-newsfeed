@@ -937,20 +937,88 @@ body.logged-out .auth-panel { min-height: calc(100vh - 48px); }
     transform: translateX(-100%);
     transition: transform var(--dur-slow) var(--ease);
     border-radius: 0;
+    width: min(300px, 84vw);
+    min-width: min(300px, 84vw);
   }
   .sidebar.open { transform: translateX(0); }
   .hamburger { display: inline-flex; }
-  .topbar { padding: 10px 16px; }
-  .content { padding: 14px 16px 80px; }
-  .grid-2, .grid-2-wide, .newsletter-grid { grid-template-columns: 1fr; }
+  .topbar { padding: 10px 12px; gap: 8px; }
+  .topbar-left { min-width: 0; }
+  .topbar h1 {
+    font-size: 17px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .topbar-sub { display: none; }
+  .topbar-actions { gap: 6px; }
+  .topbar-actions .btn { padding: 6px 8px; font-size: 12px; }
+  .topbar-actions .btn span { display: none; }
+  .content { padding: 12px 12px 84px; }
+
+  .grid-2, .grid-2-wide, .newsletter-grid, .sponsor-grid { grid-template-columns: 1fr; }
   .editor-layout { grid-template-columns: 1fr; }
   .editor-inspector { border-left: none; border-top: 1px solid var(--border); padding-left: 0; padding-top: 16px; }
   .mobile-action-bar { display: flex; }
   .stats { flex-direction: column; }
   .stat { min-width: 0; }
   .item-toolbar .select-auto { flex: 1 1 100%; }
+  .item-toolbar #search-input { min-width: 100%; }
   th, td { padding: 7px 8px; }
-  .truncate, .title-chip { max-width: 140px; }
+  .truncate, .title-chip { max-width: 130px; }
+
+  /* Publish toolbar: allow wrap so title and buttons never collide */
+  .publish-toolbar { flex-wrap: wrap; gap: 8px; }
+  .publish-title-block { flex: 1 1 auto; min-width: 0; }
+  .publish-title { font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .publish-toolbar-actions { margin-left: 0; flex-wrap: wrap; }
+  .publish-toolbar-actions .btn { padding: 6px 10px; font-size: 12px; }
+
+  /* Publish layout: hide the decorative icon rail on phones */
+  .publish-rail { display: none; }
+  .publish-form { width: 100%; }
+
+  /* AI assist rows: stack buttons under the field instead of beside it */
+  .ai-assist-row { flex-wrap: wrap; }
+  .ai-assist-row .input, .ai-assist-row .textarea { flex: 1 1 100%; }
+  .ai-assist-row .btn { flex: 1 1 auto; justify-content: center; }
+  .ai-assist-top { align-items: stretch; }
+  .ai-assist-top .btn { margin-top: 0; }
+
+  /* Greyed Content block: collapse the fake toolbar on phones */
+  .wysiwyg-bar { flex-wrap: wrap; }
+
+  /* Status strip: wrap cleanly */
+  .status-strip { gap: 8px 14px; }
+
+  /* Form actions: stack full-width buttons */
+  .form-actions { flex-wrap: wrap; }
+  .form-actions .btn { flex: 1 1 100%; justify-content: center; }
+
+  /* Segment tabs: allow scroll rather than squeeze */
+  .seg-tabs { flex-wrap: wrap; }
+
+  /* Live edit overlay: full-screen sheet, top-aligned so nothing clips */
+  .live-edit-overlay { align-items: flex-start; padding: 0; overflow-y: auto; }
+  .live-edit-panel {
+    width: 100%;
+    max-width: 100%;
+    max-height: none;
+    min-height: 100%;
+    border-radius: 0;
+    padding: 16px;
+  }
+
+  /* Readback pre: fine, keep scroll */
+  .readback pre { font-size: 10px; }
+}
+
+@media (max-width: 420px) {
+  .live-edit-head { flex-wrap: wrap; }
+  .row { flex-direction: column; }
+  .row > .field { flex: 1 1 auto; }
+  .publish-toolbar-actions .btn-icon { display: none; }
+  .topbar-actions .btn { padding: 6px 7px; }
 }
 
 /* ============ PUBLISH PAGE (mockup-aligned, Aug 23 2026) ============ */
