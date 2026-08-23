@@ -519,7 +519,7 @@ tr:last-child td { border-bottom: none; }
 .item-row-hidden td { opacity: 0.55; }
 .item-row td[data-label="Visible"] { white-space: nowrap; }
 
-.id-cell { font-family: var(--mono); font-size: 12px; color: var(--muted); white-space: nowrap; width: 80px; }
+.id-cell { font-family: var(--mono); font-size: 12px; color: var(--muted); white-space: nowrap; width: 72px; min-width: 72px; }
 th.id-cell { width: 80px; }
 .truncate {
   max-width: 260px;
@@ -966,7 +966,10 @@ body.logged-out .auth-panel { min-height: calc(100vh - 48px); }
   .item-toolbar .select-auto { flex: 1 1 100%; }
   .item-toolbar #search-input { min-width: 100%; }
   th, td { padding: 7px 8px; }
-  .truncate, .title-chip { max-width: 130px; }
+  /* Dense data tables keep Finder-like column widths on phones: scroll, don't squeeze.
+     Prevents the ID column from stretching and titles from being crushed. */
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .table-wrap table { min-width: 760px; }
 
   /* Publish toolbar: allow wrap so title and buttons never collide */
   .publish-toolbar { flex-wrap: wrap; gap: 8px; }
