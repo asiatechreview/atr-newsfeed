@@ -1828,20 +1828,47 @@ function renderList() {
 
     const catTd = document.createElement("td");
     catTd.dataset.label = "Category";
-    const catSelect = document.createElement("select");
-    catSelect.className = "input cat-edit";
-    styleCategorySelect(catSelect, item.category || "Other news");
-    const cats = state.categories.length ? state.categories : [item.category || "Other news"];
-    for (const cat of cats) {
-      const opt = document.createElement("option");
-      opt.value = cat;
-      opt.textContent = cat;
-      if (cat === (item.category || "Other news")) opt.selected = true;
-      catSelect.append(opt);
-    }
-    catSelect.addEventListener("change", () => saveItemCategory(item, catSelect.value));
-    catSelect.addEventListener("click", (event) => event.stopPropagation());
-    catTd.append(catSelect);
+    const currentCat = item.category || "Other news";
+
+    // Pill view (mockup style). Click to swap in the quick-edit select.
+    const buildCatSelect = () => {
+      const sel = document.createElement("select");
+      sel.className = "input cat-edit";
+      styleCategorySelect(sel, currentCat);
+      const cats = state.categories.length ? state.categories : [currentCat];
+      for (const cat of cats) {
+        const opt = document.createElement("option");
+        opt.value = cat;
+        opt.textContent = cat;
+        if (cat === currentCat) opt.selected = true;
+        sel.append(opt);
+      }
+      sel.addEventListener("change", () => saveItemCategory(item, sel.value));
+      sel.addEventListener("click", (event) => event.stopPropagation());
+      sel.addEventListener("blur", () => {
+        if (sel.value === currentCat) catTd.replaceChildren(buildCatPill());
+      });
+      return sel;
+    };
+
+    const buildCatPill = () => {
+      const pill = document.createElement("button");
+      pill.type = "button";
+      pill.className = "cat-pill";
+      pill.textContent = currentCat;
+      const colour = categoryColour(currentCat);
+      pill.style.setProperty("--cat", colour);
+      pill.title = "Change category";
+      pill.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const sel = buildCatSelect();
+        catTd.replaceChildren(sel);
+        sel.focus();
+      });
+      return pill;
+    };
+
+    catTd.append(buildCatPill());
     tr.append(catTd);
     tr.append(tagsIconCell(item.tags));
     tr.append(cell(formatDateTime(item.published_at), "nowrap", "Published"));

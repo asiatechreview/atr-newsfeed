@@ -152,15 +152,15 @@
         <section id="publish-view" hidden>
           <div class="card publish-card">
             <div class="publish-toolbar">
-              <button id="publish-back" class="btn btn-ghost btn-icon" type="button" title="Back to Live Items" aria-label="Back">←</button>
+              <button id="publish-back" class="btn btn-ghost btn-icon" type="button" title="Back to Live Items" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg></button>
               <div class="publish-title-block">
                 <h2 class="publish-title" id="editor-title">Edit Item</h2>
                 <span class="status-badge status-badge-draft" id="editor-mode">No item</span>
               </div>
               <div class="publish-toolbar-actions">
                 <button id="save-button" class="btn btn-ghost" type="submit" form="item-form">Save draft</button>
-                <button id="publish-quick" class="btn btn-primary" type="button">+ Publish ▾</button>
-                <button class="btn btn-ghost btn-icon" type="button" aria-label="More actions" disabled title="More actions">⋯</button>
+                <button id="publish-quick" class="btn btn-primary" type="button">+ Publish <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+                <button class="btn btn-ghost btn-icon" type="button" aria-label="More actions" disabled title="More actions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button>
               </div>
             </div>
 
@@ -172,13 +172,13 @@
 
             <div class="publish-layout">
               <div class="publish-rail" aria-hidden="true">
-                <span class="rail-icon rail-active" title="Edit">✎</span>
-                <span class="rail-icon" title="Preview">👁</span>
-                <span class="rail-icon" title="Metadata">▤</span>
-                <span class="rail-icon" title="Link">🔗</span>
-                <span class="rail-icon" title="Tags">#</span>
-                <span class="rail-icon" title="SEO">ℹ</span>
-                <span class="rail-icon" title="More">⋯</span>
+                <span class="rail-icon rail-active" title="Edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span>
+                <span class="rail-icon" title="Preview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></span>
+                <span class="rail-icon" title="Metadata"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></span>
+                <span class="rail-icon" title="Link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span>
+                <span class="rail-icon" title="Tags"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><path d="M4 9h16"/><path d="M4 15h16"/><path d="M10 3 8 21"/><path d="M16 3l-2 18"/></svg></span>
+                <span class="rail-icon" title="SEO"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></span>
+                <span class="rail-icon" title="More"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></span>
               </div>
 
               <form id="item-form" class="publish-form">
@@ -187,8 +187,8 @@
                     <label for="headline-input">Headline <span class="required-star">*</span></label>
                     <div class="ai-assist-row">
                       <input id="headline-input" class="input input-headline" type="text" maxlength="120" placeholder="Clean ATR-style scan title...">
-                      <button id="ai-headline-btn" class="btn btn-ghost" type="button" title="Suggest a headline with Qwen">✨ Suggest</button>
-                      <button id="ai-dupes-btn" class="btn btn-ghost" type="button" title="Check for the same story already in the bulletin (semantic)">🔍 Check dupes</button>
+                      <button id="ai-headline-btn" class="btn btn-ghost" type="button" title="Suggest a headline with Qwen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3z"/></svg> Suggest</button>
+                      <button id="ai-dupes-btn" class="btn btn-ghost" type="button" title="Check for the same story already in the bulletin (semantic)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg> Check dupes</button>
                     </div>
                     <div class="field-meta"><span class="char-count" id="headline-count">0/120</span></div>
                     <div id="headline-similar-warning" class="dupe-warning" hidden></div>
@@ -199,7 +199,7 @@
                     <label for="blurb-input">Blurb <span class="required-star">*</span></label>
                     <textarea id="blurb-input" class="textarea" rows="8" required placeholder="Bulletin blurb..."></textarea>
                     <div class="ai-assist-row ai-assist-below">
-                      <button id="ai-blurb-btn" class="btn btn-ghost" type="button" title="Tighten the blurb with Qwen">✨ Tighten</button>
+                      <button id="ai-blurb-btn" class="btn btn-ghost" type="button" title="Tighten the blurb with Qwen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3z"/></svg> Tighten</button>
                     </div>
                     <div class="field-meta"><span class="char-count" id="blurb-count">0/300</span></div>
                     <div id="ai-blurb-note" class="ai-note" hidden></div>
@@ -247,7 +247,7 @@
                       <label for="category-input">Category <span class="required-star">*</span> <span class="label-hint">(auto-suggested, editable)</span></label>
                       <div class="ai-assist-row">
                         <input id="category-input" class="input" type="text" placeholder="Select category" list="category-options">
-                        <button id="ai-category-btn" class="btn btn-ghost" type="button" title="Suggest a category with Qwen">✨ Suggest</button>
+                        <button id="ai-category-btn" class="btn btn-ghost" type="button" title="Suggest a category with Qwen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3z"/></svg> Suggest</button>
                       </div>
                       <datalist id="category-options"></datalist>
                     </div>
@@ -255,7 +255,7 @@
                       <label for="tags-input">Tags <span class="label-hint">(comma separated)</span></label>
                       <div class="ai-assist-row">
                         <input id="tags-input" class="input" type="text" placeholder="Add tags...">
-                        <button id="ai-tags-btn" class="btn btn-ghost" type="button" title="Suggest tags with Qwen">✨ Suggest</button>
+                        <button id="ai-tags-btn" class="btn btn-ghost" type="button" title="Suggest tags with Qwen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3z"/></svg> Suggest</button>
                       </div>
                     </div>
 
@@ -265,7 +265,7 @@
                   </div>
                 <div class="field field-disabled" aria-disabled="true">
                     <label>Content (optional)</label>
-                    <div class="wysiwyg-bar"><span>H</span><span>B</span><span>I</span><span>🔗</span><span>•</span><span>1.</span><span>”</span><span>&lt;/&gt;</span></div>
+                    <div class="wysiwyg-bar"><span class="wysiwyg-key">H</span><span class="wysiwyg-key">B</span><span class="wysiwyg-key">I</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg></span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><path d="M10 6h11M10 12h11M10 18h11"/><path d="M4 6h1v4M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><path d="M3 21c3-1 5-3 5-6V9H4v6h3c0 2-1 3-4 4v2zm11 0c3-1 5-3 5-6V9h-4v6h3c0 2-1 3-4 4v2z"/></svg></span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg></span></div>
                     <textarea class="textarea" rows="6" disabled placeholder="Start writing..."></textarea>
                     <div class="field-meta muted">Word count: 0 · Reading time: 0 min</div>
                   </div>
@@ -592,7 +592,7 @@
                   <h3 id="preview-newsletter-title">No card loaded</h3>
                   <p id="preview-newsletter-blurb"></p>
                 </div>
-                <a class="newsletter-link" id="preview-newsletter-read-link" href="#" target="_blank" rel="noopener">Read now →</a>
+                <a class="newsletter-link" id="preview-newsletter-read-link" href="#" target="_blank" rel="noopener">Read now <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
               </div>
               <div class="preview-empty" id="newsletter-preview-empty" hidden>
                 <p class="muted">Save a card to see the live homepage preview here.</p>
