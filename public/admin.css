@@ -465,17 +465,16 @@ select.input { appearance: none; padding-right: 28px; background-image: url("dat
 .form-row { display: flex; gap: 8px; align-items: flex-end; }
 .form-row .input { flex: 1; }
 
-/* ============ EDITOR LAYOUT (canvas + inspector) ============ */
+/* ============ EDITOR LAYOUT (single column: fields then metadata below blurb) ============ */
 .editor-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
-  gap: 20px;
-  align-items: start;
+  display: block;
+  max-width: 860px;
 }
 .editor-canvas { min-width: 0; }
 .editor-inspector {
-  border-left: 1px solid var(--border);
-  padding-left: 20px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
 }
 .inspector-group {
   padding-bottom: 14px;
