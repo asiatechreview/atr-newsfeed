@@ -2902,3 +2902,68 @@ if (themeLabel) {
 sidebar?.addEventListener("click", (event) => {
   if (event.target.closest("a, button")) closeSidebar();
 });
+
+/* ============ REDESIGN ENHANCEMENTS (Aug 23, 2026) ============ */
+// Ingest Log tabs: Failures | Successes
+(function () {
+  const tabFail = document.querySelector("#ops-tab-failures");
+  const tabSucc = document.querySelector("#ops-tab-success");
+  const panelFail = document.querySelector("#ops-failures-panel");
+  const panelSucc = document.querySelector("#ops-success-panel");
+  if (tabFail && tabSucc && panelFail && panelSucc) {
+    const activate = (failures) => {
+      tabFail.classList.toggle("active", failures);
+      tabSucc.classList.toggle("active", !failures);
+      tabFail.setAttribute("aria-selected", failures ? "true" : "false");
+      tabSucc.setAttribute("aria-selected", failures ? "false" : "true");
+      panelFail.hidden = !failures;
+      panelSucc.hidden = failures;
+    };
+    tabFail.addEventListener("click", () => activate(true));
+    tabSucc.addEventListener("click", () => activate(false));
+  }
+})();
+
+// Dashboard tabs: Overview | Events | Logs
+(function () {
+  const tabs = {
+    overview: document.querySelector("#dash-tab-overview"),
+    events: document.querySelector("#dash-tab-events"),
+    logs: document.querySelector("#dash-tab-logs")
+  };
+  const panels = {
+    overview: document.querySelector("#dash-overview-panel"),
+    events: document.querySelector("#dash-events-panel"),
+    logs: document.querySelector("#dash-logs-panel")
+  };
+  if (tabs.overview && tabs.events && tabs.logs) {
+    const activate = (name) => {
+      for (const key of Object.keys(tabs)) {
+        const on = key === name;
+        tabs[key].classList.toggle("active", on);
+        tabs[key].setAttribute("aria-selected", on ? "true" : "false");
+        if (panels[key]) panels[key].hidden = !on;
+      }
+    };
+    tabs.overview.addEventListener("click", () => activate("overview"));
+    tabs.events.addEventListener("click", () => activate("events"));
+    tabs.logs.addEventListener("click", () => activate("logs"));
+  }
+})();
+
+// Character counters: headline 0/120, blurb 0/300 (publish form + live editor)
+function bindCharCounter(inputSelector, counterSelector, max) {
+  const input = document.querySelector(inputSelector);
+  const counter = document.querySelector(counterSelector);
+  if (!input || !counter) return;
+  const update = () => {
+    counter.textContent = `${input.value.length}/${max}`;
+    counter.classList.toggle("over", input.value.length > max);
+  };
+  input.addEventListener("input", update);
+  update();
+}
+bindCharCounter("#headline-input", "#headline-count", 120);
+bindCharCounter("#blurb-input", "#blurb-count", 300);
+bindCharCounter("#live-edit-headline", "#live-edit-headline-count", 120);
+bindCharCounter("#live-edit-blurb", "#live-edit-blurb-count", 300);
