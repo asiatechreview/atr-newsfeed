@@ -150,35 +150,43 @@
 
         <!-- ============ PUBLISH ============ -->
         <section id="publish-view" hidden>
-          <div class="stats">
-            <article class="stat">
-              <span class="stat-label">Status</span>
-              <strong id="status-title" class="stat-value stat-ok">Ready</strong>
-              <span id="status-detail" class="stat-note">Signed in</span>
-            </article>
-            <article class="stat">
-              <span class="stat-label">Loaded Items</span>
-              <strong id="loaded-count" class="stat-value">-</strong>
-              <span id="filtered-count" class="stat-note">-</span>
-            </article>
-            <article class="stat">
-              <span class="stat-label">Selected</span>
-              <strong id="selected-id" class="stat-value">-</strong>
-              <span id="selected-detail" class="stat-note">-</span>
-            </article>
-          </div>
+          <div class="card publish-card">
+            <div class="publish-toolbar">
+              <button id="publish-back" class="btn btn-ghost btn-icon" type="button" title="Back to Live Items" aria-label="Back">←</button>
+              <div class="publish-title-block">
+                <h2 class="publish-title" id="editor-title">Edit Item</h2>
+                <span class="status-badge status-badge-draft" id="editor-mode">No item</span>
+              </div>
+              <div class="publish-toolbar-actions">
+                <button id="save-button" class="btn btn-ghost" type="submit" form="item-form">Save draft</button>
+                <button id="publish-quick" class="btn btn-primary" type="button">+ Publish ▾</button>
+                <button class="btn btn-ghost btn-icon" type="button" aria-label="More actions" disabled title="More actions">⋯</button>
+              </div>
+            </div>
 
-          <div class="card">
-              <div class="card-head">
-                <div class="card-title" id="editor-title">Edit Item <small id="editor-mode">No item</small></div>
+            <div class="status-strip" role="status">
+              <span class="status-strip-item"><span class="status-strip-label">Status</span> <strong id="status-title" class="stat-value stat-ok">Ready</strong> <span id="status-detail" class="status-strip-note">Signed in</span></span>
+              <span class="status-strip-item"><span class="status-strip-label">Loaded</span> <strong id="loaded-count" class="stat-value">-</strong> <span id="filtered-count" class="status-strip-note">-</span></span>
+              <span class="status-strip-item"><span class="status-strip-label">Selected</span> <strong id="selected-id" class="stat-value">-</strong> <span id="selected-detail" class="status-strip-note">-</span></span>
+            </div>
+
+            <div class="publish-layout">
+              <div class="publish-rail" aria-hidden="true">
+                <span class="rail-icon rail-active" title="Edit">✎</span>
+                <span class="rail-icon" title="Preview">👁</span>
+                <span class="rail-icon" title="Metadata">▤</span>
+                <span class="rail-icon" title="Link">🔗</span>
+                <span class="rail-icon" title="Tags">#</span>
+                <span class="rail-icon" title="SEO">ℹ</span>
+                <span class="rail-icon" title="More">⋯</span>
               </div>
 
-              <form id="item-form" class="editor-layout">
+              <form id="item-form" class="publish-form">
                 <div class="editor-canvas">
                   <div class="field">
-                    <label for="headline-input">Headline</label>
+                    <label for="headline-input">Headline <span class="required-star">*</span></label>
                     <div class="ai-assist-row">
-                      <input id="headline-input" class="input" type="text" maxlength="120" placeholder="Clean ATR-style scan title">
+                      <input id="headline-input" class="input input-headline" type="text" maxlength="120" placeholder="Clean ATR-style scan title...">
                       <button id="ai-headline-btn" class="btn btn-ghost" type="button" title="Suggest a headline with Qwen">✨ Suggest</button>
                       <button id="ai-dupes-btn" class="btn btn-ghost" type="button" title="Check for the same story already in the bulletin (semantic)">🔍 Check dupes</button>
                     </div>
@@ -188,51 +196,59 @@
                   </div>
 
                   <div class="field">
-                    <label for="blurb-input">Blurb</label>
-                    <div class="ai-assist-row ai-assist-top">
-                      <textarea id="blurb-input" class="textarea" rows="8" required placeholder="Bulletin blurb"></textarea>
+                    <label for="blurb-input">Blurb <span class="required-star">*</span></label>
+                    <textarea id="blurb-input" class="textarea" rows="8" required placeholder="Bulletin blurb..."></textarea>
+                    <div class="ai-assist-row ai-assist-below">
                       <button id="ai-blurb-btn" class="btn btn-ghost" type="button" title="Tighten the blurb with Qwen">✨ Tighten</button>
                     </div>
                     <div class="field-meta"><span class="char-count" id="blurb-count">0/300</span></div>
                     <div id="ai-blurb-note" class="ai-note" hidden></div>
                   </div>
+
+                  <div class="field field-disabled" aria-disabled="true">
+                    <label>Content (optional)</label>
+                    <div class="wysiwyg-bar"><span>H</span><span>B</span><span>I</span><span>🔗</span><span>•</span><span>1.</span><span>”</span><span>&lt;/&gt;</span></div>
+                    <textarea class="textarea" rows="6" disabled placeholder="Start writing..."></textarea>
+                    <div class="field-meta muted">Word count: 0 · Reading time: 0 min</div>
+                  </div>
                 </div>
 
                 <div class="editor-inspector">
+                  <div class="inspector-label">Metadata</div>
                   <div class="inspector-group">
-                    <div class="inspector-label">Metadata</div>
                     <div class="field">
-                      <label for="category-input">Category <span class="label-hint">(auto-suggested, editable)</span></label>
+                      <label for="category-input">Category <span class="required-star">*</span> <span class="label-hint">(auto-suggested, editable)</span></label>
                       <div class="ai-assist-row">
-                        <input id="category-input" class="input" type="text" placeholder="e.g. Markets, AI, Crypto" list="category-options">
+                        <input id="category-input" class="input" type="text" placeholder="Select category" list="category-options">
                         <button id="ai-category-btn" class="btn btn-ghost" type="button" title="Suggest a category with Qwen">✨ Suggest</button>
                       </div>
                       <datalist id="category-options"></datalist>
                     </div>
-
                     <div class="field">
                       <label for="tags-input">Tags <span class="label-hint">(comma separated)</span></label>
                       <div class="ai-assist-row">
-                        <input id="tags-input" class="input" type="text" placeholder="e.g. China, AI, DeepSeek">
+                        <input id="tags-input" class="input" type="text" placeholder="Add tags...">
                         <button id="ai-tags-btn" class="btn btn-ghost" type="button" title="Suggest tags with Qwen">✨ Suggest</button>
                       </div>
                     </div>
                   </div>
 
                   <div class="inspector-group">
-                    <div class="inspector-label">Source</div>
                     <div class="field">
                       <label for="source-name-input">Source name</label>
-                      <input id="source-name-input" class="input" type="text" required>
+                      <input id="source-name-input" class="input" type="text" required placeholder="e.g. TechCrunch">
                     </div>
                     <div class="field">
                       <label for="source-url-input">Source URL</label>
-                      <input id="source-url-input" class="input" type="url" required>
+                      <input id="source-url-input" class="input" type="url" required placeholder="https://">
                     </div>
                   </div>
 
                   <div class="inspector-group">
-                    <div class="inspector-label">Publishing</div>
+                    <div class="field">
+                      <label for="published-at-input">Published at</label>
+                      <input id="published-at-input" class="input" type="datetime-local">
+                    </div>
                     <div class="field">
                       <label for="item-status">Status</label>
                       <select id="item-status" class="input">
@@ -240,10 +256,6 @@
                         <option value="draft">Draft</option>
                         <option value="hidden">Hidden</option>
                       </select>
-                    </div>
-                    <div class="field">
-                      <label for="published-at-input">Published at</label>
-                      <input id="published-at-input" class="input" type="datetime-local">
                     </div>
                     <div class="field">
                       <label for="item-scheduled-at">Publish at <span class="label-hint">(drafts only)</span></label>
@@ -257,17 +269,17 @@
                   </div>
 
                   <div class="form-actions">
-                    <button id="save-button" class="btn btn-ghost" type="submit">Save</button>
                     <button id="remove-button" class="btn btn-danger" type="button">Remove</button>
                     <button id="reset-button" class="btn btn-ghost" type="button">Reset</button>
                   </div>
                 </div>
               </form>
+            </div>
 
-              <details class="readback">
-                <summary>Readback <span id="readback-status" class="pill">Idle</span></summary>
-                <pre id="readback-output">Select an item to edit.</pre>
-              </details>
+            <details class="readback">
+              <summary>Readback <span id="readback-status" class="pill">Idle</span></summary>
+              <pre id="readback-output">Select an item to edit.</pre>
+            </details>
           </div>
         </section>
 
@@ -500,11 +512,6 @@
               <strong id="analytics-pageviews" class="stat-value">-</strong>
               <span id="analytics-pv-detail" class="stat-note">-</span>
             </article>
-            <article class="stat">
-              <span class="stat-label">Data Since</span>
-              <strong id="analytics-since" class="stat-value">-</strong>
-              <span id="analytics-since-detail" class="stat-note">-</span>
-            </article>
           </div>
 
           <div class="card">
@@ -534,20 +541,7 @@
             </div>
           </div>
 
-          <div class="grid-2">
-            <div class="card">
-              <div class="card-head">
-                <div class="card-title">Top Pages <small id="analytics-pages-total">-</small></div>
-              </div>
-              <div id="analytics-pages" class="breakdown"></div>
-            </div>
-            <div class="card">
-              <div class="card-head">
-                <div class="card-title">Devices <small id="analytics-devices-total">-</small></div>
-              </div>
-              <div id="analytics-devices" class="breakdown"></div>
-            </div>
-          </div>
+
         </section>
 
         <!-- ============ NEWSLETTER ============ -->

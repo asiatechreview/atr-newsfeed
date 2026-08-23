@@ -41,7 +41,7 @@
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Roboto, sans-serif;
   --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
   --sidebar-w: 232px;
-  --glass: rgba(255, 255, 255, 0.72);
+  --glass: rgba(255, 255, 255, 0.6);
   --glass-border: rgba(255, 255, 255, 0.5);
 }
 
@@ -70,7 +70,7 @@
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
   --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.55);
   --scrim: rgba(0, 0, 0, 0.6);
-  --glass: rgba(20, 23, 27, 0.72);
+  --glass: rgba(20, 23, 27, 0.6);
   --glass-border: rgba(255, 255, 255, 0.08);
 }
 
@@ -99,6 +99,8 @@ button { font-family: inherit; }
 /* ============ APP SHELL ============ */
 .app {
   display: flex;
+  gap: 12px;
+  padding: 12px;
   height: 100vh;
   overflow: hidden;
 }
@@ -110,11 +112,11 @@ button { font-family: inherit; }
   display: flex;
   flex-direction: column;
   background: var(--glass);
-  backdrop-filter: saturate(1.4) blur(20px);
-  -webkit-backdrop-filter: saturate(1.4) blur(20px);
-  border-right: 1px solid var(--border);
-  border-top-right-radius: var(--radius);
-  border-bottom-right-radius: var(--radius);
+  backdrop-filter: saturate(1.4) blur(24px);
+  -webkit-backdrop-filter: saturate(1.4) blur(24px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  box-shadow: var(--shadow-md);
   padding: 12px 10px;
   overflow-y: auto;
   z-index: 30;
@@ -243,6 +245,7 @@ button { font-family: inherit; }
   flex-direction: column;
   min-width: 0;
   overflow: hidden;
+  border-radius: 20px;
 }
 
 /* ============ TOPBAR (macOS toolbar, Liquid Glass) ============ */
@@ -923,6 +926,8 @@ body.logged-out .auth-panel { min-height: calc(100vh - 48px); }
 
 /* ============ RESPONSIVE ============ */
 @media (max-width: 900px) {
+  .app { padding: 0; gap: 0; }
+  .main { border-radius: 0; }
   .sidebar {
     position: fixed;
     top: 0;
@@ -946,3 +951,93 @@ body.logged-out .auth-panel { min-height: calc(100vh - 48px); }
   th, td { padding: 7px 8px; }
   .truncate, .title-chip { max-width: 140px; }
 }
+
+/* ============ PUBLISH PAGE (mockup-aligned, Aug 23 2026) ============ */
+.publish-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.publish-title-block { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.publish-title { font-size: 18px; font-weight: 700; color: var(--text); margin: 0; }
+.publish-toolbar-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.btn-icon { padding: 6px 9px; }
+
+.publish-layout { display: flex; gap: 16px; align-items: flex-start; }
+.publish-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 4px;
+  border-right: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.rail-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--faint);
+  background: transparent;
+  opacity: 0.45;
+}
+.rail-icon.rail-active {
+  color: #fff;
+  background: var(--primary);
+  opacity: 1;
+}
+.publish-form { flex: 1; min-width: 0; }
+
+.status-strip {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 8px 12px;
+  margin-bottom: 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+}
+.status-strip-item { display: flex; align-items: baseline; gap: 6px; }
+.status-strip-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--faint);
+}
+.status-strip-note { font-size: 11px; color: var(--muted); }
+.status-strip .stat-value { font-size: 13px; }
+
+.required-star { color: var(--danger); font-weight: 700; }
+.input-headline { font-size: 15px; }
+.ai-assist-below { margin-top: 6px; }
+
+.field-disabled { opacity: 0.45; pointer-events: none; }
+.wysiwyg-bar {
+  display: flex;
+  gap: 2px;
+  padding: 4px 6px;
+  border: 1px solid var(--border-2);
+  border-bottom: none;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: var(--surface-2);
+}
+.wysiwyg-bar span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 22px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.field-disabled .textarea { border-radius: 0 0 var(--radius-sm) var(--radius-sm); }

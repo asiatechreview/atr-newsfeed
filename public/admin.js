@@ -1237,8 +1237,8 @@ function renderAnalytics(payload) {  const totals = payload.totals || {};
 
   const firstDate = daily.find((day) => day.visits > 0);
   const lastDate = daily.length ? daily[daily.length - 1].date : null;
-  els.analyticsSince.textContent = firstDate ? firstDate.date : "-";
-  els.analyticsSinceDetail.textContent = lastDate ? `through ${lastDate}` : "No traffic yet";
+  if (els.analyticsSince) els.analyticsSince.textContent = firstDate ? firstDate.date : "-";
+  if (els.analyticsSinceDetail) els.analyticsSinceDetail.textContent = lastDate ? `through ${lastDate}` : "No traffic yet";
 
   els.analyticsDays.textContent = `${daily.length} days shown`;
   els.analyticsBreakdown.replaceChildren();
@@ -1250,8 +1250,6 @@ function renderAnalytics(payload) {  const totals = payload.totals || {};
   }
   renderAnalyticsBreakdown(countries, els.analyticsCountries, els.analyticsCountriesTotal);
   renderAnalyticsBreakdown(breakdowns.referrers, els.analyticsReferrers, els.analyticsReferrersTotal);
-  renderAnalyticsBreakdown(breakdowns.pages, els.analyticsPages, els.analyticsPagesTotal);
-  renderAnalyticsBreakdown(breakdowns.devices, els.analyticsDevices, els.analyticsDevicesTotal);
 
   if (!daily.length) {
     const empty = document.createElement("p");
@@ -1497,6 +1495,7 @@ const COUNTRY_NAMES = {
 };
 
 function renderAnalyticsBreakdown(values, target, countEl) {
+  if (!target) return;
   const entries = Object.entries(values || {});
   countEl.textContent = `${formatNumber(entries.length)} shown`;
   renderBreakdown(target, values || {}, "No data in this window.");
@@ -1694,6 +1693,56 @@ function populateCategoryFilter() {
   els.sourceFilter.value = state.source;
 }
 
+
+/* Exclusive colour per category (mockup palette, Aug 23 2026). Known categories
+   get a curated colour; unknown ones get a deterministic hue so every category
+   is visually distinct. Applied to the Live Items category select. */
+const CATEGORY_COLOURS = {
+  "Markets": "#2563eb",
+  "AI": "#7c3aed",
+  "Cloud": "#0d9488",
+  "Transport": "#ea580c",
+  "Space": "#0284c7",
+  "Robotics": "#db2777",
+  "Chips": "#ca8a04",
+  "EVs": "#16a34a",
+  "Energy": "#d97706",
+  "E-commerce": "#9333ea",
+  "Hardware": "#475569",
+  "Biotech": "#059669",
+  "Health": "#e11d48",
+  "Earnings": "#22c55e",
+  "Policy": "#6366f1",
+  "Crypto": "#d97706",
+  "Fintech": "#0891b2",
+  "Funding": "#3b82f6",
+  "Venture Capital": "#8b5cf6",
+  "Deals": "#dc2626",
+  "Mobility": "#0ea5e9",
+  "Cybersecurity": "#4f46e5",
+  "Gaming": "#c026d3",
+  "Telecommunications": "#14b8a6",
+  "Startups": "#84cc16",
+  "Apps": "#2563eb",
+  "WAIC 2026": "#0d9488",
+  "Other news": "#64748b"
+};
+
+function categoryColour(name) {
+  const key = String(name || "Other news").trim();
+  if (CATEGORY_COLOURS[key]) return CATEGORY_COLOURS[key];
+  let hash = 0;
+  for (let i = 0; i < key.length; i++) hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
+  return `hsl(${hash % 360} 65% 45%)`;
+}
+
+function styleCategorySelect(select, category) {
+  const colour = categoryColour(category);
+  select.style.color = colour;
+  select.style.backgroundColor = `color-mix(in srgb, ${colour} 12%, transparent)`;
+  select.style.borderColor = `color-mix(in srgb, ${colour} 30%, transparent)`;
+}
+
 function renderList() {
   els.itemList.replaceChildren();
   const total = state.filtered.length;
@@ -1781,6 +1830,7 @@ function renderList() {
     catTd.dataset.label = "Category";
     const catSelect = document.createElement("select");
     catSelect.className = "input cat-edit";
+    styleCategorySelect(catSelect, item.category || "Other news");
     const cats = state.categories.length ? state.categories : [item.category || "Other news"];
     for (const cat of cats) {
       const opt = document.createElement("option");
@@ -2967,3 +3017,15 @@ bindCharCounter("#headline-input", "#headline-count", 120);
 bindCharCounter("#blurb-input", "#blurb-count", 300);
 bindCharCounter("#live-edit-headline", "#live-edit-headline-count", 120);
 bindCharCounter("#live-edit-blurb", "#live-edit-blurb-count", 300);
+
+/* Publish toolbar wiring (Aug 23, 2026) */
+(function () {
+  const backBtn = document.querySelector("#publish-back");
+  if (backBtn) backBtn.addEventListener("click", () => switchTab("live"));
+  const quickBtn = document.querySelector("#publish-quick");
+  if (quickBtn) quickBtn.addEventListener("click", () => {
+    const status = document.querySelector("#item-status");
+    if (status) status.value = "published";
+    if (els.form) els.form.requestSubmit();
+  });
+})();
