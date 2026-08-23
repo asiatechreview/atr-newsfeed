@@ -205,35 +205,11 @@
                     <div id="ai-blurb-note" class="ai-note" hidden></div>
                   </div>
 
-                  <div class="field field-disabled" aria-disabled="true">
-                    <label>Content (optional)</label>
-                    <div class="wysiwyg-bar"><span>H</span><span>B</span><span>I</span><span>🔗</span><span>•</span><span>1.</span><span>”</span><span>&lt;/&gt;</span></div>
-                    <textarea class="textarea" rows="6" disabled placeholder="Start writing..."></textarea>
-                    <div class="field-meta muted">Word count: 0 · Reading time: 0 min</div>
-                  </div>
+
                 </div>
 
                 <div class="editor-inspector">
-                  <div class="inspector-label">Metadata</div>
-                  <div class="inspector-group">
-                    <div class="field">
-                      <label for="category-input">Category <span class="required-star">*</span> <span class="label-hint">(auto-suggested, editable)</span></label>
-                      <div class="ai-assist-row">
-                        <input id="category-input" class="input" type="text" placeholder="Select category" list="category-options">
-                        <button id="ai-category-btn" class="btn btn-ghost" type="button" title="Suggest a category with Qwen">✨ Suggest</button>
-                      </div>
-                      <datalist id="category-options"></datalist>
-                    </div>
-                    <div class="field">
-                      <label for="tags-input">Tags <span class="label-hint">(comma separated)</span></label>
-                      <div class="ai-assist-row">
-                        <input id="tags-input" class="input" type="text" placeholder="Add tags...">
-                        <button id="ai-tags-btn" class="btn btn-ghost" type="button" title="Suggest tags with Qwen">✨ Suggest</button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="inspector-group">
+<div class="inspector-group">
                     <div class="field">
                       <label for="source-name-input">Source name</label>
                       <input id="source-name-input" class="input" type="text" required placeholder="e.g. TechCrunch">
@@ -242,9 +218,8 @@
                       <label for="source-url-input">Source URL</label>
                       <input id="source-url-input" class="input" type="url" required placeholder="https://">
                     </div>
-                  </div>
 
-                  <div class="inspector-group">
+<div class="inspector-group">
                     <div class="field">
                       <label for="published-at-input">Published at</label>
                       <input id="published-at-input" class="input" type="datetime-local">
@@ -261,16 +236,38 @@
                       <label for="item-scheduled-at">Publish at <span class="label-hint">(drafts only)</span></label>
                       <input id="item-scheduled-at" class="input" type="datetime-local">
                     </div>
-                  </div>
 
-                  <div class="field">
+<div class="field">
                     <label for="item-id">Item ID <span class="label-hint">(auto)</span></label>
                     <input id="item-id" class="input" type="text" disabled>
-                  </div>
+
+<div class="inspector-label">Metadata</div>
+                  <div class="inspector-group">
+                    <div class="field">
+                      <label for="category-input">Category <span class="required-star">*</span> <span class="label-hint">(auto-suggested, editable)</span></label>
+                      <div class="ai-assist-row">
+                        <input id="category-input" class="input" type="text" placeholder="Select category" list="category-options">
+                        <button id="ai-category-btn" class="btn btn-ghost" type="button" title="Suggest a category with Qwen">✨ Suggest</button>
+                      </div>
+                      <datalist id="category-options"></datalist>
+                    </div>
+                    <div class="field">
+                      <label for="tags-input">Tags <span class="label-hint">(comma separated)</span></label>
+                      <div class="ai-assist-row">
+                        <input id="tags-input" class="input" type="text" placeholder="Add tags...">
+                        <button id="ai-tags-btn" class="btn btn-ghost" type="button" title="Suggest tags with Qwen">✨ Suggest</button>
+                      </div>
+                    </div>
 
                   <div class="form-actions">
                     <button id="remove-button" class="btn btn-danger" type="button">Remove</button>
                     <button id="reset-button" class="btn btn-ghost" type="button">Reset</button>
+                  </div>
+                <div class="field field-disabled" aria-disabled="true">
+                    <label>Content (optional)</label>
+                    <div class="wysiwyg-bar"><span>H</span><span>B</span><span>I</span><span>🔗</span><span>•</span><span>1.</span><span>”</span><span>&lt;/&gt;</span></div>
+                    <textarea class="textarea" rows="6" disabled placeholder="Start writing..."></textarea>
+                    <div class="field-meta muted">Word count: 0 · Reading time: 0 min</div>
                   </div>
                 </div>
               </form>
