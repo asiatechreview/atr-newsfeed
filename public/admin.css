@@ -931,14 +931,15 @@ body.logged-out .auth-panel { min-height: calc(100vh - 48px); }
   .main { border-radius: 0; }
   .sidebar {
     position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    transform: translateX(-100%);
+    top: 12px;
+    bottom: 12px;
+    left: 12px;
+    transform: translateX(calc(-100% - 24px));
     transition: transform var(--dur-slow) var(--ease);
-    border-radius: 0;
+    border-radius: 20px;
     width: min(300px, 84vw);
     min-width: min(300px, 84vw);
+    box-shadow: var(--shadow-lg);
   }
   .sidebar.open { transform: translateX(0); }
   .hamburger { display: inline-flex; }
