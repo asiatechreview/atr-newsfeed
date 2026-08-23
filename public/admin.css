@@ -76,6 +76,9 @@
 
 * { box-sizing: border-box; }
 
+/* Author CSS display rules (flex/grid) must never override the hidden attribute. */
+[hidden] { display: none !important; }
+
 html, body {
   margin: 0;
   padding: 0;
