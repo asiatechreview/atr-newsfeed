@@ -2888,6 +2888,7 @@ function setReadback(status, value) {
 
 function setAuthMessage(message) {
   els.authMessage.textContent = message;
+  els.authMessage.classList.toggle("error", /invalid|incorrect|expired|failed/i.test(message));
 }
 
 function formatNumber(value) {

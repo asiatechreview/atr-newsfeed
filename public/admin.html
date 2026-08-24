@@ -128,23 +128,34 @@
         <!-- ============ LOGIN SPLASH ============ -->
         <section id="auth-panel" class="auth-panel">
           <div class="splash-card">
-            <p class="eyebrow">Asia Tech Review</p>
+            <div class="splash-brand">
+              <svg class="splash-mark" viewBox="0 0 64 64" role="img" aria-label="Asia Tech Review">
+                <rect width="64" height="64" rx="14" fill="#0f172a"/>
+                <rect x="10" y="10" width="5" height="44" fill="#e94b35"/>
+                <text x="40" y="41" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" text-anchor="middle" dominant-baseline="middle">ATR</text>
+              </svg>
+              <div class="splash-brand-text">
+                <p class="eyebrow">Asia Tech Review</p>
+                <p class="splash-name">Bulletin Admin</p>
+              </div>
+            </div>
             <h1 class="auth-title">Sign in</h1>
+            <p class="auth-sub">Sign in with your admin account.</p>
             <form id="login-form" method="post" action="/api/auth/login">
               <input type="hidden" name="next" value="/admin">
               <div class="login-fields">
                 <div class="input-wrap">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                  <input id="username-input" name="username" type="text" autocomplete="username" placeholder="Username" required>
+                  <input id="username-input" class="input" name="username" type="text" autocomplete="username" placeholder="Username" required>
                 </div>
                 <div class="input-wrap">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
-                  <input id="password-input" name="password" type="password" autocomplete="current-password" placeholder="Password" required>
+                  <input id="password-input" class="input" name="password" type="password" autocomplete="current-password" placeholder="Password" required>
                 </div>
               </div>
               <button id="save-token-button" class="login-button" type="submit">Sign in</button>
             </form>
-            <p id="auth-message" class="muted"></p>
+            <p id="auth-message" class="auth-message" role="status"></p>
           </div>
         </section>
 
