@@ -2061,10 +2061,30 @@ function renderItems(items) {
 
     feed.appendChild(itemNode);
   }
+
+  placeShareButtons();
 }
 
 const SHARE_ICON_SVG = '<svg class="item-share-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>';
 const CHECK_ICON_SVG = '<svg class="item-share-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 12l5 5L20 6"/></svg>';
+
+const mobileShareQuery = window.matchMedia("(max-width: 640px)");
+
+function placeShareButtons() {
+  const mobile = mobileShareQuery.matches;
+  document.querySelectorAll(".item-copy-link").forEach((btn) => {
+    const item = btn.closest(".item");
+    if (!item) return;
+    const meta = item.querySelector(".meta");
+    const headline = item.querySelector(".item-headline-row");
+    const target = mobile && meta ? meta : headline;
+    if (target && btn.parentNode !== target) target.appendChild(btn);
+  });
+}
+
+if (typeof mobileShareQuery.addEventListener === "function") {
+  mobileShareQuery.addEventListener("change", placeShareButtons);
+}
 
 function copyItemLink(item, button) {
   const url = `${window.location.origin}/?item=${encodeURIComponent(item.link_key || item.id)}`;

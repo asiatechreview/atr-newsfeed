@@ -974,6 +974,18 @@ main {
     gap: 10px;
   }
 
+  .meta .item-copy-link {
+    width: 26px;
+    min-width: 26px;
+    padding: 4px 0;
+    align-self: center;
+  }
+
+  .meta .item-copy-link .item-share-icon {
+    width: 13px;
+    height: 13px;
+  }
+
   .newsletter-promo {
     grid-template-columns: 1fr;
     align-items: center;
@@ -1494,6 +1506,10 @@ footer {
   .status { text-align: center !important; }
   main {
     padding: 18px 22px;
+  }
+
+  .meta {
+    align-items: center;
   }
 }
 @media (min-width: 641px) and (max-width: 1024px) {
