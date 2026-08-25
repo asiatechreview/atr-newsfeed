@@ -1587,3 +1587,33 @@ footer {
     border-radius: 8px;
   }
 }
+
+/* ============================================================
+   Remove horizontal dividing lines on mobile/iPad only (<=1024px).
+   Desktop (>1024px) keeps its dividers. Sai, Aug 25 2026.
+   ============================================================ */
+@media (max-width: 1024px) {
+  .site-masthead {
+    border-bottom: 0;
+  }
+
+  .topbar {
+    border-bottom: 0;
+  }
+
+  .feed {
+    border-top: 0;
+  }
+
+  .feed .item {
+    border-top: 0;
+  }
+
+  .pagination {
+    border-bottom: 0;
+  }
+
+  .metric {
+    border-top: 0;
+  }
+}
