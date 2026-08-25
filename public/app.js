@@ -1801,6 +1801,13 @@ function renderPage(page = currentPage) {
   renderArchive();
   renderItems(pageItems);
   renderPagination(homepageItems.length);
+
+  // DEMO ONLY: mount the old-Substack unit 4 entries below the latest post.
+  // 0-based index 4 = newest story + 3 more, so the unit sits at the 4th
+  // position under the latest bulletin news post. Remove before any merge.
+  if (!currentSearchQuery && !currentTagFilter && !currentDateFilter) {
+    mountNewsletterUnitDemo(feed, 4);
+  }
 }
 
 function renderDate(date, page = currentPage) {
@@ -2123,6 +2130,40 @@ function fallbackCopy(text, done) {
     // Clipboard unavailable; leave the button unchanged.
   }
   textarea.remove();
+}
+
+const newsletterUnitTemplate = document.querySelector("#newsletter-unit-template");
+
+// DEMO ONLY: a self-contained unit representing an old Substack card. It is
+// mounted into the feed body 4 items below the latest bulletin post (the
+// "Unit", in 4th position under the newest story) rather than at its
+// original publish date. This is a standalone body unit, not a mutation of
+// the bulletin row. Remove the demo mounting before any merge.
+function mountNewsletterUnitDemo(feedEl, anchorCount) {
+  if (!newsletterUnitTemplate) {
+    return;
+  }
+  const block = newsletterUnitTemplate.content.cloneNode(true);
+  const unit = block.querySelector(".newsletter-unit");
+  const home = "https://www.asiatechreview.com/p/grab-bets-on-fintech-to-reinforce";
+  const image = "https://substackcdn.com/image/fetch/$s_!PMQo!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F5db78b08-9f8e-4b8f-9ba1-bcdb75abfb84_1672x941.png";
+  unit.querySelector(".newsletter-unit-link").href = home;
+  unit.querySelector(".newsletter-unit-cta").href = home;
+  const img = unit.querySelector(".newsletter-unit-image");
+  img.src = image;
+  img.alt = "Newsletter cover";
+  unit.querySelector(".newsletter-unit-title").textContent = "Grab bets on fintech to reinforce its tech story";
+  unit.querySelector(".newsletter-unit-sub").textContent = "The company's bid to become a fintech heavyweight is about to face its first major test";
+  unit.dataset.itemKey = "demo-newsletter-unit";
+
+  // Insert as element index `anchorCount` (0-based) into the live feed.
+  const slots = feedEl.children;
+  const insertAt = Math.min(anchorCount, slots.length);
+  if (insertAt < slots.length) {
+    feedEl.insertBefore(unit, slots[insertAt]);
+  } else {
+    feedEl.appendChild(unit);
+  }
 }
 
 function render(items, options = {}) {

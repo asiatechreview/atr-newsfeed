@@ -1587,3 +1587,72 @@ footer {
     border-radius: 8px;
   }
 }
+
+/* ============================================================
+   DEMO ONLY: self-contained unit for an old Substack card, placed
+   in the body. Independent component (image + title + subtitle +
+   CTA), not a mutation of the bulletin row. Remove before merge.
+   ============================================================ */
+.newsletter-unit {
+  display: block;
+  margin: 0 0 6px;
+  padding: 18px 0 20px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background:
+    linear-gradient(135deg, rgba(120, 181, 146, 0.08), transparent 50%),
+    transparent;
+}
+
+.newsletter-unit-link {
+  display: block;
+  margin: 0 0 14px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
+}
+
+.newsletter-unit-image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.newsletter-unit-copy {
+  margin: 0 0 12px;
+}
+
+.newsletter-unit-title {
+  margin: 0 0 6px;
+  color: var(--text);
+  font: 600 20px/1.3 var(--font-body);
+}
+
+.newsletter-unit-sub {
+  margin: 0;
+  color: var(--dek);
+  font: 400 15px/1.5 var(--font-body);
+}
+
+.newsletter-unit-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 176px;
+  padding: 10px 18px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: var(--on-text);
+  font: 700 12px/1 var(--font-meta);
+  text-align: center;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.newsletter-unit-cta:hover {
+  filter: brightness(1.08);
+}

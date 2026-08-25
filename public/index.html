@@ -142,6 +142,21 @@
     </article>
   </template>
 
+  <!-- DEMO: a self-contained unit for an old Substack card, placed in the
+       body. Independent component, not a mutation of the feed row. -->
+  <template id="newsletter-unit-template">
+    <article class="newsletter-unit" data-unit="newsletter">
+      <a class="newsletter-unit-link" target="_blank" rel="noopener">
+        <img class="newsletter-unit-image" alt="">
+      </a>
+      <div class="newsletter-unit-copy">
+        <h3 class="newsletter-unit-title"></h3>
+        <p class="newsletter-unit-sub"></p>
+      </div>
+      <a class="newsletter-unit-cta" target="_blank" rel="noopener">Read now →</a>
+    </article>
+  </template>
+
   <script src="/app.js?v=20260811-category-badge" defer></script>
   <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "dbf480a7e72c4290892373a4177e22c2"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
