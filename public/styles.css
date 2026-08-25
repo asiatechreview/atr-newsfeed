@@ -1446,3 +1446,72 @@ footer {
   .topbar-actions { align-items: center !important; }
   .status { text-align: center !important; }
 }
+
+/* ============================================================
+   Mobile/iPad newsletter card — edge-to-edge immersive (Sai, Aug 25 2026)
+   Applies only up to 1024px (phones + iPad portrait/landscape).
+   Desktop (>1024px) is untouched.
+   ============================================================ */
+@media (max-width: 1024px) {
+  /* Full-bleed the whole block across the viewport, countering main's
+     centering + horizontal padding so it runs truly edge to edge. */
+  .newsletter-block {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: 0;
+  }
+
+  /* Lose the box: no border, no shadow, no gradient panel — let the
+     card merge into the page so only imagery defines the edge. */
+  .newsletter-promo {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+    padding: 0 0 8px;
+  }
+
+  /* Header image runs full width, edge to edge, with square top corners. */
+  .newsletter-image-link {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    width: 100%;
+  }
+
+  .newsletter-image-link img {
+    border-radius: 0;
+  }
+
+  /* Keep the headline/dek aligned with a comfortable reading margin
+     once the box is gone, so content doesn't hug the screen edge. */
+  .newsletter-copy {
+    padding: 0 20px;
+  }
+
+  .newsletter-link {
+    margin: 0 20px;
+  }
+}
+
+/* On the stacked (single column) mobile layout the image is the hero —
+   square it all round and tuck the copy under it with edge padding. */
+@media (max-width: 640px) {
+  .newsletter-promo {
+    padding: 0 0 14px;
+  }
+
+  .newsletter-copy {
+    padding: 0 20px;
+  }
+
+  .newsletter-link {
+    margin: 0 20px;
+  }
+
+  /* Image sits as a full-bleed banner at the very top of the section */
+  .newsletter-image-link {
+    border-radius: 0;
+    margin-bottom: 14px;
+  }
+}
