@@ -1617,3 +1617,40 @@ footer {
     border-top: 0;
   }
 }
+
+/* ============================================================
+   DEMO ONLY: newsletter swipe pager indicator (Sai, Aug 25 2026)
+   Small pagination pill under the Read now button. Mobile (<=640px)
+   only. The card layout itself is untouched. Remove before merge.
+   ============================================================ */
+@media (max-width: 640px) {
+  .newsletter-pager-pill {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 2px auto 0;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: rgba(120, 181, 146, 0.14);
+  }
+
+  .newsletter-pager-dot {
+    width: 6px;
+    height: 6px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: var(--quiet);
+    opacity: 0.4;
+    cursor: pointer;
+    transition: all 0.28s ease;
+  }
+
+  .newsletter-pager-dot.active {
+    width: 20px;
+    opacity: 1;
+    background: var(--accent);
+  }
+}

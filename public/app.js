@@ -2362,6 +2362,80 @@ async function loadNewsletterCard() {
   }
 }
 
+
+// ============================================================
+// DEMO: mobile swipe pager for the newsletter card (Sai, Aug 25 2026)
+// The existing card keeps its exact layout and styling. On mobile
+// (<=640px) only, swiping cycles through the 7 latest newsletters,
+// updating the card content in place. The only visible addition is a
+// small pagination indicator under the "Read now" button.
+// iPad/desktop untouched. Remove before any merge.
+// ============================================================
+const NEWSLETTER_PAGER_POSTS = [["Shein set for Hong Kong IPO at heavily discounted valuation of $27B", "Fast fashion pioneer takes a hit on peak $100B valuation, and Japanese fusion power pioneer raises $162M", "https://www.asiatechreview.com/p/shein-set-for-hong-kong-ipo-at-heavily", "https://substackcdn.com/image/fetch/$s_!g9NW!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F2fcc5d28-108d-4892-9bd7-f285a815f8ba_1672x941.png"], ["Kakao bets on AI with controversial spinout proposal", "Messaging app company wants a clear structure for AI spending, but investors aren’t sold", "https://www.asiatechreview.com/p/kakao-bets-on-ai-with-controversial", "https://substack-post-media.s3.amazonaws.com/public/images/fe8a4956-d537-46ff-b4ea-e4daab0f490a_1672x941.png"], ["Apple Pay’s slow journey of progress across Asia", "Cashless payment service launches in the Philippines, its 12th Asian market, but major countries remain", "https://www.asiatechreview.com/p/apple-pays-slow-journey-of-progress", "https://substack-post-media.s3.amazonaws.com/public/images/0aa33b18-578d-40cf-b884-619268371150_1536x1024.png"], ["Razorpay plays up its AI smarts as it heads to an IPO", "Fintech firm releases AI model for payments in rare move for Indian startup", "https://www.asiatechreview.com/p/razorpay-plays-up-its-ai-smarts-as", "https://substackcdn.com/image/fetch/$s_!mVoC!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F1606f13f-1c21-4657-90dd-5e9be98c82c7_1672x941.png"], ["Alibaba’s AI strategy bears fruit with 3 billion downloads and an impressive new model", "Its latest Qwen3.8-27B model brings frontier AI capabilities to laptops for free", "https://www.asiatechreview.com/p/alibabas-ai-strategy-bears-fruit", "https://substackcdn.com/image/fetch/$s_!L0qD!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fad3bc542-3433-45bf-8fdb-6337a85e12f8_1672x941.png"], ["Sea looks like Southeast Asia’s true internet giant", "More records for Shopee and another promising period for its fintech division", "https://www.asiatechreview.com/p/sea-looks-like-southeast-asias-true", "https://substackcdn.com/image/fetch/$s_!yixZ!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F3c15bb1f-aae3-483b-9980-514aae052d72_1672x941.jpeg"], ["DeepSeek enters a new era of raised ambition and higher prices", "It turns out raising more than $7 billion from investors will change a company’s goals", "https://www.asiatechreview.com/p/deepseek-enters-a-new-era-of-raised", "https://substackcdn.com/image/fetch/$s_!h3Uo!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fc3d9f18b-b066-4962-bca3-f1ccebe5684a_1672x941.png"]];
+let newsletterPagerIndex = 0;
+
+function initNewsletterPager() {
+  if (window.matchMedia("(min-width: 641px)").matches) return; // mobile only
+
+  const promo = document.querySelector("#newsletter-promo");
+  const titleEl = document.querySelector("#newsletter-title");
+  const blurbEl = document.querySelector("#newsletter-blurb");
+  const imageEl = document.querySelector("#newsletter-image");
+  const imageLink = document.querySelector("#newsletter-image-link");
+  const readLink = document.querySelector("#newsletter-read-link");
+  if (!promo || !titleEl || !blurbEl || !imageEl) return;
+
+  // Small pagination indicator under the Read now button.
+  const pill = document.createElement("div");
+  pill.className = "newsletter-pager-pill";
+  pill.setAttribute("role", "tablist");
+  pill.setAttribute("aria-label", "Newsletter pages");
+  NEWSLETTER_PAGER_POSTS.forEach(function (_, i) {
+    const d = document.createElement("button");
+    d.type = "button";
+    d.className = "newsletter-pager-dot" + (i === 0 ? " active" : "");
+    d.setAttribute("role", "tab");
+    d.setAttribute("aria-label", "Newsletter " + (i + 1));
+    d.addEventListener("click", function () { newsletterPagerIndex = i; render(); });
+    pill.appendChild(d);
+  });
+  promo.appendChild(pill);
+
+  function render() {
+    const post = NEWSLETTER_PAGER_POSTS[newsletterPagerIndex];
+    titleEl.textContent = post[0];
+    blurbEl.textContent = post[1];
+    imageEl.src = post[3];
+    imageEl.alt = post[0];
+    if (imageLink) imageLink.href = post[2];
+    if (readLink) readLink.href = post[2];
+    for (let i = 0; i < pill.children.length; i++) {
+      pill.children[i].classList.toggle("active", i === newsletterPagerIndex);
+    }
+  }
+
+  // Swipe handling on the card: horizontal drag advances/retreats.
+  let startX = null;
+  promo.addEventListener("touchstart", function (e) { startX = e.touches[0].clientX; }, { passive: true });
+  promo.addEventListener("touchend", function (e) {
+    if (startX === null) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    startX = null;
+    const threshold = 50;
+    if (Math.abs(dx) < threshold) return;
+    if (dx < 0) newsletterPagerIndex = Math.min(newsletterPagerIndex + 1, NEWSLETTER_PAGER_POSTS.length - 1);
+    else newsletterPagerIndex = Math.max(newsletterPagerIndex - 1, 0);
+    render();
+  }, { passive: true });
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initNewsletterPager);
+} else {
+  initNewsletterPager();
+}
+
+
 initThemeToggle();
 initFontScale();
 refreshFeed({ initial: true });
