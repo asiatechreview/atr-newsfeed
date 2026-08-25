@@ -2125,8 +2125,25 @@ function fallbackCopy(text, done) {
   textarea.remove();
 }
 
+// DEMO ONLY (visual preview, no DB writes): a sample integrated newsletter
+// tile injected into the feed so the design can be reviewed on a throwaway
+// branch. Remove before any merge. It renders exactly like a normal feed
+// item would after a real integration.
+const DEMO_NEWSLETTER_TILE = {
+  id: "demo-newsletter-1",
+  headline: "Grab bets on fintech to reinforce its tech story",
+  blurb: "Grab\u2019s bid to become a fintech heavyweight is about to face its first major test, as regulatory and competitive pressure builds across Southeast Asia.",
+  source_name: "ATR Newsletter",
+  source_url: "https://www.asiatechreview.com/p/grab-bets-on-fintech-to-reinforce",
+  published_at: new Date().toISOString(),
+  category: "Newsletter",
+  tags: []
+};
+
 function render(items, options = {}) {
   allItems = sortItems(items.map(normalizeItem).filter(Boolean));
+  const demo = normalizeItem(DEMO_NEWSLETTER_TILE);
+  if (demo) allItems = sortItems([...allItems, demo]);
   syncSearchInput();
   renderSignal(allItems);
 
