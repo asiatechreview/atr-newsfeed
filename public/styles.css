@@ -134,6 +134,7 @@ h1 a {
 .site-masthead {
   padding: 28px 22px 26px;
   text-align: center;
+  border-bottom: 1px solid var(--border);
   background: var(--bg);
 }
 
@@ -172,6 +173,7 @@ main {
   justify-content: space-between;
   gap: 18px;
   align-items: flex-start;
+  border-bottom: 1px solid var(--border);
   padding-bottom: 18px;
   margin-bottom: 18px;
 }
@@ -557,6 +559,7 @@ main {
 }
 
 .feed {
+  border-top: 1px solid var(--border);
 }
 
 .watchlist {
@@ -597,6 +600,7 @@ main {
   gap: 7px;
   margin: 16px 0 0;
   padding-bottom: 15px;
+  border-bottom: 1px solid var(--border);
   overflow-x: auto;
   white-space: nowrap;
 }
@@ -652,6 +656,7 @@ main {
 .item {
   padding: 15px 0 17px;
   margin: 0;
+  border-top: 1px solid var(--border);
   display: block;
 }
 
@@ -958,6 +963,7 @@ main {
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 12px;
   padding: 9px 0;
+  border-top: 1px solid var(--border);
   font: 500 13px/1.2 var(--font-meta);
 }
 
@@ -1508,5 +1514,35 @@ footer {
 
   .newsletter-image-link img {
     border-radius: 8px;
+  }
+}
+
+/* ============================================================
+   Remove horizontal dividing lines on mobile/iPad only (<=1024px).
+   Desktop (>1024px) keeps its dividers. Sai, Aug 25 2026.
+   ============================================================ */
+@media (max-width: 1024px) {
+  .site-masthead {
+    border-bottom: 0;
+  }
+
+  .topbar {
+    border-bottom: 0;
+  }
+
+  .feed {
+    border-top: 0;
+  }
+
+  .feed .item {
+    border-top: 0;
+  }
+
+  .pagination {
+    border-bottom: 0;
+  }
+
+  .metric {
+    border-top: 0;
   }
 }
