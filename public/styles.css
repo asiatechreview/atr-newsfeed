@@ -1657,9 +1657,10 @@ footer {
 
   /* Fixed segment height: cards vary in content length, so lock the
      whole carousel to one height so the page body never bounces while
-     swiping between slides. */
+     swiping between slides. Tall enough to hold the longest card's
+     full title + subtitle without truncation. */
   .newsletter-carousel {
-    height: 400px;
+    height: 470px;
   }
   .newsletter-carousel-track {
     height: 100%;
@@ -1697,28 +1698,18 @@ footer {
     border-radius: 8px;
   }
 
-  /* Fixed-size text blocks so differing lengths don't change height */
+  /* Title/subtitle fully visible at all times (no truncation). */
   .newsletter-carousel-slide h3 {
     width: 90%;
     margin: 0 auto 8px;
     color: var(--text);
     font: 600 19px/1.25 var(--font-body);
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    min-height: 2.5em;
   }
   .newsletter-carousel-slide p {
     width: 90%;
     margin: 0 auto 14px;
     color: var(--dek);
     font: 400 14px/1.5 var(--font-body);
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    min-height: 3em;
   }
 
   .newsletter-carousel-slide .newsletter-read {
