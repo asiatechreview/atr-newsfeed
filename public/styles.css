@@ -1453,16 +1453,16 @@ footer {
    Desktop (>1024px) is untouched.
    ============================================================ */
 @media (max-width: 1024px) {
-  /* Full-bleed the whole block across the viewport, countering main's
-     centering + horizontal padding so it runs truly edge to edge. */
+  /* Lose the box: no border, no shadow, no gradient panel — let the
+     card merge into the page so only imagery defines the edge. The
+     block stays inside main's normal content padding, matching the
+     site's horizontal inset. */
   .newsletter-block {
-    width: 100vw;
-    margin-left: calc(50% - 50vw);
+    width: auto;
+    margin-left: 0;
     margin-right: 0;
   }
 
-  /* Lose the box: no border, no shadow, no gradient panel — let the
-     card merge into the page so only imagery defines the edge. */
   .newsletter-promo {
     border: 0;
     border-radius: 0;
@@ -1471,7 +1471,9 @@ footer {
     padding: 0 0 8px;
   }
 
-  /* Header image runs full width, edge to edge, with square top corners. */
+  /* Header image fills the card width (inside the site padding), with
+     square top corners so it reads as a full-bleed banner within the
+     content column rather than a rounded card. */
   .newsletter-image-link {
     border: 0;
     border-radius: 0;
@@ -1482,34 +1484,22 @@ footer {
   .newsletter-image-link img {
     border-radius: 0;
   }
-
-  /* Keep the headline/dek aligned with a comfortable reading margin
-     once the box is gone, so content doesn't hug the screen edge. */
-  .newsletter-copy {
-    padding: 0 20px;
-  }
-
-  .newsletter-link {
-    margin: 0 20px;
-  }
 }
 
-/* On the stacked (single column) mobile layout the image is the hero —
-   square it all round and tuck the copy under it with edge padding. */
+/* On the stacked (single column) mobile layout the image is the hero,
+   sitting flush in the content column under the section title. Copy and
+   CTA inherit the content column inset so everything lines up. */
 @media (max-width: 640px) {
   .newsletter-promo {
     padding: 0 0 14px;
   }
 
-  .newsletter-copy {
-    padding: 0 20px;
-  }
-
+  .newsletter-copy,
   .newsletter-link {
-    margin: 0 20px;
+    padding: 0;
+    margin: 0;
   }
 
-  /* Image sits as a full-bleed banner at the very top of the section */
   .newsletter-image-link {
     border-radius: 0;
     margin-bottom: 14px;
