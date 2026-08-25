@@ -1587,3 +1587,50 @@ footer {
     border-radius: 8px;
   }
 }
+
+/* ============================================================
+   DEMO ONLY: compact integrated newsletter card (visual preview)
+   Mirrors the main Substack card (image + title + subtitle) at a
+   smaller size, sitting inline in the feed. Remove before merge.
+   ============================================================ */
+.newsletter-tile {
+  border-top: 1px solid var(--border);
+  padding: 16px 0 14px;
+}
+
+.newsletter-tile-image-link {
+  display: block;
+  margin: 0 0 12px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.newsletter-tile-image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.newsletter-tile-copy {
+  margin-bottom: 10px;
+}
+
+.newsletter-tile-title {
+  margin: 0 0 5px;
+  color: var(--text);
+  font: 600 18px/1.3 var(--font-body);
+}
+
+.newsletter-tile-sub {
+  margin: 0;
+  color: var(--dek);
+  font: 400 14px/1.5 var(--font-body);
+}
+
+.newsletter-tile-meta {
+  margin: 0;
+}

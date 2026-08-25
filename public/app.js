@@ -2031,6 +2031,11 @@ function renderItems(items) {
       feed.appendChild(dateNode);
     }
 
+    if (item.is_newsletter) {
+      renderNewsletterTile(feed, item, nextDate);
+      continue;
+    }
+
     const itemNode = itemTemplate.content.cloneNode(true);
     const primaryTag = item.region || item.category || primaryTopicTag(item.tags);
     const primaryTagLink = itemNode.querySelector(".item-primary-tag");
@@ -2063,6 +2068,37 @@ function renderItems(items) {
   }
 
   placeShareButtons();
+}
+
+const newsletterTileTemplate = document.querySelector("#newsletter-tile-template");
+
+function renderNewsletterTile(feed, item, dateKey) {
+  const block = newsletterTileTemplate.content.cloneNode(true);
+  const tile = block.querySelector(".newsletter-tile");
+  tile.dataset.itemKey = stableItemKey(item);
+
+  const imageLink = block.querySelector(".newsletter-tile-image-link");
+  imageLink.href = item.source_url || "#";
+  const img = block.querySelector(".newsletter-tile-image");
+  img.src = item.image;
+  img.alt = item.headline;
+
+  block.querySelector(".newsletter-tile-title").textContent = item.headline;
+  block.querySelector(".newsletter-tile-sub").textContent = item.blurb;
+
+  const time = block.querySelector(".item-time");
+  time.textContent = formatTime(item.published_at);
+  time.dateTime = item.published_at;
+  const tag = block.querySelector(".item-primary-tag");
+  tag.textContent = titleCaseTag("Newsletter");
+  tag.href = "?tag=Newsletter";
+
+  const dateNode = dateTemplate.content.cloneNode(true);
+  const date = dateNode.querySelector(".date");
+  date.id = dateKey;
+  date.textContent = formatDate(item.published_at);
+  feed.appendChild(dateNode);
+  feed.appendChild(block);
 }
 
 const SHARE_ICON_SVG = '<svg class="item-share-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>';
@@ -2125,8 +2161,24 @@ function fallbackCopy(text, done) {
   textarea.remove();
 }
 
+// DEMO ONLY (visual preview, no DB writes): a sample integrated newsletter
+// rendered as a compact Substack-style card in the feed. Remove before any
+// merge.
+const DEMO_NEWSLETTER_TILE = {
+  id: "demo-newsletter-1",
+  headline: "Grab bets on fintech to reinforce its tech story",
+  blurb: "The company's bid to become a fintech heavyweight is about to face its first major test",
+  source_name: "ATR Newsletter",
+  source_url: "https://www.asiatechreview.com/p/grab-bets-on-fintech-to-reinforce",
+  published_at: new Date().toISOString(),
+  is_newsletter: true,
+  image: "https://substackcdn.com/image/fetch/$s_!PMQo!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F5db78b08-9f8e-4b8f-9ba1-bcdb75abfb84_1672x941.png"
+};
+
 function render(items, options = {}) {
   allItems = sortItems(items.map(normalizeItem).filter(Boolean));
+  const demo = normalizeItem(DEMO_NEWSLETTER_TILE);
+  if (demo) allItems = sortItems([...allItems, demo]);
   syncSearchInput();
   renderSignal(allItems);
 
