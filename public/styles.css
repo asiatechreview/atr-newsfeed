@@ -1517,3 +1517,73 @@ footer {
   .topbar-actions { align-items: center !important; }
   .status { text-align: center !important; }
 }
+
+/* ============================================================
+   Mobile/iPad newsletter card — edge-to-edge immersive (Sai, Aug 25 2026)
+   Applies only up to 1024px (phones + iPad portrait/landscape).
+   Desktop (>1024px) is untouched.
+   ============================================================ */
+@media (max-width: 1024px) {
+  /* Lose the box: no border, no shadow, no gradient panel — let the
+     card merge into the page so only imagery defines the edge. The
+     block stays inside main's normal content padding, matching the
+     site's horizontal inset. */
+  .newsletter-block {
+    width: auto;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .newsletter-promo {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+    padding: 0 0 8px;
+  }
+
+  /* Header image fills the card width (inside the site padding). Give it
+     a softly rounded corner so it reads as a modern full-bleed image
+     within the content column rather than a sharp-edged block. */
+  .newsletter-image-link {
+    border: 0;
+    border-radius: 8px;
+    box-shadow: none;
+    width: 100%;
+  }
+
+  .newsletter-image-link img {
+    border-radius: 8px;
+  }
+}
+
+/* On the stacked (single column) mobile layout the image is the hero,
+   sitting flush in the content column under the section title. Copy and
+   CTA inherit the content column inset so everything lines up. */
+@media (max-width: 640px) {
+  .newsletter-promo {
+    padding: 0 0 14px;
+  }
+
+  .newsletter-copy {
+    padding: 0;
+    margin: 0;
+  }
+
+  /* CTA pill: centered, sized to its label, no horiz stretch */
+  .newsletter-link {
+    justify-self: center;
+    margin: 0 auto;
+    min-width: 0;
+    width: auto;
+  }
+
+  .newsletter-image-link {
+    border-radius: 8px;
+    margin-bottom: 14px;
+  }
+
+  .newsletter-image-link img {
+    border-radius: 8px;
+  }
+}
