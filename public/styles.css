@@ -1642,7 +1642,6 @@ footer {
 
   .newsletter-carousel {
     position: relative;
-    overflow: hidden;
   }
 
   .newsletter-carousel-track {
@@ -1652,23 +1651,19 @@ footer {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     scroll-snap-stop: always;
+    scroll-padding-inline: 8px;
+    gap: 16px;
+    padding-inline: 8px;
+    /* Fixed segment height: cards vary in content length, so lock the
+       sliding area to one height so the page body never bounces while
+       swiping between slides. Tall enough for the longest full title */
+    height: 400px;
+    overflow-y: hidden;
   }
   .newsletter-carousel-track::-webkit-scrollbar { display: none; }
 
-  /* Fixed segment height: cards vary in content length, so lock the
-     whole carousel to one height so the page body never bounces while
-     swiping between slides. Tall enough to hold the longest card's
-     full title + subtitle without truncation. */
-  .newsletter-carousel {
-    height: 470px;
-  }
-  .newsletter-carousel-track {
-    height: 100%;
-    align-items: flex-start;
-  }
-
   .newsletter-carousel-slide {
-    flex: 0 0 100%;
+    flex: 0 0 calc(100% - 40px);
     scroll-snap-align: center;
     max-width: 100%;
     box-sizing: border-box;
@@ -1712,7 +1707,10 @@ footer {
     font: 400 14px/1.5 var(--font-body);
   }
 
+  /* Pin the button to the bottom of every slide so it stays in the same
+     position on all cards regardless of text length (no jumping). */
   .newsletter-carousel-slide .newsletter-read {
+    margin-top: auto;
     display: inline-flex;
     align-items: center;
     justify-content: center;
