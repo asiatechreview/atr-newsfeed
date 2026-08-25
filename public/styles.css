@@ -1471,18 +1471,18 @@ footer {
     padding: 0 0 8px;
   }
 
-  /* Header image fills the card width (inside the site padding), with
-     square top corners so it reads as a full-bleed banner within the
-     content column rather than a rounded card. */
+  /* Header image fills the card width (inside the site padding). Give it
+     a softly rounded corner so it reads as a modern full-bleed image
+     within the content column rather than a sharp-edged block. */
   .newsletter-image-link {
     border: 0;
-    border-radius: 0;
+    border-radius: 8px;
     box-shadow: none;
     width: 100%;
   }
 
   .newsletter-image-link img {
-    border-radius: 0;
+    border-radius: 8px;
   }
 }
 
@@ -1508,7 +1508,11 @@ footer {
   }
 
   .newsletter-image-link {
-    border-radius: 0;
+    border-radius: 8px;
     margin-bottom: 14px;
+  }
+
+  .newsletter-image-link img {
+    border-radius: 8px;
   }
 }
