@@ -1651,9 +1651,6 @@ footer {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     scroll-snap-stop: always;
-    scroll-padding-inline: 8px;
-    gap: 16px;
-    padding-inline: 8px;
     /* Fixed segment height: cards vary in content length, so lock the
        sliding area to one height so the page body never bounces while
        swiping between slides. Tall enough for the longest full title */
@@ -1662,8 +1659,11 @@ footer {
   }
   .newsletter-carousel-track::-webkit-scrollbar { display: none; }
 
+  /* Each slide fills the full content width. No gap, no peek: at rest you
+     see exactly one card, centred and identical to the live card. The
+     next card slides in only while swiping. */
   .newsletter-carousel-slide {
-    flex: 0 0 calc(100% - 40px);
+    flex: 0 0 100%;
     scroll-snap-align: center;
     max-width: 100%;
     box-sizing: border-box;
