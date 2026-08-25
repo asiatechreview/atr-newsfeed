@@ -1408,7 +1408,9 @@ function normalizeItem(item) {
     ).trim(),
     source_url: isValidLink(sourceUrl) ? sourceUrl : "",
     headline: HEADLINE_OVERRIDES.get(id) || editorialHeadline(item) || deriveHeadline(blurb),
-    tags: itemTags(item, blurb)
+    tags: itemTags(item, blurb),
+    is_newsletter: Boolean(item.is_newsletter),
+    image: String(item.image || item.Image || "").trim()
   };
 }
 
