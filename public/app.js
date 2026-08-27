@@ -2069,21 +2069,29 @@ const SHARE_ICON_SVG = '<svg class="item-share-icon" viewBox="0 0 24 24" fill="n
 const CHECK_ICON_SVG = '<svg class="item-share-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 12l5 5L20 6"/></svg>';
 
 const mobileShareQuery = window.matchMedia("(max-width: 640px)");
+const desktopShareQuery = window.matchMedia("(min-width: 1025px)");
 
 function placeShareButtons() {
   const mobile = mobileShareQuery.matches;
+  const desktop = desktopShareQuery.matches;
   document.querySelectorAll(".item-copy-link").forEach((btn) => {
     const item = btn.closest(".item");
     if (!item) return;
     const meta = item.querySelector(".meta");
     const headline = item.querySelector(".item-headline-row");
-    const target = mobile && meta ? meta : headline;
+    // Jon, Aug 27 2026: on desktop the Share button belongs on the
+    // category/time row above the headline, aligned to that row's box.
+    // Mobile (<=640) already sat there; tablets keep the old spot.
+    const target = meta && (desktop || mobile) ? meta : headline;
     if (target && btn.parentNode !== target) target.appendChild(btn);
   });
 }
 
 if (typeof mobileShareQuery.addEventListener === "function") {
   mobileShareQuery.addEventListener("change", placeShareButtons);
+}
+if (typeof desktopShareQuery.addEventListener === "function") {
+  desktopShareQuery.addEventListener("change", placeShareButtons);
 }
 
 function copyItemLink(item, button) {

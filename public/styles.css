@@ -690,6 +690,16 @@ main {
   display: none;
 }
 
+@media (min-width: 1025px) {
+  /* Desktop only: Share lives on the category/time row above the
+     headline, centred to that row's box (not text baseline). */
+  .meta .item-copy-link {
+    margin-left: auto;
+    align-self: center;
+    flex-shrink: 0;
+  }
+}
+
 .item-copy-link:hover {
   color: var(--accent);
   border-color: var(--accent);
