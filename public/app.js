@@ -2205,7 +2205,7 @@ function mergeIncomingItems(items) {
 }
 
 async function fetchFeedItems(limit = 50) {
-  const response = await fetch(`/api/items?limit=${limit}&_=${Date.now()}`, {
+  const response = await fetch(`/api/items?limit=${limit}`, {
     headers: { Accept: "application/json" }
   });
 

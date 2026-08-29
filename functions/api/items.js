@@ -247,7 +247,7 @@ export async function onRequestGet({ env, request }) {
     authorized
   });
 
-  return json(result);
+  return json(result, 200, includeHidden ? 0 : 60);
 }
 
 export async function loadFeedItems({
@@ -1519,12 +1519,12 @@ function pad2(value) {
   return value < 10 ? `0${value}` : String(value);
 }
 
-function json(payload, status = 200) {
+function json(payload, status = 200, cacheSeconds = 0) {
   return new Response(JSON.stringify(payload, null, 2), {
     status,
     headers: {
       "content-type": "application/json; charset=utf-8",
-      "cache-control": "no-store"
+      "cache-control": cacheSeconds > 0 ? `public, max-age=${cacheSeconds}, stale-while-revalidate=120` : "no-store"
     }
   });
 }
