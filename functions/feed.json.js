@@ -1,11 +1,13 @@
+import { loadFeedItems } from "./api/items.js";
+
 const SITE_TITLE = "Asia Tech Review Bulletin";
 const SITE_URL = "https://bulletin.asiatechreview.com";
 const FEED_URL = `${SITE_URL}/feed.json`;
 const FEED_LIMIT = 100;
 const CACHE_SECONDS = 300;
 
-export async function onRequestGet({ request }) {
-  const items = await loadItems(request);
+export async function onRequestGet({ env }) {
+  const { items } = await loadFeedItems({ env, limit: FEED_LIMIT });
   const payload = {
     version: "https://jsonfeed.org/version/1.1",
     title: SITE_TITLE,
@@ -22,20 +24,6 @@ export async function onRequestGet({ request }) {
       "cache-control": `public, max-age=${CACHE_SECONDS}`
     }
   });
-}
-
-async function loadItems(request) {
-  const origin = new URL(request.url).origin;
-  const response = await fetch(`${origin}/api/items?limit=${FEED_LIMIT}`, {
-    headers: { accept: "application/json" }
-  });
-
-  if (!response.ok) {
-    throw new Error(`Bulletin API returned ${response.status}`);
-  }
-
-  const payload = await response.json();
-  return Array.isArray(payload.items) ? payload.items : [];
 }
 
 function toJsonFeedItem(item) {

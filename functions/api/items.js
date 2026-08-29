@@ -237,9 +237,36 @@ export async function onRequestGet({ env, request }) {
     return json({ error: "Unauthorized" }, 401);
   }
 
+  const result = await loadFeedItems({
+    env,
+    limit,
+    offset,
+    category,
+    date,
+    statusParam,
+    authorized
+  });
+
+  return json(result);
+}
+
+export async function loadFeedItems({
+  env,
+  limit = DEFAULT_LIMIT,
+  offset = 0,
+  category = "",
+  date = "",
+  statusParam = "",
+  authorized = false
+} = {}) {
+  const normalizedLimit = Math.min(Number(limit) || DEFAULT_LIMIT, MAX_LIMIT);
+  const normalizedOffset = Math.max(0, Number(offset) || 0);
+  const requestedWindow = normalizedOffset + normalizedLimit;
+  const includeArchive = Boolean(category || date || authorized || statusParam === "removed");
+  const queryLimit = includeArchive ? INTERNAL_FETCH_LIMIT : Math.min(requestedWindow, MAX_LIMIT);
+
   let select = "id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key";
   if (authorized) select += ", status, posted_by, posted_via, scheduled_at";
-
 
   let query = `SELECT ${select} FROM feed_items WHERE status = ?`;
   const params = ["published"];
@@ -257,24 +284,15 @@ export async function onRequestGet({ env, request }) {
   }
 
   query += " ORDER BY published_at DESC, id DESC LIMIT ?";
-  params.push(INTERNAL_FETCH_LIMIT);
+  params.push(queryLimit);
 
   let d1Items = [];
-
-  try {
-    await ensureHeadlineColumn(env);
-    await ensureTagsColumn(env);
-    await ensurePostedColumns(env);
-    await ensureScheduledAtColumn(env);
-  } catch {
-    // Migration attempts are best-effort; the query below is the real check.
-  }
 
   try {
     const result = await env.ATR_FEED_DB.prepare(query).bind(...params).all();
     d1Items = result.results || [];
   } catch (error) {
-    d1Items = await loadD1ItemsWithoutHeadline({ env, category });
+    d1Items = await loadD1ItemsWithoutHeadline({ env, category, limit: queryLimit });
   }
 
   // Static archive items (md-*, html-*, manual-telegram-*) live in code and
@@ -284,31 +302,34 @@ export async function onRequestGet({ env, request }) {
   // a real D1 row (new numeric id, same source_url), so the static original
   // is a stale twin carrying the old title. Dropping it here stops stale
   // originals from surfacing next to the fixed D1 rows.
-  const staticItems = statusParam === "removed"
+  const shouldLoadStaticItems = includeArchive || d1Items.length < requestedWindow;
+  const staticLimit = includeArchive ? INTERNAL_FETCH_LIMIT : Math.max(requestedWindow - d1Items.length, 0);
+  const d1SourceUrls = new Set(d1Items.map((d1) => String(d1.source_url || "").toLowerCase()).filter(Boolean));
+  const staticItems = statusParam === "removed" || !shouldLoadStaticItems
     ? []
-    : loadStaticItems({ limit: INTERNAL_FETCH_LIMIT, category })
+    : loadStaticItems({ limit: staticLimit || normalizedLimit, category })
         .filter((item) => {
           if (!item?.source_url) return true;
           const url = String(item.source_url).toLowerCase();
-          return !d1Items.some((d1) => String(d1.source_url || "").toLowerCase() === url);
+          return !d1SourceUrls.has(url);
         });
   const mergedItems = balanceArchiveDates(rebalanceJulyArchiveDates(mergeItems(d1Items, staticItems)))
     .filter((item) => !date || dateKey(item.published_at) === date);
   const total = mergedItems.length;
 
   if (mergedItems.length) {
-    return json({
-      items: withHeadlines(mergedItems.slice(offset, offset + limit)),
+    return {
+      items: withHeadlines(mergedItems.slice(normalizedOffset, normalizedOffset + normalizedLimit)),
       total
-    });
+    };
   }
 
   const sheetItems = await loadSheetItems({ category, date });
 
-  return json({
-    items: withHeadlines(sheetItems.slice(offset, offset + limit)),
+  return {
+    items: withHeadlines(sheetItems.slice(normalizedOffset, normalizedOffset + normalizedLimit)),
     total: sheetItems.length
-  });
+  };
 }
 
 export function withHeadlines(items) {
@@ -1003,7 +1024,7 @@ function isAuthorized(env, request) {
   return isAdmin(env, request);
 }
 
-async function loadD1ItemsWithoutHeadline({ env, category }) {
+async function loadD1ItemsWithoutHeadline({ env, category, limit = INTERNAL_FETCH_LIMIT }) {
   let query = "SELECT id, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at FROM feed_items WHERE status = ?";
   const params = ["published"];
 
@@ -1013,7 +1034,7 @@ async function loadD1ItemsWithoutHeadline({ env, category }) {
   }
 
   query += " ORDER BY published_at DESC, id DESC LIMIT ?";
-  params.push(INTERNAL_FETCH_LIMIT);
+  params.push(limit);
 
   try {
     const result = await env.ATR_FEED_DB.prepare(query).bind(...params).all();
