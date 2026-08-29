@@ -27,6 +27,8 @@ function scrollFeedToTop() {
   window.scrollTo({ top: 0, left: 0, behavior: "auto" });
 }
 const ITEMS_PER_PAGE = 15;
+const INITIAL_FEED_LIMIT = 50;
+const RECENT_FEED_LIMIT = 100;
 const VISIBLE_PAGE_BUTTONS = 8;
 const ARCHIVE_DAYS = 5;
 const FEED_POLL_INTERVAL_MS = 10 * 60 * 1000;
@@ -2219,7 +2221,7 @@ async function fetchFeedItems(limit = 50) {
 
 async function loadBackgroundFullFeed() {
   try {
-    const fullItems = await fetchFeedItems(500);
+    const fullItems = await fetchFeedItems(RECENT_FEED_LIMIT);
     if (fullItems && fullItems.length) {
       mergeIncomingItems(fullItems);
     }
@@ -2236,12 +2238,12 @@ async function refreshFeed(options = {}) {
   isFetchingFeed = true;
 
   try {
-    const items = await fetchFeedItems(options.initial ? 50 : 500);
+    const items = await fetchFeedItems(options.initial ? INITIAL_FEED_LIMIT : RECENT_FEED_LIMIT);
 
     if (options.initial) {
       render(items, { statusText: "" });
       handleRequestedItem();
-      // Silently fetch full 500-item window in background after initial paint
+      // Silently fetch the recent-item window in background after initial paint
       window.setTimeout(loadBackgroundFullFeed, 1000);
       return;
     }
