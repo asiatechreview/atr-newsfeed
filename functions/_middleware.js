@@ -1,5 +1,5 @@
 import { shouldLogCrawlerPath, writeCrawlerAccessLog } from "./_lib/crawler-log.js";
-import { ensureSiteContentTable, readSiteContent } from "./_lib/site-content.js";
+import { readSiteContent } from "./_lib/site-content.js";
 import { ogMetaBlock, lookupItem } from "./_lib/og-preview.js";
 
 const PUBLIC_HOST = "bulletin.asiatechreview.com";
@@ -163,7 +163,6 @@ async function injectHomepageMeta(response, env, url) {
 // flash of an older Substack post before the client-side swap.
 async function applyNewsletterHtml(html, env) {
   try {
-    await ensureSiteContentTable(env);
     const content = await readSiteContent(env);
     const newsletter = content.newsletter || {};
     const title = escapeHtml(newsletter.title || "");

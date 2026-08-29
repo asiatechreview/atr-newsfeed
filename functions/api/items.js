@@ -262,7 +262,7 @@ export async function loadFeedItems({
   const normalizedLimit = Math.min(Number(limit) || DEFAULT_LIMIT, MAX_LIMIT);
   const normalizedOffset = Math.max(0, Number(offset) || 0);
   const requestedWindow = normalizedOffset + normalizedLimit;
-  const includeArchive = Boolean(category || date || authorized || statusParam === "removed");
+  const includeArchive = Boolean(authorized || statusParam === "removed");
   const queryLimit = includeArchive ? INTERNAL_FETCH_LIMIT : Math.min(requestedWindow, MAX_LIMIT);
 
   let select = "id, headline, blurb, source_name, source_url, category, tags, telegram_message_id, published_at, created_at, link_key";
@@ -281,6 +281,12 @@ export async function loadFeedItems({
   if (category) {
     query += " AND category = ?";
     params.push(category);
+  }
+
+  const dateBounds = date ? bangkokDateBounds(date) : null;
+  if (dateBounds) {
+    query += " AND published_at >= ? AND published_at < ?";
+    params.push(dateBounds.start, dateBounds.end);
   }
 
   query += " ORDER BY published_at DESC, id DESC LIMIT ?";
@@ -1473,6 +1479,17 @@ function parseDateParam(value) {
   }
 
   return /^\d{4}-\d{2}-\d{2}$/.test(cleaned) ? cleaned : "";
+}
+
+function bangkokDateBounds(date) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+  const start = new Date(`${date}T00:00:00+07:00`);
+  if (Number.isNaN(start.getTime())) return null;
+  const end = new Date(start.getTime() + 24 * 60 * 60 * 1000);
+  return {
+    start: start.toISOString(),
+    end: end.toISOString()
+  };
 }
 
 function dateKey(value) {

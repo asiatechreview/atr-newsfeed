@@ -1,6 +1,9 @@
 import { clampLimit, filterItems, json, loadAllBulletinItems, loadBulletinItems, summarizeCollection, toPublicItem } from "../../_lib/public-api.js";
+import { loadFeedItems } from "../items.js";
 
-export async function onRequestGet({ request }) {
+const SEARCH_WINDOW = 500;
+
+export async function onRequestGet({ env, request }) {
   const url = new URL(request.url);
   const limit = clampLimit(url.searchParams.get("limit"));
   const offset = Math.max(0, Number(url.searchParams.get("offset")) || 0);
@@ -9,7 +12,9 @@ export async function onRequestGet({ request }) {
   const query = url.searchParams.get("q");
 
   if (query) {
-    const source = await loadAllBulletinItems(request, { category, date });
+    const source = env?.ATR_FEED_DB
+      ? await loadFeedItems({ env, limit: SEARCH_WINDOW, category, date })
+      : await loadAllBulletinItems(request, { category, date });
     const filtered = filterItems(source.items.map(toPublicItem), { query });
 
     return json(summarizeCollection(
@@ -21,7 +26,9 @@ export async function onRequestGet({ request }) {
     ));
   }
 
-  const source = await loadBulletinItems(request, { limit, offset, category, date });
+  const source = env?.ATR_FEED_DB
+    ? await loadFeedItems({ env, limit, offset, category, date })
+    : await loadBulletinItems(request, { limit, offset, category, date });
 
   return json(summarizeCollection(
     source.items.map(toPublicItem),
