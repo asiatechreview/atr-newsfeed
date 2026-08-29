@@ -67,6 +67,17 @@ function escapeHtml(value) {
     .replaceAll('"', "&quot;");
 }
 
+function newsletterImageProxyUrl(value) {
+  try {
+    const url = new URL(String(value || "").trim());
+    if (url.protocol !== "https:") return "";
+    if (!["substackcdn.com", "substack-post-media.s3.amazonaws.com"].includes(url.hostname)) return url.href;
+    return `/api/newsletter-image?src=${encodeURIComponent(url.href)}`;
+  } catch {
+    return "";
+  }
+}
+
 // Insert a block of meta tags just before </head>.
 function insertBeforeHeadClose(html, metaBlock) {
   const marker = "</head>";
@@ -171,7 +182,7 @@ async function applyNewsletterHtml(html, env) {
     const title = escapeHtml(newsletter.title || "");
     const blurb = escapeHtml(newsletter.blurb || "");
     const url = escapeHtml(newsletter.url || "");
-    const image = escapeHtml(newsletter.image || "");
+    const image = escapeHtml(newsletterImageProxyUrl(newsletter.image) || newsletter.image || "");
     if (!title && !url) return null;
 
     let next = html;
@@ -179,10 +190,7 @@ async function applyNewsletterHtml(html, env) {
       next = next.replaceAll("https://www.asiatechreview.com/p/grab-bets-on-fintech-to-reinforce", url);
     }
     if (image) {
-      next = next.replaceAll(
-        "https://substackcdn.com/image/fetch/$s_!PMQo!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F5db78b08-9f8e-4b8f-9ba1-bcdb75abfb84_1672x941.png",
-        image
-      );
+      next = next.replace(/(<img id="newsletter-image" src=")[^"]*(")/, `$1${image}$2`);
     }
     next = next.replaceAll("Grab bets on fintech to reinforce its tech story", title);
     next = next.replaceAll("The company's bid to become a fintech heavyweight is about to face its first major test", blurb);

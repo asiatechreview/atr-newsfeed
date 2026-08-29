@@ -38,6 +38,17 @@ const THEME_STORAGE_KEY = "atr-bulletin-theme";
 const SHOW_WATCHLIST = false;
 const FEATURED_ITEM_ID = "manual-telegram-2026-07-17-005";
 const FEATURED_SOURCE_URL = "https://www.bloomberg.com/news/newsletters/2026-07-17/china-can-still-win-the-ai-race-with-inferior-technology";
+
+function newsletterImageProxyUrl(value) {
+  try {
+    const url = new URL(String(value || "").trim(), window.location.origin);
+    if (url.protocol !== "https:") return "";
+    if (!["substackcdn.com", "substack-post-media.s3.amazonaws.com"].includes(url.hostname)) return url.href;
+    return `/api/newsletter-image?src=${encodeURIComponent(url.href)}`;
+  } catch {
+    return "";
+  }
+}
 const HEADLINE_OVERRIDES = new Map(Object.entries({
   "19": "DeepSeek pushes China AI price war into enterprise adoption",
   "43": "SK warns AI memory crunch is getting political",
@@ -2364,7 +2375,7 @@ async function loadNewsletterCard() {
       if (imageLink) imageLink.href = newsletter.url;
       if (readLink) readLink.href = newsletter.url;
     }
-    if (newsletter.image && image) image.src = newsletter.image;
+    if (newsletter.image && image) image.src = newsletterImageProxyUrl(newsletter.image) || newsletter.image;
     if (title && newsletter.title) title.textContent = newsletter.title;
     if (blurb && newsletter.blurb) blurb.textContent = newsletter.blurb;
   } catch {
