@@ -91,10 +91,11 @@ export async function lookupItem(env, itemParam) {
 
 // Build the meta block to inject for a given request URL.
 // Always returns tags: item-specific when ?item= resolves, defaults otherwise.
-export async function ogMetaBlock(env, url) {
+// Pass resolvedItem when the caller already looked up ?item= for page content.
+export async function ogMetaBlock(env, url, resolvedItem = null) {
   const itemParam = url.searchParams.get("item");
   if (itemParam) {
-    const item = await lookupItem(env, itemParam);
+    const item = resolvedItem || await lookupItem(env, itemParam);
     if (item) return itemTags(item, itemParam);
   }
   return defaultTags(url);

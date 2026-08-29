@@ -97,7 +97,7 @@ function preRenderItemCard(item) {
   const sourceName = escapeHtml(item.source_name || "Source");
   const sourceUrl = escapeHtml(item.source_url || "#");
   const timeStr = escapeHtml(formatItemTime(item.published_at));
-  const itemKey = `item-${item.id}`;
+  const itemKey = String(item.id || item.link_key || "");
 
   return `
     <article class="item item-flash" data-item-key="${itemKey}">
@@ -118,12 +118,13 @@ async function injectHomepageMeta(response, env, url) {
     const original = await response.text();
     let html = original;
     let changed = false;
+    let resolvedItem = null;
 
     const itemParam = url.searchParams.get("item");
     if (itemParam) {
-      const item = await lookupItem(env, itemParam);
-      if (item) {
-        const itemCardHtml = preRenderItemCard(item);
+      resolvedItem = await lookupItem(env, itemParam);
+      if (resolvedItem) {
+        const itemCardHtml = preRenderItemCard(resolvedItem);
         if (itemCardHtml) {
           html = html.replace(
             '<section id="feed-list" class="feed"></section>',
@@ -134,7 +135,7 @@ async function injectHomepageMeta(response, env, url) {
       }
     }
 
-    const ogTags = await ogMetaBlock(env, url);
+    const ogTags = await ogMetaBlock(env, url, resolvedItem);
     if (ogTags && !html.includes('property="og:title"')) {
       html = insertBeforeHeadClose(html, ogTags);
       changed = true;
@@ -150,7 +151,9 @@ async function injectHomepageMeta(response, env, url) {
 
     const headers = new Headers(response.headers);
     headers.set("content-type", "text/html; charset=utf-8");
-    headers.set("cache-control", "public, max-age=60");
+    headers.set("cache-control", itemParam
+      ? "public, max-age=60, stale-while-revalidate=120"
+      : "public, max-age=60");
     return new Response(html, { status: response.status, headers });
   } catch {
     // Fall back to the static page; never break the homepage.
