@@ -162,9 +162,7 @@ async function injectHomepageMeta(response, env, url) {
 
     const headers = new Headers(response.headers);
     headers.set("content-type", "text/html; charset=utf-8");
-    headers.set("cache-control", itemParam
-      ? "public, max-age=60, stale-while-revalidate=120"
-      : "public, max-age=60");
+    headers.set("cache-control", itemParam ? "public, max-age=60, stale-while-revalidate=120" : "no-store");
     return new Response(html, { status: response.status, headers });
   } catch {
     // Fall back to the static page; never break the homepage.

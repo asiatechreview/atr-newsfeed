@@ -42,6 +42,7 @@ const required = [
   "functions/api/auth/users.js",
   "functions/api/site-content.js",
   "functions/api/site-content/newsletter/refresh.js",
+  "functions/api/newsletter-image.js",
   "functions/_lib/newsletter-refresh.js",
   "functions/_lib/admin-auth.js",
   "functions/_lib/site-content.js",
@@ -99,6 +100,9 @@ const dashboardCss = readFileSync(join(root, "public/dashboard.css"), "utf8");
 const adminHtml = readFileSync(join(root, "public/admin.html"), "utf8");
 const adminScript = readFileSync(join(root, "public/admin.js"), "utf8");
 const adminCss = readFileSync(join(root, "public/admin.css"), "utf8");
+const siteContentApi = readFileSync(join(root, "functions/api/site-content.js"), "utf8");
+const middlewareScript = readFileSync(join(root, "functions/_middleware.js"), "utf8");
+const newsletterImageApi = readFileSync(join(root, "functions/api/newsletter-image.js"), "utf8");
 
 if (!dashboardHtml.includes("/dashboard.js") || !dashboardScript.includes("/api/dashboard") || !dashboardCss.includes(".status-strip")) {
   console.error("dashboard assets must expose a protected operational dashboard UI");
@@ -115,6 +119,22 @@ if (!adminHtml.includes("analytics-view") || !adminScript.includes("/api/analyti
 }
 if (!adminHtml.includes("newsletter-update-now") || !adminHtml.includes("newsletter-preview") || !adminScript.includes("/api/site-content/newsletter/refresh") || !adminScript.includes("updateNewsletterNow") || !adminScript.includes("renderNewsletterPreview")) {
   console.error("admin assets must expose a manual newsletter refresh trigger and live preview");
+  process.exit(1);
+}
+if (!adminScript.includes("function newsletterImageProxyUrl") || !adminScript.includes("els.previewNewsletterImage.src = newsletterImageProxyUrl(image) || image")) {
+  console.error("admin newsletter preview must render Substack images through the same proxy as the public card");
+  process.exit(1);
+}
+if (!adminScript.includes("renderNewsletterPreview(newsletter)") || !adminScript.includes('els.newsletterStatus.textContent = "Saved"')) {
+  console.error("admin newsletter save must refresh the live preview from the write readback");
+  process.exit(1);
+}
+if (!siteContentApi.includes('"cache-control": "no-store"') || !middlewareScript.includes('itemParam ? "public, max-age=60, stale-while-revalidate=120" : "no-store"')) {
+  console.error("editable newsletter site content must not be hidden behind stale homepage/API caches");
+  process.exit(1);
+}
+if (!newsletterImageApi.includes('cacheUrl.searchParams.set("src", sourceUrl.href)')) {
+  console.error("newsletter image proxy cache must be keyed by the resolved source image");
   process.exit(1);
 }
 if (!adminHtml.includes('action="/api/auth/login"') || !adminHtml.includes('name="username"') || !adminHtml.includes('name="password"') || !adminScript.includes("/api/auth/me")) {

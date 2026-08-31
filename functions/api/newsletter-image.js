@@ -30,7 +30,9 @@ export async function onRequestGet({ env, request }) {
   }
 
   const cache = caches.default;
-  const cacheKey = new Request(request.url, request);
+  const cacheUrl = new URL(request.url);
+  cacheUrl.searchParams.set("src", sourceUrl.href);
+  const cacheKey = new Request(cacheUrl.toString(), request);
   const cached = await cache.match(cacheKey);
   if (cached) return cached;
 

@@ -479,6 +479,17 @@ const els = {
   liveEditReadbackOutput: document.querySelector("#live-edit-readback-output")
 };
 
+function newsletterImageProxyUrl(value) {
+  try {
+    const url = new URL(String(value || "").trim(), window.location.origin);
+    if (url.protocol !== "https:") return "";
+    if (!["substackcdn.com", "substack-post-media.s3.amazonaws.com"].includes(url.hostname)) return url.href;
+    return `/api/newsletter-image?src=${encodeURIComponent(url.href)}`;
+  } catch {
+    return "";
+  }
+}
+
 function switchTab(name) {
   const publish = name === "publish";
   const live = name === "live";
@@ -2614,7 +2625,7 @@ function renderNewsletterPreview(newsletter) {
   if (els.newsletterPreview) els.newsletterPreview.hidden = !(title || url || image || blurb);
 
   if (image) {
-    els.previewNewsletterImage.src = image;
+    els.previewNewsletterImage.src = newsletterImageProxyUrl(image) || image;
     els.previewNewsletterImage.hidden = false;
   } else {
     els.previewNewsletterImage.removeAttribute("src");
@@ -2671,8 +2682,11 @@ async function saveNewsletter() {
     });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.error || `PUT returned ${response.status}`);
+    const newsletter = result.newsletter || payload.newsletter;
+    renderNewsletterPreview(newsletter);
+    els.newsletterStatus.textContent = "Saved";
     els.newsletterReadbackStatus.textContent = "Saved";
-    els.newsletterReadbackOutput.textContent = JSON.stringify(result.newsletter || payload.newsletter, null, 2);
+    els.newsletterReadbackOutput.textContent = JSON.stringify(newsletter, null, 2);
   } catch (error) {
     els.newsletterReadbackStatus.textContent = "Error";
     els.newsletterReadbackOutput.textContent = error.message;
