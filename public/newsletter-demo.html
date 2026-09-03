@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ATR Newsletter Feature Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/newsletter-demo.css">
+</head>
+<body data-view="desktop">
+  <header class="masthead">
+    <a class="brand" href="/">Asia Tech Review</a>
+    <span>Bulletin</span>
+  </header>
+
+  <main class="viewport">
+    <nav class="view-switch" aria-label="Demo view">
+      <a href="?view=desktop">Desktop</a>
+      <a href="?view=ipad">iPad</a>
+    </nav>
+
+    <section class="newsletter-block" aria-label="Latest Asia Tech Review newsletter">
+      <p class="section-label">Our latest newsletter</p>
+      <article class="newsletter-feature">
+        <a id="newsletter-image-link" class="feature-image" href="https://www.asiatechreview.com/" target="_blank" rel="noopener">
+          <img id="newsletter-image" src="/api/newsletter-image?src=https%3A%2F%2Fsubstackcdn.com%2Fimage%2Ffetch%2F%24s_!CWDC!%2Cf_auto%2Cq_auto%3Agood%2Cfl_progressive%3Asteep%2Fhttps%253A%252F%252Fsubstack-post-media.s3.amazonaws.com%252Fpublic%252Fimages%252Fc4500b11-015d-4a4a-8ff5-109ed92fa189_1536x1024.png" alt="Latest Asia Tech Review newsletter" width="960" height="540">
+        </a>
+        <div class="feature-copy">
+          <div>
+            <h1 id="newsletter-title">MiniMax and Z.ai are growing up with big revenue jumps but a lot more spending</h1>
+            <p id="newsletter-blurb">China’s public AI companies are now playing in the global market as their first financial reports show</p>
+          </div>
+          <a id="newsletter-read-link" class="read-link" href="https://www.asiatechreview.com/" target="_blank" rel="noopener">Read now <span aria-hidden="true">→</span></a>
+        </div>
+      </article>
+    </section>
+
+    <section class="updates" aria-label="Latest updates">
+      <p class="section-label">Latest updates</p>
+      <p>Newsletter feature sits above the Bulletin feed without being boxed off from it.</p>
+    </section>
+  </main>
+
+  <script>
+    const view = new URLSearchParams(window.location.search).get('view');
+    document.body.dataset.view = view === 'ipad' ? 'ipad' : 'desktop';
+    document.querySelectorAll('.view-switch a').forEach((link) => {
+      if (link.href.includes(`view=${document.body.dataset.view}`)) link.setAttribute('aria-current', 'page');
+    });
+
+    fetch('/api/site-content')
+      .then((response) => response.ok ? response.json() : null)
+      .then((content) => {
+        const newsletter = content && content.newsletter;
+        if (!newsletter) return;
+        const set = (id, value, prop = 'textContent') => {
+          if (value) document.getElementById(id)[prop] = value;
+        };
+        set('newsletter-title', newsletter.title);
+        set('newsletter-blurb', newsletter.blurb);
+        if (newsletter.image) {
+          set('newsletter-image', `/api/newsletter-image?src=${encodeURIComponent(newsletter.image)}`, 'src');
+        }
+        ['newsletter-image-link', 'newsletter-read-link'].forEach((id) => set(id, newsletter.url, 'href'));
+      })
+      .catch(() => {});
+  </script>
+</body>
+</html>
