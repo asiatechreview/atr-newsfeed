@@ -1493,8 +1493,8 @@ footer {
 .status { font-size: calc(12px * var(--font-scale, 1)); }
 .date { font-size: calc(12px * var(--font-scale, 1)); }
 .topbar h2 { font-size: calc(24px * var(--font-scale, 1)); }
-.newsletter-promo h3 { font-size: calc(19px * var(--font-scale, 1)); }
-.newsletter-promo p:not(.eyebrow) { font-size: calc(14px * var(--font-scale, 1)); }
+.newsletter-promo h3 { font-size: calc(21px * var(--font-scale, 1)); }
+.newsletter-promo p:not(.eyebrow) { font-size: calc(16px * var(--font-scale, 1)); }
 .watchlist h2 { font-size: calc(17px * var(--font-scale, 1)); }
 .watchlist-blurb { font-size: calc(12px * var(--font-scale, 1)); }
 
@@ -1510,8 +1510,14 @@ footer {
   .status { font-size: calc(14px * var(--font-scale, 1)); }
   .date { font-size: calc(14px * var(--font-scale, 1)); }
   .topbar h2 { font-size: calc(27px * var(--font-scale, 1)); }
-  .newsletter-promo h3 { font-size: calc(22px * var(--font-scale, 1)); }
-  .newsletter-promo p:not(.eyebrow) { font-size: calc(17px * var(--font-scale, 1)); }
+  .newsletter-promo h3 { font-size: calc(24px * var(--font-scale, 1)); }
+  .newsletter-promo p:not(.eyebrow) { font-size: calc(19px * var(--font-scale, 1)); }
+}
+
+/* Keep the compact newsletter typography on phones. */
+@media (max-width: 640px) {
+  .newsletter-promo h3 { font-size: calc(19px * var(--font-scale, 1)); }
+  .newsletter-promo p:not(.eyebrow) { font-size: calc(14px * var(--font-scale, 1)); }
 }
 
 /* Hide topbar title block until further notice (Sai, Aug 17 2026) */
