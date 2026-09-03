@@ -553,6 +553,20 @@ th.id-cell { width: 80px; }
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* Keep the short provenance fields at their content width. The title column
+   receives any spare table space instead of ID or Source. */
+.sources-table th:nth-child(1),
+.sources-table td:nth-child(1),
+.sources-table th:nth-child(3),
+.sources-table td:nth-child(3) {
+  width: 1%;
+  white-space: nowrap;
+}
+.sources-table .id-cell {
+  width: auto;
+  min-width: 0;
+}
 .nowrap { white-space: nowrap; }
 
 /* Category select in table */
