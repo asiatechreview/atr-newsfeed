@@ -1,6 +1,6 @@
 import { json } from "../../_lib/public-api.js";
 import { linkKeyFor } from "../../_lib/link-key.js";
-import { SEED_CATEGORIES } from "../../_lib/categories.js";
+import { categoryRules } from "../../_lib/categories.js";
 import {
   clearSchedule,
   istDateKey,
@@ -193,9 +193,10 @@ async function savePendingTitleRequest(env, chatId, url, blurb, domain, label) {
   ).bind(String(chatId), url, blurb, domain, label).run();
 }
 
-function inferCategory(blurb) {
+async function inferCategory(env, blurb) {
   const text = String(blurb || "").toLowerCase();
-  for (const rule of SEED_CATEGORIES || []) {
+  const rules = await categoryRules(env);
+  for (const rule of rules) {
     if (!rule || !rule.pattern) continue;
     try {
       if (new RegExp(rule.pattern, "i").test(text)) {
@@ -525,7 +526,7 @@ async function generateHeadline(env, blurb) {
 
 async function ingestItem(env, request, { blurb, url, label, headline, postedBy }) {
   const origin = new URL(request.url).origin;
-  const category = inferCategory(blurb) || undefined;
+  const category = await inferCategory(env, blurb) || undefined;
   const ingestBody = {
     blurb,
     sourceName: label,

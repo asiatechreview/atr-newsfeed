@@ -27,7 +27,7 @@ async function loadCategoryCounts(env) {
   ).all();
 
   const counts = new Map((countRows.results || []).map((row) => [row.category, Number(row.count) || 0]));
-  const names = new Set(seeds);
+  const names = new Set();
 
   try {
     const tableRows = await env.ATR_FEED_DB.prepare(
@@ -37,7 +37,9 @@ async function loadCategoryCounts(env) {
       if (row.name) names.add(row.name);
     }
   } catch {
-    // Public category metadata should not create or migrate tables on request.
+    // A brand-new database has not had an admin request to initialise the
+    // category table yet, so retain the defaults only in that bootstrap case.
+    for (const name of seeds) names.add(name);
   }
 
   for (const name of counts.keys()) {

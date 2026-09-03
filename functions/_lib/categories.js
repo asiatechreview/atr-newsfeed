@@ -18,6 +18,13 @@ export async function ensureCategoriesTable(env) {
       updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
     )`
   ).run();
+  await env.ATR_FEED_DB.prepare(
+    `CREATE TABLE IF NOT EXISTS category_settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
+    )`
+  ).run();
 }
 
 // Seed data mirrors the inference rules that previously lived in admin.js.
@@ -56,33 +63,30 @@ export const SEED_CATEGORIES = [
 export async function seedCategories(env) {
   if (!env?.ATR_FEED_DB) return;
 
+  const initialized = await env.ATR_FEED_DB.prepare(
+    "SELECT value FROM category_settings WHERE key = 'initial_seed_complete'"
+  ).first();
+  if (initialized) return;
+
   const row = await env.ATR_FEED_DB.prepare("SELECT COUNT(*) AS count FROM categories").first();
   if (row && Number(row.count) > 0) {
-    // Table already seeded. Backfill any seed categories added later
-    // (e.g. Funding) without touching existing rows, so the live table
-    // picks up new canonical categories on next request.
-    const existing = await env.ATR_FEED_DB.prepare("SELECT name FROM categories").all();
-    const known = new Set((existing.results || []).map((r) => r.name));
-    const insert = env.ATR_FEED_DB.prepare(
-      "INSERT OR IGNORE INTO categories (name, pattern, sort_order) VALUES (?, ?, ?)"
-    );
-    const missing = SEED_CATEGORIES
-      .map((cat, index) => ({ cat, index }))
-      .filter(({ cat }) => !known.has(cat.name));
-    if (missing.length) {
-      await env.ATR_FEED_DB.batch(
-        missing.map(({ cat, index }) => insert.bind(cat.name, cat.pattern, index))
-      );
-    }
+    // This is an existing installation. Mark it as initialized, but never
+    // "backfill" deleted defaults: the category table is admin-owned now.
+    await env.ATR_FEED_DB.prepare(
+      "INSERT OR REPLACE INTO category_settings (key, value, updated_at) VALUES ('initial_seed_complete', 'true', strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))"
+    ).run();
     return;
   }
 
   const insert = env.ATR_FEED_DB.prepare(
     "INSERT INTO categories (name, pattern, sort_order) VALUES (?, ?, ?)"
   );
-  const batch = SEED_CATEGORIES.map((cat, index) =>
-    insert.bind(cat.name, cat.pattern, index)
-  );
+  const batch = [
+    ...SEED_CATEGORIES.map((cat, index) => insert.bind(cat.name, cat.pattern, index)),
+    env.ATR_FEED_DB.prepare(
+      "INSERT OR REPLACE INTO category_settings (key, value, updated_at) VALUES ('initial_seed_complete', 'true', strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))"
+    )
+  ];
   await env.ATR_FEED_DB.batch(batch);
 }
 
@@ -152,7 +156,10 @@ export async function updateCategory(env, { name, newName, pattern }) {
   const current = await env.ATR_FEED_DB.prepare(
     "SELECT name FROM categories WHERE name = ?"
   ).bind(cleanName).first();
-  if (!current) throw new Error("category not found");
+  const legacy = !current && await env.ATR_FEED_DB.prepare(
+    "SELECT category FROM feed_items WHERE category = ? LIMIT 1"
+  ).bind(cleanName).first();
+  if (!current && !legacy) throw new Error("category not found");
 
   const cleanNewName = newName === undefined ? cleanName : String(newName).trim();
   if (!cleanNewName) throw new Error("newName is required");
@@ -161,7 +168,10 @@ export async function updateCategory(env, { name, newName, pattern }) {
     const clash = await env.ATR_FEED_DB.prepare(
       "SELECT name FROM categories WHERE name = ?"
     ).bind(cleanNewName).first();
-    if (clash) throw new Error("target category already exists");
+    const legacyClash = !clash && await env.ATR_FEED_DB.prepare(
+      "SELECT category FROM feed_items WHERE category = ? LIMIT 1"
+    ).bind(cleanNewName).first();
+    if (clash || legacyClash) throw new Error("target category already exists");
   }
 
   // Rename propagates to every published/hidden item that used the old label.
@@ -169,9 +179,18 @@ export async function updateCategory(env, { name, newName, pattern }) {
     "UPDATE feed_items SET category = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now') WHERE category = ?"
   ).bind(cleanNewName, cleanName).run();
 
-  await env.ATR_FEED_DB.prepare(
-    "UPDATE categories SET name = ?, pattern = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now') WHERE name = ?"
-  ).bind(cleanNewName, pattern === undefined ? current.pattern : String(pattern).trim(), cleanName).run();
+  if (current) {
+    await env.ATR_FEED_DB.prepare(
+      "UPDATE categories SET name = ?, pattern = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now') WHERE name = ?"
+    ).bind(cleanNewName, pattern === undefined ? current.pattern : String(pattern).trim(), cleanName).run();
+  } else {
+    const sortRow = await env.ATR_FEED_DB.prepare(
+      "SELECT COALESCE(MAX(sort_order), -1) + 1 AS next FROM categories"
+    ).first();
+    await env.ATR_FEED_DB.prepare(
+      "INSERT INTO categories (name, pattern, sort_order) VALUES (?, ?, ?)"
+    ).bind(cleanNewName, String(pattern || "").trim(), Number(sortRow?.next || 0)).run();
+  }
 }
 
 export async function deleteCategory(env, { name, reassignTo }) {
@@ -181,7 +200,10 @@ export async function deleteCategory(env, { name, reassignTo }) {
   const current = await env.ATR_FEED_DB.prepare(
     "SELECT name FROM categories WHERE name = ?"
   ).bind(cleanName).first();
-  if (!current) throw new Error("category not found");
+  const legacy = !current && await env.ATR_FEED_DB.prepare(
+    "SELECT category FROM feed_items WHERE category = ? LIMIT 1"
+  ).bind(cleanName).first();
+  if (!current && !legacy) throw new Error("category not found");
 
   const target = String(reassignTo || "Other news").trim();
   if (target === cleanName) throw new Error("cannot reassign to the category being deleted");
@@ -191,5 +213,16 @@ export async function deleteCategory(env, { name, reassignTo }) {
     "UPDATE feed_items SET category = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now') WHERE category = ?"
   ).bind(target, cleanName).run();
 
-  await env.ATR_FEED_DB.prepare("DELETE FROM categories WHERE name = ?").bind(cleanName).run();
+  if (current) {
+    await env.ATR_FEED_DB.prepare("DELETE FROM categories WHERE name = ?").bind(cleanName).run();
+  }
+}
+
+export async function categoryRules(env) {
+  await ensureCategoriesTable(env);
+  await seedCategories(env);
+  const rows = await env.ATR_FEED_DB.prepare(
+    "SELECT name, pattern FROM categories ORDER BY sort_order ASC, name ASC"
+  ).all();
+  return (rows.results || []).map((row) => ({ name: row.name, pattern: row.pattern || "" }));
 }

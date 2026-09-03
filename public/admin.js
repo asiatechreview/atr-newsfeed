@@ -1,48 +1,10 @@
 const DEFAULT_CATEGORY = "Other news";
 const ITEMS_PER_PAGE = 20;
 
-// Category inference for manual entries (mirrors the public site's tag inference,
-// mapped to the category labels ATR actually uses). Pure client-side, no LLM.
-const CATEGORY_RULES = [
-  { label: "WAIC 2026", pattern: /\bwaic\b/ },
-  { label: "Cloud", pattern: /\b(cloud|data centre|data center|data centres|data centers|hyperscaler|hyperscalers|aws|azure|google cloud|alibaba cloud|tencent cloud|huawei cloud|cloud computing|cloud services|cloud infrastructure|infrastructure-as-a-service|iaas|saas|paas)\b/ },
-  { label: "AI", pattern: /\b(ai|artificial intelligence|llm|multimodal|foundation model|claude|openai|anthropic|deepseek|minimax|moonshot|agentic|nvidia|distillation|gpu)\b/ },
-  { label: "Chips", pattern: /\b(chip|chips|chipmaker|chipmaking|semiconductor|semiconductors|integrated circuit|tsmc|sk hynix|hynix|cxmt|silicon|photonics|fab|foundry|packaging|hbm|memory chips?)\b/ },
-  { label: "Robotics", pattern: /\b(robot|robots|robotics|humanoid|robotaxi|robotaxis|unitree|agibot|ubtech|boston dynamics|figure|digit robot)\b/ },
-  { label: "EVs", pattern: /\b(electric vehicle|electric vehicles|evs?|ev maker|ev makers|ev battery|ev charging|charging network|ev startup)\b/ },
-  { label: "Transportation", pattern: /\b(transportation|transport|logistics|shipping|airline|airlines|aviation|airport|airports|railway|railways|rail|train|trains|port|ports|freight|trucking|courier|delivery)\b/ },
-  { label: "Energy", pattern: /\b(energy|solar|wind power|renewables?|grid|power plant|power station|oil|natural gas|nuclear|battery|catl|energy storage|petrochemicals?)\b/ },
-  { label: "Space", pattern: /\b(space|satellite|satellites|rocket|rockets|launch vehicle|spacecraft|orbit|starlink|gps|gnss)\b/ },
-  { label: "E-commerce", pattern: /\b(e-commerce|ecommerce|marketplace|online retail|shopee|lazada|shein|tiktok shop|quick commerce)\b/ },
-  { label: "Hardware", pattern: /\b(smartphone|smartphones|handset|handsets|laptop|laptops|tablet|tablets|wearable|wearables|consumer electronics|headset|headsets|gadget|gadgets|iphone|airpods|pixel phone)\b/ },
-  { label: "Biotech", pattern: /\b(biotech|biotechnology|biopharma|protein design|gene therapy|genomics|genome|clinical trial|pharma|pharmaceutical|drug development|drugmaker|vaccine development|cell therapy)\b/ },
-  { label: "Health", pattern: /\b(health|healthcare|health care|hospital|hospitals|medical|medicine|doctor|doctors|nurse|nurses|patient|patients|telehealth|telemedicine|medtech|wellness|mental health|health insurance)\b/ },
-  { label: "Crypto", pattern: /\b(crypto|bitcoin|stablecoin|stablecoins|blockchain|onchain|token|digital asset|solana)\b/ },
-  { label: "Fintech", pattern: /\b(bank|banking|fintech|financial|payments?|qr payment|insurance|lending|digital bank|coinhako)\b/ },
-  // Venture Capital = the industry: VC/PE firms raising their own funds,
-  // LPs, fund of funds, accelerators, incubators ("Peak XV closes fund").
-  { label: "Venture Capital", pattern: /\b(venture capital|venture-capital|vc firm|vc firms|vc fund|vc funds|private equity|pe firm|pe firms|pe fund|pe funds|fund of funds|limited partner|limited partners|accelerator|incubator|raises?[^.]*?\bfund\b|closes?[^.]*?\bfund\b|new\s+fund\b)\b/ },
-  // Funding = money moving into a company: rounds, raises, seed, Series A-Z,
-  // secured investment ("startup raises Series B").
-  { label: "Funding", pattern: /\b(funding|raise|raised|raises|raising|secured|secures|series [a-z]|seed round|pre-seed|backs|backed by|valuation)\b/ },
-  // Deals = M&A only: acquisitions, mergers, buyouts, takeovers, stakes,
-  // divestments, consolidation.
-  { label: "Deals", pattern: /\b(acquisition|acquisitions|acquire|acquires|acquired|merger|mergers|merging|buyout|buyouts|takeover|take over|stake|stakes|sell|sells|sold|divest|divesting|consolidat|restructuring)\b/ },
-  { label: "Earnings", pattern: /\b(earnings|quarterly results|quarterly report|net income|net profit|profit warning)\b/ },
-  { label: "Markets", pattern: /\b(markets?|shares?|stock|trading|revenue|profit|sales|yield|price|ipo|listing|public listing|investors?|balance sheet|tax)\b/ },
-  { label: "Policy", pattern: /\b(regulator|regulators|regulation|regulations|policy|government|ministry|customs|approval|approved|audit|probe|immigration|law|rules|compliance|incentives|public sector|sanctions|tariff|tariffs)\b/ },
-  { label: "Cybersecurity", pattern: /\b(cybersecurity|security|hack|hacked|breach|ransomware|data leak|critical infrastructure|export controls?|export-restricted|illicit finance)\b/ },
-  { label: "Mobility", pattern: /\b(mobility|electric vehicle|electric vehicles|evs?|ride-hailing|ride hailing|grab|gojek|go-jek|autonomous|self-driving|self driving|carmaker|carmakers|scooters?)\b/ },
-  { label: "Gaming", pattern: /\b(gaming|games|esports|e-sports|famitsu)\b/ },
-  { label: "Telecommunications", pattern: /\b(telecom|telecommunications|5g|6g|network operator|spectrum|broadband)\b/ },
-  { label: "Startups", pattern: /\b(startup|startups|start-up|start-ups|unicorn)\b/ },
-  { label: "Apps", pattern: /\b(apps?|app store|superapp|super-app)\b/ }
-];
-
 function inferCategory(text) {
   const lower = String(text || "").toLowerCase();
-  for (const rule of CATEGORY_RULES) {
-    if (rule.pattern.test(lower)) return rule.label;
+  for (const rule of state.categoryRules) {
+    if (rule.pattern.test(lower)) return rule.name;
   }
   return "";
 }
@@ -276,6 +238,7 @@ const state = {
   page: 1,
   category: "",
   categories: [],
+  categoryRules: [],
   currentUser: "",
   selectedIds: new Set(),
   source: "",
@@ -563,7 +526,8 @@ async function checkSession() {
       els.whoamiAvatar.hidden = false;
       if (payload.role) els.whoamiRole.textContent = payload.role;
       els.authPanel.hidden = true;
-      loadItems();
+      await loadCategories();
+      await loadItems();
       startNewItem();
       loadOps();
       loadAnalytics();
@@ -1061,6 +1025,16 @@ async function loadCategories() {
     if (!response.ok) throw new Error(`/api/admin/categories returned ${response.status}`);
     const payload = await response.json();
     const categories = Array.isArray(payload.categories) ? payload.categories : [];
+    state.categoryRules = categories
+      .filter((cat) => !cat.legacy && cat.pattern)
+      .flatMap((cat) => {
+        try {
+          return [{ name: cat.name, pattern: new RegExp(cat.pattern, "i") }];
+        } catch {
+          return [];
+        }
+      });
+    state.categories = categories.map((cat) => cat.name);
     renderCategories(categories);
   } catch (error) {
     els.categoriesCount.textContent = "Error";
@@ -1662,15 +1636,13 @@ function populateCategoryFilter() {
     counts.set(cat, (counts.get(cat) || 0) + 1);
   }
 
-  // Always offer the full canonical category list first (including brand-new
-  // categories that no item uses yet), then any legacy categories found on
-  // existing items, so every category is reachable from the admin UI.
-  const canonical = CATEGORY_RULES.map((rule) => rule.label);
-  if (!canonical.includes(DEFAULT_CATEGORY)) canonical.push(DEFAULT_CATEGORY);
+  // The category table is the source of truth. Include any item-only legacy
+  // values while they are being cleaned up, but never resurrect deleted seeds.
+  const canonical = [...state.categories];
   const extras = [...counts.keys()]
     .filter((cat) => !canonical.includes(cat))
     .sort((a, b) => (counts.get(b) || 0) - (counts.get(a) || 0) || a.localeCompare(b));
-  state.categories = [...canonical, ...extras].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+  state.categories = [...new Set([...canonical, ...extras])].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
 
   els.categoryFilter.replaceChildren();
   const all = document.createElement("option");
