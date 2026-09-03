@@ -691,11 +691,19 @@ main {
 }
 
 @media (min-width: 1025px) {
-  /* Desktop only: Share lives on the category/time row above the
-     headline, centred to that row's box (not text baseline). */
+  /* Keep the complete Share control on the category/time line above the
+     headline. A grid prevents the control itself from drifting with the
+     headline or wrapping independently from the category tag. */
+  .meta {
+    display: grid;
+    grid-template-columns: max-content max-content minmax(0, 1fr) max-content;
+    align-items: center;
+  }
+
   .meta .item-copy-link {
-    margin-left: auto;
-    align-self: center;
+    grid-column: 4;
+    grid-row: 1;
+    margin-left: 0;
     flex-shrink: 0;
   }
 }
@@ -1598,32 +1606,16 @@ footer {
   }
 }
 
-/* ============================================================
-   Remove horizontal dividing lines on mobile/iPad only (<=1024px).
-   Desktop (>1024px) keeps its dividers. Sai, Aug 25 2026.
-   ============================================================ */
-@media (max-width: 1024px) {
-  .site-masthead {
-    border-bottom: 0;
-  }
+/* Match the mobile reading view: no horizontal dividers between the
+   masthead, controls, feed items, pagination or metrics. */
+.site-masthead,
+.topbar,
+.pagination {
+  border-bottom: 0;
+}
 
-  .topbar {
-    border-bottom: 0;
-  }
-
-  .feed {
-    border-top: 0;
-  }
-
-  .feed .item {
-    border-top: 0;
-  }
-
-  .pagination {
-    border-bottom: 0;
-  }
-
-  .metric {
-    border-top: 0;
-  }
+.feed,
+.feed .item,
+.metric {
+  border-top: 0;
 }
