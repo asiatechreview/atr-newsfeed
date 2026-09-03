@@ -28,20 +28,16 @@ a { color: inherit; text-decoration: none; }
 
 /* There is deliberately no enclosing card. The visual weight comes from
    the image, typography and generous space around one featured issue. */
-.newsletter-feature { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 24px; align-items: start; }
-.feature-image { display: block; width: 100%; height: 146px; overflow: hidden; background: #181a16; }
+.newsletter-feature { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 22px; align-items: start; }
+.feature-image { display: block; width: 100%; height: 141px; overflow: hidden; background: #181a16; }
 .feature-image img { display: block; width: 100%; height: 100%; object-fit: cover; }
 
-/* The copy column has a fixed editorial stage. The CTA owns its last row,
-   so changing the title or deck cannot move it. Long copy is capped rather
-   than stretching the component. */
-/* Image and copy share the same fixed editorial stage. The copy has three
-   explicit regions: the title/deck begins at the image top; spare space sits
-   in the middle; Read now always occupies the final baseline. */
-.feature-copy { min-height: 146px; display: grid; grid-template-rows: 1fr auto; align-self: stretch; }
-.feature-copy h1 { display: -webkit-box; margin: 0; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; color: var(--text); font-size: 20px; font-weight: 500; line-height: 1.22; letter-spacing: -.025em; }
-.feature-copy p { display: -webkit-box; margin: 7px 0 0; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; color: var(--muted); font-size: 14px; line-height: 1.4; }
-.read-link { align-self: end; width: max-content; color: var(--accent); font-size: 13px; font-weight: 600; letter-spacing: .01em; }
+/* The text column is the same height as the image. Its top stack starts on
+   the image's top edge and the CTA owns the final line, whatever the copy. */
+.feature-copy { height: 141px; display: flex; flex-direction: column; align-self: stretch; }
+.feature-copy h1 { display: -webkit-box; margin: 0; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; color: var(--text); font-size: 19px; font-weight: 500; line-height: 1.26; letter-spacing: -.02em; }
+.feature-copy p { display: -webkit-box; margin: 6px 0 0; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; color: var(--muted); font-size: 13px; line-height: 1.38; }
+.read-link { align-self: flex-start; margin-top: auto; width: max-content; color: var(--accent); font-size: 13px; font-weight: 600; letter-spacing: .01em; }
 .read-link span { margin-left: 5px; }
 .read-link:hover { color: var(--text); }
 
@@ -49,17 +45,17 @@ a { color: inherit; text-decoration: none; }
 .updates p:last-child { margin: 0; }
 
 body[data-view="ipad"] .viewport { width: min(calc(100% - 48px), 834px); }
-body[data-view="ipad"] .newsletter-feature { grid-template-columns: 280px minmax(0, 1fr); gap: 28px; }
-body[data-view="ipad"] .feature-image { height: 158px; }
-body[data-view="ipad"] .feature-copy { min-height: 158px; }
-body[data-view="ipad"] .feature-copy h1 { font-size: 22px; }
-body[data-view="ipad"] .feature-copy p { font-size: 14px; }
+body[data-view="ipad"] .newsletter-feature { grid-template-columns: 270px minmax(0, 1fr); gap: 24px; }
+body[data-view="ipad"] .feature-image { height: 152px; }
+body[data-view="ipad"] .feature-copy { height: 152px; }
+body[data-view="ipad"] .feature-copy h1 { font-size: 20px; line-height: 1.24; }
+body[data-view="ipad"] .feature-copy p { font-size: 13px; }
 
 @media (max-width: 700px) {
   .viewport { width: min(calc(100% - 32px), 560px); }
   .newsletter-feature { grid-template-columns: 1fr; gap: 18px; }
   .feature-image { height: auto; aspect-ratio: 16 / 9; }
-  .feature-copy { min-height: auto; gap: 18px; }
+  .feature-copy { height: auto; min-height: auto; gap: 18px; }
   .feature-copy h1 { font-size: 26px; }
   .feature-copy p { font-size: 14px; }
 }
