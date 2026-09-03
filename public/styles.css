@@ -1606,6 +1606,115 @@ footer {
   }
 }
 
+/* Approved newsletter treatment for iPad and desktop (Sai, Sep 3 2026).
+   This deliberately starts above the mobile breakpoint: the existing
+   image-first mobile layout is unchanged. */
+@media (min-width: 641px) {
+  .newsletter-block {
+    width: min(100%, 840px);
+    margin: 0 auto 18px;
+  }
+
+  .newsletter-promo {
+    display: grid;
+    grid-template-columns: 250px minmax(0, 1fr);
+    grid-template-rows: 141px;
+    gap: 22px;
+    align-items: start;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .newsletter-image-link {
+    grid-column: 1;
+    grid-row: 1;
+    width: 250px;
+    height: 141px;
+    aspect-ratio: auto;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+  }
+
+  .newsletter-image-link img {
+    border-radius: 0;
+  }
+
+  .newsletter-copy {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    height: 141px;
+    padding: 0;
+  }
+
+  .newsletter-promo h3 {
+    display: -webkit-box;
+    margin: 0;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    font-size: calc(19px * var(--font-scale, 1));
+    font-weight: 600;
+    line-height: 1.26;
+    letter-spacing: -0.02em;
+  }
+
+  .newsletter-promo p:not(.eyebrow) {
+    display: -webkit-box;
+    margin: 6px 0 0;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    font-size: calc(13px * var(--font-scale, 1));
+    line-height: 1.38;
+  }
+
+  .newsletter-link {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: end;
+    justify-self: start;
+    width: max-content;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--newsletter-accent);
+    font: 600 13px/1 var(--font-meta);
+  }
+
+  @media (max-width: 1024px) {
+    .newsletter-promo {
+      grid-template-columns: 270px minmax(0, 1fr);
+      grid-template-rows: 152px;
+      gap: 24px;
+    }
+
+    .newsletter-image-link {
+      width: 270px;
+      height: 152px;
+    }
+
+    .newsletter-copy {
+      height: 152px;
+    }
+
+    .newsletter-promo h3 {
+      font-size: calc(20px * var(--font-scale, 1));
+      line-height: 1.24;
+    }
+  }
+}
+
 /* Match the mobile reading view: no horizontal dividers between the
    masthead, controls, feed items, pagination or metrics. */
 .site-masthead,
