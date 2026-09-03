@@ -1635,13 +1635,13 @@ footer {
     height: 141px;
     aspect-ratio: auto;
     border: 0;
-    border-radius: 0;
+    border-radius: 8px;
     box-shadow: none;
     background: transparent;
   }
 
   .newsletter-image-link img {
-    border-radius: 0;
+    border-radius: 8px;
   }
 
   .newsletter-copy {
