@@ -242,7 +242,10 @@ const state = {
   currentUser: "",
   selectedIds: new Set(),
   source: "",
-  sort: "newest"
+  sort: "newest",
+  sourcesPage: 0,
+  sourcesPageSize: 15,
+  sourcesTotal: 0
 };
 
 const els = {
@@ -350,6 +353,9 @@ const els = {
   sourcesCountDetail: document.querySelector("#sources-count-detail"),
   sourcesHiddenCount: document.querySelector("#sources-hidden-count"),
   sourcesHiddenDetail: document.querySelector("#sources-hidden-detail"),
+  sourcesPageLabel: document.querySelector("#sources-page-label"),
+  sourcesPrevPage: document.querySelector("#sources-prev-page"),
+  sourcesNextPage: document.querySelector("#sources-next-page"),
   opsView: document.querySelector("#ops-view"),
   analyticsView: document.querySelector("#analytics-view"),
   newsletterView: document.querySelector("#newsletter-view"),
@@ -712,6 +718,16 @@ els.tabSources.addEventListener("click", () => {
   switchTab("sources");
   loadSources();
 });
+els.sourcesPrevPage.addEventListener("click", () => {
+  if (state.sourcesPage <= 0) return;
+  state.sourcesPage -= 1;
+  loadSources();
+});
+els.sourcesNextPage.addEventListener("click", () => {
+  if ((state.sourcesPage + 1) * state.sourcesPageSize >= state.sourcesTotal) return;
+  state.sourcesPage += 1;
+  loadSources();
+});
 els.tabCategories.addEventListener("click", () => {
   switchTab("categories");
   loadCategories();
@@ -941,24 +957,24 @@ async function loadItems() {
 async function loadSources() {
   beginLoad();
   try {
-    const pageSize = 500;
-    const allItems = [];
-    let offset = 0;
-    for (;;) {
-      const response = await fetch(`/api/items?status=all&limit=${pageSize}&offset=${offset}&_=${Date.now()}`, {
-        headers: { accept: "application/json", "cache-control": "no-cache" },
-        credentials: "same-origin"
-      });
-      if (response.status === 401) throw new Error("Session expired, sign in again.");
-      if (!response.ok) throw new Error(`/api/items returned ${response.status}`);
-      const payload = await response.json();
-      const page = Array.isArray(payload.items) ? payload.items : [];
-      allItems.push(...page);
-      const total = payload.total != null ? payload.total : allItems.length;
-      if (!page.length || allItems.length >= total) break;
-      offset += pageSize;
+    const offset = state.sourcesPage * state.sourcesPageSize;
+    const response = await fetch(`/api/items?status=all&limit=${state.sourcesPageSize}&offset=${offset}&_=${Date.now()}`, {
+      headers: { accept: "application/json", "cache-control": "no-cache" },
+      credentials: "same-origin"
+    });
+    if (response.status === 401) throw new Error("Session expired, sign in again.");
+    if (!response.ok) throw new Error(`/api/items returned ${response.status}`);
+    const payload = await response.json();
+    const total = Number(payload.total) || 0;
+    if (state.sourcesPage > 0 && offset >= total) {
+      state.sourcesPage = Math.max(0, Math.ceil(total / state.sourcesPageSize) - 1);
+      return loadSources();
     }
-    renderSources(allItems);
+    state.sourcesTotal = total;
+    renderSources(Array.isArray(payload.items) ? payload.items : [], {
+      total,
+      hidden: Number(payload.summary?.hidden) || 0
+    });
   } catch (error) {
     els.sourcesCount.textContent = "Error";
     els.sourcesCountDetail.textContent = error.message;
@@ -986,10 +1002,10 @@ function displayVia(value) {
   return POSTER_LABELS[v] || v;
 }
 
-function renderSources(items) {
+function renderSources(items, summary = {}) {
   els.sourcesBody.replaceChildren();
-  const total = items.length;
-  const hidden = items.filter((item) => item.status === "hidden").length;
+  const total = Number(summary.total) || 0;
+  const hidden = Number(summary.hidden) || 0;
   els.sourcesCount.textContent = String(total);
   els.sourcesCountDetail.textContent = `${hidden} hidden`;
   els.sourcesHiddenCount.textContent = String(hidden);
@@ -997,21 +1013,26 @@ function renderSources(items) {
 
   if (!total) {
     els.sourcesBody.append(emptyTableRow(7, "No items tracked yet."));
-    return;
+  } else {
+    for (const item of items) {
+      const tr = document.createElement("tr");
+      tr.className = item.status === "hidden" ? "item-row item-row-hidden" : "item-row";
+      tr.append(cell(String(item.id), "nowrap id-cell", "ID"));
+      tr.append(cell(item.headline || item.title || firstWords(item.blurb, 12), "truncate", "Title"));
+      tr.append(cell(item.source_name || "-", "truncate", "Source"));
+      tr.append(cell(displayPoster(item.posted_by), "", "Posted by"));
+      tr.append(cell(displayVia(item.posted_via), "", "Via"));
+      tr.append(cell(formatDateTime(item.published_at || item.created_at), "nowrap", "When"));
+      tr.append(cell(item.status === "hidden" ? "Hidden" : "Published", item.status === "hidden" ? "status-error" : "status-ok", "Status"));
+      els.sourcesBody.append(tr);
+    }
   }
 
-  for (const item of items) {
-    const tr = document.createElement("tr");
-    tr.className = item.status === "hidden" ? "item-row item-row-hidden" : "item-row";
-    tr.append(cell(String(item.id), "nowrap id-cell", "ID"));
-    tr.append(cell(item.headline || item.title || firstWords(item.blurb, 12), "truncate", "Title"));
-    tr.append(cell(item.source_name || "-", "truncate", "Source"));
-    tr.append(cell(displayPoster(item.posted_by), "", "Posted by"));
-    tr.append(cell(displayVia(item.posted_via), "", "Via"));
-    tr.append(cell(formatDateTime(item.published_at || item.created_at), "nowrap", "When"));
-    tr.append(cell(item.status === "hidden" ? "Hidden" : "Published", item.status === "hidden" ? "status-error" : "status-ok", "Status"));
-    els.sourcesBody.append(tr);
-  }
+  const start = total ? state.sourcesPage * state.sourcesPageSize + 1 : 0;
+  const end = Math.min((state.sourcesPage + 1) * state.sourcesPageSize, total);
+  els.sourcesPageLabel.textContent = total ? `Showing ${start}–${end} of ${total}` : "No sources to show";
+  els.sourcesPrevPage.disabled = state.sourcesPage === 0;
+  els.sourcesNextPage.disabled = end >= total;
 }
 
 async function loadCategories() {

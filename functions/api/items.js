@@ -326,7 +326,12 @@ export async function loadFeedItems({
   if (mergedItems.length) {
     return {
       items: withHeadlines(mergedItems.slice(normalizedOffset, normalizedOffset + normalizedLimit)),
-      total
+      total,
+      ...(authorized ? {
+        summary: {
+          hidden: mergedItems.filter((item) => item.status === "hidden").length
+        }
+      } : {})
     };
   }
 
@@ -334,7 +339,8 @@ export async function loadFeedItems({
 
   return {
     items: withHeadlines(sheetItems.slice(normalizedOffset, normalizedOffset + normalizedLimit)),
-    total: sheetItems.length
+    total: sheetItems.length,
+    ...(authorized ? { summary: { hidden: 0 } } : {})
   };
 }
 
