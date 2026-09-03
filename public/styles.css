@@ -691,17 +691,15 @@ main {
 }
 
 @media (min-width: 1025px) {
-  /* Keep the complete Share control on the category/time line above the
-     headline. A grid prevents the control itself from drifting with the
-     headline or wrapping independently from the category tag. */
+  /* Keep Share alongside the category tag on the metadata line. */
   .item .meta {
     display: grid;
-    grid-template-columns: max-content max-content minmax(0, 1fr) max-content;
+    grid-template-columns: max-content max-content max-content;
     align-items: center;
   }
 
   .item .meta .item-copy-link {
-    grid-column: 4;
+    grid-column: 3;
     grid-row: 1;
     margin-left: 0;
     flex-shrink: 0;
