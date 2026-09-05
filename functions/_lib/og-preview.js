@@ -6,7 +6,7 @@
 
 export const SITE_NAME = "Asia Tech Review Bulletin";
 export const SITE_URL = "https://bulletin.asiatechreview.com";
-export const OG_IMAGE_PATH = "/og-image.png";
+export const OG_IMAGE_PATH = "/og-image-20260905.png";
 export const OG_IMAGE_URL = `${SITE_URL}${OG_IMAGE_PATH}`;
 export const OG_IMAGE_WIDTH = 1200;
 export const OG_IMAGE_HEIGHT = 630;
