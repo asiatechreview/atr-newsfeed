@@ -280,10 +280,56 @@ function findTab(doc, title) {
   return null;
 }
 
+function pagelessRequest(tabId) {
+  return {
+    updateDocumentStyle: {
+      tabId,
+      documentStyle: { documentFormat: { documentMode: "PAGELESS" } },
+      fields: "documentFormat.documentMode"
+    }
+  };
+}
+
+function tabIsPageless(tab) {
+  return tab?.documentTab?.documentStyle?.documentFormat?.documentMode === "PAGELESS";
+}
+
+async function ensurePagelessTabs(accessToken, docId) {
+  const doc = await docsGet(accessToken, docId);
+  const tabs = flattenTabs(doc.tabs || []);
+  const paginatedTabs = tabs.filter((tab) => !tabIsPageless(tab));
+  if (paginatedTabs.length) {
+    await docsBatchUpdate(accessToken, docId, paginatedTabs.map((tab) => {
+      const tabId = tab.tabProperties?.tabId;
+      if (!tabId) throw new Error("Could not resolve tab ID while setting pageless mode");
+      return pagelessRequest(tabId);
+    }));
+  }
+
+  const verified = await docsGet(accessToken, docId);
+  const failures = flattenTabs(verified.tabs || [])
+    .filter((tab) => !tabIsPageless(tab))
+    .map((tab) => tab.tabProperties?.title || tab.tabProperties?.tabId || "unnamed tab");
+  if (failures.length) {
+    throw new Error(`Pageless verification failed for tab(s): ${failures.join(", ")}`);
+  }
+}
+
 async function getOrCreateTab(accessToken, docId, title) {
   const doc = await docsGet(accessToken, docId);
   const existing = findTab(doc, title);
-  if (existing) return existing;
+  if (existing) {
+    if (!tabIsPageless(existing.tab)) {
+      await docsBatchUpdate(accessToken, docId, [pagelessRequest(existing.tab_id)]);
+      const refreshed = await docsGet(accessToken, docId);
+      const verified = findTab(refreshed, title);
+      if (!verified || !tabIsPageless(verified.tab)) {
+        throw new Error(`Pageless verification failed for existing tab ${title}`);
+      }
+      return verified;
+    }
+    return existing;
+  }
 
   await docsBatchUpdate(accessToken, docId, [
     { addDocumentTab: { tabProperties: { title } } }
@@ -291,7 +337,13 @@ async function getOrCreateTab(accessToken, docId, title) {
   const refreshed = await docsGet(accessToken, docId);
   const created = findTab(refreshed, title);
   if (!created) throw new Error(`Created tab ${title}, but could not find it on readback`);
-  return created;
+  await docsBatchUpdate(accessToken, docId, [pagelessRequest(created.tab_id)]);
+  const verified = await docsGet(accessToken, docId);
+  const pagelessCreated = findTab(verified, title);
+  if (!pagelessCreated || !tabIsPageless(pagelessCreated.tab)) {
+    throw new Error(`Pageless verification failed for newly created tab ${title}`);
+  }
+  return pagelessCreated;
 }
 
 function tabBody(tab) {
@@ -527,6 +579,10 @@ export async function monthlyDocInfo(env, state, notifyFn) {
   const docId = created.id;
   if (!docId) throw new Error("Drive create returned no file id");
 
+  // A new Google Doc starts with a default tab. Set that tab to pageless
+  // before any dated tabs are created, then verify the result on readback.
+  await ensurePagelessTabs(accessToken, docId);
+
   // Share with the configured editor (admin) recipient.
   const shareEmail = env.GATHER_SHARE_EMAIL || "sai@asiatechreview.com";
   await driveShare(accessToken, docId, shareEmail);
@@ -598,6 +654,9 @@ export async function runGather(env, options = {}) {
   }
 
   const accessToken = await googleAccessToken(env);
+  // Google Docs stores DocumentStyle per tab. Reconcile every tab on each
+  // run so old documents and manually added tabs cannot remain paginated.
+  await ensurePagelessTabs(accessToken, docId);
   let totalLinks = 0;
   for (const day of Object.keys(groups).sort()) {
     const items = groups[day];
