@@ -3,6 +3,7 @@ import { loadFeedItems } from "./api/items.js";
 const SITE_TITLE = "Asia Tech Review Bulletin";
 const SITE_URL = "https://bulletin.asiatechreview.com";
 const FEED_URL = `${SITE_URL}/rss.xml`;
+const SITE_ICON_URL = `${SITE_URL}/atr-bulletin-20260905-v2.png`;
 const FEED_LIMIT = 100;
 const CACHE_SECONDS = 300;
 
@@ -16,6 +17,11 @@ export async function onRequestGet({ env }) {
     <link>${escapeXml(SITE_URL)}</link>
     <atom:link href="${escapeXml(FEED_URL)}" rel="self" type="application/rss+xml" />
     <description>Short headline-led Asia tech updates from Asia Tech Review.</description>
+    <image>
+      <url>${escapeXml(SITE_ICON_URL)}</url>
+      <title>${escapeXml(SITE_TITLE)}</title>
+      <link>${escapeXml(SITE_URL)}</link>
+    </image>
     <language>en</language>
     <lastBuildDate>${updatedAt.toUTCString()}</lastBuildDate>
     ${items.map(toRssItem).join("\n    ")}
