@@ -1,6 +1,7 @@
 import { json } from "../../_lib/public-api.js";
 import { linkKeyFor } from "../../_lib/link-key.js";
 import { categoryRules } from "../../_lib/categories.js";
+import { refreshNewsletterCardFromFeed } from "../../_lib/newsletter-refresh.js";
 import {
   clearSchedule,
   istDateKey,
@@ -752,6 +753,28 @@ async function handleGatherCommand(env, request, chatId, text, replyTo = null) {
   }
 }
 
+// /updatess refreshes the Bulletin homepage's Substack card from the same
+// uncached feed used by the Newsletter admin. It is deliberately a direct
+// Worker action: Rapid Transit remains usable when OpenClaw is unavailable.
+async function handleUpdateSubstackCardCommand(env, request, chatId, replyTo = null) {
+  await sendGroupMessage(env, chatId, "Updating the Substack card…", replyTo);
+  try {
+    const result = await refreshNewsletterCardFromFeed(env, request);
+    const item = result.item || {};
+    const subhead = item.subhead || item.blurb || "";
+    const status = result.updated ? "Updated Substack card" : "Substack card already current";
+    const details = [item.title, subhead, item.link].filter(Boolean).join("\n");
+    await sendGroupMessage(env, chatId, `✅ ${status}${details ? `:\n${details}` : ""}`, replyTo);
+  } catch (error) {
+    await sendGroupMessage(
+      env,
+      chatId,
+      `❌ Substack card update failed: ${String(error?.message || error).slice(0, 200)}`,
+      replyTo
+    );
+  }
+}
+
 export async function onRequestPost({ env, request }) {
   // 1. Validate the webhook secret token (set via setWebhook secret_token).
   const secretHeader = request.headers.get("X-Telegram-Bot-Api-Secret-Token");
@@ -782,6 +805,13 @@ export async function onRequestPost({ env, request }) {
   await ensureTables(env);
 
   const text = String(message.text || "").trim();
+
+  // 4a. /updatess: refresh the Bulletin homepage card from the latest
+  // Substack post, including title, subhead, URL and image.
+  if (/^\/updatess(?:@\w+)?(?:\s|$)/i.test(text)) {
+    await handleUpdateSubstackCardCommand(env, request, chatId, message.message_id);
+    return json({ ok: true });
+  }
 
   // 4a. /gather commands: daily gather control from the group.
   if (text.startsWith("/gather")) {
