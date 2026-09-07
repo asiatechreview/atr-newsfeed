@@ -2640,7 +2640,11 @@ async function updateNewsletterNow() {
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || `Refresh returned ${response.status}`);
 
-    const newsletter = result.item || {};
+    const item = result.item || {};
+    // The refresh endpoint reads Substack's RSS description as its subhead.
+    // Map it explicitly into the form field, while retaining blurb for older
+    // responses during deployment rollouts.
+    const newsletter = { ...item, blurb: item.subhead || item.blurb || "" };
     fillNewsletterForm(newsletter);
     renderNewsletterPreview(newsletter);
     els.newsletterStatus.textContent = result.updated ? "Updated to latest post" : "Already current";

@@ -7,7 +7,7 @@ const SUBSTACK_FEED_URL = "https://www.asiatechreview.com/feed";
 // site-content when it differs from what is stored. Used by the scheduled
 // newsletter cron (functions/_scheduled.js) and the manual admin trigger
 // (POST /api/site-content/newsletter/refresh). Returns
-// { updated: boolean, item: { title, blurb, url, image } }.
+// { updated: boolean, item: { title, subhead, blurb, url, image } }.
 export async function refreshNewsletterCardFromFeed(env, request = null) {
   await ensureSiteContentTable(env);
   await ensureOperationalEventsTable(env);
@@ -68,7 +68,10 @@ export async function refreshNewsletterCardFromFeed(env, request = null) {
   await writeSiteContent(env, {
     newsletter: {
       title: item.title,
-      blurb: item.description || item.title,
+      // Substack exposes a post's subhead as the RSS item description.
+      // Keep the explicit field here so a manual refresh cannot overwrite the
+      // card's Subhead with the title or an old stored value.
+      blurb: item.subhead || item.title,
       url: item.link,
       image: item.image || stored.image || ""
     }
@@ -93,11 +96,17 @@ export function parseFirstFeedItem(xml) {
   const block = blockMatch[0];
   const title = decodeEntities(stripTags(extractTag(block, "title")));
   const link = decodeEntities(extractTag(block, "link")).trim();
-  const description = decodeEntities(stripTags(extractTag(block, "description")));
+  // On Substack's RSS feed, <description> is the post subhead. Prefer it,
+  // with itunes:subtitle as a compatibility fallback for other feed shapes.
+  const subhead = decodeEntities(stripTags(
+    extractTag(block, "description") || extractTag(block, "itunes:subtitle")
+  ));
   const imageMatch = block.match(/<enclosure[^>]*url="([^"]+)"/i);
   const image = imageMatch ? decodeEntities(imageMatch[1]) : "";
 
-  return { title, link, description, image };
+  // `blurb` preserves the shape expected by the admin form; `subhead` makes
+  // the source value explicit for callers and readbacks.
+  return { title, subhead, blurb: subhead, link, image };
 }
 
 function extractTag(block, tag) {
