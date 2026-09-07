@@ -2689,7 +2689,14 @@ async function saveNewsletter() {
 async function loadLatestSubstackPost() {
   els.newsletterStatus.textContent = "Fetching";
   try {
-    const feedResponse = await fetch("https://www.asiatechreview.com/feed", { headers: { accept: "application/xml" } });
+    // Do not let a browser or intermediary serve a cached RSS response here.
+    // This is a manual latest-post action, so freshness matters more than reuse.
+    const feedUrl = new URL("https://www.asiatechreview.com/feed");
+    feedUrl.searchParams.set("atr_refresh", String(Date.now()));
+    const feedResponse = await fetch(feedUrl, {
+      cache: "no-store",
+      headers: { accept: "application/xml", "cache-control": "no-cache" }
+    });
     if (!feedResponse.ok) throw new Error(`Feed returned ${feedResponse.status}`);
     const xml = await feedResponse.text();
     const parser = new DOMParser();

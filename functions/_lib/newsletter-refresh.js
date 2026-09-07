@@ -12,9 +12,16 @@ export async function refreshNewsletterCardFromFeed(env, request = null) {
   await ensureSiteContentTable(env);
   await ensureOperationalEventsTable(env);
 
-  const feedResponse = await fetch(SUBSTACK_FEED_URL, {
+  // A bare feed URL has occasionally returned a stale Substack response to
+  // the Worker. Give each refresh a unique URL and explicitly bypass caches:
+  // a manual "Fetch latest" must never replace the card with an older post.
+  const feedUrl = new URL(SUBSTACK_FEED_URL);
+  feedUrl.searchParams.set("atr_refresh", String(Date.now()));
+  const feedResponse = await fetch(feedUrl.toString(), {
+    cache: "no-store",
     headers: {
       accept: "application/xml",
+      "cache-control": "no-cache",
       "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"
     }
   });
