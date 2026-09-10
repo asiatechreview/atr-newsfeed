@@ -121,8 +121,8 @@ if (!adminHtml.includes("newsletter-update-now") || !adminHtml.includes("newslet
   console.error("admin assets must expose a manual newsletter refresh trigger and live preview");
   process.exit(1);
 }
-if (!adminScript.includes("function newsletterImageProxyUrl") || !adminScript.includes("els.previewNewsletterImage.src = newsletterImageProxyUrl(image) || image")) {
-  console.error("admin newsletter preview must render Substack images through the same proxy as the public card");
+if (!adminScript.includes("function newsletterImageProxyUrl") || !adminScript.includes("function setNewsletterPreviewImage") || !adminScript.includes("const optimised = newsletterImageProxyUrl(source)") || !adminScript.includes("preview.src = source")) {
+  console.error("admin newsletter preview must use the public card image path and fall back to its stored source");
   process.exit(1);
 }
 if (!adminScript.includes("renderNewsletterPreview(newsletter)") || !adminScript.includes('els.newsletterStatus.textContent = "Saved"')) {

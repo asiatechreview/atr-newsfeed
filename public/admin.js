@@ -459,6 +459,25 @@ function newsletterImageProxyUrl(value) {
   }
 }
 
+function setNewsletterPreviewImage(imageUrl) {
+  const source = String(imageUrl || "").trim();
+  if (!source) {
+    els.previewNewsletterImage.removeAttribute("src");
+    els.previewNewsletterImage.hidden = true;
+    return;
+  }
+
+  const preview = els.previewNewsletterImage;
+  const optimised = newsletterImageProxyUrl(source);
+  preview.hidden = false;
+  preview.onerror = () => {
+    // The card data is the source of truth. A failed image optimisation must
+    // not turn an otherwise valid Substack image into a blank admin preview.
+    if (preview.src !== source) preview.src = source;
+  };
+  preview.src = optimised || source;
+}
+
 function switchTab(name) {
   const publish = name === "publish";
   const live = name === "live";
@@ -2617,13 +2636,7 @@ function renderNewsletterPreview(newsletter) {
   if (previewEmpty) previewEmpty.hidden = Boolean(title || url || image || blurb);
   if (els.newsletterPreview) els.newsletterPreview.hidden = !(title || url || image || blurb);
 
-  if (image) {
-    els.previewNewsletterImage.src = newsletterImageProxyUrl(image) || image;
-    els.previewNewsletterImage.hidden = false;
-  } else {
-    els.previewNewsletterImage.removeAttribute("src");
-    els.previewNewsletterImage.hidden = true;
-  }
+  setNewsletterPreviewImage(image);
 
   els.newsletterPreviewStatus.textContent = "Live from /api/site-content";
 }
