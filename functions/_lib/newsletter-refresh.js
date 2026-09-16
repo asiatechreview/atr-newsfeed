@@ -12,28 +12,28 @@ export async function refreshNewsletterCardFromFeed(env, request = null) {
   await ensureSiteContentTable(env);
   await ensureOperationalEventsTable(env);
 
-  // A bare feed URL has occasionally returned a stale Substack response to
-  // the Worker. Give each refresh a unique URL and explicitly bypass caches:
-  // a manual "Fetch latest" must never replace the card with an older post.
-  const feedUrl = new URL(SUBSTACK_FEED_URL);
-  feedUrl.searchParams.set("atr_refresh", String(Date.now()));
-  const feedResponse = await fetch(feedUrl.toString(), {
-    cache: "no-store",
-    headers: {
-      accept: "application/xml",
-      "cache-control": "no-cache",
-      "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"
-    }
-  });
+  // Read this before contacting Substack. If its feed temporarily rate-limits
+  // us, a manual refresh must preserve the existing verified card instead of
+  // surfacing a dead-end error to Telegram.
+  const content = await readSiteContent(env);
+  const stored = content.newsletter || {};
+
+  const feedResponse = await fetchFreshFeedWithRetry();
   if (!feedResponse.ok) {
+    const fallbackItem = stored.url && stored.title
+      ? { title: stored.title, subhead: stored.blurb || "", blurb: stored.blurb || "", link: stored.url, image: stored.image || "" }
+      : null;
     await writeOperationalEvent(env, request, {
       workflow: "site_content",
       action: "newsletter_auto_refresh",
-      status: "error",
-      severity: "error",
+      status: fallbackItem ? "degraded" : "error",
+      severity: fallbackItem ? "warning" : "error",
       http_status: feedResponse.status,
-      message: `Newsletter auto-refresh failed: feed returned ${feedResponse.status}.`
+      message: fallbackItem
+        ? `Newsletter refresh retained the existing card after feed returned ${feedResponse.status}.`
+        : `Newsletter auto-refresh failed: feed returned ${feedResponse.status}.`
     });
+    if (fallbackItem) return { updated: false, item: fallbackItem, fallback: true, feedStatus: feedResponse.status };
     throw new Error(`Feed returned ${feedResponse.status}`);
   }
 
@@ -49,9 +49,6 @@ export async function refreshNewsletterCardFromFeed(env, request = null) {
     });
     throw new Error("No usable item in feed");
   }
-
-  const content = await readSiteContent(env);
-  const stored = content.newsletter || {};
 
   if (item.link === stored.url) {
     await writeOperationalEvent(env, request, {
@@ -87,6 +84,38 @@ export async function refreshNewsletterCardFromFeed(env, request = null) {
   });
 
   return { updated: true, item };
+}
+
+async function fetchFreshFeedWithRetry() {
+  // Substack can rate-limit an uncached Worker fetch. Retry only 429/5xx,
+  // honouring Retry-After where available, then let the caller retain the
+  // known-good card rather than claiming the update failed.
+  let response;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const feedUrl = new URL(SUBSTACK_FEED_URL);
+    feedUrl.searchParams.set("atr_refresh", `${Date.now()}-${attempt}`);
+    response = await fetch(feedUrl.toString(), {
+      cache: "no-store",
+      headers: {
+        accept: "application/xml",
+        "cache-control": "no-cache",
+        "user-agent": "Mozilla/5.0 (compatible; ATR-Newsfeed/1.0)"
+      }
+    });
+    if (response.ok || (response.status !== 429 && response.status < 500)) return response;
+    if (attempt < 2) await delay(retryDelayMs(response, attempt));
+  }
+  return response;
+}
+
+function retryDelayMs(response, attempt) {
+  const retryAfter = Number(response.headers.get("retry-after"));
+  if (Number.isFinite(retryAfter) && retryAfter > 0) return Math.min(retryAfter * 1000, 8000);
+  return 800 * (attempt + 1);
+}
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export function parseFirstFeedItem(xml) {
