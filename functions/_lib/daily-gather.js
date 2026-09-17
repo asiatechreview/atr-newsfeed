@@ -360,10 +360,9 @@ function bodyEndIndex(body) {
 
 function runTimestampHeader() {
   const now = istNow();
-  const month = new Intl.DateTimeFormat("en-US", { month: "long", timeZone: "UTC" }).format(now);
   const hh = String(now.getUTCHours()).padStart(2, "0");
   const mm = String(now.getUTCMinutes()).padStart(2, "0");
-  return `[Run at ${hh}:${mm} IST, ${month} ${now.getUTCDate()} ${now.getUTCFullYear()}]`;
+  return `[Run at ${hh}:${mm} IST]`;
 }
 
 function buildDocText(items) {
