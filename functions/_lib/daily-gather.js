@@ -358,6 +358,14 @@ function bodyEndIndex(body) {
   return Number(content[content.length - 1].endIndex || 1);
 }
 
+function runTimestampHeader() {
+  const now = istNow();
+  const month = new Intl.DateTimeFormat("en-US", { month: "long", timeZone: "UTC" }).format(now);
+  const hh = String(now.getUTCHours()).padStart(2, "0");
+  const mm = String(now.getUTCMinutes()).padStart(2, "0");
+  return `[Run at ${hh}:${mm} IST, ${month} ${now.getUTCDate()} ${now.getUTCFullYear()}]`;
+}
+
 function buildDocText(items) {
   let text = "";
   const linkRanges = [];
@@ -458,10 +466,18 @@ async function writeTab(accessToken, docId, target, items, replace = false) {
     }
     insertIndex = 1;
   } else {
+    // Same-date re-run: the tab already has content and we are appending only
+    // the missing items. Prefix a run timestamp so old and new entries are
+    // distinguishable in the doc (rule from Sai, Sep 16 2026).
     insertIndex = end - 1;
+    let prefix = "";
     if (existingText && !existingText.endsWith("\n\n")) {
-      text = "\n" + text;
+      prefix += "\n";
     }
+    const headerBlock = `${runTimestampHeader()}\n\n`;
+    prefix += headerBlock;
+    text = prefix + text;
+    linkRanges = linkRanges.map(([start, finish, url]) => [start + prefix.length, finish + prefix.length, url]);
   }
 
   if (text) {
