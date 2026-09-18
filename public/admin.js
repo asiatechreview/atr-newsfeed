@@ -242,6 +242,7 @@ const state = {
   currentUser: "",
   selectedIds: new Set(),
   source: "",
+  sources: [],
   sort: "newest",
   sourcesPage: 0,
   sourcesPageSize: 15,
@@ -555,6 +556,7 @@ async function checkSession() {
       els.authPanel.hidden = true;
       await loadCategories();
       await loadItems();
+      loadSourceOptions();
       startNewItem();
       loadOps();
       loadAnalytics();
@@ -818,7 +820,8 @@ els.categoryFilter.addEventListener("change", () => {
 });
 els.sourceFilter?.addEventListener("change", () => {
   state.source = els.sourceFilter.value;
-  filterItems();
+  // Server-side filter: jump to page 1 and page through that source's items.
+  fetchPage(1);
 });
 els.sortOrder?.addEventListener("change", () => {
   state.sort = els.sortOrder.value;
@@ -971,7 +974,7 @@ async function fetchPage(targetPage) {
   const pageSize = 25;
   const offset = (targetPage - 1) * pageSize;
   try {
-    const response = await fetch(`/api/items?status=all&limit=${pageSize}&offset=${offset}&_=${Date.now()}`, {
+    const response = await fetch(`/api/items?status=all&limit=${pageSize}&offset=${offset}&source=${encodeURIComponent(state.source || "")}&_=${Date.now()}`, {
       headers: { accept: "application/json", "cache-control": "no-cache" }
     });
     if (response.status === 401) {
@@ -1719,23 +1722,57 @@ function populateCategoryFilter() {
   }
   els.categoryFilter.value = state.category;
 
-  // Source filter options, derived from loaded items.
-  const sources = new Set();
-  for (const item of state.items) {
-    if (item.source_name) sources.add(item.source_name);
-  }
+  // Source filter options. Prefer the exhaustive server list; fall back to
+  // whatever is currently loaded so the dropdown is never empty mid-load.
+  const sources = state.sources.length
+    ? [...state.sources]
+    : [...new Set(state.items.map((item) => item.source_name).filter(Boolean))];
   els.sourceFilter.replaceChildren();
   const allSources = document.createElement("option");
   allSources.value = "";
   allSources.textContent = "All sources";
   els.sourceFilter.append(allSources);
-  for (const name of [...sources].sort((a, b) => a.localeCompare(b))) {
+  for (const name of [...sources].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }))) {
     const opt = document.createElement("option");
     opt.value = name;
     opt.textContent = name;
     els.sourceFilter.append(opt);
   }
   els.sourceFilter.value = state.source;
+}
+
+// Populate the exhaustive source list for the dropdown (all publishers, not
+// just those on the currently loaded page). Fetched once on boot.
+async function loadSourceOptions() {
+  try {
+    const response = await fetch("/api/admin/sources", {
+      headers: { accept: "application/json", "cache-control": "no-cache" },
+      credentials: "same-origin"
+    });
+    if (response.status === 401) return;
+    if (!response.ok) return;
+    const payload = await response.json();
+    if (Array.isArray(payload.sources)) {
+      state.sources = payload.sources;
+      if (els.sourceFilter) {
+        const current = state.source;
+        els.sourceFilter.replaceChildren();
+        const allSources = document.createElement("option");
+        allSources.value = "";
+        allSources.textContent = "All sources";
+        els.sourceFilter.append(allSources);
+        for (const name of [...state.sources].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }))) {
+          const opt = document.createElement("option");
+          opt.value = name;
+          opt.textContent = name;
+          els.sourceFilter.append(opt);
+        }
+        els.sourceFilter.value = current;
+      }
+    }
+  } catch {
+    // Non-fatal; the dropdown falls back to loaded items.
+  }
 }
 
 

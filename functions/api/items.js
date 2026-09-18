@@ -227,6 +227,7 @@ export async function onRequestGet({ env, request }) {
   const limit = Math.min(Number(url.searchParams.get("limit")) || DEFAULT_LIMIT, MAX_LIMIT);
   const offset = Math.max(0, Number(url.searchParams.get("offset")) || 0);
   const category = url.searchParams.get("category");
+  const source = url.searchParams.get("source");
   const date = parseDateParam(url.searchParams.get("date"));
   const statusParam = url.searchParams.get("status");
   const includeHidden = statusParam === "all" || statusParam === "removed" || url.searchParams.get("includeHidden") === "1";
@@ -242,6 +243,7 @@ export async function onRequestGet({ env, request }) {
     limit,
     offset,
     category,
+    source,
     date,
     statusParam,
     authorized
@@ -255,6 +257,7 @@ export async function loadFeedItems({
   limit = DEFAULT_LIMIT,
   offset = 0,
   category = "",
+  source = "",
   date = "",
   statusParam = "",
   authorized = false
@@ -283,6 +286,11 @@ export async function loadFeedItems({
     params.push(category);
   }
 
+  if (source) {
+    query += " AND source_name = ?";
+    params.push(source);
+  }
+
   const dateBounds = date ? bangkokDateBounds(date) : null;
   if (dateBounds) {
     query += " AND published_at >= ? AND published_at < ?";
@@ -298,7 +306,7 @@ export async function loadFeedItems({
     const result = await env.ATR_FEED_DB.prepare(query).bind(...params).all();
     d1Items = result.results || [];
   } catch (error) {
-    d1Items = await loadD1ItemsWithoutHeadline({ env, category, limit: queryLimit });
+    d1Items = await loadD1ItemsWithoutHeadline({ env, category, source, limit: queryLimit });
   }
 
   // Static archive items (md-*, html-*, manual-telegram-*) live in code and
@@ -313,7 +321,7 @@ export async function loadFeedItems({
   const d1SourceUrls = new Set(d1Items.map((d1) => String(d1.source_url || "").toLowerCase()).filter(Boolean));
   const staticItems = statusParam === "removed" || !shouldLoadStaticItems
     ? []
-    : loadStaticItems({ limit: staticLimit || normalizedLimit, category })
+    : loadStaticItems({ limit: staticLimit || normalizedLimit, category, source })
         .filter((item) => {
           if (!item?.source_url) return true;
           const url = String(item.source_url).toLowerCase();
@@ -335,7 +343,7 @@ export async function loadFeedItems({
     };
   }
 
-  const sheetItems = await loadSheetItems({ category, date });
+  const sheetItems = await loadSheetItems({ category, source, date });
 
   return {
     items: withHeadlines(sheetItems.slice(normalizedOffset, normalizedOffset + normalizedLimit)),
@@ -379,9 +387,9 @@ export function mergeItems(...groups) {
     });
 }
 
-export function loadStaticItems({ limit, category, date }) {
+export function loadStaticItems({ limit, category, source, date }) {
   return STATIC_ITEMS
-    .filter((item) => item && (!category || item.category === category) && (!date || dateKey(item.published_at) === date))
+    .filter((item) => item && (!category || item.category === category) && (!source || item.source_name === source) && (!date || dateKey(item.published_at) === date))
     .sort((a, b) => {
       const aTime = new Date(a.published_at).getTime() || 0;
       const bTime = new Date(b.published_at).getTime() || 0;
@@ -1036,13 +1044,18 @@ function isAuthorized(env, request) {
   return isAdmin(env, request);
 }
 
-async function loadD1ItemsWithoutHeadline({ env, category, limit = INTERNAL_FETCH_LIMIT }) {
+async function loadD1ItemsWithoutHeadline({ env, category, source, limit = INTERNAL_FETCH_LIMIT }) {
   let query = "SELECT id, blurb, source_name, source_url, category, telegram_message_id, published_at, created_at FROM feed_items WHERE status = ?";
   const params = ["published"];
 
   if (category) {
     query += " AND category = ?";
     params.push(category);
+  }
+
+  if (source) {
+    query += " AND source_name = ?";
+    params.push(source);
   }
 
   query += " ORDER BY published_at DESC, id DESC LIMIT ?";
@@ -1371,7 +1384,7 @@ function deriveHeadline(blurb) {
   return limitHeadline(clauses[0].trim());
 }
 
-export async function loadSheetItems({ category, date }) {
+export async function loadSheetItems({ category, source, date }) {
   const response = await fetch(SHEET_CSV_URL);
   if (!response.ok) {
     throw new Error(`Feed sheet returned ${response.status}`);
@@ -1379,7 +1392,7 @@ export async function loadSheetItems({ category, date }) {
 
   return parseCsv(await response.text())
     .map(normalizeSheetItem)
-    .filter((item) => item && (!category || item.category === category) && (!date || dateKey(item.published_at) === date))
+    .filter((item) => item && (!category || item.category === category) && (!source || item.source_name === source) && (!date || dateKey(item.published_at) === date))
     .sort((a, b) => {
       const aTime = new Date(a.published_at).getTime() || 0;
       const bTime = new Date(b.published_at).getTime() || 0;
