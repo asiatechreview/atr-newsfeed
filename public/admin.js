@@ -1628,8 +1628,8 @@ function cell(value, className = "", label = "") {
   return td;
 }
 
-function filterItems() {
-  state.page = 1;
+function filterItems(preservePage = false) {
+  if (!preservePage) state.page = 1;
   const query = els.searchInput.value.trim().toLowerCase();
   const category = state.category;
   const source = state.source;
@@ -2063,10 +2063,10 @@ async function saveItemCategory(item, newCategory) {
       item.category = newCategory;
     }
     setStatus("Saved", `Category updated for item ${item.id}`);
-    filterItems();
+    filterItems(true);
   } catch (error) {
     setStatus("Error", error.message);
-    filterItems();
+    filterItems(true);
   }
 }
 
@@ -2106,10 +2106,10 @@ async function toggleItemVisibility(item) {
     const idx = state.items.findIndex((candidate) => String(candidate.id) === String(item.id));
     if (idx >= 0) state.items[idx] = { ...state.items[idx], status: updated?.status || next };
     setStatus("Saved", `Item ${item.id} is now ${updated?.status === "hidden" ? "hidden" : "visible"} on the public site`);
-    filterItems();
+    filterItems(true);
   } catch (error) {
     setStatus("Error", error.message);
-    filterItems();
+    filterItems(true);
   }
 }
 
