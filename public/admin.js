@@ -245,7 +245,9 @@ const state = {
   sort: "newest",
   sourcesPage: 0,
   sourcesPageSize: 15,
-  sourcesTotal: 0
+  sourcesTotal: 0,
+  apiTotal: 0,
+  loadingMore: false
 };
 
 const els = {
@@ -951,7 +953,7 @@ async function loadItems() {
   try {
     // Load only the latest batch on first paint so the page renders
     // instantly instead of paging through the whole archive first.
-    const pageSize = 50;
+    const pageSize = 25;
     const response = await fetch(`/api/items?status=all&limit=${pageSize}&offset=0&_=${Date.now()}`, {
       headers: { accept: "application/json", "cache-control": "no-cache" }
     });
@@ -963,6 +965,7 @@ async function loadItems() {
     const allItems = Array.isArray(payload.items) ? payload.items : [];
 
     state.items = allItems;
+    state.apiTotal = Number(payload.total) || allItems.length;
     populateCategoryFilter();
     filterItems();
     setStatus("Ready", `Loaded ${allItems.length} items`);
@@ -970,6 +973,38 @@ async function loadItems() {
     setStatus("Error", error.message);
   } finally {
     endLoad();
+  }
+}
+
+// Fetch the next batch of items from the server and append them to the
+// already-loaded set, so Next can keep paging through the full archive
+// instead of being capped at the initial load. Keeps first paint small.
+async function loadMoreItems() {
+  if (state.loadingMore) return;
+  state.loadingMore = true;
+  try {
+    const offset = state.items.length;
+    const response = await fetch(`/api/items?status=all&limit=25&offset=${offset}&_=${Date.now()}`, {
+      headers: { accept: "application/json", "cache-control": "no-cache" }
+    });
+    if (response.status === 401) {
+      throw new Error("Admin session expired, sign in again.");
+    }
+    if (!response.ok) throw new Error(`/api/items returned ${response.status}`);
+    const payload = await response.json();
+    const batch = Array.isArray(payload.items) ? payload.items : [];
+    const existing = new Set(state.items.map((it) => String(it.id)));
+    for (const item of batch) {
+      if (!existing.has(String(item.id))) {
+        state.items.push(item);
+        existing.add(String(item.id));
+      }
+    }
+    state.apiTotal = Number(payload.total) || state.apiTotal;
+  } catch (error) {
+    setStatus("Error", error.message);
+  } finally {
+    state.loadingMore = false;
   }
 }
 
@@ -1972,7 +2007,7 @@ function renderListPagination(total) {
   if (!wrap) return;
   wrap.replaceChildren();
   const totalPages = Math.max(1, Math.ceil(total / ITEMS_PER_PAGE));
-  if (totalPages <= 1) return;
+  const hasMoreToLoad = state.apiTotal > state.items.length;
 
   const prev = document.createElement("button");
   prev.type = "button";
@@ -1987,15 +2022,21 @@ function renderListPagination(total) {
 
   const label = document.createElement("span");
   label.className = "pagination-label";
-  label.textContent = `Page ${state.page} of ${totalPages}`;
+  label.textContent = hasMoreToLoad && state.page >= totalPages ? `Page ${state.page}` : `Page ${state.page} of ${totalPages}`;
   wrap.append(label);
 
   const next = document.createElement("button");
   next.type = "button";
   next.className = "btn btn-ghost";
   next.textContent = "Next";
-  next.disabled = state.page >= totalPages;
-  next.addEventListener("click", () => {
+  next.disabled = state.page >= totalPages && !hasMoreToLoad;
+  next.addEventListener("click", async () => {
+    // If we're on the last page of what's loaded and there's more on the
+    // server, fetch the next batch first so Next can keep paging forward.
+    if (state.page >= totalPages && hasMoreToLoad) {
+      await loadMoreItems();
+      filterItems(true);
+    }
     state.page += 1;
     renderList();
   });
