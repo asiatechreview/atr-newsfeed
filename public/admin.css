@@ -467,6 +467,23 @@ select.input { appearance: none; padding-right: 30px; min-height: 38px; backgrou
 }
 .cat-pill:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
+/* Copy-link icon button in the Live Items table Link column. */
+.link-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border: 1px solid var(--border-2);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  line-height: 0;
+}
+.link-icon-btn:hover { background: var(--surface-3); color: var(--body); }
+.link-icon-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.link-icon-btn svg { display: block; }
+
 .ai-assist-row { display: flex; gap: 6px; align-items: flex-start; }
 .ai-assist-row .input, .ai-assist-row .textarea { flex: 1; }
 .ai-assist-top { align-items: stretch; }

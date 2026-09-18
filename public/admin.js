@@ -1940,14 +1940,24 @@ function renderList() {
     const linkTd = document.createElement("td");
     linkTd.dataset.label = "Link";
     linkTd.className = "truncate";
-    const linkA = document.createElement("a");
-    linkA.href = linkUrl;
-    linkA.target = "_blank";
-    linkA.rel = "noopener";
-    linkA.textContent = linkUrl;
-    linkA.title = linkUrl;
-    linkA.addEventListener("click", (event) => event.stopPropagation());
-    linkTd.append(linkA);
+    const linkBtn = document.createElement("button");
+    linkBtn.type = "button";
+    linkBtn.className = "link-icon-btn";
+    linkBtn.title = linkUrl;
+    linkBtn.setAttribute("aria-label", "Copy link");
+    linkBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
+    linkBtn.addEventListener("click", async (event) => {
+      event.stopPropagation();
+      try {
+        await navigator.clipboard.writeText(linkUrl);
+        const prev = linkBtn.title;
+        linkBtn.title = "Copied";
+        setTimeout(() => { linkBtn.title = prev; }, 1200);
+      } catch {
+        setStatus("Error", "Could not copy link");
+      }
+    });
+    linkTd.append(linkBtn);
     tr.append(linkTd);
     tbody.append(tr);
   }
