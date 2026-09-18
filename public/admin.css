@@ -677,15 +677,13 @@ th.id-cell { width: 80px; }
 }
 .tags-icon:hover .tags-tooltip,
 .title-cell:hover .title-tooltip { display: block; }
-.title-cell { position: relative; max-width: 260px; }
+.title-cell { position: relative; }
 .title-chip {
   display: block;
-  max-width: 260px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   font-weight: 600;
   color: var(--text);
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 /* ============ PAGINATION ============ */
