@@ -1807,7 +1807,7 @@ function renderList() {
   });
   checkTh.append(selectAll);
   headRow.append(checkTh);
-  for (const label of ["ID", "Title", "Publisher", "Category", "Tags", "Published", "Visible", "Link"]) {
+  for (const label of ["ID", "Title", "Publisher", "Category", "Published", "Visible", "Link"]) {
     const th = document.createElement("th");
     th.textContent = label;
     if (label === "ID") th.className = "id-cell";
@@ -1893,7 +1893,6 @@ function renderList() {
 
     catTd.append(buildCatPill());
     tr.append(catTd);
-    tr.append(tagsIconCell(item.tags));
     tr.append(cell(formatDateTime(item.published_at), "nowrap", "Published"));
 
     // Visible toggle: iOS-style switch for hide/show on the public site.
