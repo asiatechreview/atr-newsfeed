@@ -2152,15 +2152,6 @@ function titleCell(item) {
   chip.textContent = title;
   td.append(chip);
 
-  const blurb = String(item.blurb || "").trim();
-  if (blurb) {
-    const tooltip = document.createElement("span");
-    tooltip.className = "title-tooltip";
-    tooltip.setAttribute("role", "tooltip");
-    tooltip.textContent = blurb;
-    td.append(tooltip);
-  }
-
   return td;
 }
 

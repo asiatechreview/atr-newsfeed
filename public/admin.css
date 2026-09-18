@@ -661,7 +661,7 @@ th.id-cell { width: 80px; }
 }
 .tags-icon { cursor: default; color: var(--faint); position: relative; }
 .tags-count { font-size: 11px; color: var(--muted); }
-.tags-tooltip, .title-tooltip {
+.tags-tooltip {
   position: absolute;
   display: none;
   background: var(--surface-1);
@@ -675,8 +675,7 @@ th.id-cell { width: 80px; }
   max-width: 320px;
   white-space: normal;
 }
-.tags-icon:hover .tags-tooltip,
-.title-cell:hover .title-tooltip { display: block; }
+.tags-icon:hover .tags-tooltip { display: block; }
 .title-cell { position: relative; }
 .title-chip {
   display: block;
