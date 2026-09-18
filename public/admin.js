@@ -595,7 +595,13 @@ els.tokenButton.addEventListener("click", () => {
 });
 
 els.tabPublish.addEventListener("click", () => switchTab("publish"));
-els.tabLive.addEventListener("click", () => switchTab("live"));
+els.tabLive.addEventListener("click", () => {
+  switchTab("live");
+  // Refresh the category and source options so the dropdown reflects any
+  // category edits made since boot.
+  loadCategories();
+  loadSourceOptions();
+});
 // ---------------------------------------------------------------------------
 // AI assist (Qwen via /api/ai-assist). Advisory only; every result is
 // inserted into the form for Sai/Jon to review before saving.
@@ -1701,20 +1707,18 @@ function populateCategoryFilter() {
     counts.set(cat, (counts.get(cat) || 0) + 1);
   }
 
-  // The category table is the source of truth. Include any item-only legacy
-  // values while they are being cleaned up, but never resurrect deleted seeds.
-  const canonical = [...state.categories];
-  const extras = [...counts.keys()]
-    .filter((cat) => !canonical.includes(cat))
-    .sort((a, b) => (counts.get(b) || 0) - (counts.get(a) || 0) || a.localeCompare(b));
-  state.categories = [...new Set([...canonical, ...extras])].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+  // The categories table (state.categories, loaded from /api/admin/categories)
+  // is the single source of truth for the dropdown. Do NOT mutate it with
+  // item-only legacy values here, otherwise deleted/renamed categories keep
+  // resurfacing and the list drifts from the real category set.
+  const canonical = [...state.categories].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
 
   els.categoryFilter.replaceChildren();
   const all = document.createElement("option");
   all.value = "";
   all.textContent = "All categories";
   els.categoryFilter.append(all);
-  for (const cat of state.categories) {
+  for (const cat of canonical) {
     const opt = document.createElement("option");
     opt.value = cat;
     opt.textContent = `${cat} (${counts.get(cat) || 0})`;
