@@ -822,7 +822,8 @@ els.dashboardWindow.addEventListener("change", () => loadDashboard());
 els.searchInput.addEventListener("input", filterItems);
 els.categoryFilter.addEventListener("change", () => {
   state.category = els.categoryFilter.value;
-  filterItems();
+  // Server-side filter: jump to page 1 and page through that category's items.
+  fetchPage(1);
 });
 els.sourceFilter?.addEventListener("change", () => {
   state.source = els.sourceFilter.value;
@@ -980,7 +981,7 @@ async function fetchPage(targetPage) {
   const pageSize = 25;
   const offset = (targetPage - 1) * pageSize;
   try {
-    const response = await fetch(`/api/items?status=all&limit=${pageSize}&offset=${offset}&source=${encodeURIComponent(state.source || "")}&_=${Date.now()}`, {
+    const response = await fetch(`/api/items?status=all&limit=${pageSize}&offset=${offset}&source=${encodeURIComponent(state.source || "")}&category=${encodeURIComponent(state.category || "")}&_=${Date.now()}`, {
       headers: { accept: "application/json", "cache-control": "no-cache" }
     });
     if (response.status === 401) {
@@ -1106,6 +1107,10 @@ async function loadCategories() {
         }
       });
     state.categories = categories.map((cat) => cat.name);
+    state.categoryCounts = {};
+    for (const cat of categories) {
+      state.categoryCounts[cat.name] = Number(cat.count) || 0;
+    }
     renderCategories(categories);
   } catch (error) {
     els.categoriesCount.textContent = "Error";
@@ -1707,8 +1712,10 @@ function populateCategoryFilter() {
     counts.set(cat, (counts.get(cat) || 0) + 1);
   }
 
-  // The categories table (state.categories, loaded from /api/admin/categories)
-  // is the single source of truth for the dropdown. Do NOT mutate it with
+  // The categories table (state.categories + state.categoryCounts, loaded from
+  // /api/admin/categories) is the single source of truth for the dropdown. Show
+  // ARCHIVE-wide counts (all items ever posted per category), not the count of
+  // items in the currently loaded page. Do NOT mutate state.categories with
   // item-only legacy values here, otherwise deleted/renamed categories keep
   // resurfacing and the list drifts from the real category set.
   const canonical = [...state.categories].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
@@ -1721,7 +1728,7 @@ function populateCategoryFilter() {
   for (const cat of canonical) {
     const opt = document.createElement("option");
     opt.value = cat;
-    opt.textContent = `${cat} (${counts.get(cat) || 0})`;
+    opt.textContent = `${cat} (${state.categoryCounts[cat] || 0})`;
     els.categoryFilter.append(opt);
   }
   els.categoryFilter.value = state.category;
