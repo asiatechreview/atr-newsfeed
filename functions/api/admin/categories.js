@@ -92,8 +92,7 @@ export async function onRequestPatch({ env, request }) {
     await updateCategory(env, {
       name: clean(body.name),
       newName: body.newName === undefined ? undefined : clean(body.newName),
-      pattern: body.pattern === undefined ? undefined : clean(body.pattern),
-      sortOrder: body.sortOrder
+      pattern: body.pattern === undefined ? undefined : clean(body.pattern)
     });
     await writeOperationalEvent(env, request, {
       workflow: "categories",

@@ -32,8 +32,8 @@ export async function ensureCategoriesTable(env) {
 export const SEED_CATEGORIES = [
   { name: "WAIC 2026", pattern: "\\bwaic\\b" },
   { name: "Cloud", pattern: "\\b(cloud|data centre|data center|data centres|data centers|hyperscaler|hyperscalers|aws|azure|google cloud|alibaba cloud|tencent cloud|huawei cloud|cloud computing|cloud services|cloud infrastructure|infrastructure-as-a-service|iaas|saas|paas)\\b" },
-  { name: "AI", pattern: "\\b(ai|artificial intelligence|llm|multimodal|foundation model|claude|openai|anthropic|deepseek|minimax|moonshot|agentic|distillation|language model|chatbot|inference|model (?:training|release|launch))\\b" },
-  { name: "Chips", pattern: "\\b(chip|chips|chipmaker|chipmaking|semiconductor|semiconductors|integrated circuit|tsmc|sk hynix|hynix|cxmt|silicon|photonics|fab|foundry|packaging|hbm|memory chips?|gpu|cpu|flash memory|nand|dram|logic chip|wafer|mlcc|chip equipment|euv|equipment maker)\\b" },
+  { name: "AI", pattern: "\\b(ai|artificial intelligence|llm|multimodal|foundation model|claude|openai|anthropic|deepseek|minimax|moonshot|agentic|nvidia|distillation|gpu)\\b" },
+  { name: "Chips", pattern: "\\b(chip|chips|chipmaker|chipmaking|semiconductor|semiconductors|integrated circuit|tsmc|sk hynix|hynix|cxmt|silicon|photonics|fab|foundry|packaging|hbm|memory chips?)\\b" },
   { name: "Robotics", pattern: "\\b(robot|robots|robotics|humanoid|robotaxi|robotaxis|unitree|agibot|ubtech|boston dynamics|figure|digit robot)\\b" },
   { name: "EVs", pattern: "\\b(electric vehicle|electric vehicles|evs?|ev maker|ev makers|ev battery|ev charging|charging network|ev startup)\\b" },
   { name: "Transportation", pattern: "\\b(transportation|transport|logistics|shipping|airline|airlines|aviation|airport|airports|railway|railways|rail|train|trains|port|ports|freight|trucking|courier|delivery)\\b" },
@@ -45,10 +45,11 @@ export const SEED_CATEGORIES = [
   { name: "Health", pattern: "\\b(health|healthcare|health care|hospital|hospitals|medical|medicine|doctor|doctors|nurse|nurses|patient|patients|telehealth|telemedicine|medtech|wellness|mental health|health insurance)\\b" },
   { name: "Crypto", pattern: "\\b(crypto|bitcoin|stablecoin|stablecoins|blockchain|onchain|token|digital asset|solana)\\b" },
   { name: "Fintech", pattern: "\\b(bank|banking|fintech|financial|payments?|qr payment|insurance|lending|digital bank|coinhako)\\b" },
-  { name: "Venture Capital", pattern: "\\b(venture capital|venture-capital|vc firm|vc firms|vc fund|vc funds|private equity|pe firm|pe firms|pe fund|pe funds|fund of funds|limited partner|limited partners|accelerator|incubator|raises?[^.]*?\\bfund\\b|closes?[^.]*?\\bfund\\b|new\\s+fund\\b|backers? raise|firm raises a fund)\\b" },
-  { name: "Deals", pattern: "\\b(acquisition|acquisitions|acquire|acquires|acquired|merger|mergers|merging|buyout|buyouts|takeover|take over|stake|stakes|sell|sells|sold|divest|divesting|consolidat|restructuring|funding|raise|raised|raises|raising|secured|secures|series [a-z]|seed round|pre-seed|backs|backed by|valuation of|valued at|round at)\\b" },
+  { name: "Venture Capital", pattern: "\\b(venture capital|venture-capital|vc firm|vc firms|vc fund|vc funds|private equity|pe firm|pe firms|pe fund|pe funds|fund of funds|limited partner|limited partners|accelerator|incubator|raises?[^.]*?\\bfund\\b|closes?[^.]*?\\bfund\\b|new\\s+fund\\b)\\b" },
+  { name: "Funding", pattern: "\\b(funding|raise|raised|raises|raising|secured|secures|series [a-z]|seed round|pre-seed|backs|backed by|valuation)\\b" },
+  { name: "Deals", pattern: "\\b(acquisition|acquisitions|acquire|acquires|acquired|merger|mergers|merging|buyout|buyouts|takeover|take over|stake|stakes|sell|sells|sold|divest|divesting|consolidat|restructuring)\\b" },
   { name: "Earnings", pattern: "\\b(earnings|quarterly results|quarterly report|net income|net profit|profit warning)\\b" },
-  { name: "Markets", pattern: "\\b(go(es)? public|going public|ipo|ipo(?:s|ing)?|public listing|listed company|stock market debut|pre-ipo|plan(s|ning)? (?:an|the)? (?:ipo|listing|public offering)|debut on|public offering|raise money|raising money|capital raise|public markets|stock exchange)\\b" },
+  { name: "Markets", pattern: "\\b(markets?|shares?|stock|trading|revenue|profit|sales|yield|price|ipo|listing|public listing|investors?|balance sheet|tax)\\b" },
   { name: "Policy", pattern: "\\b(regulator|regulators|regulation|regulations|policy|government|ministry|customs|approval|approved|audit|probe|immigration|law|rules|compliance|incentives|public sector|sanctions|tariff|tariffs)\\b" },
   { name: "Cybersecurity", pattern: "\\b(cybersecurity|security|hack|hacked|breach|ransomware|data leak|critical infrastructure|export controls?|export-restricted|illicit finance)\\b" },
   { name: "Mobility", pattern: "\\b(mobility|electric vehicle|electric vehicles|evs?|ride-hailing|ride hailing|grab|gojek|go-jek|autonomous|self-driving|self driving|carmaker|carmakers|scooters?)\\b" },
@@ -148,7 +149,7 @@ export async function createCategory(env, { name, pattern }) {
   ).bind(cleanName, String(pattern || "").trim(), Number(sortRow?.next || 0)).run();
 }
 
-export async function updateCategory(env, { name, newName, pattern, sortOrder }) {
+export async function updateCategory(env, { name, newName, pattern }) {
   const cleanName = String(name || "").trim();
   if (!cleanName) throw new Error("name is required");
 
@@ -180,13 +181,8 @@ export async function updateCategory(env, { name, newName, pattern, sortOrder })
 
   if (current) {
     await env.ATR_FEED_DB.prepare(
-      "UPDATE categories SET name = ?, pattern = ?, sort_order = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now') WHERE name = ?"
-    ).bind(
-      cleanNewName,
-      pattern === undefined ? current.pattern : String(pattern).trim(),
-      sortOrder === undefined ? 0 : Number(sortOrder),
-      cleanName
-    ).run();
+      "UPDATE categories SET name = ?, pattern = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now') WHERE name = ?"
+    ).bind(cleanNewName, pattern === undefined ? current.pattern : String(pattern).trim(), cleanName).run();
   } else {
     const sortRow = await env.ATR_FEED_DB.prepare(
       "SELECT COALESCE(MAX(sort_order), -1) + 1 AS next FROM categories"
