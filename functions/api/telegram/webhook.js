@@ -1,6 +1,7 @@
 import { json } from "../../_lib/public-api.js";
 import { linkKeyFor } from "../../_lib/link-key.js";
 import { categoryRules } from "../../_lib/categories.js";
+import { findStoryMatches } from "../../_lib/story-match.js";
 import { refreshNewsletterCardFromFeed } from "../../_lib/newsletter-refresh.js";
 import {
   clearSchedule,
@@ -106,6 +107,8 @@ async function ensureTables(env) {
       domain TEXT NOT NULL,
       label TEXT,
       supplied_headline TEXT,
+      generated_headline TEXT,
+      duplicate_prompt_message_id TEXT,
       status TEXT NOT NULL DEFAULT 'awaiting_label',
       created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
     )`
@@ -119,6 +122,16 @@ async function ensureTables(env) {
     await env.ATR_FEED_DB.prepare("ALTER TABLE rapid_transit_pending ADD COLUMN supplied_headline TEXT").run();
   } catch {
     // Existing table already has the optional supplied headline column.
+  }
+  try {
+    await env.ATR_FEED_DB.prepare("ALTER TABLE rapid_transit_pending ADD COLUMN generated_headline TEXT").run();
+  } catch {
+    // Existing table already has the optional generated headline column.
+  }
+  try {
+    await env.ATR_FEED_DB.prepare("ALTER TABLE rapid_transit_pending ADD COLUMN duplicate_prompt_message_id TEXT").run();
+  } catch {
+    // Existing table already has the duplicate-warning message id column.
   }
 }
 
@@ -179,10 +192,25 @@ async function oldestPendingTitle(env) {
   return row || null;
 }
 
+async function pendingDuplicateForReply(env, replyToMessageId) {
+  if (!env?.ATR_FEED_DB || !replyToMessageId) return null;
+  const row = await env.ATR_FEED_DB.prepare(
+    "SELECT * FROM rapid_transit_pending WHERE status = 'awaiting_duplicate_decision' AND duplicate_prompt_message_id = ? ORDER BY id DESC LIMIT 1"
+  ).bind(String(replyToMessageId)).first();
+  return row || null;
+}
+
 async function markPendingProcessed(env, id) {
   if (!env?.ATR_FEED_DB) return;
   await env.ATR_FEED_DB.prepare(
     "UPDATE rapid_transit_pending SET status = 'processed' WHERE id = ?"
+  ).bind(id).run();
+}
+
+async function markPendingCancelled(env, id) {
+  if (!env?.ATR_FEED_DB) return;
+  await env.ATR_FEED_DB.prepare(
+    "UPDATE rapid_transit_pending SET status = 'cancelled' WHERE id = ?"
   ).bind(id).run();
 }
 
@@ -192,6 +220,42 @@ async function savePendingTitleRequest(env, chatId, url, blurb, domain, label) {
     `INSERT INTO rapid_transit_pending (chat_id, url, blurb, domain, label, status, created_at)
      VALUES (?, ?, ?, ?, ?, 'awaiting_title', strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))`
   ).bind(String(chatId), url, blurb, domain, label).run();
+}
+
+async function savePendingDuplicate(env, { chatId, url, blurb, domain, label, headline }) {
+  if (!env?.ATR_FEED_DB) return null;
+  const result = await env.ATR_FEED_DB.prepare(
+    `INSERT INTO rapid_transit_pending
+      (chat_id, url, blurb, domain, label, generated_headline, status, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, 'awaiting_duplicate_decision', strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
+     RETURNING id`
+  ).bind(String(chatId), url, blurb, domain, label, headline).first();
+  return result?.id || null;
+}
+
+async function setDuplicatePromptMessage(env, pendingId, messageId) {
+  if (!env?.ATR_FEED_DB || !pendingId || !messageId) return;
+  await env.ATR_FEED_DB.prepare(
+    "UPDATE rapid_transit_pending SET duplicate_prompt_message_id = ? WHERE id = ?"
+  ).bind(String(messageId), pendingId).run();
+}
+
+async function probableStoryMatches(env, headline, blurb) {
+  if (!env?.ATR_FEED_DB) return [];
+  try {
+    const result = await env.ATR_FEED_DB.prepare(
+      `SELECT id, headline, blurb, source_name, source_url, category, published_at
+       FROM feed_items
+       WHERE status = 'published'
+       ORDER BY published_at DESC, id DESC
+       LIMIT 5000`
+    ).all();
+    return findStoryMatches(result.results || [], { headline, blurb });
+  } catch {
+    // Duplicate detection is advisory. A transient database failure must not
+    // prevent editorial intake.
+    return [];
+  }
 }
 
 async function inferCategory(env, blurb) {
@@ -210,7 +274,7 @@ async function inferCategory(env, blurb) {
   return "";
 }
 
-async function sendGroupMessage(env, chatId, text, replyTo = null, entities = null) {
+async function sendGroupMessage(env, chatId, text, replyTo = null, entities = null, returnMessage = false) {
   const token = env.TELEGRAM_BACKUP_BOT_TOKEN;
   if (!token) return false;
   try {
@@ -231,17 +295,22 @@ async function sendGroupMessage(env, chatId, text, replyTo = null, entities = nu
         headers: { "content-type": "application/json" },
         body: JSON.stringify(payload)
       });
-      return response.ok ? true : { ok: false, status: response.status, text: (await response.text()).slice(0, 200) };
+      if (!response.ok) {
+        return { ok: false, status: response.status, text: (await response.text()).slice(0, 200) };
+      }
+      if (!returnMessage) return true;
+      const resultPayload = await response.json().catch(() => ({}));
+      return resultPayload?.result || null;
     };
     let result = await send(body);
-    if (result !== true && body.parse_mode === "Markdown") {
+    if (result?.ok === false && body.parse_mode === "Markdown") {
       // Markdown can fail on titles containing special characters. Retry as
       // plain text so the reply always lands.
       const plain = { ...body };
       delete plain.parse_mode;
       result = await send(plain);
     }
-    return result === true;
+    return returnMessage ? (result && result !== true ? result : null) : result === true;
   } catch {
     return false;
   }
@@ -589,16 +658,7 @@ function senderName(message) {
   return from.username || null;
 }
 
-async function processPost(env, request, chatId, url, blurb, label, replyTo = null, postedBy = null, suppliedHeadline = null) {
-  const linkKey = await linkKeyFor(url);
-  const deepLink = linkKey
-    ? `https://bulletin.asiatechreview.com/?item=${encodeURIComponent(linkKey)}`
-    : url;
-  const visibleText = `${blurb} [${label}]`;
-  const labelOffset = blurb.length + 2;
-  const entities = [{ type: "text_link", offset: labelOffset, length: label.length, url: deepLink }];
-  await sendGroupMessage(env, chatId, visibleText, replyTo, entities);
-
+async function processPost(env, request, chatId, url, blurb, label, replyTo = null, postedBy = null, suppliedHeadline = null, skipDuplicateCheck = false) {
   // Use an editor-supplied title when present; otherwise generate a
   // scan-first headline from the supplied blurb.
   let headline = suppliedHeadline ? cleanHeadlineOutput(suppliedHeadline) : "";
@@ -627,6 +687,44 @@ async function processPost(env, request, chatId, url, blurb, label, replyTo = nu
     );
     return;
   }
+
+  // Check the recent published archive before sending the normal Rapid
+  // Transit draft. Same-company + same-event matches are advisory: they
+  // pause for an explicit editorial decision rather than silently blocking.
+  const matches = skipDuplicateCheck ? [] : await probableStoryMatches(env, headline, blurb);
+  if (matches.length) {
+    const pendingId = await savePendingDuplicate(env, {
+      chatId,
+      url,
+      blurb,
+      domain: hostOf(url),
+      label,
+      headline
+    });
+    const lines = matches.slice(0, 3).map((match) => {
+      const age = match.days_ago === 0 ? "today" : `${match.days_ago}d ago`;
+      const itemLink = `https://bulletin.asiatechreview.com/?item=${encodeURIComponent(match.id)}`;
+      return `• ${match.headline || "Untitled"} — ${match.source_name || "Unknown source"}, ${age}\n${itemLink}`;
+    });
+    const warning = [
+      "⚠️ Possible duplicate story",
+      ...lines,
+      "",
+      "Reply directly to this message with `post anyway` to publish, or `cancel` to discard."
+    ].join("\n");
+    const prompt = await sendGroupMessage(env, chatId, warning, replyTo, null, true);
+    await setDuplicatePromptMessage(env, pendingId, prompt?.message_id);
+    return;
+  }
+
+  const linkKey = await linkKeyFor(url);
+  const deepLink = linkKey
+    ? `https://bulletin.asiatechreview.com/?item=${encodeURIComponent(linkKey)}`
+    : url;
+  const visibleText = `${blurb} [${label}]`;
+  const labelOffset = blurb.length + 2;
+  const entities = [{ type: "text_link", offset: labelOffset, length: label.length, url: deepLink }];
+  await sendGroupMessage(env, chatId, visibleText, replyTo, entities);
 
   const result = await ingestItem(env, request, { blurb, url, label, headline, postedBy });
   await sendIngestResult(env, chatId, result, headline);
@@ -847,6 +945,43 @@ export async function onRequestPost({ env, request }) {
   // 4a. Plain text with no URL: treat it as the answer to a pending
   //     title request first, then a publisher-label question.
   if (!urlMatch) {
+    // A duplicate decision must be an explicit reply to its warning. This
+    // prevents an ordinary "post anyway" in the group from releasing an
+    // unrelated held story.
+    const repliedMessageId = message.reply_to_message?.message_id;
+    const pendingDuplicate = await pendingDuplicateForReply(env, repliedMessageId);
+    if (pendingDuplicate) {
+      const decision = text.toLowerCase().trim();
+      if (decision === "post anyway") {
+        await markPendingProcessed(env, pendingDuplicate.id);
+        await processPost(
+          env,
+          request,
+          chatId,
+          pendingDuplicate.url,
+          pendingDuplicate.blurb,
+          pendingDuplicate.label || fallbackLabel(pendingDuplicate.domain),
+          message.message_id,
+          senderName(message),
+          pendingDuplicate.generated_headline || pendingDuplicate.supplied_headline || null,
+          true
+        );
+        return json({ ok: true });
+      }
+      if (decision === "cancel") {
+        await markPendingCancelled(env, pendingDuplicate.id);
+        await sendGroupMessage(env, chatId, "Duplicate candidate discarded.", message.message_id);
+        return json({ ok: true });
+      }
+      await sendGroupMessage(
+        env,
+        chatId,
+        "Reply `post anyway` to publish this item, or `cancel` to discard it.",
+        message.message_id
+      );
+      return json({ ok: true });
+    }
+
     const pendingTitle = await oldestPendingTitle(env);
     if (pendingTitle) {
       await processPendingTitle(env, request, chatId, message, pendingTitle);
