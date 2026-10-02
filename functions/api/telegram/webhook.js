@@ -72,6 +72,9 @@ const OUTLET_MAP = {
   "globenewswire.com": "GlobeNewswire"
 };
 
+const RAPID_SEARCH_FIRST_PAGE = 10;
+const RAPID_SEARCH_MORE_PAGE = 5;
+
 function hostOf(url) {
   try {
     return new URL(url).hostname.replace(/^www\./, "").toLowerCase();
@@ -96,6 +99,15 @@ async function ensureTables(env) {
       domain TEXT PRIMARY KEY,
       label TEXT NOT NULL,
       created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
+    )`
+  ).run();
+  await env.ATR_FEED_DB.prepare(
+    `CREATE TABLE IF NOT EXISTS rapid_transit_search_state (
+      chat_id TEXT PRIMARY KEY,
+      query TEXT NOT NULL,
+      next_offset INTEGER NOT NULL DEFAULT 0,
+      total INTEGER NOT NULL DEFAULT 0,
+      updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
     )`
   ).run();
   await env.ATR_FEED_DB.prepare(
@@ -238,6 +250,109 @@ async function setDuplicatePromptMessage(env, pendingId, messageId) {
   await env.ATR_FEED_DB.prepare(
     "UPDATE rapid_transit_pending SET duplicate_prompt_message_id = ? WHERE id = ?"
   ).bind(String(messageId), pendingId).run();
+}
+
+async function readSearchState(env, chatId) {
+  if (!env?.ATR_FEED_DB) return null;
+  const row = await env.ATR_FEED_DB.prepare(
+    "SELECT query, next_offset, total FROM rapid_transit_search_state WHERE chat_id = ?"
+  ).bind(String(chatId)).first();
+  return row || null;
+}
+
+async function writeSearchState(env, chatId, query, nextOffset, total) {
+  if (!env?.ATR_FEED_DB) return;
+  await env.ATR_FEED_DB.prepare(
+    `INSERT INTO rapid_transit_search_state (chat_id, query, next_offset, total, updated_at)
+     VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
+     ON CONFLICT(chat_id) DO UPDATE SET
+       query = excluded.query,
+       next_offset = excluded.next_offset,
+       total = excluded.total,
+       updated_at = excluded.updated_at`
+  ).bind(String(chatId), query, nextOffset, total).run();
+}
+
+function bulletinLink(item) {
+  const key = item?.link_key || item?.raw_id || String(item?.id || "").replace(/^bulletin-/, "");
+  return key ? `https://bulletin.asiatechreview.com/?item=${encodeURIComponent(key)}` : "https://bulletin.asiatechreview.com/";
+}
+
+function shortDate(value) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "Unknown date" : date.toISOString().slice(0, 10);
+}
+
+function searchMessage(query, items, total, offset) {
+  if (!items.length) {
+    return { text: `No Bulletin matches for “${query}”.`, entities: [] };
+  }
+  const start = offset + 1;
+  const end = offset + items.length;
+  let text = `Search: ${query}\nShowing ${start}–${end} of ${total}`;
+  const entities = [];
+  for (const [index, item] of items.entries()) {
+    const title = String(item.title || item.headline || "Asia tech update").replace(/\s+/g, " ").trim().slice(0, 180);
+    // Two leading newlines, the result number, then ". ". Telegram offsets
+    // are UTF-16 code units, matching JavaScript string lengths.
+    const titleOffset = text.length + 4 + String(start + index).length;
+    text += `\n\n${start + index}. ${title}\n${item.source_name || "Source"} · ${shortDate(item.published_at)}`;
+    entities.push({ type: "text_link", offset: titleOffset, length: title.length, url: bulletinLink(item) });
+  }
+  if (end < total) text += "\n\nReply `more` for five more.";
+  return { text, entities };
+}
+
+async function searchArchive(request, query, limit, offset) {
+  const url = new URL(`${new URL(request.url).origin}/api/v1/search`);
+  url.searchParams.set("q", query);
+  url.searchParams.set("limit", String(limit));
+  url.searchParams.set("offset", String(offset));
+  url.searchParams.set("_", String(Date.now()));
+  const response = await fetch(url, { headers: { accept: "application/json", "cache-control": "no-cache" } });
+  if (!response.ok) throw new Error(`archive search returned ${response.status}`);
+  const payload = await response.json();
+  return {
+    items: Array.isArray(payload.items) ? payload.items : [],
+    total: Number(payload.total) || 0
+  };
+}
+
+async function sendSearchPage(env, request, chatId, query, limit, offset, replyTo = null) {
+  const result = await searchArchive(request, query, limit, offset);
+  const message = searchMessage(query, result.items, result.total, offset);
+  await sendGroupMessage(env, chatId, message.text, replyTo, message.entities);
+  await writeSearchState(env, chatId, query, offset + result.items.length, result.total);
+}
+
+async function handleSearchCommand(env, request, chatId, text, replyTo = null) {
+  const query = text.replace(/^\/search(?:@\w+)?\s*/i, "").trim();
+  if (!query) {
+    await sendGroupMessage(env, chatId, "Use /search followed by words to find in the Bulletin archive.", replyTo);
+    return;
+  }
+  try {
+    await sendSearchPage(env, request, chatId, query, RAPID_SEARCH_FIRST_PAGE, 0, replyTo);
+  } catch (error) {
+    await sendGroupMessage(env, chatId, `❌ Archive search failed: ${String(error?.message || error).slice(0, 160)}`, replyTo);
+  }
+}
+
+async function handleSearchMore(env, request, chatId, replyTo = null) {
+  const state = await readSearchState(env, chatId);
+  if (!state?.query) {
+    await sendGroupMessage(env, chatId, "Run /search <term> first.", replyTo);
+    return;
+  }
+  if (Number(state.next_offset) >= Number(state.total)) {
+    await sendGroupMessage(env, chatId, "No more matches for that search.", replyTo);
+    return;
+  }
+  try {
+    await sendSearchPage(env, request, chatId, state.query, RAPID_SEARCH_MORE_PAGE, Number(state.next_offset), replyTo);
+  } catch (error) {
+    await sendGroupMessage(env, chatId, `❌ Archive search failed: ${String(error?.message || error).slice(0, 160)}`, replyTo);
+  }
 }
 
 async function probableStoryMatches(env, headline, blurb) {
@@ -759,7 +874,8 @@ async function processPendingTitle(env, request, chatId, message, pending) {
 export const __rapidTransitHeadlineTest = {
   extractJsonObject,
   validateHeadlineObject,
-  parseRapidTransitPost
+  parseRapidTransitPost,
+  searchMessage
 };
 
 // ---------------------------------------------------------------------------
@@ -851,10 +967,15 @@ async function handleGatherCommand(env, request, chatId, text, replyTo = null) {
   }
 }
 
-// /updatess refreshes the Bulletin homepage's Substack card from the same
-// uncached feed used by the Newsletter admin. It is deliberately a direct
-// Worker action: Rapid Transit remains usable when OpenClaw is unavailable.
-async function handleUpdateSubstackCardCommand(env, request, chatId, replyTo = null) {
+// /updatess refreshes the Bulletin homepage's Substack card. Without an
+// argument it uses the Substack RSS feed; with a Substack post URL it
+// fetches that page directly (bypassing the feed when rate-limited).
+async function handleUpdateSubstackCardCommand(env, request, chatId, text, replyTo = null) {
+  const urlMatch = text.match(/https?:\/\/[^\s]+/);
+  if (urlMatch) {
+    await handleManualSubstackCardRefresh(env, chatId, urlMatch[0], replyTo);
+    return;
+  }
   await sendGroupMessage(env, chatId, "Updating the Substack card…", replyTo);
   try {
     const result = await refreshNewsletterCardFromFeed(env, request);
@@ -870,6 +991,53 @@ async function handleUpdateSubstackCardCommand(env, request, chatId, replyTo = n
       env,
       chatId,
       `❌ Substack card update failed: ${String(error?.message || error).slice(0, 200)}`,
+      replyTo
+    );
+  }
+}
+
+async function handleManualSubstackCardRefresh(env, chatId, url, replyTo = null) {
+  await sendGroupMessage(env, chatId, `Updating card from ${url}…`, replyTo);
+  try {
+    const page = await fetch(url, {
+      headers: { "User-Agent": "ATR-Newsletter/1.0 (Substack card refresh)" }
+    });
+    if (!page.ok) throw new Error(`Page returned ${page.status}`);
+    const html = await page.text();
+
+    // Extract metadata from the Substack post page.
+    const titleMatch = html.match(/<meta[^>]+property="og:title"[^>]+content="([^"]+)"/i)
+      || html.match(/<title>([^<]+)<\/title>/i);
+    const imageMatch = html.match(/<meta[^>]+property="og:image"[^>]+content="([^"]+)"/i);
+    const descMatch = html.match(/<meta[^>]+property="og:description"[^>]+content="([^"]+)"/i)
+      || html.match(/<meta[^>]+name="description"[^>]+content="([^"]+)"/i);
+
+    const title = titleMatch ? titleMatch[1].replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"') : "";
+    const image = imageMatch ? imageMatch[1] : "";
+    const subhead = descMatch ? descMatch[1].replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"') : "";
+
+    if (!title || !url) throw new Error("Could not extract title from page");
+
+    const { ensureSiteContentTable, readSiteContent, writeSiteContent } = await import("../../_lib/site-content.js");
+    await ensureSiteContentTable(env);
+    const stored = await readSiteContent(env);
+    const current = stored.newsletter || {};
+
+    await writeSiteContent(env, {
+      newsletter: {
+        title,
+        blurb: subhead || title,
+        url,
+        image: image || current.image || ""
+      }
+    }, "rt:manual-substack-url");
+
+    await sendGroupMessage(env, chatId, `✅ Updated Substack card:\n${title}\n${subhead || ""}\n${url}`, replyTo);
+  } catch (error) {
+    await sendGroupMessage(
+      env,
+      chatId,
+      `❌ Manual card update failed: ${String(error?.message || error).slice(0, 200)}`,
       replyTo
     );
   }
@@ -909,13 +1077,20 @@ export async function onRequestPost({ env, request }) {
   // 4a. /updatess: refresh the Bulletin homepage card from the latest
   // Substack post, including title, subhead, URL and image.
   if (/^\/updatess(?:@\w+)?(?:\s|$)/i.test(text)) {
-    await handleUpdateSubstackCardCommand(env, request, chatId, message.message_id);
+    await handleUpdateSubstackCardCommand(env, request, chatId, text, message.message_id);
     return json({ ok: true });
   }
 
   // 4a. /gather commands: daily gather control from the group.
   if (text.startsWith("/gather")) {
     await handleGatherCommand(env, request, chatId, text, message.message_id);
+    return json({ ok: true });
+  }
+
+  // /search is a Rapid Transit-native archive lookup, deliberately handled
+  // alongside /gather rather than as general chat.
+  if (/^\/search(?:@\w+)?(?:\s|$)/i.test(text)) {
+    await handleSearchCommand(env, request, chatId, text, message.message_id);
     return json({ ok: true });
   }
 
@@ -979,6 +1154,11 @@ export async function onRequestPost({ env, request }) {
         "Reply `post anyway` to publish this item, or `cancel` to discard it.",
         message.message_id
       );
+      return json({ ok: true });
+    }
+
+    if (text.toLowerCase() === "more") {
+      await handleSearchMore(env, request, chatId, message.message_id);
       return json({ ok: true });
     }
 
