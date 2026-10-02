@@ -149,17 +149,21 @@ const COMPANY_ALIASES = [
 ];
 
 // Event classification: keyword sets per event type. Match any keyword.
+// Each keyword must be a specific, unambiguous news event, not a generic
+// business term that bleeds across topics. False positives from overly
+// broad matching (e.g. "valuation" matching everything from an IPO delay
+// to a product launch) are worse than missing a few true duplicates.
 const EVENT_KEYWORDS = {
-  earnings: ["earnings", "quarterly results", "quarterly report", "net income", "net profit", "profit warning", "revenue miss", "revenue beat", "misses revenue", "beats revenue"],
-  funding: ["raises", "raised", "funding", "round", "series a", "series b", "series c", "series d", "series e", "seed round", "pre-seed", "secures", "invests", "investment", "backed by", "valuation", "led by"],
-  ipo: ["ipo", "initial public offering", "public listing", "lists on", "debuts on", "float", "listing"],
-  manda: ["acquires", "acquisition", "merger", "merges", "buyout", "takeover", "takes over", "stake", "buys", "sells", "divests", "to acquire"],
-  launch: ["launches", "launched", "unveils", "unveiled", "debuts", "debuted", "releases", "released", "introduces", "rolls out", "starts selling", "goes on sale"],
-  ban: ["bans", "ban on", "blocks", "blocked", "restricts", "restriction", "prohibits", "crackdown", "outlaw"],
-  probe: ["probe", "probes", "investigation", "investigates", "regulator", "antitrust", "competition watchdog", "lawsuit", "sues", "sued", "fine", "fined"],
-  partner: ["partnership", "partners with", "collaborates", "alliance", "joint venture", "teams up", "deal with"],
-  layoffs: ["layoffs", "lays off", "cuts jobs", "job cuts", "redundancies", "restructures", "downsizes"],
-  cloud: ["data centre", "data center", "cloud", "hyperscaler", "infrastructure"]
+  earnings: ["quarterly earnings", "quarterly results", "quarterly net", "net profit fell", "net profit rose", "net income rose", "net income fell", "revenue miss", "profit warning", "earnings fell", "earnings rose"],
+  funding: ["raises $", "raised $", "series a", "series b", "series c", "series d", "pre-seed", "seed round", "funding round", "secures $", "invests $"],
+  ipo: ["initial public offering", "plans ipo", "planning an ipo", "files for ipo", "public listing", "shares jumped", "shares fell", "share price", "stock fell", "stock rose", "market cap", "listed company"],
+  manda: ["acquires ", "acquired ", "to acquire", "merger with", "takes over", "buys ", "takeover of", "to buy"],
+  launch: ["new model", "latest model", "new chip", "next-generation", "launches new", "launched its", "unveils new", "opens office", "opened a", "introduces ", "rolls out", "opening in"],
+  ban: ["bans ", "banned", "blocks access", "restricts ", "crackdown on", "blacklists"],
+  probe: ["sues ", "sued ", "files lawsuit", "court orders", "investigation into", "antitrust probe", "antitrust investigation", "raided by"],
+  partner: ["partnership with", "partners with", "joint venture", "signs deal with", "deal with each other"],
+  layoffs: ["lays off", "cuts jobs", "job cuts", "cuts staff", "laid off", "redundancies"],
+  cloud: ["data centre", "data center", "1gw", "10gw", "20gw", "hyperscaler", "compute capacity"]
 };
 
 // Time window for story matching (days). Same company + same event inside
@@ -206,10 +210,20 @@ export function extractEvents(text) {
 }
 
 // Extract (company, event) keys from headline + blurb.
+// The company must appear in the HEADLINE to be considered a primary
+// subject of the story; blurb-only mentions are weaker signals and
+// would cause false positives (e.g. a Google checkout story mentioning
+// Flipkart gets flagged as a duplicate of a Flipkart IPO story).
 export function extractStoryKeys(headline, blurb) {
-  const text = `${headline || ""} ${blurb || ""}`;
-  const companies = extractCompanies(text);
-  const events = extractEvents(text);
+  const headlineText = normalise(headline || "");
+  const blurbText = normalise(blurb || "");
+  const fullText = `${headlineText} ${blurbText}`;
+
+  // Company must be in the headline to be treated as a story subject.
+  const headlineCompanies = extractCompanies(headlineText);
+  const companies = headlineCompanies.size ? headlineCompanies : extractCompanies(fullText);
+
+  const events = extractEvents(fullText);
   const keys = [];
   for (const company of companies) {
     for (const event of events) {
