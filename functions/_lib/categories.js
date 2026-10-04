@@ -154,7 +154,7 @@ export async function updateCategory(env, { name, newName, pattern, sortOrder })
   if (!cleanName) throw new Error("name is required");
 
   const current = await env.ATR_FEED_DB.prepare(
-    "SELECT name FROM categories WHERE name = ?"
+    "SELECT name, pattern, sort_order FROM categories WHERE name = ?"
   ).bind(cleanName).first();
   const legacy = !current && await env.ATR_FEED_DB.prepare(
     "SELECT category FROM feed_items WHERE category = ? LIMIT 1"
