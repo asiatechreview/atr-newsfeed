@@ -149,7 +149,7 @@ export async function createCategory(env, { name, pattern }) {
   ).bind(cleanName, String(pattern || "").trim(), Number(sortRow?.next || 0)).run();
 }
 
-export async function updateCategory(env, { name, newName, pattern }) {
+export async function updateCategory(env, { name, newName, pattern, sortOrder }) {
   const cleanName = String(name || "").trim();
   if (!cleanName) throw new Error("name is required");
 
@@ -180,9 +180,10 @@ export async function updateCategory(env, { name, newName, pattern }) {
   ).bind(cleanNewName, cleanName).run();
 
   if (current) {
+    const sortValue = sortOrder === undefined ? current.sort_order : Number(sortOrder);
     await env.ATR_FEED_DB.prepare(
-      "UPDATE categories SET name = ?, pattern = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now') WHERE name = ?"
-    ).bind(cleanNewName, pattern === undefined ? current.pattern : String(pattern).trim(), cleanName).run();
+      "UPDATE categories SET name = ?, pattern = ?, sort_order = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now') WHERE name = ?"
+    ).bind(cleanNewName, pattern === undefined ? current.pattern : String(pattern).trim(), sortValue, cleanName).run();
   } else {
     const sortRow = await env.ATR_FEED_DB.prepare(
       "SELECT COALESCE(MAX(sort_order), -1) + 1 AS next FROM categories"
