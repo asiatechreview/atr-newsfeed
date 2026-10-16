@@ -2,6 +2,45 @@ import { ensureSiteContentTable, readSiteContent, writeSiteContent } from "./sit
 import { ensureOperationalEventsTable, writeOperationalEvent } from "./operational-log.js";
 
 const SUBSTACK_FEED_URL = "https://www.asiatechreview.com/feed";
+const SUBSTACK_ARCHIVE_URL = "https://www.asiatechreview.com/api/v1/archive";
+
+// Public JSON archive; one call returns the latest post's title, subtitle
+// (subhead), canonical URL and cover image. Used only as a fallback when the
+// RSS feed is rate-limiting us (Substack throttles Cloudflare egress IPs).
+export function parseArchivePost(payload) {
+  const first = Array.isArray(payload) ? payload[0] : null;
+  if (!first) return null;
+  const link = decodeEntities(stripTags(String(first.canonical_url || ""))).trim();
+  const title = decodeEntities(stripTags(String(first.title || ""))).trim();
+  if (!link || !title) return null;
+  const subhead = decodeEntities(stripTags(String(first.subtitle || first.description || ""))).trim();
+  return {
+    title,
+    subhead,
+    blurb: subhead,
+    link,
+    image: decodeEntities(stripTags(String(first.cover_image || ""))).trim()
+  };
+}
+
+async function fetchLatestArchivePost() {
+  const url = new URL(SUBSTACK_ARCHIVE_URL);
+  url.searchParams.set("sort", "new");
+  url.searchParams.set("offset", "0");
+  url.searchParams.set("limit", "1");
+  url.searchParams.set("atr_refresh", `${Date.now()}`);
+  const response = await fetch(url.toString(), {
+    cache: "no-store",
+    headers: {
+      accept: "application/json",
+      "cache-control": "no-cache",
+      "user-agent": "Mozilla/5.0 (compatible; ATR-Newsfeed/1.0)"
+    }
+  });
+  if (!response.ok) return null;
+  const payload = await response.json().catch(() => null);
+  return parseArchivePost(payload);
+}
 
 // Shared newsletter refresh: fetches the latest Substack post and writes it to
 // site-content when it differs from what is stored. Used by the scheduled
@@ -20,6 +59,43 @@ export async function refreshNewsletterCardFromFeed(env, request = null) {
 
   const feedResponse = await fetchFreshFeedWithRetry();
   if (!feedResponse.ok) {
+    // The feed is throttling us (429/5xx). Before retaining the existing
+    // card, try Substack's public archive API — a separate endpoint that
+    // reliably returns the latest post's title/subhead/url/image.
+    const archivePost = await fetchLatestArchivePost();
+    if (archivePost && archivePost.link && archivePost.title) {
+      if (archivePost.link !== stored.url) {
+        await writeSiteContent(env, {
+          newsletter: {
+            title: archivePost.title,
+            blurb: archivePost.subhead || archivePost.title,
+            url: archivePost.link,
+            image: archivePost.image || stored.image || ""
+          }
+        }, request ? "admin:newsletter-archive-fallback" : "scheduled:substack-archive-fallback");
+        await writeOperationalEvent(env, request, {
+          workflow: "site_content",
+          action: "newsletter_auto_refresh",
+          status: "success",
+          severity: "info",
+          http_status: feedResponse.status,
+          message: `Newsletter card updated via archive fallback after feed returned ${feedResponse.status}.`,
+          details: { title: archivePost.title, url: archivePost.link, source: "archive" }
+        });
+        return { updated: true, item: archivePost, fallback: true, feedStatus: feedResponse.status };
+      }
+      await writeOperationalEvent(env, request, {
+        workflow: "site_content",
+        action: "newsletter_auto_refresh",
+        status: "success",
+        severity: "info",
+        http_status: feedResponse.status,
+        message: `Newsletter card already current (archive fallback) after feed returned ${feedResponse.status}.`,
+        details: { url: archivePost.link, source: "archive" }
+      });
+      return { updated: false, item: archivePost, fallback: true, feedStatus: feedResponse.status };
+    }
+
     const fallbackItem = stored.url && stored.title
       ? { title: stored.title, subhead: stored.blurb || "", blurb: stored.blurb || "", link: stored.url, image: stored.image || "" }
       : null;

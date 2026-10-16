@@ -981,9 +981,11 @@ async function handleUpdateSubstackCardCommand(env, request, chatId, text, reply
     const result = await refreshNewsletterCardFromFeed(env, request);
     const item = result.item || {};
     const subhead = item.subhead || item.blurb || "";
-    const status = result.fallback
-      ? "Kept the existing Substack card while the feed is rate-limited"
-      : result.updated ? "Updated Substack card" : "Substack card already current";
+    const status = result.updated
+      ? "Updated Substack card"
+      : result.fallback
+        ? "Kept the existing Substack card while the feed is rate-limited"
+        : "Substack card already current";
     const details = [item.title, subhead, item.link].filter(Boolean).join("\n");
     await sendGroupMessage(env, chatId, `✅ ${status}${details ? `:\n${details}` : ""}`, replyTo);
   } catch (error) {

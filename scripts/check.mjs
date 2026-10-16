@@ -15,6 +15,7 @@ import { onRequestGet as onJsonFeedRequestGet } from "../functions/feed.json.js"
 import { onRequestGet as onRssRequestGet } from "../functions/rss.xml.js";
 import { onRequest as onMiddlewareRequest } from "../functions/_middleware.js";
 import { __rapidTransitHeadlineTest } from "../functions/api/telegram/webhook.js";
+import { parseArchivePost } from "../functions/_lib/newsletter-refresh.js";
 
 const root = new URL("..", import.meta.url).pathname;
 const required = [
@@ -390,6 +391,27 @@ const inventedNumberValidation = __rapidTransitHeadlineTest.validateHeadlineObje
   { title: "Unitree raises $999 million in STAR Market IPO", confidence: 0.92, needs_review: false },
   headlineBlurb
 );
+const archiveFallbackTest = parseArchivePost([
+  {
+    title: "Ledger spyware scare raises supply-chain concerns across Asia",
+    subtitle: "New ownership at key reseller raises concern that Ledger’s supply chain is compromised",
+    canonical_url: "https://www.asiatechreview.com/p/ledger-spyware-scare-raises-supply",
+    cover_image: "https://substackcdn.com/image/fetch/cover.png"
+  }
+]);
+if (
+  !archiveFallbackTest ||
+  archiveFallbackTest.title !== "Ledger spyware scare raises supply-chain concerns across Asia" ||
+  archiveFallbackTest.link !== "https://www.asiatechreview.com/p/ledger-spyware-scare-raises-supply" ||
+  archiveFallbackTest.image !== "https://substackcdn.com/image/fetch/cover.png" ||
+  !archiveFallbackTest.subhead.includes("New ownership") ||
+  parseArchivePost([]) !== null ||
+  parseArchivePost(null) !== null
+) {
+  console.error("FAILED: archive fallback parser must extract the latest post title/subhead/link/image and reject empty payloads");
+  process.exit(1);
+}
+
 const titledRapidTransitPost = __rapidTransitHeadlineTest.parseRapidTransitPost(
   "Title: Unitree files for STAR Market IPO\nBlurb: China's Unitree is raising ¥6.10 billion ($904 million) in a STAR Market IPO.\nhttps://www.ft.com/content/unitree-test",
   ["https://www.ft.com/content/unitree-test"]
