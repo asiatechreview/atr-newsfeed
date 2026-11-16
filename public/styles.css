@@ -1890,3 +1890,34 @@ footer {
     column-gap: 24px;
   }
 }
+
+/* iPad and other tablets: use the mobile stacked layout (image on top,
+   centred copy, centred control bar) instead of the desktop split. */
+@media (max-width: 1024px) {
+  .newsletter-slide {
+    grid-template-columns: 1fr;
+    align-items: center;
+  }
+
+  .newsletter-slide .newsletter-image-link {
+    grid-column: 1;
+    grid-row: 1;
+    width: 100%;
+    height: auto;
+    margin-bottom: 14px;
+  }
+
+  .newsletter-slide .newsletter-copy {
+    grid-column: 1;
+    grid-row: 2;
+    text-align: center;
+  }
+
+  .newsletter-carousel .newsletter-slide .newsletter-copy p {
+    font-size: calc(14px * var(--font-scale, 1));
+  }
+
+  .newsletter-actions {
+    margin: 14px auto 0;
+  }
+}
