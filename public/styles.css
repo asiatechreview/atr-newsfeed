@@ -1956,3 +1956,20 @@ footer {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+/* Desktop: larger, more prominent newsletter CTA bar (in-flow, centred). */
+@media (min-width: 1025px) {
+  .newsletter-actions {
+    height: 38px;
+  }
+
+  .newsletter-cta {
+    padding: 0 20px;
+    font-size: 14px;
+  }
+
+  .newsletter-arrow {
+    width: 38px;
+    font-size: 17px;
+  }
+}
