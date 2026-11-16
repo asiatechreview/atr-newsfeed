@@ -16,6 +16,7 @@ import { onRequestGet as onRssRequestGet } from "../functions/rss.xml.js";
 import { onRequest as onMiddlewareRequest } from "../functions/_middleware.js";
 import { __rapidTransitHeadlineTest } from "../functions/api/telegram/webhook.js";
 import { parseArchivePost } from "../functions/_lib/newsletter-refresh.js";
+import { findStoryMatches } from "../functions/_lib/story-match.js";
 
 const root = new URL("..", import.meta.url).pathname;
 const required = [
@@ -848,6 +849,47 @@ const crawlerLogsPayload = await crawlerLogsResponse.json();
 
 if (crawlerLogsResponse.status !== 200 || crawlerLogsPayload.summary?.byBot?.GPTBot !== 1 || crawlerLogsPayload.logs?.[0]?.path !== "/feed.json") {
   console.error("FAILED: protected crawler log endpoint must return logs and summary");
+  process.exit(1);
+}
+
+// Duplicate guard regression corpus (Sai, Nov 2026 samples): broad Nvidia /
+// data-centre stories must not match; genuine same-event duplicates must.
+const fpItems = [
+  { id: "1603", headline: "Alice Huang-linked company obtained smuggled AI servers for Shanghai data centre", blurb: "A Chinese company founded by Alice Huang obtained smuggled AI chips installed at a Shanghai data centre with links to her Singapore-based Megaspeed International.", source_name: "Bloomberg", published_at: new Date(Date.now() - 1.6 * 86400000).toISOString() },
+  { id: "1574", headline: "Chinese AI firms seek Nvidia computing capacity outside China", blurb: "Chinese AI companies are seeking to rent Nvidia-powered computing capacity at overseas data centres.", source_name: "Reuters", published_at: new Date(Date.now() - 2.8 * 86400000).toISOString() },
+  { id: "1548", headline: "Nvidia, Rebellions and SK Telecom join forces on Korea’s sovereign AI infrastructure", blurb: "Nvidia and SK Telecom will combine locally designed chips with Nvidia’s platform to build sovereign AI infrastructure.", source_name: "NVIDIA", published_at: new Date(Date.now() - 4.6 * 86400000).toISOString() }
+];
+const fpIncoming = {
+  headline: "How Southeast Asian data centres kept China in the AI race",
+  blurb: "Large data centres across Southeast Asia exploited gaps in US export controls to provide Chinese companies with access to Nvidia-powered computing capacity."
+};
+const fpMatches = findStoryMatches(fpItems, fpIncoming);
+if (fpMatches.length) {
+  console.error("FAILED: duplicate guard must not flag broad Nvidia/data-centre stories as duplicates");
+  process.exit(1);
+}
+
+const samsungItem = {
+  id: "1584",
+  headline: "Samsung in talks to acquire data centre cooling maker Modine",
+  blurb: "Samsung Electronics is in discussions to acquire US-based Modine Manufacturing.",
+  source_name: "Bloomberg",
+  published_at: new Date(Date.now() - 2.2 * 86400000).toISOString()
+};
+if (findStoryMatches([samsungItem], { headline: "Samsung in talks to buy Modine for $7.1bn", blurb: "" }).length !== 1) {
+  console.error("FAILED: duplicate guard must catch the same Samsung/Modine deal from another outlet");
+  process.exit(1);
+}
+
+const alibabaItem = {
+  id: "x1",
+  headline: "Alibaba earnings miss as cloud growth slows",
+  blurb: "",
+  source_name: "Reuters",
+  published_at: new Date(Date.now() - 86400000).toISOString()
+};
+if (findStoryMatches([alibabaItem], { headline: "Alibaba misses revenue estimates as cloud growth slows", blurb: "" }).length !== 1) {
+  console.error("FAILED: duplicate guard must catch the same earnings miss from another outlet");
   process.exit(1);
 }
 
