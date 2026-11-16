@@ -1902,9 +1902,10 @@ footer {
   .newsletter-slide .newsletter-image-link {
     grid-column: 1;
     grid-row: 1;
-    width: 100%;
+    width: 86%;
+    max-width: 720px;
     height: auto;
-    margin-bottom: 14px;
+    margin: 0 auto 14px;
   }
 
   .newsletter-slide .newsletter-copy {
@@ -1919,5 +1920,24 @@ footer {
 
   .newsletter-actions {
     margin: 14px auto 0;
+  }
+}
+
+/* Sai (Nov 2026): one type step larger for section headings and date labels */
+.section-title {
+  font-size: calc(13px * var(--font-scale, 1));
+}
+
+.date {
+  font-size: calc(13px * var(--font-scale, 1));
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .section-title {
+    font-size: calc(15px * var(--font-scale, 1));
+  }
+
+  .date {
+    font-size: calc(15px * var(--font-scale, 1));
   }
 }
