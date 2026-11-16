@@ -2,6 +2,7 @@ import { json } from "../../_lib/public-api.js";
 import { linkKeyFor } from "../../_lib/link-key.js";
 import { categoryRules } from "../../_lib/categories.js";
 import { findStoryMatches } from "../../_lib/story-match.js";
+import { classifyCategory } from "../../_lib/category-classifier.js";
 import { refreshNewsletterCardFromFeed } from "../../_lib/newsletter-refresh.js";
 import {
   clearSchedule,
@@ -373,20 +374,13 @@ async function probableStoryMatches(env, headline, blurb) {
   }
 }
 
-async function inferCategory(env, blurb) {
-  const text = String(blurb || "").toLowerCase();
-  const rules = await categoryRules(env);
-  for (const rule of rules) {
-    if (!rule || !rule.pattern) continue;
-    try {
-      if (new RegExp(rule.pattern, "i").test(text)) {
-        return rule.name;
-      }
-    } catch {
-      // Skip malformed patterns.
-    }
-  }
-  return "";
+// Weighted classifier for new items. It scores every canonical category on
+// headline + blurb (headline weighted double) and only assigns when the
+// winner clears a confidence margin; otherwise the story is "Other news".
+// Existing items are never re-tagged.
+async function inferCategory(env, headline, blurb) {
+  const result = classifyCategory(headline, blurb);
+  return result.category || "";
 }
 
 async function sendGroupMessage(env, chatId, text, replyTo = null, entities = null, returnMessage = false) {
@@ -711,7 +705,7 @@ async function generateHeadline(env, blurb) {
 
 async function ingestItem(env, request, { blurb, url, label, headline, postedBy }) {
   const origin = new URL(request.url).origin;
-  const category = await inferCategory(env, blurb) || undefined;
+  const category = await inferCategory(env, headline, blurb) || undefined;
   const ingestBody = {
     blurb,
     sourceName: label,

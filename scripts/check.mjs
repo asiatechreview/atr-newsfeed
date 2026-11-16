@@ -17,6 +17,7 @@ import { onRequest as onMiddlewareRequest } from "../functions/_middleware.js";
 import { __rapidTransitHeadlineTest } from "../functions/api/telegram/webhook.js";
 import { parseArchivePost } from "../functions/_lib/newsletter-refresh.js";
 import { findStoryMatches } from "../functions/_lib/story-match.js";
+import { classifyCategory } from "../functions/_lib/category-classifier.js";
 
 const root = new URL("..", import.meta.url).pathname;
 const required = [
@@ -850,6 +851,25 @@ const crawlerLogsPayload = await crawlerLogsResponse.json();
 if (crawlerLogsResponse.status !== 200 || crawlerLogsPayload.summary?.byBot?.GPTBot !== 1 || crawlerLogsPayload.logs?.[0]?.path !== "/feed.json") {
   console.error("FAILED: protected crawler log endpoint must return logs and summary");
   process.exit(1);
+}
+
+// Category classifier regression corpus (Sai, Nov 2026): real mis-sorted
+// items from the live feed, plus an ambiguous story that must stay Other news.
+const categoryCases = [
+  ["Moonshot AI expands into AI-driven scientific research", "Chinese AI startup Moonshot AI, developer of the Kimi models, is expanding into biology, chemistry and pharmaceutical research.", "AI"],
+  ["Japan's Taisei launches $150 million fund to back AI and robotics startups", "Construction firm Taisei sets up a fund to invest in AI and robotics startups.", "Venture Capital"],
+  ["Huawei data centre highlights China's AI computing gap with the US", "Huawei opens a large data centre as China seeks to close the AI computing gap.", "Cloud"],
+  ["US and allies agree to protect AI supply chains from China", "Washington and allies agree on export controls and measures to protect AI supply chains from China.", "Policy"],
+  ["Alibaba launches Qwen4-Max to challenge US AI leaders", "Alibaba released Qwen4-Max, its latest large language model, to challenge US AI leaders.", "AI"],
+  ["Alice Huang pitched China investors on access to Nvidia chips", "The Megaspeed founder pitched investors on access to Nvidia chips.", "Chips"],
+  ["Megaspeed says Alice Huang left company in August 2025", "Megaspeed said its founder Alice Huang left the company in August 2025.", "Other news"]
+];
+for (const [headline, blurb, expected] of categoryCases) {
+  const got = classifyCategory(headline, blurb).category;
+  if (got !== expected) {
+    console.error(`FAILED: category classifier classified "${headline}" as ${got}, expected ${expected}`);
+    process.exit(1);
+  }
 }
 
 // Duplicate guard regression corpus (Sai, Nov 2026 samples): broad Nvidia /
