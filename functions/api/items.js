@@ -812,13 +812,14 @@ export async function onRequestPatch({ env, request }) {
   const sourceName = body.sourceName || body.source_name;
   const sourceUrl = body.sourceUrl || body.source_url;
   const category = body.category || body.region;
+  const country = body.country === undefined ? undefined : clean(body.country);
   const tags = body.tags === undefined ? undefined : normalizeTagsInput(body.tags);
   const status = body.status === undefined ? undefined : clean(body.status);
   const postedBy = body.postedBy === undefined ? undefined : clean(body.postedBy);
   const postedVia = body.postedVia === undefined ? undefined : clean(body.postedVia);
   const scheduledAt = body.scheduledAt === undefined ? undefined : clean(body.scheduledAt);
 
-  if (headline === undefined && blurb === undefined && sourceName === undefined && sourceUrl === undefined && category === undefined && tags === undefined && status === undefined && postedBy === undefined && postedVia === undefined && scheduledAt === undefined) {
+  if (headline === undefined && blurb === undefined && sourceName === undefined && sourceUrl === undefined && category === undefined && country === undefined && tags === undefined && status === undefined && postedBy === undefined && postedVia === undefined && scheduledAt === undefined) {
     return json({ error: "headline, blurb, sourceName, sourceUrl, category, country, tags, status, postedBy, postedVia or scheduledAt is required" }, 400);
   }
 
@@ -827,6 +828,7 @@ export async function onRequestPatch({ env, request }) {
   const nextSourceName = sourceName === undefined ? current.source_name : clean(sourceName);
   const nextSourceUrl = sourceUrl === undefined ? current.source_url : clean(sourceUrl);
   const nextCategory = category === undefined ? current.category : clean(category);
+  const nextCountry = country === undefined ? current.country : country;
   const nextTags = tags === undefined ? current.tags : tags;
   const nextStatus = status === undefined ? current.status : status;
   const nextPostedBy = postedBy === undefined ? current.posted_by : postedBy;
@@ -855,11 +857,11 @@ export async function onRequestPatch({ env, request }) {
 
   const result = await env.ATR_FEED_DB.prepare(
     `UPDATE feed_items
-       SET headline = ?, blurb = ?, source_name = ?, source_url = ?, category = ?, tags = ?, link_key = ?, status = ?, posted_by = ?, posted_via = ?, scheduled_at = ?
+       SET headline = ?, blurb = ?, source_name = ?, source_url = ?, category = ?, country = ?, tags = ?, link_key = ?, status = ?, posted_by = ?, posted_via = ?, scheduled_at = ?
      WHERE id = ? AND status IN ('published','hidden','draft','removed')
      RETURNING id, headline, blurb, source_name, source_url, category, country, tags, telegram_message_id, published_at, created_at, link_key, status, posted_by, posted_via, scheduled_at`
   )
-    .bind(nextHeadline || null, nextBlurb, nextSourceName, nextSourceUrl, nextCategory, nextTags, nextLinkKey, nextStatus, nextPostedBy, nextPostedVia, nextScheduledAt, id)
+    .bind(nextHeadline || null, nextBlurb, nextSourceName, nextSourceUrl, nextCategory, nextCountry || "", nextTags, nextLinkKey, nextStatus, nextPostedBy, nextPostedVia, nextScheduledAt, id)
     .first();
 
   await writeOperationalEvent(env, request, {

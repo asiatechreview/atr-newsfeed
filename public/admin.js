@@ -1798,6 +1798,8 @@ async function loadSourceOptions() {
 /* Exclusive colour per category (mockup palette, Aug 23 2026). Known categories
    get a curated colour; unknown ones get a deterministic hue so every category
    is visually distinct. Applied to the Live Items category select. */
+const COUNTRY_OPTIONS = ["China", "India", "Japan", "South Korea", "Taiwan", "Singapore", "Indonesia", "Malaysia", "Vietnam", "Thailand", "Philippines", "Hong Kong", "US", "UK", "UAE", "Saudi Arabia", "Australia"];
+
 const CATEGORY_COLOURS = {
   "Markets": "#2563eb",
   "AI": "#7c3aed",
@@ -1884,7 +1886,7 @@ function renderList() {
   });
   checkTh.append(selectAll);
   headRow.append(checkTh);
-  for (const label of ["ID", "Title", "Publisher", "Category", "Published", "Visible", "Link"]) {
+  for (const label of ["ID", "Title", "Publisher", "Category", "Region", "Published", "Visible", "Link"]) {
     const th = document.createElement("th");
     th.textContent = label;
     if (label === "ID") th.className = "id-cell";
@@ -1970,6 +1972,54 @@ function renderList() {
 
     catTd.append(buildCatPill());
     tr.append(catTd);
+
+    // Region / country tag: same interaction pattern as Category.
+    const regionTd = document.createElement("td");
+    regionTd.dataset.label = "Region";
+    const currentCountry = item.country || "";
+
+    const buildCountrySelect = () => {
+      const sel = document.createElement("select");
+      sel.className = "input cat-edit";
+      const blank = document.createElement("option");
+      blank.value = "";
+      blank.textContent = "—";
+      if (!currentCountry) blank.selected = true;
+      sel.append(blank);
+      for (const name of COUNTRY_OPTIONS) {
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = name;
+        if (name === currentCountry) opt.selected = true;
+        sel.append(opt);
+      }
+      sel.addEventListener("change", () => saveItemCountry(item, sel.value));
+      sel.addEventListener("click", (event) => event.stopPropagation());
+      sel.addEventListener("blur", () => {
+        if (sel.value === currentCountry) regionTd.replaceChildren(buildCountryPill());
+      });
+      return sel;
+    };
+
+    const buildCountryPill = () => {
+      const pill = document.createElement("button");
+      pill.type = "button";
+      pill.className = "cat-pill";
+      pill.textContent = currentCountry || "—";
+      pill.style.setProperty("--cat", "#64748b");
+      pill.title = "Change region";
+      pill.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const sel = buildCountrySelect();
+        regionTd.replaceChildren(sel);
+        sel.focus();
+      });
+      return pill;
+    };
+
+    regionTd.append(buildCountryPill());
+    tr.append(regionTd);
+
     tr.append(cell(formatDateTime(item.published_at), "nowrap", "Published"));
 
     // Visible toggle: iOS-style switch for hide/show on the public site.
@@ -2142,6 +2192,32 @@ async function saveItemCategory(item, newCategory) {
       item.category = newCategory;
     }
     setStatus("Saved", `Category updated for item ${item.id}`);
+    filterItems(true);
+  } catch (error) {
+    setStatus("Error", error.message);
+    filterItems(true);
+  }
+}
+
+async function saveItemCountry(item, newCountry) {
+  const oldCountry = item.country || "";
+  if (newCountry === oldCountry) return;
+  setStatus("Saving", `Updating region for item ${item.id}`);
+  try {
+    const response = await fetch("/api/items", {
+      method: "PATCH",
+      credentials: "same-origin",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({ id: String(item.id), country: newCountry })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || `PATCH returned ${response.status}`);
+    const updated = result.item;
+    const value = updated ? (updated.country || "") : newCountry;
+    const idx = state.items.findIndex((candidate) => String(candidate.id) === String(item.id));
+    if (idx >= 0) state.items[idx] = { ...state.items[idx], country: value };
+    else item.country = value;
+    setStatus("Saved", `Region updated for item ${item.id}`);
     filterItems(true);
   } catch (error) {
     setStatus("Error", error.message);
