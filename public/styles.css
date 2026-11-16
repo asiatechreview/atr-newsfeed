@@ -1972,7 +1972,9 @@ footer {
   .newsletter-actions {
     position: absolute;
     left: 268px;
-    bottom: 0;
+    top: calc(250px * 9 / 16);
+    bottom: auto;
+    transform: translateY(-100%);
     margin: 0;
   }
 }
