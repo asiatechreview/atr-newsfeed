@@ -70,6 +70,7 @@ const COMPANY_ALIASES = [
   ["gotravel", "GoTo"],
   ["tokopedia", "GoTo"],
   ["sea limited", "Sea"],
+  ["sea group", "Sea"],
   ["shopee", "Sea"],
   ["garena", "Sea"],
   ["lazada", "Lazada"],
@@ -100,7 +101,8 @@ const COMPANY_ALIASES = [
   ["kakao", "Kakao"],
   ["naver", "Naver"],
   ["coupang", "Coupang"],
-  ["line", "LY Corp"],
+  ["line app", "LY Corp"],
+  ["ly corp", "LY Corp"],
   ["rakuten", "Rakuten"],
   ["sony", "Sony"],
   ["nintendo", "Nintendo"],
@@ -120,7 +122,6 @@ const COMPANY_ALIASES = [
   ["contemporary amperex", "CATL"],
   ["vinfast", "VinFast"],
   ["grab", "Grab"],
-  ["sea", "Sea"],
   ["reliance", "Reliance"],
   ["jio", "Reliance Jio"],
   ["airtel", "Airtel"],
@@ -130,7 +131,8 @@ const COMPANY_ALIASES = [
   ["tc s", "TCS"],
   ["lenovo", "Lenovo"],
   ["zte", "ZTE"],
-  ["arm", "Arm"],
+  ["arm holdings", "Arm"],
+  ["arm ltd", "Arm"],
   ["broadcom", "Broadcom"],
   ["micron", "Micron"],
   ["western digital", "Western Digital"],
@@ -154,21 +156,21 @@ const COMPANY_ALIASES = [
 // broad matching (e.g. "valuation" matching everything from an IPO delay
 // to a product launch) are worse than missing a few true duplicates.
 const EVENT_KEYWORDS = {
-  earnings: ["quarterly earnings", "quarterly results", "quarterly net", "net profit fell", "net profit rose", "net income rose", "net income fell", "revenue miss", "profit warning", "earnings fell", "earnings rose"],
-  funding: ["raises $", "raised $", "series a", "series b", "series c", "series d", "pre-seed", "seed round", "funding round", "secures $", "invests $"],
-  ipo: ["initial public offering", "plans ipo", "planning an ipo", "files for ipo", "public listing", "shares jumped", "shares fell", "share price", "stock fell", "stock rose", "market cap", "listed company"],
-  manda: ["acquires ", "acquired ", "to acquire", "merger with", "takes over", "buys ", "takeover of", "to buy"],
-  launch: ["new model", "latest model", "new chip", "next-generation", "launches new", "launched its", "unveils new", "opens office", "opened a", "introduces ", "rolls out", "opening in"],
-  ban: ["bans ", "banned", "blocks access", "restricts ", "crackdown on", "blacklists"],
-  probe: ["sues ", "sued ", "files lawsuit", "court orders", "investigation into", "antitrust probe", "antitrust investigation", "raided by"],
-  partner: ["partnership with", "partners with", "joint venture", "signs deal with", "deal with each other"],
-  layoffs: ["lays off", "cuts jobs", "job cuts", "cuts staff", "laid off", "redundancies"],
-  cloud: ["data centre", "data center", "1gw", "10gw", "20gw", "hyperscaler", "compute capacity"]
+  earnings_miss: ["misses estimates", "missed estimates", "misses revenue estimates", "misses profit estimates", "earnings miss", "profit warning", "cuts forecast", "lowers guidance"],
+  earnings_beat: ["beats estimates", "beat estimates", "beats revenue estimates", "raises guidance", "raised guidance", "profit jumps", "profit surges"],
+  ipo: ["files for ipo", "filed for ipo", "plans ipo", "planning an ipo", "ipo pricing", "prices ipo", "public listing", "market debut", "stock market debut"],
+  funding: ["raises $", "raised $", "series a", "series b", "series c", "series d", "seed round", "funding round"],
+  acquisition: ["to acquire", "acquires", "acquired", "takeover", "merger with", "to buy", "buys"],
+  layoffs: ["lays off", "cuts jobs", "job cuts", "cuts staff", "redundancies"],
+  ban: ["bans ", "banned", "blocks access", "export controls", "blacklists"],
+  probe: ["antitrust", "investigation into", "sues ", "lawsuit", "raided by"],
+  partnership: ["partnership", "joint venture", "teams up", "join forces", "partners with"],
+  launch: ["unveils", "launches", "introduces", "releases"]
 };
 
 // Time window for story matching (days). Same company + same event inside
 // this window is flagged as a probable duplicate.
-const MATCH_WINDOW_DAYS = 7;
+const MATCH_WINDOW_DAYS = 4;
 
 function normalise(text) {
   return String(text || "").toLowerCase().replace(/\s+/g, " ").trim();
@@ -209,40 +211,80 @@ export function extractEvents(text) {
   return found;
 }
 
-// Extract (company, event) keys from headline + blurb.
-// The company must appear in the HEADLINE to be considered a primary
-// subject of the story; blurb-only mentions are weaker signals and
-// would cause false positives (e.g. a Google checkout story mentioning
-// Flipkart gets flagged as a duplicate of a Flipkart IPO story).
+// Distinctive tokens: words that actually identify a story. Generic tech
+// vocabulary, geography and the company name itself are excluded so that
+// "Nvidia data centre" cannot collide with every other Nvidia data-centre
+// story in the window.
+const STOPWORDS = new Set([
+  "the","and","for","with","from","that","this","these","those","are","was","were","has","have","had",
+  "will","would","could","should","its","their","his","her","they","them","into","over","after","before",
+  "about","more","than","said","says","new","one","two","three","first","last","next","also","but","not",
+  "you","your","our","out","up","down","off","on","in","at","by","as","of","to","a","an","is","be","it",
+  "we","he","she","i","or","if","so","no","do","did","does","can","may","might","must","just","now","then",
+  "when","where","which","who","whom","what","how","why","while","amid","among","including","through",
+  "using","under","between","across","around","per","via","vs","company","companies","firm","firms",
+  "report","reports","reported","according","documents","billion","million","percent","deal","deals"
+]);
+
+const GENERIC_TERMS = new Set([
+  "artificial","intelligence","chip","chips","semiconductor","semiconductors","data","centre","center",
+  "centres","centers","computing","compute","cloud","tech","technology","industry","business","news",
+  "market","markets","asia","asian","china","chinese","american","global","world","region","regional",
+  "southeast","south","east","north","overseas","international","platform","platforms","services"
+]);
+
+function significantTokens(text, companyKeys) {
+  const companyWords = new Set();
+  for (const key of companyKeys) {
+    for (const word of normalise(key).split(/\s+/)) companyWords.add(word);
+  }
+  const tokens = new Set();
+  for (const raw of normalise(text).split(/\s+/)) {
+    const token = raw.replace(/^[^a-z0-9]+|[^a-z0-9]+$/g, "");
+    if (token.length < 4) continue;
+    if (STOPWORDS.has(token) || GENERIC_TERMS.has(token) || companyWords.has(token)) continue;
+    tokens.add(token);
+  }
+  return tokens;
+}
+
+function sharedTokenCount(a, b) {
+  let count = 0;
+  for (const token of a) if (b.has(token)) count += 1;
+  return count;
+}
+
+function jaccard(a, b) {
+  if (!a.size || !b.size) return 0;
+  const shared = sharedTokenCount(a, b);
+  return shared / (a.size + b.size - shared);
+}
+
+// Legacy shape kept for callers that only need (company, event) keys.
 export function extractStoryKeys(headline, blurb) {
-  const headlineText = normalise(headline || "");
-  const blurbText = normalise(blurb || "");
-  const fullText = `${headlineText} ${blurbText}`;
-
-  // Company must be in the headline to be treated as a story subject.
-  const headlineCompanies = extractCompanies(headlineText);
-  const companies = headlineCompanies.size ? headlineCompanies : extractCompanies(fullText);
-
-  const events = extractEvents(fullText);
+  const companies = extractCompanies(normalise(headline));
+  const events = extractEvents(normalise(headline));
   const keys = [];
   for (const company of companies) {
-    for (const event of events) {
-      keys.push({ company, event });
-    }
+    for (const event of events) keys.push({ company, event });
   }
   return keys;
 }
 
-// Given candidate items (with headline, blurb, published_at, id, source_name)
-// and a new story's headline/blurb, return probable duplicates: same company
-// AND same event within MATCH_WINDOW_DAYS. Sorted by closeness (days ago).
+// Strict duplicate match:
+//   - the same company must appear in BOTH headlines;
+//   - a specific event must appear in BOTH headlines;
+//   - the headlines must share at least two distinctive tokens (or 0.35 Jaccard).
+// Blurb-only mentions no longer count: they were the main source of false
+// positives on broad stories about a company.
 export function findStoryMatches(items, { headline, blurb }) {
-  const incomingKeys = extractStoryKeys(headline, blurb);
-  if (!incomingKeys.length) return [];
+  const incomingCompanies = extractCompanies(normalise(headline));
+  const incomingEvents = extractEvents(normalise(headline));
+  if (!incomingCompanies.size || !incomingEvents.size) return [];
 
+  const incomingTokens = significantTokens(headline, incomingCompanies);
   const now = Date.now();
   const matches = [];
-  const seen = new Set();
 
   for (const item of items || []) {
     const id = String(item.id || "");
@@ -252,33 +294,38 @@ export function findStoryMatches(items, { headline, blurb }) {
     const daysAgo = (now - published) / 86400000;
     if (daysAgo > MATCH_WINDOW_DAYS) continue;
 
-    const itemKeys = extractStoryKeys(item.headline || item.title, item.blurb);
-    for (const incoming of incomingKeys) {
-      for (const existing of itemKeys) {
-        if (incoming.company !== existing.company || incoming.event !== existing.event) continue;
-        const dedupeKey = `${id}:${incoming.company}:${incoming.event}`;
-        if (seen.has(dedupeKey)) continue;
-        seen.add(dedupeKey);
-        matches.push({
-          id: item.id,
-          company: incoming.company,
-          event: incoming.event,
-          headline: item.headline || item.title || "",
-          source_name: item.source_name || "",
-          source_url: item.source_url || "",
-          category: item.category || "",
-          published_at: item.published_at,
-          days_ago: Math.round(daysAgo * 10) / 10
-        });
-      }
-    }
+    const itemHeadline = normalise(item.headline || item.title);
+    const itemCompanies = extractCompanies(itemHeadline);
+    if (![...incomingCompanies].some((company) => itemCompanies.has(company))) continue;
+
+    const itemEvents = extractEvents(itemHeadline);
+    const sharedEvents = [...incomingEvents].filter((event) => itemEvents.has(event));
+    if (!sharedEvents.length) continue;
+
+    const itemTokens = significantTokens(itemHeadline, itemCompanies);
+    const sharedTokens = sharedTokenCount(incomingTokens, itemTokens);
+    const similarity = jaccard(incomingTokens, itemTokens);
+    if (sharedTokens < 2 && similarity < 0.35) continue;
+
+    matches.push({
+      id: item.id,
+      company: sharedEvents.length ? [...incomingCompanies].find((c) => itemCompanies.has(c)) : "",
+      event: sharedEvents[0],
+      score: sharedTokens + sharedEvents.length,
+      headline: item.headline || item.title || "",
+      source_name: item.source_name || "",
+      source_url: item.source_url || "",
+      category: item.category || "",
+      published_at: item.published_at,
+      days_ago: Math.round(daysAgo * 10) / 10
+    });
   }
 
-  return matches.sort((a, b) => a.days_ago - b.days_ago);
+  return matches
+    .sort((a, b) => b.score - a.score || a.days_ago - b.days_ago)
+    .slice(0, 3);
 }
 
-// Backend /api/story-match handler data: fetch recent items is done by the
-// caller; this keeps the module pure and testable.
 export function storyMatchPayload(matches) {
   return { matches };
 }
