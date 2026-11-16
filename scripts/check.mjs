@@ -886,7 +886,8 @@ const countryCases = [
   ["TSMC approves up to $1 billion in investments in Anthropic and OpenAI", "TSMC approved investments in AI startups Anthropic and OpenAI.", "Taiwan"],
   ["Southeast Asia's AI data centre boom faces a US test", "US may curb Chinese firms access to Nvidia chips in the region.", "Southeast Asia"],
   ["Malaysia gains more ground in Southeast Asia data centre race", "Google and Microsoft make further commitments in Malaysia.", "Malaysia"],
-  ["Grab and GoTo expand their super-app battle", "Grab is based in Singapore and GoTo in Indonesia.", "Southeast Asia"]
+  ["Grab and GoTo expand their super-app battle", "Grab is based in Singapore and GoTo in Indonesia.", "Southeast Asia"],
+  ["A new app launches today", "A new app launches today.", ""]
 ];
 for (const [headline, blurb, expected] of countryCases) {
   const got = classifyCountry(headline, blurb).country;

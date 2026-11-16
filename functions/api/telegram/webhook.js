@@ -198,6 +198,26 @@ async function oldestPending(env) {
   return row || null;
 }
 
+async function savePendingCountry(env, chatId, url, blurb, domain, label, headline) {
+  if (!env?.ATR_FEED_DB) return;
+  await env.ATR_FEED_DB.prepare(
+    `INSERT INTO rapid_transit_pending (chat_id, url, blurb, domain, label, generated_headline, status, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, 'awaiting_country', strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))`
+  ).bind(String(chatId), url, blurb, domain, label, headline).run();
+}
+
+async function oldestPendingCountry(env) {
+  if (!env?.ATR_FEED_DB) return null;
+  const row = await env.ATR_FEED_DB.prepare(
+    "SELECT * FROM rapid_transit_pending WHERE status = 'awaiting_country' ORDER BY id ASC LIMIT 1"
+  ).first();
+  return row || null;
+}
+
+function cleanCountryInput(value) {
+  return String(value || "").trim().replace(/\s+/g, " ").slice(0, 40);
+}
+
 async function oldestPendingTitle(env) {
   if (!env?.ATR_FEED_DB) return null;
   const row = await env.ATR_FEED_DB.prepare(
@@ -704,16 +724,16 @@ async function generateHeadline(env, blurb) {
   return result.ok ? result.headline : null;
 }
 
-async function ingestItem(env, request, { blurb, url, label, headline, postedBy }) {
+async function ingestItem(env, request, { blurb, url, label, headline, postedBy, country }) {
   const origin = new URL(request.url).origin;
   const category = await inferCategory(env, headline, blurb) || undefined;
-  const country = classifyCountry(headline, blurb).country || undefined;
+  const resolvedCountry = country || classifyCountry(headline, blurb).country || undefined;
   const ingestBody = {
     blurb,
     sourceName: label,
     sourceUrl: url,
     category,
-    country,
+    country: resolvedCountry,
     tags: [],
     postedBy: postedBy || "telegram_rapid_transit",
     postedVia: "telegram_rapid_transit",
@@ -770,7 +790,7 @@ function senderName(message) {
   return from.username || null;
 }
 
-async function processPost(env, request, chatId, url, blurb, label, replyTo = null, postedBy = null, suppliedHeadline = null, skipDuplicateCheck = false) {
+async function processPost(env, request, chatId, url, blurb, label, replyTo = null, postedBy = null, suppliedHeadline = null, skipDuplicateCheck = false, countryOverride = null) {
   // Use an editor-supplied title when present; otherwise generate a
   // scan-first headline from the supplied blurb.
   let headline = suppliedHeadline ? cleanHeadlineOutput(suppliedHeadline) : "";
@@ -827,6 +847,24 @@ async function processPost(env, request, chatId, url, blurb, label, replyTo = nu
     const prompt = await sendGroupMessage(env, chatId, warning, replyTo, null, true);
     await setDuplicatePromptMessage(env, pendingId, prompt?.message_id);
     return;
+  }
+
+  // Country/region: never guess silently. If the classifier is not confident,
+  // pause and ask the group for the tag, then resume with it.
+  let country = countryOverride;
+  if (!country) {
+    const inferred = classifyCountry(headline, blurb);
+    if (inferred.fallback || !inferred.country) {
+      await savePendingCountry(env, chatId, url, blurb, hostOf(url), label, headline);
+      await sendGroupMessage(
+        env,
+        chatId,
+        "Which country or region is this story about? Reply with the tag (e.g. China, India, Southeast Asia).",
+        replyTo
+      );
+      return;
+    }
+    country = inferred.country;
   }
 
   const linkKey = await linkKeyFor(url);
@@ -1164,6 +1202,35 @@ export async function onRequestPost({ env, request }) {
     const pendingTitle = await oldestPendingTitle(env);
     if (pendingTitle) {
       await processPendingTitle(env, request, chatId, message, pendingTitle);
+      return json({ ok: true });
+    }
+
+    const pendingCountry = await oldestPendingCountry(env);
+    if (pendingCountry) {
+      const country = cleanCountryInput(text);
+      if (!country || /https?:\/\//i.test(country)) {
+        await sendGroupMessage(
+          env,
+          chatId,
+          "Reply with just the country or region tag (e.g. China, India, Southeast Asia).",
+          message.message_id
+        );
+        return json({ ok: true });
+      }
+      await markPendingProcessed(env, pendingCountry.id);
+      await processPost(
+        env,
+        request,
+        chatId,
+        pendingCountry.url,
+        pendingCountry.blurb,
+        pendingCountry.label || fallbackLabel(pendingCountry.domain),
+        message.message_id,
+        senderName(message),
+        pendingCountry.generated_headline || pendingCountry.supplied_headline || null,
+        false,
+        country
+      );
       return json({ ok: true });
     }
 

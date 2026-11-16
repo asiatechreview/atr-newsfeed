@@ -1981,11 +1981,6 @@ function renderList() {
     const buildCountrySelect = () => {
       const sel = document.createElement("select");
       sel.className = "input cat-edit";
-      const blank = document.createElement("option");
-      blank.value = "";
-      blank.textContent = "—";
-      if (!currentCountry) blank.selected = true;
-      sel.append(blank);
       for (const name of COUNTRY_OPTIONS) {
         const opt = document.createElement("option");
         opt.value = name;
@@ -2005,7 +2000,7 @@ function renderList() {
       const pill = document.createElement("button");
       pill.type = "button";
       pill.className = "cat-pill";
-      pill.textContent = currentCountry || "—";
+      pill.textContent = currentCountry || "Set region";
       pill.style.setProperty("--cat", "#64748b");
       pill.title = "Change region";
       pill.addEventListener("click", (event) => {

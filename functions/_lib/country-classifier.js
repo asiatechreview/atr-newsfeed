@@ -169,13 +169,15 @@ export function classifyCountry(headline, blurb) {
   }
 
   if (!ranked.length) {
-    return { country: "", score: 0, margin: 0, runnerUp: null, scores };
+    // Every story gets a region. When nothing specific is detectable, the
+    // broad regional tag is used rather than leaving the field empty.
+    return { country: "", score: 0, margin: 0, runnerUp: null, scores, fallback: true };
   }
   const [country, score] = ranked[0];
   const runnerUp = ranked[1] ? { country: ranked[1][0], score: ranked[1][1] } : null;
   const margin = runnerUp ? score - runnerUp.score : score;
   if (score < 4 || margin < 2) {
-    return { country: "", score, margin, runnerUp, scores };
+    return { country: "", score, margin, runnerUp, scores, fallback: true };
   }
   return { country, score, margin, runnerUp, scores };
 }
