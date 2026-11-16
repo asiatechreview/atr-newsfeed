@@ -1242,3 +1242,48 @@ body.logged-out .auth-panel { min-height: calc(100vh - 48px); }
 .wysiwyg-bar span svg { width: 13px; height: 13px; }
 .wysiwyg-bar .wysiwyg-key { font-weight: 700; font-size: 12px; }
 .field-disabled .textarea { border-radius: 0 0 var(--radius-sm) var(--radius-sm); }
+
+/* Newsletter archive manager */
+.newsletter-archive-card {
+  margin-top: 18px;
+}
+
+.newsletter-archive-list {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.newsletter-archive-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+  padding: 11px 12px;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.newsletter-archive-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.newsletter-archive-item.current {
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+.newsletter-archive-title {
+  font: 600 13px/1.35 var(--font-body);
+}
+
+.newsletter-archive-sub {
+  color: var(--muted);
+  font: 400 12px/1.4 var(--font-body);
+}

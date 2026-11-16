@@ -235,6 +235,8 @@ const state = {
   selected: null,
   mode: "edit",
   sponsors: [],
+  newsletterEditions: [],
+  editingEdition: null,
   page: 1,
   category: "",
   categories: [],
@@ -418,6 +420,9 @@ const els = {
   previewNewsletterReadLink: document.querySelector("#preview-newsletter-read-link"),
   newsletterReadbackStatus: document.querySelector("#newsletter-readback-status"),
   newsletterReadbackOutput: document.querySelector("#newsletter-readback-output"),
+  newsletterArchiveList: document.querySelector("#newsletter-archive-list"),
+  newsletterArchiveCount: document.querySelector("#newsletter-archive-count"),
+  newsletterArchiveStatus: document.querySelector("#newsletter-archive-status"),
   sponsorsList: document.querySelector("#sponsors-list"),
   sponsorAdd: document.querySelector("#sponsor-add"),
   sponsorsSave: document.querySelector("#sponsors-save"),
@@ -782,7 +787,10 @@ els.categoryAddForm.addEventListener("submit", (event) => {
     els.categoryPatternInput.value = "";
   });
 });
-els.newsletterReload.addEventListener("click", loadLatestSubstackPost);
+els.newsletterReload.addEventListener("click", () => {
+  resetNewsletterEditing();
+  loadLatestSubstackPost();
+});
 els.newsletterUpdateNow.addEventListener("click", updateNewsletterNow);
 els.sponsorAdd.addEventListener("click", () => {
   state.sponsors.push({ name: "", blurb: "", url: "", logo: "", enabled: false });
@@ -2664,6 +2672,12 @@ async function loadSiteContent() {
     fillNewsletterForm(content.newsletter || {});
     renderNewsletterPreview(content.newsletter || {});
     state.sponsors = Array.isArray(content.sponsors) ? content.sponsors.map((s) => ({ ...s })) : [];
+    state.newsletterEditions = Array.isArray(content.newsletterEditions)
+      ? content.newsletterEditions.map((edition) => ({ ...edition }))
+      : [];
+    state.editingEdition = null;
+    els.newsletterSave.textContent = "Save card";
+    renderNewsletterArchiveList();
     renderSponsors();
   } catch (error) {
     els.newsletterStatus.textContent = "Error";
@@ -2680,6 +2694,73 @@ function fillNewsletterForm(newsletter) {
   els.newsletterImage.value = newsletter.image || "";
   els.newsletterStatus.textContent = "Loaded";
   renderNewsletterPreview(newsletter);
+}
+
+function renderNewsletterArchiveList() {
+  if (!els.newsletterArchiveList) return;
+  const editions = state.newsletterEditions;
+  els.newsletterArchiveCount.textContent = `${editions.length} edition${editions.length === 1 ? "" : "s"}`;
+  els.newsletterArchiveList.textContent = "";
+  if (!editions.length) {
+    const empty = document.createElement("p");
+    empty.className = "muted";
+    empty.textContent = "No archived editions yet.";
+    els.newsletterArchiveList.appendChild(empty);
+    return;
+  }
+  editions.forEach((edition, index) => {
+    const row = document.createElement("button");
+    row.type = "button";
+    row.className = "newsletter-archive-item";
+    if (state.editingEdition === index) row.classList.add("current");
+    const title = document.createElement("span");
+    title.className = "newsletter-archive-title";
+    title.textContent = edition.title || "(untitled)";
+    const sub = document.createElement("span");
+    sub.className = "newsletter-archive-sub";
+    sub.textContent = edition.subhead || "";
+    row.append(title, sub);
+    row.addEventListener("click", () => editNewsletterEdition(index));
+    els.newsletterArchiveList.appendChild(row);
+  });
+}
+
+function editNewsletterEdition(index) {
+  const edition = state.newsletterEditions[index];
+  if (!edition) return;
+  state.editingEdition = index;
+  fillNewsletterForm({
+    title: edition.title,
+    blurb: edition.subhead || edition.blurb || "",
+    url: edition.url,
+    image: edition.image
+  });
+  els.newsletterStatus.textContent = `Editing edition ${index + 1}`;
+  els.newsletterSave.textContent = "Save edition";
+  els.newsletterArchiveStatus.textContent = "Editing";
+  renderNewsletterArchiveList();
+  els.newsletterTitle.focus();
+}
+
+function resetNewsletterEditing() {
+  state.editingEdition = null;
+  els.newsletterSave.textContent = "Save card";
+  els.newsletterArchiveStatus.textContent = "Idle";
+  renderNewsletterArchiveList();
+}
+
+async function refreshNewsletterEditions() {
+  try {
+    const response = await fetch("/api/site-content", { credentials: "same-origin" });
+    if (!response.ok) return;
+    const content = await response.json();
+    state.newsletterEditions = Array.isArray(content.newsletterEditions)
+      ? content.newsletterEditions.map((edition) => ({ ...edition }))
+      : [];
+    renderNewsletterArchiveList();
+  } catch {
+    // Listing is advisory; the form still works.
+  }
 }
 
 function renderNewsletterPreview(newsletter) {
@@ -2725,6 +2806,9 @@ async function updateNewsletterNow() {
     els.newsletterStatus.textContent = result.updated ? "Updated to latest post" : "Already current";
     els.newsletterReadbackStatus.textContent = result.updated ? "Updated" : "No change";
     els.newsletterReadbackOutput.textContent = JSON.stringify(result, null, 2);
+    state.editingEdition = null;
+    els.newsletterSave.textContent = "Save card";
+    await refreshNewsletterEditions();
   } catch (error) {
     els.newsletterStatus.textContent = "Update failed";
     els.newsletterReadbackStatus.textContent = "Error";
@@ -2735,14 +2819,27 @@ async function updateNewsletterNow() {
 }
 
 async function saveNewsletter() {
-  const payload = {
-    newsletter: {
-      title: els.newsletterTitle.value.trim(),
-      blurb: els.newsletterBlurb.value.trim(),
-      url: els.newsletterUrl.value.trim(),
-      image: els.newsletterImage.value.trim()
-    }
+  const form = {
+    title: els.newsletterTitle.value.trim(),
+    subhead: els.newsletterBlurb.value.trim(),
+    url: els.newsletterUrl.value.trim(),
+    image: els.newsletterImage.value.trim()
   };
+  const editing = state.editingEdition;
+  const payload = editing === null
+    ? { newsletter: { title: form.title, blurb: form.subhead, url: form.url, image: form.image } }
+    : {
+        newsletterEditions: state.newsletterEditions.map((edition, index) =>
+          index === editing
+            ? { title: form.title, subhead: form.subhead, url: form.url, image: form.image }
+            : {
+                title: edition.title,
+                subhead: edition.subhead || edition.blurb || "",
+                url: edition.url,
+                image: edition.image || ""
+              }
+        )
+      };
 
   els.newsletterReadbackStatus.textContent = "Saving";
   try {
@@ -2754,11 +2851,26 @@ async function saveNewsletter() {
     });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.error || `PUT returned ${response.status}`);
-    const newsletter = result.newsletter || payload.newsletter;
-    renderNewsletterPreview(newsletter);
-    els.newsletterStatus.textContent = "Saved";
+
+    if (editing === null) {
+      const newsletter = result.newsletter || payload.newsletter;
+      renderNewsletterPreview(newsletter);
+      els.newsletterStatus.textContent = "Saved";
+      els.newsletterReadbackStatus.textContent = "Saved";
+      els.newsletterReadbackOutput.textContent = JSON.stringify(newsletter, null, 2);
+      return;
+    }
+
+    state.newsletterEditions = Array.isArray(result.newsletterEditions)
+      ? result.newsletterEditions.map((edition) => ({ ...edition }))
+      : payload.newsletterEditions;
+    state.editingEdition = null;
+    els.newsletterSave.textContent = "Save card";
+    els.newsletterStatus.textContent = "Edition saved";
+    els.newsletterArchiveStatus.textContent = "Saved";
     els.newsletterReadbackStatus.textContent = "Saved";
-    els.newsletterReadbackOutput.textContent = JSON.stringify(newsletter, null, 2);
+    els.newsletterReadbackOutput.textContent = JSON.stringify(form, null, 2);
+    renderNewsletterArchiveList();
   } catch (error) {
     els.newsletterReadbackStatus.textContent = "Error";
     els.newsletterReadbackOutput.textContent = error.message;

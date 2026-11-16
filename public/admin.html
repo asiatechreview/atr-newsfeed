@@ -14,7 +14,7 @@
       document.documentElement.dataset.theme = localStorage.getItem("atr-admin-theme") === "dark" ? "dark" : "light";
     } catch (error) {}
   </script>
-  <link rel="stylesheet" href="/admin.css?v=20260815-uxpass">
+  <link rel="stylesheet" href="/admin.css?v=20261116-newsletter-archive">
 </head>
 <body class="logged-out">
   <div class="app">
@@ -613,6 +613,15 @@
               </div>
             </div>
           </div>
+
+          <div class="card newsletter-archive-card">
+            <div class="card-head">
+              <div class="card-title">Archived newsletters <small id="newsletter-archive-count">0 editions</small></div>
+              <span id="newsletter-archive-status" class="pill">Idle</span>
+            </div>
+            <p class="muted">Click an edition to edit its title, subhead, image or link.</p>
+            <div id="newsletter-archive-list" class="newsletter-archive-list"></div>
+          </div>
         </section>
 
         <!-- ============ SPONSORS ============ -->
@@ -903,6 +912,6 @@
     <button id="mobile-refresh-button" type="button">Refresh</button>
   </nav>
 
-  <script src="/admin.js?v=20260903-dynamic-categories" defer></script>
+  <script src="/admin.js?v=20261116-newsletter-archive" defer></script>
 </body>
 </html>

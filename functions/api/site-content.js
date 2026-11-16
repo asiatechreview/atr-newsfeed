@@ -35,6 +35,7 @@ export async function onRequestPut({ env, request }) {
   const updates = {};
   if (body.newsletter !== undefined) updates.newsletter = normalizeNewsletter(body.newsletter);
   if (body.sponsors !== undefined) updates.sponsors = normalizeSponsors(body.sponsors);
+  if (body.newsletterEditions !== undefined) updates.newsletter_editions = normalizeNewsletterEditions(body.newsletterEditions);
   if (!Object.keys(updates).length) {
     return json({ error: "Nothing to update" }, 400);
   }
@@ -63,6 +64,19 @@ function normalizeNewsletter(value) {
     url: clean(source.url),
     image: clean(source.image)
   };
+}
+
+function normalizeNewsletterEditions(value) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((edition) => ({
+      title: clean(edition?.title),
+      subhead: clean(edition?.subhead || edition?.blurb),
+      url: clean(edition?.url),
+      image: clean(edition?.image)
+    }))
+    .filter((edition) => edition.title && edition.url)
+    .slice(0, 500);
 }
 
 function normalizeSponsors(value) {
