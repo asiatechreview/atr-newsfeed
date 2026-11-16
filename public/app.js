@@ -861,6 +861,12 @@ function isValidLink(value) {
   }
 }
 
+// Category labels are hidden from readers while the taxonomy/sorting is
+// rebuilt (Sai directive, Nov 2026). Category data is still stored, still
+// used for admin editing and sorting, and still exposed by the JSON/RSS
+// feeds. Flip this flag to true to restore the public chips.
+const SHOW_CATEGORY_TAGS = false;
+
 function normalizeTag(value) {
   return String(value || "")
     .trim()
@@ -1530,19 +1536,21 @@ function renderSignal(items) {
 
   signalMetrics.textContent = "";
 
-  const topicCounts = new Map();
-  for (const item of items) {
-    const topic = item.region || item.category || primaryTopicTag(item.tags);
-    topicCounts.set(topic, (topicCounts.get(topic) || 0) + 1);
-  }
+  const metrics = [["Active stories", String(items.length)]];
 
-  const metrics = [
-    ["Active stories", String(items.length)],
-    ...[...topicCounts.entries()]
-      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-      .slice(0, 4)
-      .map(([tag, count]) => [titleCaseTag(tag), String(count)])
-  ];
+  if (SHOW_CATEGORY_TAGS) {
+    const topicCounts = new Map();
+    for (const item of items) {
+      const topic = item.region || item.category || primaryTopicTag(item.tags);
+      topicCounts.set(topic, (topicCounts.get(topic) || 0) + 1);
+    }
+    metrics.push(
+      ...[...topicCounts.entries()]
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+        .slice(0, 4)
+        .map(([tag, count]) => [titleCaseTag(tag), String(count)])
+    );
+  }
 
   for (const [label, value] of metrics) {
     const metric = document.createElement("div");
@@ -1580,7 +1588,9 @@ function showNewItemToast(item, count = 1) {
   newItemToastTitle.textContent = item?.headline || "New update available";
   newItemToastMeta.textContent = count > 1
     ? `${count} new updates · just now`
-    : `${titleCaseTag(item?.region || item?.category || primaryTopicTag(item?.tags))} · just now`;
+    : SHOW_CATEGORY_TAGS
+      ? `${titleCaseTag(item?.region || item?.category || primaryTopicTag(item?.tags))} · just now`
+      : "just now";
   newItemToast.hidden = false;
 
   if (newItemToastTimer) {
@@ -2050,8 +2060,12 @@ function renderItems(items) {
 
     itemNode.querySelector(".item-time").textContent = formatTime(item.published_at);
     itemNode.querySelector(".item").dataset.itemKey = stableItemKey(item);
-    primaryTagLink.href = `?tag=${encodeURIComponent(primaryTag)}`;
-    primaryTagLink.textContent = titleCaseTag(primaryTag);
+    if (SHOW_CATEGORY_TAGS) {
+      primaryTagLink.href = `?tag=${encodeURIComponent(primaryTag)}`;
+      primaryTagLink.textContent = titleCaseTag(primaryTag);
+    } else {
+      primaryTagLink.remove();
+    }
     itemNode.querySelector(".headline").textContent = item.headline;
     appendItemText(itemNode.querySelector(".blurb"), item);
     renderTags(itemNode.querySelector(".tags"), item);
