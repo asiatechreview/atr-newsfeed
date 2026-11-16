@@ -26,3 +26,12 @@
 
 /styles.css
   Cache-Control: public, max-age=300
+
+/theme-preview
+  Cache-Control: no-store, no-cache, must-revalidate
+/theme-preview.html
+  Cache-Control: no-store, no-cache, must-revalidate
+/preview-a
+  Cache-Control: no-store, no-cache, must-revalidate
+/preview-a.html
+  Cache-Control: no-store, no-cache, must-revalidate
