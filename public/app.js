@@ -2434,7 +2434,7 @@ async function loadNewsletterCarousel() {
     const actions = document.createElement("div");
     actions.className = "newsletter-actions";
     const read = document.createElement("a");
-    read.className = "newsletter-link";
+    read.className = "newsletter-cta";
     read.target = "_blank";
     read.rel = "noopener";
     read.textContent = "Read now →";
@@ -2450,7 +2450,10 @@ async function loadNewsletterCarousel() {
     };
     const prevArrow = makeArrow("prev", "Previous newsletter", "‹");
     const nextArrow = makeArrow("next", "Next newsletter", "›");
-    actions.append(read, prevArrow, nextArrow);
+    const divider = document.createElement("span");
+    divider.className = "newsletter-divider";
+    divider.setAttribute("aria-hidden", "true");
+    actions.append(read, divider, prevArrow, nextArrow);
     promo.appendChild(actions);
 
     const slides = [...track.querySelectorAll(".newsletter-slide")];
