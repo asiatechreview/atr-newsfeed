@@ -18,6 +18,7 @@ import { __rapidTransitHeadlineTest } from "../functions/api/telegram/webhook.js
 import { parseArchivePost } from "../functions/_lib/newsletter-refresh.js";
 import { findStoryMatches } from "../functions/_lib/story-match.js";
 import { classifyCategory } from "../functions/_lib/category-classifier.js";
+import { classifyCountry } from "../functions/_lib/country-classifier.js";
 
 const root = new URL("..", import.meta.url).pathname;
 const required = [
@@ -868,6 +869,26 @@ for (const [headline, blurb, expected] of categoryCases) {
   const got = classifyCategory(headline, blurb).category;
   if (got !== expected) {
     console.error(`FAILED: category classifier classified "${headline}" as ${got}, expected ${expected}`);
+    process.exit(1);
+  }
+}
+
+// Country classifier regression corpus (Sai, Nov 2026): real headlines from
+// the live feed, including comparator-country traps.
+const countryCases = [
+  ["Huawei data centre highlights China's AI computing gap with the US", "Huawei opens a large data centre as China seeks to close the AI computing gap.", "China"],
+  ["Malaysia plans separate electricity market for data centres by 2030", "Malaysia will set up a separate electricity market for data centres.", "Malaysia"],
+  ["Samsung to make Starlink satellite chips at expanded Texas plant", "Samsung will produce satellite chips for Starlink at its expanded Texas plant.", "South Korea"],
+  ["US and allies agree to protect AI supply chains from China", "Washington and allies agree on export controls to protect AI supply chains from China.", "US"],
+  ["Alibaba launches Qwen4-Max to challenge US AI leaders", "Alibaba released Qwen4-Max, its latest large language model.", "China"],
+  ["Japan’s Taisei launches $150 million fund to back AI and robotics startups", "Construction firm Taisei sets up a fund to invest in AI and robotics startups.", "Japan"],
+  ["Megaspeed says Alice Huang left company in August 2025", "Megaspeed said its founder Alice Huang left the company.", "Singapore"],
+  ["TSMC approves up to $1 billion in investments in Anthropic and OpenAI", "TSMC approved investments in AI startups Anthropic and OpenAI.", "Taiwan"]
+];
+for (const [headline, blurb, expected] of countryCases) {
+  const got = classifyCountry(headline, blurb).country;
+  if (got !== expected) {
+    console.error(`FAILED: country classifier classified "${headline}" as ${got || "(none)"}, expected ${expected}`);
     process.exit(1);
   }
 }

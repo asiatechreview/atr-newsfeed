@@ -3,6 +3,7 @@ import { linkKeyFor } from "../../_lib/link-key.js";
 import { categoryRules } from "../../_lib/categories.js";
 import { findStoryMatches } from "../../_lib/story-match.js";
 import { classifyCategory } from "../../_lib/category-classifier.js";
+import { classifyCountry } from "../../_lib/country-classifier.js";
 import { refreshNewsletterCardFromFeed } from "../../_lib/newsletter-refresh.js";
 import {
   clearSchedule,
@@ -706,11 +707,13 @@ async function generateHeadline(env, blurb) {
 async function ingestItem(env, request, { blurb, url, label, headline, postedBy }) {
   const origin = new URL(request.url).origin;
   const category = await inferCategory(env, headline, blurb) || undefined;
+  const country = classifyCountry(headline, blurb).country || undefined;
   const ingestBody = {
     blurb,
     sourceName: label,
     sourceUrl: url,
     category,
+    country,
     tags: [],
     postedBy: postedBy || "telegram_rapid_transit",
     postedVia: "telegram_rapid_transit",
