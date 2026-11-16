@@ -143,12 +143,19 @@ h1 a {
 
 .site-masthead h1 {
   margin: 0;
+  display: flex;
+  justify-content: center;
   line-height: 0;
   font-family: var(--font-masthead);
   font-weight: 400;
   font-size: clamp(28px, 5vw, 44px);
   line-height: 1;
   letter-spacing: 0;
+}
+
+.site-masthead h1 a {
+  display: inline-flex;
+  align-items: center;
 }
 
 .logo-mark {
