@@ -2462,12 +2462,6 @@ async function loadNewsletterCarousel() {
       const height = copies.reduce((max, node) => Math.max(max, node.offsetHeight), 0);
       track.style.setProperty("--copy-h", height + "px");
     };
-    measure();
-    fitSubtitles();
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(() => { measure(); fitSubtitles(); }).catch(() => {});
-    }
-
     // Long subtitles must stay fully visible without moving the layout:
     // shrink the subtitle type until it fits the reserved copy box.
     const fitSubtitles = () => {
@@ -2489,6 +2483,12 @@ async function loadNewsletterCarousel() {
         }
       }
     };
+
+    measure();
+    fitSubtitles();
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => { measure(); fitSubtitles(); }).catch(() => {});
+    }
 
     let currentIndex = 0;
 
