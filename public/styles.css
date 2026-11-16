@@ -1026,17 +1026,25 @@ main {
 }
 
 .newsletter-actions {
-  grid-column: 2;
-  grid-row: 2;
   display: flex;
   align-items: center;
   gap: 8px;
+  margin: 14px 0 0 258px;
 }
 
 .newsletter-actions .newsletter-link {
   grid-column: auto;
   grid-row: auto;
   justify-self: auto;
+  width: max-content;
+  min-width: 0;
+  margin: 0;
+  padding: 10px 18px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--newsletter-accent);
+  font: 600 13px/1 var(--font-meta);
 }
 
 
@@ -1045,6 +1053,7 @@ main {
   display: block;
   overflow: visible;
   -webkit-line-clamp: unset;
+  font-size: calc(14px * var(--font-scale, 1));
 }
 
 .newsletter-arrow {
@@ -1090,9 +1099,12 @@ main {
   }
 
   .newsletter-actions {
-    grid-column: 1;
-    grid-row: 3;
-    justify-self: center;
+    margin: 14px 0 0;
+    justify-content: center;
+  }
+
+  .newsletter-carousel .newsletter-slide .newsletter-copy p {
+    font-size: calc(13px * var(--font-scale, 1));
   }
 }
 

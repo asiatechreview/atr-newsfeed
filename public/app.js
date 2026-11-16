@@ -2403,27 +2403,7 @@ function buildNewsletterSlide(edition) {
   subhead.textContent = edition.subhead || edition.blurb || "";
   copy.append(title, subhead);
 
-  const actions = document.createElement("div");
-  actions.className = "newsletter-actions";
-  const read = document.createElement("a");
-  read.className = "newsletter-link";
-  read.href = edition.url || "#";
-  read.target = "_blank";
-  read.rel = "noopener";
-  read.textContent = "Read now →";
-
-  const makeArrow = (dir, label, glyph) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "newsletter-arrow";
-    button.dataset.dir = dir;
-    button.setAttribute("aria-label", label);
-    button.textContent = glyph;
-    return button;
-  };
-  actions.append(read, makeArrow("prev", "Previous newsletter", "‹"), makeArrow("next", "Next newsletter", "›"));
-
-  slide.append(imageLink, copy, actions);
+  slide.append(imageLink, copy);
   return slide;
 }
 
@@ -2451,8 +2431,30 @@ async function loadNewsletterCarousel() {
     promo.textContent = "";
     promo.appendChild(track);
 
+    const actions = document.createElement("div");
+    actions.className = "newsletter-actions";
+    const read = document.createElement("a");
+    read.className = "newsletter-link";
+    read.target = "_blank";
+    read.rel = "noopener";
+    read.textContent = "Read now →";
+
+    const makeArrow = (dir, label, glyph) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "newsletter-arrow";
+      button.dataset.dir = dir;
+      button.setAttribute("aria-label", label);
+      button.textContent = glyph;
+      return button;
+    };
+    const prevArrow = makeArrow("prev", "Previous newsletter", "‹");
+    const nextArrow = makeArrow("next", "Next newsletter", "›");
+    actions.append(read, prevArrow, nextArrow);
+    promo.appendChild(actions);
+
     const slides = [...track.querySelectorAll(".newsletter-slide")];
-    const arrows = [...track.querySelectorAll(".newsletter-arrow")];
+    const arrows = [prevArrow, nextArrow];
     const copies = slides.map((slide) => slide.querySelector(".newsletter-copy")).filter(Boolean);
 
     // Reserve the tallest copy block so title/subtitle/button never move
@@ -2503,6 +2505,9 @@ async function loadNewsletterCarousel() {
     const go = (next) => {
       currentIndex = Math.max(0, Math.min(slides.length - 1, next));
       track.style.transform = `translateX(${-currentIndex * 100}%)`;
+      const edition = editions[currentIndex] || {};
+      read.href = edition.url || "#";
+      read.setAttribute("aria-label", `Read ${edition.title || "newsletter"} on Asia Tech Review`);
       sync();
     };
 
@@ -2529,7 +2534,7 @@ async function loadNewsletterCarousel() {
     track.addEventListener("pointerup", onEnd);
 
     window.addEventListener("resize", () => { measure(); fitSubtitles(); sync(); });
-    sync();
+    go(0);
   } catch {
     // Keep the static fallback card.
   }
