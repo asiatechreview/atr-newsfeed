@@ -1893,7 +1893,7 @@ footer {
 
 /* iPad and other tablets: use the mobile stacked layout (image on top,
    centred copy, centred control bar) instead of the desktop split. */
-@media (max-width: 1024px) {
+@media (min-width: 641px) and (max-width: 1024px) {
   .newsletter-slide {
     grid-template-columns: 1fr;
     align-items: center;
