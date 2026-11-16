@@ -2463,9 +2463,32 @@ async function loadNewsletterCarousel() {
       track.style.setProperty("--copy-h", height + "px");
     };
     measure();
+    fitSubtitles();
     if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(measure).catch(() => {});
+      document.fonts.ready.then(() => { measure(); fitSubtitles(); }).catch(() => {});
     }
+
+    // Long subtitles must stay fully visible without moving the layout:
+    // shrink the subtitle type until it fits the reserved copy box.
+    const fitSubtitles = () => {
+      for (const copy of copies) {
+        const title = copy.querySelector("h3");
+        const subhead = copy.querySelector("p");
+        if (!subhead) continue;
+        subhead.style.fontSize = "";
+        const styles = getComputedStyle(subhead);
+        let size = parseFloat(styles.fontSize) || 14;
+        const minimum = 10.5;
+        const margin = parseFloat(styles.marginTop) || 0;
+        const available = copy.clientHeight - (title ? title.offsetHeight : 0) - margin;
+        let guard = 40;
+        while (subhead.scrollHeight > available && size > minimum && guard > 0) {
+          size -= 0.5;
+          subhead.style.fontSize = size + "px";
+          guard -= 1;
+        }
+      }
+    };
 
     const step = () => track.clientWidth || 1;
     const index = () => Math.round(track.scrollLeft / step());
@@ -2485,7 +2508,7 @@ async function loadNewsletterCarousel() {
       });
     }
     track.addEventListener("scroll", sync, { passive: true });
-    window.addEventListener("resize", () => { measure(); sync(); });
+    window.addEventListener("resize", () => { measure(); fitSubtitles(); sync(); });
     sync();
   } catch {
     // Keep the static fallback card.
