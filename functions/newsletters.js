@@ -20,7 +20,6 @@ export function renderNewsletterArchive(editions = []) {
         <div class="archive-copy">
           <h3><a href="${url}" target="_blank" rel="noopener">${title}</a></h3>
           ${subhead ? `<p>${subhead}</p>` : ""}
-          <a class="archive-read" href="${url}" target="_blank" rel="noopener">Read now →</a>
         </div>
       </article>`;
   }).join("\n");
@@ -115,19 +114,6 @@ export function renderNewsletterArchive(editions = []) {
       margin: 0 0 10px;
       color: var(--dek);
       font: 400 14px/1.5 var(--font-body);
-    }
-    .archive-read {
-      display: inline-flex;
-      align-items: center;
-      padding: 9px 16px;
-      border: 1px solid var(--accent);
-      border-radius: var(--radius);
-      color: var(--newsletter-accent);
-      font: 600 12px/1 var(--font-meta);
-      text-decoration: none;
-    }
-    .archive-read:hover {
-      background: rgba(255, 255, 255, 0.06);
     }
     .archive-empty {
       color: var(--muted);
