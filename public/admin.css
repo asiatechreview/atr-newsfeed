@@ -484,6 +484,19 @@ select.input { appearance: none; padding-right: 30px; min-height: 38px; backgrou
 .link-icon-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .link-icon-btn svg { display: block; }
 
+/* Sources tab: wall of publisher buttons. */
+.publisher-wall {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 14px 4px 0;
+}
+.publisher-btn {
+  padding: 8px 14px;
+  font-size: 13px;
+  border-radius: 8px;
+}
+
 .ai-assist-row { display: flex; gap: 6px; align-items: flex-start; }
 .ai-assist-row .input, .ai-assist-row .textarea { flex: 1; }
 .ai-assist-top { align-items: stretch; }

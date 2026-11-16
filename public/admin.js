@@ -243,9 +243,10 @@ const state = {
   selectedIds: new Set(),
   source: "",
   sources: [],
+  publisher: "",
   sort: "newest",
   sourcesPage: 0,
-  sourcesPageSize: 15,
+  sourcesPageSize: 25,
   sourcesTotal: 0,
   apiTotal: 0,
   loadingMore: false
@@ -352,10 +353,10 @@ const els = {
   categoryNameInput: document.querySelector("#category-name-input"),
   categoryPatternInput: document.querySelector("#category-pattern-input"),
   sourcesBody: document.querySelector("#sources-body"),
-  sourcesCount: document.querySelector("#sources-count"),
-  sourcesCountDetail: document.querySelector("#sources-count-detail"),
-  sourcesHiddenCount: document.querySelector("#sources-hidden-count"),
-  sourcesHiddenDetail: document.querySelector("#sources-hidden-detail"),
+  sourcesWall: document.querySelector("#sources-wall"),
+  sourcesTitle: document.querySelector("#sources-title"),
+  sourcesListContainer: document.querySelector("#sources-list-container"),
+  sourcesBack: document.querySelector("#sources-back"),
   sourcesPageLabel: document.querySelector("#sources-page-label"),
   sourcesPrevPage: document.querySelector("#sources-prev-page"),
   sourcesNextPage: document.querySelector("#sources-next-page"),
@@ -747,16 +748,9 @@ els.tabSources.addEventListener("click", () => {
   switchTab("sources");
   loadSources();
 });
-els.sourcesPrevPage.addEventListener("click", () => {
-  if (state.sourcesPage <= 0) return;
-  state.sourcesPage -= 1;
-  loadSources();
-});
-els.sourcesNextPage.addEventListener("click", () => {
-  if ((state.sourcesPage + 1) * state.sourcesPageSize >= state.sourcesTotal) return;
-  state.sourcesPage += 1;
-  loadSources();
-});
+els.sourcesPrevPage?.addEventListener("click", () => loadPublisherPage(state.sourcesPage - 1));
+els.sourcesNextPage?.addEventListener("click", () => loadPublisherPage(state.sourcesPage + 1));
+els.sourcesBack?.addEventListener("click", () => loadSources());
 els.tabCategories.addEventListener("click", () => {
   switchTab("categories");
   loadCategories();
@@ -1005,85 +999,115 @@ async function fetchPage(targetPage) {
   }
 }
 
+// Sources tab: a wall of publisher buttons. Clicking a publisher shows that
+// publisher's latest links (server-side pagination, 25/page) with an "All
+// publishers" button to return to the wall.
 async function loadSources() {
   beginLoad();
   try {
-    const offset = state.sourcesPage * state.sourcesPageSize;
-    const response = await fetch(`/api/items?status=all&limit=${state.sourcesPageSize}&offset=${offset}&_=${Date.now()}`, {
+    const response = await fetch(`/api/admin/sources?_=${Date.now()}`, {
+      headers: { accept: "application/json", "cache-control": "no-cache" },
+      credentials: "same-origin"
+    });
+    if (response.status === 401) throw new Error("Session expired, sign in again.");
+    if (!response.ok) throw new Error(`/api/admin/sources returned ${response.status}`);
+    const payload = await response.json();
+    renderPublisherWall(Array.isArray(payload.sources) ? payload.sources : []);
+  } catch (error) {
+    if (els.sourcesTitle) els.sourcesTitle.textContent = `Error: ${error.message}`;
+  } finally {
+    endLoad();
+  }
+}
+
+function renderPublisherWall(sources) {
+  state.publisher = "";
+  if (els.sourcesTitle) els.sourcesTitle.textContent = "Publishers";
+  els.sourcesWall.hidden = false;
+  if (els.sourcesListContainer) els.sourcesListContainer.hidden = true;
+  els.sourcesWall.replaceChildren();
+
+  if (!sources.length) {
+    const p = document.createElement("p");
+    p.className = "muted";
+    p.textContent = "No publishers found.";
+    els.sourcesWall.append(p);
+    return;
+  }
+
+  for (const name of sources) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "btn btn-ghost publisher-btn";
+    btn.textContent = name;
+    btn.addEventListener("click", () => openPublisher(name));
+    els.sourcesWall.append(btn);
+  }
+}
+
+async function openPublisher(name) {
+  state.publisher = name;
+  state.sourcesPage = 1;
+  els.sourcesWall.hidden = true;
+  if (els.sourcesListContainer) els.sourcesListContainer.hidden = false;
+  if (els.sourcesTitle) els.sourcesTitle.textContent = name;
+  await loadPublisherPage(1);
+}
+
+async function loadPublisherPage(page) {
+  if (page < 1) return;
+  beginLoad();
+  try {
+    const limit = 25;
+    const offset = (page - 1) * limit;
+    const response = await fetch(`/api/items?status=all&limit=${limit}&offset=${offset}&source=${encodeURIComponent(state.publisher || "")}&_=${Date.now()}`, {
       headers: { accept: "application/json", "cache-control": "no-cache" },
       credentials: "same-origin"
     });
     if (response.status === 401) throw new Error("Session expired, sign in again.");
     if (!response.ok) throw new Error(`/api/items returned ${response.status}`);
     const payload = await response.json();
-    const total = Number(payload.total) || 0;
-    if (state.sourcesPage > 0 && offset >= total) {
-      state.sourcesPage = Math.max(0, Math.ceil(total / state.sourcesPageSize) - 1);
-      return loadSources();
-    }
-    state.sourcesTotal = total;
-    renderSources(Array.isArray(payload.items) ? payload.items : [], {
-      total,
-      hidden: Number(payload.summary?.hidden) || 0
-    });
+    state.sourcesPage = page;
+    state.sourcesTotal = Number(payload.total) || 0;
+    renderPublisherLinks(Array.isArray(payload.items) ? payload.items : [], page, state.sourcesTotal);
   } catch (error) {
-    els.sourcesCount.textContent = "Error";
-    els.sourcesCountDetail.textContent = error.message;
+    if (els.sourcesPageLabel) els.sourcesPageLabel.textContent = `Error: ${error.message}`;
   } finally {
     endLoad();
   }
 }
 
-const POSTER_LABELS = {
-  telegram_rapid_transit: "Rapid Transit",
-  telegram_backup_bot: "Backup bot",
-  daily_news_automation: "Daily News Automation",
-  "": "Not recorded"
-};
-
-function displayPoster(value) {
-  const v = String(value || "").trim();
-  if (!v) return "Not recorded";
-  return POSTER_LABELS[v] || v;
-}
-
-function displayVia(value) {
-  const v = String(value || "").trim();
-  if (!v) return "-";
-  return POSTER_LABELS[v] || v;
-}
-
-function renderSources(items, summary = {}) {
+function renderPublisherLinks(items, page, total) {
   els.sourcesBody.replaceChildren();
-  const total = Number(summary.total) || 0;
-  const hidden = Number(summary.hidden) || 0;
-  els.sourcesCount.textContent = String(total);
-  els.sourcesCountDetail.textContent = `${hidden} hidden`;
-  els.sourcesHiddenCount.textContent = String(hidden);
-  els.sourcesHiddenDetail.textContent = `${total - hidden} visible`;
 
-  if (!total) {
-    els.sourcesBody.append(emptyTableRow(7, "No items tracked yet."));
+  if (!items.length) {
+    els.sourcesBody.append(emptyTableRow(3, "No items from this publisher yet."));
   } else {
     for (const item of items) {
       const tr = document.createElement("tr");
       tr.className = item.status === "hidden" ? "item-row item-row-hidden" : "item-row";
-      tr.append(cell(String(item.id), "nowrap id-cell", "ID"));
-      tr.append(cell(item.headline || item.title || firstWords(item.blurb, 12), "truncate", "Title"));
-      tr.append(cell(item.source_name || "-", "truncate", "Source"));
-      tr.append(cell(displayPoster(item.posted_by), "", "Posted by"));
-      tr.append(cell(displayVia(item.posted_via), "", "Via"));
-      tr.append(cell(formatDateTime(item.published_at || item.created_at), "nowrap", "When"));
-      tr.append(cell(item.status === "hidden" ? "Hidden" : "Published", item.status === "hidden" ? "status-error" : "status-ok", "Status"));
+      tr.append(cell(formatDateTime(item.published_at || item.created_at), "nowrap", "Published"));
+
+      const titleTd = document.createElement("td");
+      titleTd.dataset.label = "Title";
+      titleTd.className = "truncate";
+      const link = document.createElement("a");
+      link.href = `https://bulletin.asiatechreview.com/?item=${encodeURIComponent(item.link_key || item.id)}`;
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.textContent = item.headline || item.title || firstWords(item.blurb, 12);
+      titleTd.append(link);
+      tr.append(titleTd);
+
+      tr.append(cell(item.category || "Other news", "", "Category"));
       els.sourcesBody.append(tr);
     }
   }
 
-  const start = total ? state.sourcesPage * state.sourcesPageSize + 1 : 0;
-  const end = Math.min((state.sourcesPage + 1) * state.sourcesPageSize, total);
-  els.sourcesPageLabel.textContent = total ? `Showing ${start}–${end} of ${total}` : "No sources to show";
-  els.sourcesPrevPage.disabled = state.sourcesPage === 0;
-  els.sourcesNextPage.disabled = end >= total;
+  const totalPages = Math.max(1, Math.ceil(total / 25));
+  if (els.sourcesPageLabel) els.sourcesPageLabel.textContent = `Page ${page} of ${totalPages}`;
+  if (els.sourcesPrevPage) els.sourcesPrevPage.disabled = page <= 1;
+  if (els.sourcesNextPage) els.sourcesNextPage.disabled = page >= totalPages;
 }
 
 async function loadCategories() {

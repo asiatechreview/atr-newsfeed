@@ -420,44 +420,31 @@
 
         <!-- ============ SOURCES / PROVENANCE ============ -->
         <section id="sources-view" hidden>
-          <div class="stats">
-            <article class="stat">
-              <span class="stat-label">Tracked Items</span>
-              <strong id="sources-count" class="stat-value">-</strong>
-              <span id="sources-count-detail" class="stat-note">-</span>
-            </article>
-            <article class="stat">
-              <span class="stat-label">Hidden</span>
-              <strong id="sources-hidden-count" class="stat-value">-</strong>
-              <span id="sources-hidden-detail" class="stat-note">-</span>
-            </article>
-          </div>
-
           <div class="card">
             <div class="card-head">
-              <div class="card-title">Provenance <small>who posted each item, when and how</small></div>
+              <div class="card-title" id="sources-title">Publishers <small>click a publisher to see its links</small></div>
             </div>
-            <div class="table-wrap">
-              <table class="sources-table">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Title</th>
-                    <th>Source</th>
-                    <th>Posted by</th>
-                    <th>Via</th>
-                    <th>When</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody id="sources-body"></tbody>
-              </table>
-            </div>
-            <div class="item-pagination sources-pagination" aria-label="Sources pagination">
-              <span id="sources-page-label" class="pagination-label">Loading sources…</span>
-              <div class="pagination-actions">
-                <button id="sources-prev-page" class="btn btn-ghost btn-sm" type="button">Previous</button>
-                <button id="sources-next-page" class="btn btn-ghost btn-sm" type="button">Next</button>
+            <div id="sources-wall" class="publisher-wall"></div>
+            <div id="sources-list-container" hidden>
+              <div class="table-wrap">
+                <table class="sources-table">
+                  <thead>
+                    <tr>
+                      <th>Published</th>
+                      <th>Title</th>
+                      <th>Category</th>
+                    </tr>
+                  </thead>
+                  <tbody id="sources-body"></tbody>
+                </table>
+              </div>
+              <div class="item-pagination sources-pagination" aria-label="Publisher links pagination">
+                <button id="sources-back" class="btn btn-ghost btn-sm" type="button">All publishers</button>
+                <span id="sources-page-label" class="pagination-label">Loading…</span>
+                <div class="pagination-actions">
+                  <button id="sources-prev-page" class="btn btn-ghost btn-sm" type="button">Previous</button>
+                  <button id="sources-next-page" class="btn btn-ghost btn-sm" type="button">Next</button>
+                </div>
               </div>
             </div>
           </div>
