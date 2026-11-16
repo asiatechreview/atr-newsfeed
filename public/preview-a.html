@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Asia Tech Review</title>
+  <link rel="icon" href="/atr-bulletin-20260905-v2.png" type="image/png">
+  <link rel="shortcut icon" href="/atr-bulletin-20260905-v2.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="/atr-bulletin-20260905-v2-apple-touch-icon.png">
+  <link rel="manifest" href="/atr-bulletin-20260905-v2.webmanifest">
+  <link rel="alternate" type="application/rss+xml" title="Asia Tech Review Bulletin RSS" href="/rss.xml">
+  <link rel="alternate" type="application/feed+json" title="Asia Tech Review Bulletin JSON Feed" href="/feed.json">
+  <script>
+    try {
+      const savedTheme = localStorage.getItem("atr-bulletin-theme");
+      if (savedTheme === "light" || savedTheme === "amoled") {
+        document.documentElement.dataset.theme = savedTheme;
+      }
+    } catch (error) {}
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css?v=20261116-light-palette">
+<meta property="og:site_name" content="Asia Tech Review Bulletin">
+    <meta property="og:title" content="Asia Tech Review Bulletin">
+    <meta property="og:description" content="What's moving in Asia tech, as it happens.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://bulletin.asiatechreview.com/">
+    <meta property="og:image" content="https://bulletin.asiatechreview.com/og-image-20260905.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:type" content="image/png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Asia Tech Review Bulletin">
+    <meta name="twitter:description" content="What's moving in Asia tech, as it happens.">
+    <meta name="twitter:image" content="https://bulletin.asiatechreview.com/og-image-20260905.png">
+  <meta name="robots" content="noindex,nofollow">
+<style id="palette-a-preview">
+:root{--accent:#C97A5C;--accent-dim:#6A4A3C;--link:#E0A98A;--newsletter-accent:#E0A98A;--newsletter-bg:#17110d;--newsletter-border:#4a352c;}
+:root[data-theme="light"]{--accent:#8E3F26;--accent-dim:#C08E79;--link:#7B2D26;--newsletter-accent:#8E3F26;--newsletter-bg:#f7eddd;--newsletter-border:#d9c3a4;}
+:root[data-theme="amoled"]{--accent:#C97A5C;--accent-dim:#4a342a;--link:#E0A98A;--newsletter-accent:#C97A5C;--newsletter-bg:#0a0705;--newsletter-border:#2e211a;}
+.blurb a{color:var(--link)!important;}
+.blurb a:visited{color:var(--accent-dim)!important;}
+</style>
+</head>
+<body>
+  <header class="site-masthead">
+    <h1><a href="/" aria-label="Asia Tech Review homepage">Asia Tech Review</a></h1>
+    <p class="masthead-sub">Bulletin</p>
+  </header>
+
+  <div class="page">
+    <main>
+      <div class="topbar">
+        <div class="topbar-title">
+          <p class="eyebrow">ATR Daily</p>
+          <h2>Latest Asia Tech Signals</h2>
+          <p class="dek">What's moving in Asia tech, as it happens.</p>
+        </div>
+        <div class="topbar-actions">
+          <p class="status" aria-live="polite">
+            <span class="status-dot" aria-hidden="true"></span>
+            <span id="feed-status">Loading news links...</span>
+          </p>
+          <div class="topbar-button-row">
+            <form id="search-form" class="search search-inline" role="search">
+              <input id="search-input" name="q" type="search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search" aria-label="Search">
+            </form>
+            <a class="rss-link" href="/rss.xml" aria-label="Subscribe to Asia Tech Review Bulletin RSS feed">
+              <svg class="rss-link-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M5 5.5c7.5 0 13.5 6 13.5 13.5"></path>
+                <path d="M5 11c4.4 0 8 3.6 8 8"></path>
+                <path d="M6.2 17.3h.1"></path>
+              </svg>
+              <span>RSS</span>
+            </a>
+            <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch theme">
+              <svg class="theme-bulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <g class="bulb-rays">
+                  <path d="M12 2v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M2 12h2"/><path d="M19.07 4.93l-1.41 1.41"/>
+                </g>
+                <path class="bulb-body" d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/>
+                <path d="M9 18h6"/><path d="M10 22h4"/>
+              </svg>
+            </button>
+            <button id="font-decrease" class="font-toggle" type="button" aria-label="Decrease font size" title="Decrease font size">A−</button>
+            <button id="font-increase" class="font-toggle" type="button" aria-label="Increase font size" title="Increase font size">A+</button>
+            <button id="search-toggle" class="search-toggle" type="button" aria-label="Search" aria-expanded="false">
+              <svg class="search-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <circle cx="11" cy="11" r="7"></circle>
+                <path d="M16.5 16.5 21 21"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <form id="mobile-search-form" class="mobile-search" role="search">
+        <input id="mobile-search-input" name="q" type="search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search" aria-label="Search">
+      </form>
+
+      <section class="newsletter-block" aria-label="Latest Asia Tech Review newsletter">
+        <h2 class="section-title">Our latest newsletter</h2>
+        <div class="newsletter-promo" id="newsletter-promo">
+          <a class="newsletter-image-link" id="newsletter-image-link" href="https://www.asiatechreview.com/p/southeast-asias-ai-data-centre-boom" target="_blank" rel="noopener">
+            <img id="newsletter-image" src="/api/newsletter-image?src=https%3A%2F%2Fsubstackcdn.com%2Fimage%2Ffetch%2F%24s_!eMtz!%2Cf_auto%2Cq_auto%3Agood%2Cfl_progressive%3Asteep%2Fhttps%253A%252F%252Fsubstack-post-media.s3.amazonaws.com%252Fpublic%252Fimages%252F114cfee8-9c5c-4982-9ef8-fbd7119e8829_1672x941.png" alt="Southeast Asia’s AI data centre boom faces a US test" width="960" height="540" decoding="async" loading="lazy">
+          </a>
+          <div class="newsletter-copy">
+            <h3 id="newsletter-title">Southeast Asia’s AI data centre boom faces a US test</h3>
+            <p id="newsletter-blurb">US may curb Chinese firms’ access to Nvidia chips in the region</p>
+          </div>
+          <a class="newsletter-link" id="newsletter-read-link" href="https://www.asiatechreview.com/p/southeast-asias-ai-data-centre-boom" target="_blank" rel="noopener">Read now →</a>
+        </div>
+      </section>
+
+      <div class="content-grid">
+        <section class="feed-column" aria-label="Asia Tech Review feed">
+          <h2 class="section-title">Latest Updates</h2>
+          <section id="feed-list" class="feed"></section>
+          <nav id="pagination" class="pagination" aria-label="News link pages"></nav>
+
+          <section id="watchlist" class="watchlist" aria-label="Watchlist lead" hidden>
+            <p class="eyebrow">Watchlist</p>
+            <h2 id="watchlist-headline"></h2>
+            <p id="watchlist-blurb" class="watchlist-blurb"></p>
+          </section>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <aside id="new-item-toast" class="new-item-toast" aria-live="polite" aria-label="New bulletin update" hidden>
+    <div class="new-item-toast-copy">
+      <p class="new-item-toast-kicker">New update</p>
+      <p id="new-item-toast-title" class="new-item-toast-title"></p>
+      <p id="new-item-toast-meta" class="new-item-toast-meta"></p>
+    </div>
+    <div class="new-item-toast-actions">
+      <button id="new-item-toast-read" class="new-item-toast-read" type="button">Read update</button>
+      <button id="new-item-toast-close" class="new-item-toast-close" type="button" aria-label="Dismiss new update">x</button>
+    </div>
+  </aside>
+
+  <template id="date-template">
+    <p class="date"></p>
+  </template>
+
+  <template id="item-template">
+    <article class="item">
+      <div class="meta">
+        <time class="item-time"></time>
+        <a class="item-primary-tag"></a>
+      </div>
+      <div class="item-main">
+        <div class="item-headline-row">
+          <h3 class="headline"></h3>
+        </div>
+        <p class="blurb"></p>
+        <p class="tags"></p>
+      </div>
+    </article>
+  </template>
+
+  <script src="/app.js?v=20261116-hide-category-tags" defer></script>
+  <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "dbf480a7e72c4290892373a4177e22c2"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
