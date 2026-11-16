@@ -35,3 +35,7 @@
   Cache-Control: no-store, no-cache, must-revalidate
 /preview-a.html
   Cache-Control: no-store, no-cache, must-revalidate
+
+/og-image-20261116.png
+  Cache-Control: public, max-age=604800
+  X-Content-Type-Options: nosniff
