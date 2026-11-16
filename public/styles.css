@@ -1001,6 +1001,17 @@ main {
   display: flex;
   transition: transform 0.35s ease;
   will-change: transform;
+  touch-action: pan-y;
+  -webkit-user-drag: none;
+}
+
+.newsletter-image-link {
+  touch-action: pan-y;
+}
+
+.newsletter-image-link img {
+  -webkit-user-drag: none;
+  user-select: none;
 }
 
 .newsletter-track::-webkit-scrollbar {

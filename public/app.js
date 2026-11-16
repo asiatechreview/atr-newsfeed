@@ -2393,6 +2393,8 @@ function buildNewsletterSlide(edition) {
   image.height = 540;
   image.decoding = "async";
   image.loading = "lazy";
+  image.draggable = false;
+  imageLink.draggable = false;
   imageLink.appendChild(image);
 
   const copy = document.createElement("div");
@@ -2521,16 +2523,33 @@ async function loadNewsletterCarousel() {
     }
 
     let startX = null;
+    let startY = null;
+    let didSwipe = false;
     const onStart = (event) => {
-      startX = event.touches ? event.touches[0].clientX : event.clientX;
+      const point = event.touches ? event.touches[0] : event;
+      startX = point.clientX;
+      startY = point.clientY;
     };
     const onEnd = (event) => {
       if (startX === null) return;
-      const endX = event.changedTouches ? event.changedTouches[0].clientX : event.clientX;
-      const delta = endX - startX;
+      const point = event.changedTouches ? event.changedTouches[0] : event;
+      const deltaX = point.clientX - startX;
+      const deltaY = point.clientY - startY;
       startX = null;
-      if (Math.abs(delta) > 40) go(currentIndex + (delta < 0 ? 1 : -1));
+      startY = null;
+      if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY)) {
+        go(currentIndex + (deltaX < 0 ? 1 : -1));
+        didSwipe = true;
+        window.setTimeout(() => { didSwipe = false; }, 350);
+      }
     };
+    // A horizontal swipe on the image must page the carousel, not open the story.
+    track.addEventListener("click", (event) => {
+      if (!didSwipe) return;
+      event.preventDefault();
+      event.stopPropagation();
+      didSwipe = false;
+    }, true);
     track.addEventListener("touchstart", onStart, { passive: true });
     track.addEventListener("touchend", onEnd, { passive: true });
     track.addEventListener("pointerdown", onStart);
