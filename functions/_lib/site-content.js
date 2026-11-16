@@ -1,3 +1,5 @@
+import { NEWSLETTER_EDITION_SEED } from "../_data/newsletter-editions.js";
+
 const DEFAULT_NEWSLETTER = {
   title: "Grab bets on fintech to reinforce its tech story",
   blurb: "The company's bid to become a fintech heavyweight is about to face its first major test",
@@ -19,7 +21,11 @@ export async function ensureSiteContentTable(env) {
 }
 
 export async function readSiteContent(env) {
-  const result = { newsletter: { ...DEFAULT_NEWSLETTER }, sponsors: [] };
+  const result = {
+    newsletter: { ...DEFAULT_NEWSLETTER },
+    newsletterEditions: NEWSLETTER_EDITION_SEED.map((edition) => ({ ...edition })),
+    sponsors: []
+  };
 
   if (!env?.ATR_FEED_DB) return result;
 
@@ -31,6 +37,9 @@ export async function readSiteContent(env) {
     const value = parseJson(row.value_json);
     if (row.content_key === "newsletter" && value && typeof value === "object") {
       result.newsletter = { ...DEFAULT_NEWSLETTER, ...value };
+    }
+    if (row.content_key === "newsletter_editions" && Array.isArray(value) && value.length) {
+      result.newsletterEditions = value;
     }
     if (row.content_key === "sponsors" && Array.isArray(value)) {
       result.sponsors = value;

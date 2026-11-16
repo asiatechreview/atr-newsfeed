@@ -2376,28 +2376,117 @@ if (searchToggle && mobileSearchForm && mobileSearchInput) {
   });
 }
 
-async function loadNewsletterCard() {
+function buildNewsletterSlide(edition) {
+  const slide = document.createElement("article");
+  slide.className = "newsletter-slide";
+
+  const imageLink = document.createElement("a");
+  imageLink.className = "newsletter-image-link";
+  imageLink.href = edition.url || "#";
+  imageLink.target = "_blank";
+  imageLink.rel = "noopener";
+
+  const image = document.createElement("img");
+  image.src = newsletterImageProxyUrl(edition.image) || edition.image || "";
+  image.alt = edition.title || "Asia Tech Review newsletter";
+  image.width = 960;
+  image.height = 540;
+  image.decoding = "async";
+  image.loading = "lazy";
+  imageLink.appendChild(image);
+
+  const copy = document.createElement("div");
+  copy.className = "newsletter-copy";
+  const title = document.createElement("h3");
+  title.textContent = edition.title || "";
+  const subhead = document.createElement("p");
+  subhead.textContent = edition.subhead || edition.blurb || "";
+  copy.append(title, subhead);
+
+  const actions = document.createElement("div");
+  actions.className = "newsletter-actions";
+  const read = document.createElement("a");
+  read.className = "newsletter-link";
+  read.href = edition.url || "#";
+  read.target = "_blank";
+  read.rel = "noopener";
+  read.textContent = "Read now →";
+
+  const makeArrow = (dir, label, glyph) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "newsletter-arrow";
+    button.dataset.dir = dir;
+    button.setAttribute("aria-label", label);
+    button.textContent = glyph;
+    return button;
+  };
+  actions.append(read, makeArrow("prev", "Previous newsletter", "‹"), makeArrow("next", "Next newsletter", "›"));
+
+  slide.append(imageLink, copy, actions);
+  return slide;
+}
+
+async function loadNewsletterCarousel() {
+  const promo = document.querySelector("#newsletter-promo");
+  if (!promo) return;
+
   try {
     const response = await fetch("/api/site-content");
     if (!response.ok) return;
     const content = await response.json();
     const newsletter = content.newsletter || {};
-    const promo = document.querySelector("#newsletter-promo");
-    if (!promo) return;
+    const editions = Array.isArray(content.newsletterEditions) && content.newsletterEditions.length
+      ? content.newsletterEditions.slice(0, 7)
+      : [newsletter].filter((edition) => edition && edition.url);
 
-    const title = document.querySelector("#newsletter-title");
-    const blurb = document.querySelector("#newsletter-blurb");
-    const imageLink = document.querySelector("#newsletter-image-link");
-    const image = document.querySelector("#newsletter-image");
-    const readLink = document.querySelector("#newsletter-read-link");
+    if (!editions.length) return;
 
-    if (newsletter.url) {
-      if (imageLink) imageLink.href = newsletter.url;
-      if (readLink) readLink.href = newsletter.url;
+    const track = document.createElement("div");
+    track.className = "newsletter-track";
+    track.id = "newsletter-track";
+    for (const edition of editions) track.appendChild(buildNewsletterSlide(edition));
+
+    promo.classList.add("newsletter-carousel");
+    promo.textContent = "";
+    promo.appendChild(track);
+
+    const slides = [...track.querySelectorAll(".newsletter-slide")];
+    const arrows = [...track.querySelectorAll(".newsletter-arrow")];
+    const copies = slides.map((slide) => slide.querySelector(".newsletter-copy")).filter(Boolean);
+
+    // Reserve the tallest copy block so title/subtitle/button never move
+    // between slides. All seven editions currently render at 2+2 lines.
+    const measure = () => {
+      track.style.setProperty("--copy-h", "0px");
+      const height = copies.reduce((max, node) => Math.max(max, node.offsetHeight), 0);
+      track.style.setProperty("--copy-h", height + "px");
+    };
+    measure();
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(measure).catch(() => {});
     }
-    if (newsletter.image && image) image.src = newsletterImageProxyUrl(newsletter.image) || newsletter.image;
-    if (title && newsletter.title) title.textContent = newsletter.title;
-    if (blurb && newsletter.blurb) blurb.textContent = newsletter.blurb;
+
+    const step = () => track.clientWidth || 1;
+    const index = () => Math.round(track.scrollLeft / step());
+    const sync = () => {
+      const current = index();
+      for (const arrow of arrows) {
+        arrow.disabled = arrow.dataset.dir === "prev"
+          ? current <= 0
+          : current >= slides.length - 1;
+      }
+    };
+
+    for (const arrow of arrows) {
+      arrow.addEventListener("click", () => {
+        const direction = arrow.dataset.dir === "prev" ? -1 : 1;
+        track.scrollBy({ left: direction * step(), behavior: "smooth" });
+      });
+    }
+    track.addEventListener("scroll", sync, { passive: true });
+    window.addEventListener("resize", () => { measure(); sync(); });
+    sync();
   } catch {
     // Keep the static fallback card.
   }
@@ -2407,4 +2496,4 @@ initThemeToggle();
 initFontScale();
 refreshFeed({ initial: true });
 startFeedPolling();
-loadNewsletterCard();
+loadNewsletterCarousel();
