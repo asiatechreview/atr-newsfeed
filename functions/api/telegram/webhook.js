@@ -769,7 +769,14 @@ async function sendIngestResult(env, chatId, result, headline = null) {
     await sendGroupMessage(env, chatId, `⚠️ Already posted${itemId}`);
   } else if (result.ok) {
     const titleText = headline || result.item?.headline || "";
-    const msg = titleText ? `🟢 ${titleText}` : "🟢";
+    // Show what the classifiers actually stored, so Sai can verify the pick
+    // at a glance without opening the admin.
+    const meta = [result.item?.category, result.item?.country].filter(Boolean).join(" · ");
+    const msg = titleText
+      ? `🟢 ${titleText}${meta ? `\n${meta}` : ""}`
+      : meta
+        ? `🟢 ${meta}`
+        : "🟢";
     await sendGroupMessage(env, chatId, msg);
   } else {
     await sendGroupMessage(
