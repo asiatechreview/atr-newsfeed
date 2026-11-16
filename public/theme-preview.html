@@ -1,0 +1,111 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>ATR — link/accent comparison</title>
+<style>
+  :root { --page:#e9e2d7; --ink:#151713; }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:28px; background:var(--page); color:var(--ink);
+         font-family:"Berkeley Mono","JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace; }
+  h1 { font-size:15px; letter-spacing:.14em; text-transform:uppercase; margin:0 0 6px; }
+  .sub { font-size:12px; color:#5d574c; margin:0 0 22px; }
+  .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+  .panel { border-radius:10px; overflow:hidden; box-shadow:0 1px 0 rgba(0,0,0,.08),0 8px 24px rgba(0,0,0,.06); }
+  .label { display:flex; align-items:baseline; justify-content:space-between; padding:10px 14px;
+           background:#151713; color:#f4efe6; font-size:11px; letter-spacing:.12em; text-transform:uppercase; }
+  .label b { font-weight:700; }
+  .label span { opacity:.6; letter-spacing:.06em; text-transform:none; }
+  .card { padding:18px 16px 20px; background:var(--bg); color:var(--text); }
+  .mast { font-size:13px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--text); }
+  .rule { height:1px; background:var(--border); margin:10px 0 14px; }
+  .kicker { font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+  .headline { font-size:19px; line-height:1.22; font-weight:700; margin:6px 0 8px; color:var(--text); }
+  .blurb { font-size:12.5px; line-height:1.5; color:var(--dek); margin:0 0 10px; }
+  .link { color:var(--link); font-size:12.5px; text-decoration:none; border-bottom:1px solid var(--link); padding-bottom:1px; }
+  .meta { font-size:10.5px; letter-spacing:.05em; color:var(--muted); margin-top:12px; }
+  .btn { display:inline-block; margin-top:14px; padding:8px 14px; border-radius:5px;
+         background:var(--accent); color:var(--on); font-size:11px; letter-spacing:.1em; text-transform:uppercase; }
+  .news { margin-top:16px; padding:12px; border:1px solid var(--nborder); background:var(--nbg); border-radius:6px; }
+  .news .t { font-size:13px; font-weight:700; color:var(--text); margin-bottom:4px; }
+  .news .s { font-size:11.5px; color:var(--dek); }
+  .news .a { font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--naccent); margin-top:8px; }
+  .swatches { display:flex; gap:6px; padding:10px 16px 14px; background:var(--bg); border-top:1px solid var(--border); }
+  .sw { width:26px; height:26px; border-radius:4px; border:1px solid rgba(0,0,0,.12); }
+  .swl { font-size:9px; color:var(--muted); align-self:center; margin-left:6px; letter-spacing:.04em; }
+  .dark { padding:12px 16px; background:var(--dbg); color:var(--dtext); font-size:11px; }
+  .dark .h { font-weight:700; font-size:13px; color:var(--dtext); }
+  .dark .l { color:var(--dlink); }
+  .dark .m { color:var(--dmuted); font-size:10px; }
+  @media (max-width:900px){ .grid{grid-template-columns:1fr; } body{padding:16px;} }
+</style></head>
+<body>
+  <h1>ATR Bulletin — link &amp; accent comparison</h1>
+  <p class="sub">Same content, three palettes. Headlines stay ink in all three; only links, UI accent and newsletter chrome change.</p>
+
+  <div class="grid">
+
+    <div class="panel" style="--bg:#f8f0e7;--text:#151713;--dek:#5b5346;--muted:#7c7365;--border:#ded1bf;--link:#7B2D26;--accent:#8E3F26;--on:#fff;--nbg:#f7eddd;--nborder:#d9c3a4;--naccent:#8E3F26;--dbg:#0d0e0c;--dtext:#ece8dd;--dlink:#E0A98A;--dmuted:#8d8577;">
+      <div class="label"><b>A · Ink + oxblood</b><span>recommended</span></div>
+      <div class="card">
+        <div class="mast">Asia Tech Review</div>
+        <div class="rule"></div>
+        <div class="kicker">China · AI</div>
+        <div class="headline">China's chip exports hit record as AI demand surges</div>
+        <p class="blurb">Shipments rose for a fourth straight month, driven by memory and advanced packaging demand across Asian supply chains.</p>
+        <a class="link" href="#">Read the full story →</a>
+        <div class="meta">BLOOMBERG · 16 NOV 2026 · 09:41</div>
+        <span class="btn">Subscribe</span>
+        <div class="news"><div class="t">Chinese AI is back</div><div class="s">DeepSeek, Moonshot and Manus all raise huge rounds.</div><div class="a">Read the newsletter</div></div>
+      </div>
+      <div class="swatches">
+        <div class="sw" style="background:#f8f0e7"></div><div class="sw" style="background:#7B2D26"></div>
+        <div class="sw" style="background:#8E3F26"></div><div class="sw" style="background:#9A6B1E"></div>
+        <span class="swl">bg · link · accent · gold</span>
+      </div>
+      <div class="dark"><div class="h">Dark mode headline</div><div class="l">Read the full story →</div><div class="m">link #E0A98A on #0d0e0c</div></div>
+    </div>
+
+    <div class="panel" style="--bg:#f8f0e7;--text:#151713;--dek:#5b5346;--muted:#7c7365;--border:#ded1bf;--link:#1F3A5F;--accent:#24476E;--on:#fff;--nbg:#f7eddd;--nborder:#d9c3a4;--naccent:#24476E;--dbg:#0d0e0c;--dtext:#ece8dd;--dlink:#9DBFE0;--dmuted:#8d8577;">
+      <div class="label"><b>B · Ink + navy</b><span>neutral</span></div>
+      <div class="card">
+        <div class="mast">Asia Tech Review</div>
+        <div class="rule"></div>
+        <div class="kicker">China · AI</div>
+        <div class="headline">China's chip exports hit record as AI demand surges</div>
+        <p class="blurb">Shipments rose for a fourth straight month, driven by memory and advanced packaging demand across Asian supply chains.</p>
+        <a class="link" href="#">Read the full story →</a>
+        <div class="meta">BLOOMBERG · 16 NOV 2026 · 09:41</div>
+        <span class="btn">Subscribe</span>
+        <div class="news"><div class="t">Chinese AI is back</div><div class="s">DeepSeek, Moonshot and Manus all raise huge rounds.</div><div class="a">Read the newsletter</div></div>
+      </div>
+      <div class="swatches">
+        <div class="sw" style="background:#f8f0e7"></div><div class="sw" style="background:#1F3A5F"></div>
+        <div class="sw" style="background:#24476E"></div><div class="sw" style="background:#9A6B1E"></div>
+        <span class="swl">bg · link · accent · gold</span>
+      </div>
+      <div class="dark"><div class="h">Dark mode headline</div><div class="l">Read the full story →</div><div class="m">link #9DBFE0 on #0d0e0c</div></div>
+    </div>
+
+    <div class="panel" style="--bg:#f8f0e7;--text:#151713;--dek:#5b5346;--muted:#7c7365;--border:#ded1bf;--link:#1F4E4A;--accent:#2A5F5A;--on:#fff;--nbg:#f7eddd;--nborder:#d9c3a4;--naccent:#2A5F5A;--dbg:#0d0e0c;--dtext:#ece8dd;--dlink:#8FC4BD;--dmuted:#8d8577;">
+      <div class="label"><b>C · Ink + deep teal</b><span>cool</span></div>
+      <div class="card">
+        <div class="mast">Asia Tech Review</div>
+        <div class="rule"></div>
+        <div class="kicker">China · AI</div>
+        <div class="headline">China's chip exports hit record as AI demand surges</div>
+        <p class="blurb">Shipments rose for a fourth straight month, driven by memory and advanced packaging demand across Asian supply chains.</p>
+        <a class="link" href="#">Read the full story →</a>
+        <div class="meta">BLOOMBERG · 16 NOV 2026 · 09:41</div>
+        <span class="btn">Subscribe</span>
+        <div class="news"><div class="t">Chinese AI is back</div><div class="s">DeepSeek, Moonshot and Manus all raise huge rounds.</div><div class="a">Read the newsletter</div></div>
+      </div>
+      <div class="swatches">
+        <div class="sw" style="background:#f8f0e7"></div><div class="sw" style="background:#1F4E4A"></div>
+        <div class="sw" style="background:#2A5F5A"></div><div class="sw" style="background:#9A6B1E"></div>
+        <span class="swl">bg · link · accent · gold</span>
+      </div>
+      <div class="dark"><div class="h">Dark mode headline</div><div class="l">Read the full story →</div><div class="m">link #8FC4BD on #0d0e0c</div></div>
+    </div>
+
+  </div>
+</body></html>
