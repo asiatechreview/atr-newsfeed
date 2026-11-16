@@ -6,7 +6,7 @@ const escapeHtml = (value) => String(value ?? "")
   .replace(/>/g, "&gt;")
   .replace(/"/g, "&quot;");
 
-export function renderNewsletterArchive(editions = []) {
+export function renderNewsletterArchive(editions = [], { page = 1, totalPages = 1 } = {}) {
   const entries = editions.map((edition) => {
     const url = escapeHtml(edition.url);
     const title = escapeHtml(edition.title);
@@ -119,6 +119,37 @@ export function renderNewsletterArchive(editions = []) {
       color: var(--muted);
       padding: 24px 0;
     }
+    .archive-pager {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: 26px 0 40px;
+    }
+    .pager-btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 9px 15px;
+      border: 1px solid var(--accent);
+      border-radius: var(--radius);
+      color: var(--newsletter-accent);
+      font: 600 12px/1 var(--font-meta);
+      text-decoration: none;
+    }
+    .pager-btn:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .pager-btn.is-disabled {
+      opacity: 0.35;
+      border-color: var(--border);
+      color: var(--muted);
+    }
+    .pager-status {
+      color: var(--muted);
+      font: 600 11px/1 var(--font-meta);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
     @media (max-width: 640px) {
       .archive-main {
         padding: 18px 16px;
@@ -144,13 +175,19 @@ export function renderNewsletterArchive(editions = []) {
         <a class="archive-back" href="/">← Back to the Bulletin</a>
       </div>
       ${entries || '<p class="archive-empty">No newsletters yet.</p>'}
+      ${totalPages > 1 ? `<nav class="archive-pager" aria-label="Newsletter pages">
+        ${page > 1 ? `<a class="pager-btn" href="/newsletters?page=${page - 1}">← Newer</a>` : '<span class="pager-btn is-disabled">← Newer</span>'}
+        <span class="pager-status">Page ${page} of ${totalPages}</span>
+        ${page < totalPages ? `<a class="pager-btn" href="/newsletters?page=${page + 1}">Older →</a>` : '<span class="pager-btn is-disabled">Older →</span>'}
+      </nav>` : ""}
     </main>
   </div>
 </body>
 </html>`;
 }
 
-export async function onRequestGet({ env }) {
+export async function onRequestGet({ request, env }) {
+  const PER_PAGE = 7;
   let editions = [];
   try {
     const content = await readSiteContent(env);
@@ -158,7 +195,13 @@ export async function onRequestGet({ env }) {
   } catch {
     editions = [];
   }
-  return new Response(renderNewsletterArchive(editions), {
+
+  const requested = Number(new URL(request.url).searchParams.get("page")) || 1;
+  const totalPages = Math.max(1, Math.ceil(editions.length / PER_PAGE));
+  const page = Math.min(Math.max(1, Math.floor(requested)), totalPages);
+  const slice = editions.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+
+  return new Response(renderNewsletterArchive(slice, { page, totalPages }), {
     headers: {
       "content-type": "text/html; charset=utf-8",
       "cache-control": "public, max-age=60"
