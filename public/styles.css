@@ -1956,3 +1956,23 @@ footer {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+/* Desktop only: align the newsletter control bar with the image baseline.
+   Tablets and phones keep the in-flow, centred bar. */
+@media (min-width: 1025px) {
+  .newsletter-promo.newsletter-carousel {
+    position: relative;
+  }
+
+  .newsletter-slide .newsletter-copy {
+    height: 104px;
+    min-height: 0;
+  }
+
+  .newsletter-actions {
+    position: absolute;
+    left: 268px;
+    bottom: 0;
+    margin: 0;
+  }
+}
