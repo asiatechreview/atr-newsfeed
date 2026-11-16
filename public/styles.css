@@ -25,7 +25,8 @@
   --accent: #C97A5C;
   --accent-2: #E8BC5A;
   --accent-dim: #6A4A3C;
-  --link: #E0A98A;
+  --link: #F2B79C;
+  --link-visited: #C89A85;
   --on-text: #0d0e0c;
   --red: #e47058;
   --text: #ece8dd;
@@ -53,6 +54,7 @@
   --accent-2: #9A6B1E;
   --accent-dim: #C08E79;
   --link: #7B2D26;
+  --link-visited: #C08E79;
   --on-text: #ffffff;
   --red: #b23f2c;
   --text: #151713;
@@ -76,7 +78,8 @@
   --accent: #C97A5C;
   --accent-2: #E8BC5A;
   --accent-dim: #4a342a;
-  --link: #E0A98A;
+  --link: #F5BCA2;
+  --link-visited: #C89A85;
   --on-text: #000000;
   --red: #e47058;
   --text: #ece8dd;
@@ -798,7 +801,7 @@ main {
 }
 
 .blurb a:visited {
-  color: var(--accent-dim);
+  color: var(--link-visited);
 }
 
 .tags {
