@@ -994,14 +994,13 @@ main {
 /* Newsletter carousel (Sai, Nov 2026): last 7 editions, fixed geometry */
 .newsletter-promo.newsletter-carousel {
   display: block;
+  overflow: hidden;
 }
 
 .newsletter-track {
   display: flex;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  transition: transform 0.35s ease;
+  will-change: transform;
 }
 
 .newsletter-track::-webkit-scrollbar {

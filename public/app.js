@@ -2490,24 +2490,44 @@ async function loadNewsletterCarousel() {
       }
     };
 
-    const step = () => track.clientWidth || 1;
-    const index = () => Math.round(track.scrollLeft / step());
+    let currentIndex = 0;
+
     const sync = () => {
-      const current = index();
       for (const arrow of arrows) {
         arrow.disabled = arrow.dataset.dir === "prev"
-          ? current <= 0
-          : current >= slides.length - 1;
+          ? currentIndex <= 0
+          : currentIndex >= slides.length - 1;
       }
+    };
+
+    const go = (next) => {
+      currentIndex = Math.max(0, Math.min(slides.length - 1, next));
+      track.style.transform = `translateX(${-currentIndex * 100}%)`;
+      sync();
     };
 
     for (const arrow of arrows) {
       arrow.addEventListener("click", () => {
-        const direction = arrow.dataset.dir === "prev" ? -1 : 1;
-        track.scrollBy({ left: direction * step(), behavior: "smooth" });
+        go(currentIndex + (arrow.dataset.dir === "prev" ? -1 : 1));
       });
     }
-    track.addEventListener("scroll", sync, { passive: true });
+
+    let startX = null;
+    const onStart = (event) => {
+      startX = event.touches ? event.touches[0].clientX : event.clientX;
+    };
+    const onEnd = (event) => {
+      if (startX === null) return;
+      const endX = event.changedTouches ? event.changedTouches[0].clientX : event.clientX;
+      const delta = endX - startX;
+      startX = null;
+      if (Math.abs(delta) > 40) go(currentIndex + (delta < 0 ? 1 : -1));
+    };
+    track.addEventListener("touchstart", onStart, { passive: true });
+    track.addEventListener("touchend", onEnd, { passive: true });
+    track.addEventListener("pointerdown", onStart);
+    track.addEventListener("pointerup", onEnd);
+
     window.addEventListener("resize", () => { measure(); fitSubtitles(); sync(); });
     sync();
   } catch {
