@@ -3,10 +3,10 @@
 // newsletter refreshes append to the stored list in site_content.
 export const NEWSLETTER_EDITION_SEED = [
   {
-    title: "Ledger spyware scare raises supply-chain concerns across Asia",
-    subhead: "New ownership at key reseller raises concern that Ledger’s supply chain is compromised",
-    url: "https://www.asiatechreview.com/p/ledger-spyware-scare-raises-supply",
-    image: "https://substackcdn.com/image/fetch/$s_!Jx59!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fe2b3c079-5b03-4234-aa91-5c0a8a988297_1536x1024.png"
+    title: "Southeast Asia’s AI data centre boom faces a US test",
+    subhead: "US may curb Chinese firms’ access to Nvidia chips in the region",
+    url: "https://www.asiatechreview.com/p/southeast-asias-ai-data-centre-boom",
+    image: "https://substackcdn.com/image/fetch/$s_!eMtz!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F114cfee8-9c5c-4982-9ef8-fbd7119e8829_1672x941.png"
   },
   {
     title: "Grab is putting $750 million behind Malaysia’s AI ambitions",
