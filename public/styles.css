@@ -1911,6 +1911,9 @@ footer {
   .newsletter-slide .newsletter-copy {
     grid-column: 1;
     grid-row: 2;
+    width: 86%;
+    max-width: 720px;
+    margin: 0 auto;
     text-align: center;
   }
 
