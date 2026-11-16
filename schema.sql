@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS feed_items (
   source_name TEXT NOT NULL,
   source_url TEXT NOT NULL,
   category TEXT NOT NULL DEFAULT 'Other news',
+  country TEXT,
   status TEXT NOT NULL DEFAULT 'published',
   telegram_message_id TEXT,
   tags TEXT,

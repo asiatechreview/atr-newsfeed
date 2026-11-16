@@ -84,6 +84,7 @@ export function toPublicItem(item) {
     },
     url: sourceUrl,
     category,
+    country: clean(item.country) || null,
     tags,
     published_at: publishedAt,
     date_published: publishedAt,
