@@ -2507,8 +2507,12 @@ async function loadNewsletterCarousel() {
       }
     };
 
-    const go = (next) => {
-      currentIndex = Math.max(0, Math.min(slides.length - 1, next));
+    const isMobile = () => window.matchMedia("(max-width: 640px)").matches;
+    const go = (next, wrap = false) => {
+      const last = slides.length - 1;
+      currentIndex = wrap && isMobile()
+        ? ((next % slides.length) + slides.length) % slides.length
+        : Math.max(0, Math.min(last, next));
       track.style.transform = `translateX(${-currentIndex * 100}%)`;
       const edition = editions[currentIndex] || {};
       read.href = edition.url || "#";
@@ -2522,38 +2526,56 @@ async function loadNewsletterCarousel() {
       });
     }
 
+    // Gesture handling lives on the untransformed carousel container, not the
+    // track: once the track is translated, hit-testing on its children is
+    // unreliable on iOS and only the first slide keeps receiving swipes.
     let startX = null;
     let startY = null;
+    let horizontal = false;
     let didSwipe = false;
-    const onStart = (event) => {
-      const point = event.touches ? event.touches[0] : event;
+
+    const onTouchStart = (event) => {
+      const point = event.touches[0];
       startX = point.clientX;
       startY = point.clientY;
+      horizontal = false;
     };
-    const onEnd = (event) => {
+
+    const onTouchMove = (event) => {
       if (startX === null) return;
-      const point = event.changedTouches ? event.changedTouches[0] : event;
+      const point = event.touches[0];
+      const deltaX = point.clientX - startX;
+      const deltaY = point.clientY - startY;
+      if (!horizontal && Math.abs(deltaX) > 10 && Math.abs(deltaX) > Math.abs(deltaY)) {
+        horizontal = true;
+      }
+      if (horizontal) event.preventDefault();
+    };
+
+    const onTouchEnd = (event) => {
+      if (startX === null) return;
+      const point = event.changedTouches[0];
       const deltaX = point.clientX - startX;
       const deltaY = point.clientY - startY;
       startX = null;
       startY = null;
       if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY)) {
-        go(currentIndex + (deltaX < 0 ? 1 : -1));
+        go(currentIndex + (deltaX < 0 ? 1 : -1), true);
         didSwipe = true;
-        window.setTimeout(() => { didSwipe = false; }, 350);
+        window.setTimeout(() => { didSwipe = false; }, 400);
       }
     };
-    // A horizontal swipe on the image must page the carousel, not open the story.
-    track.addEventListener("click", (event) => {
+
+    promo.addEventListener("touchstart", onTouchStart, { passive: true });
+    promo.addEventListener("touchmove", onTouchMove, { passive: false });
+    promo.addEventListener("touchend", onTouchEnd, { passive: true });
+    promo.addEventListener("touchcancel", onTouchEnd, { passive: true });
+    promo.addEventListener("click", (event) => {
       if (!didSwipe) return;
       event.preventDefault();
       event.stopPropagation();
       didSwipe = false;
     }, true);
-    track.addEventListener("touchstart", onStart, { passive: true });
-    track.addEventListener("touchend", onEnd, { passive: true });
-    track.addEventListener("pointerdown", onStart);
-    track.addEventListener("pointerup", onEnd);
 
     window.addEventListener("resize", () => { measure(); fitSubtitles(); sync(); });
     go(0);
