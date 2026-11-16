@@ -1944,3 +1944,15 @@ footer {
     font-size: calc(15px * var(--font-scale, 1));
   }
 }
+
+.section-title a,
+.section-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.section-title a:hover,
+.section-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
