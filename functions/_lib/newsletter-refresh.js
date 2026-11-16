@@ -55,7 +55,7 @@ async function recordNewsletterEdition(env, item) {
       url: item.link,
       image: item.image || ""
     };
-    const editions = [edition, ...existing.filter((entry) => entry && entry.url !== edition.url)].slice(0, 7);
+    const editions = [edition, ...existing.filter((entry) => entry && entry.url !== edition.url)].slice(0, 500);
     await writeSiteContent(env, { newsletter_editions: editions }, "system:newsletter-editions");
   } catch {
     // Archiving must never block the card refresh.
