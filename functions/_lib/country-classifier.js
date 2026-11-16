@@ -85,6 +85,21 @@ function hasTerm(text, term) {
   return new RegExp(`(^|[^a-z0-9])${escaped}([^a-z0-9]|$)`, "i").test(text);
 }
 
+const SEA_TERMS = ["southeast asia", "south-east asia", "south east asia", "southeast asian", "asean"];
+const SEA_COUNTRIES = ["Singapore", "Indonesia", "Malaysia", "Vietnam", "Thailand", "Philippines"];
+
+function earliestCountryIndex(text, country) {
+  const signals = COUNTRY_SIGNALS[country];
+  if (!signals) return -1;
+  let earliest = -1;
+  for (const term of [...signals.places, ...signals.companies]) {
+    const index = text.indexOf(term);
+    if (index === -1) continue;
+    if (earliest === -1 || index < earliest) earliest = index;
+  }
+  return earliest;
+}
+
 function hasUsCountry(raw) {
   return /(^|[^A-Za-z])(US|U\.S\.)([^A-Za-z]|$)/.test(String(raw || ""));
 }
@@ -131,7 +146,28 @@ export function scoreCountries(headline, blurb) {
 
 export function classifyCountry(headline, blurb) {
   const scores = scoreCountries(headline, blurb);
+  const h = normalise(headline);
   const ranked = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+
+  // Regional stories: "Southeast Asia" is a valid region tag. A named
+  // country still wins when it is the grammatical subject (appears before
+  // the regional phrase in the headline).
+  const seaIndexes = SEA_TERMS.map((term) => h.indexOf(term)).filter((index) => index >= 0);
+  const seaIndex = seaIndexes.length ? Math.min(...seaIndexes) : -1;
+  const seaMentioned = seaIndex >= 0;
+  const regionalCountries = SEA_COUNTRIES.filter((country) => (scores[country] || 0) > 0);
+
+  if (seaMentioned) {
+    const top = ranked[0] ? ranked[0][0] : "";
+    const topIndex = top ? earliestCountryIndex(h, top) : -1;
+    const countryLeads = top && topIndex >= 0 && topIndex < seaIndex && (scores[top] || 0) >= 6;
+    if (!countryLeads) {
+      return { country: "Southeast Asia", score: 8, margin: 8, runnerUp: null, scores };
+    }
+  } else if (regionalCountries.length >= 2) {
+    return { country: "Southeast Asia", score: 8, margin: 8, runnerUp: null, scores };
+  }
+
   if (!ranked.length) {
     return { country: "", score: 0, margin: 0, runnerUp: null, scores };
   }

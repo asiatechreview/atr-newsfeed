@@ -1798,7 +1798,7 @@ async function loadSourceOptions() {
 /* Exclusive colour per category (mockup palette, Aug 23 2026). Known categories
    get a curated colour; unknown ones get a deterministic hue so every category
    is visually distinct. Applied to the Live Items category select. */
-const COUNTRY_OPTIONS = ["China", "India", "Japan", "South Korea", "Taiwan", "Singapore", "Indonesia", "Malaysia", "Vietnam", "Thailand", "Philippines", "Hong Kong", "US", "UK", "UAE", "Saudi Arabia", "Australia"];
+const COUNTRY_OPTIONS = ["Southeast Asia", "China", "India", "Japan", "South Korea", "Taiwan", "Singapore", "Indonesia", "Malaysia", "Vietnam", "Thailand", "Philippines", "Hong Kong", "US", "UK", "UAE", "Saudi Arabia", "Australia"];
 
 const CATEGORY_COLOURS = {
   "Markets": "#2563eb",

@@ -883,7 +883,10 @@ const countryCases = [
   ["Alibaba launches Qwen4-Max to challenge US AI leaders", "Alibaba released Qwen4-Max, its latest large language model.", "China"],
   ["Japan’s Taisei launches $150 million fund to back AI and robotics startups", "Construction firm Taisei sets up a fund to invest in AI and robotics startups.", "Japan"],
   ["Megaspeed says Alice Huang left company in August 2025", "Megaspeed said its founder Alice Huang left the company.", "Singapore"],
-  ["TSMC approves up to $1 billion in investments in Anthropic and OpenAI", "TSMC approved investments in AI startups Anthropic and OpenAI.", "Taiwan"]
+  ["TSMC approves up to $1 billion in investments in Anthropic and OpenAI", "TSMC approved investments in AI startups Anthropic and OpenAI.", "Taiwan"],
+  ["Southeast Asia's AI data centre boom faces a US test", "US may curb Chinese firms access to Nvidia chips in the region.", "Southeast Asia"],
+  ["Malaysia gains more ground in Southeast Asia data centre race", "Google and Microsoft make further commitments in Malaysia.", "Malaysia"],
+  ["Grab and GoTo expand their super-app battle", "Grab is based in Singapore and GoTo in Indonesia.", "Southeast Asia"]
 ];
 for (const [headline, blurb, expected] of countryCases) {
   const got = classifyCountry(headline, blurb).country;
