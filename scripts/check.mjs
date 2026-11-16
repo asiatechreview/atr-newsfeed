@@ -154,7 +154,7 @@ if (!dashboardHtml.includes('action="/api/auth/login"') || !dashboardScript.incl
   console.error("dashboard assets must use a native username/password login form and show the actor column");
   process.exit(1);
 }
-if (!appScript.includes("loadNewsletterCard") || !appScript.includes("/api/site-content")) {
+if (!appScript.includes("loadNewsletterCarousel") || !appScript.includes("/api/site-content") || !appScript.includes("newsletter-track")) {
   console.error("public app must render the newsletter card from /api/site-content");
   process.exit(1);
 }

@@ -2376,28 +2376,209 @@ if (searchToggle && mobileSearchForm && mobileSearchInput) {
   });
 }
 
-async function loadNewsletterCard() {
+function buildNewsletterSlide(edition) {
+  const slide = document.createElement("article");
+  slide.className = "newsletter-slide";
+
+  const imageLink = document.createElement("a");
+  imageLink.className = "newsletter-image-link";
+  imageLink.href = edition.url || "#";
+  imageLink.target = "_blank";
+  imageLink.rel = "noopener";
+
+  const image = document.createElement("img");
+  image.src = newsletterImageProxyUrl(edition.image) || edition.image || "";
+  image.alt = edition.title || "Asia Tech Review newsletter";
+  image.width = 960;
+  image.height = 540;
+  image.decoding = "async";
+  image.loading = "lazy";
+  image.draggable = false;
+  imageLink.draggable = false;
+  imageLink.appendChild(image);
+
+  const copy = document.createElement("div");
+  copy.className = "newsletter-copy";
+  const title = document.createElement("h3");
+  title.textContent = edition.title || "";
+  const subhead = document.createElement("p");
+  subhead.textContent = edition.subhead || edition.blurb || "";
+  copy.append(title, subhead);
+
+  slide.append(imageLink, copy);
+  return slide;
+}
+
+async function loadNewsletterCarousel() {
+  const promo = document.querySelector("#newsletter-promo");
+  if (!promo) return;
+
   try {
     const response = await fetch("/api/site-content");
     if (!response.ok) return;
     const content = await response.json();
     const newsletter = content.newsletter || {};
-    const promo = document.querySelector("#newsletter-promo");
-    if (!promo) return;
+    const editions = Array.isArray(content.newsletterEditions) && content.newsletterEditions.length
+      ? content.newsletterEditions.slice(0, 7)
+      : [newsletter].filter((edition) => edition && edition.url);
 
-    const title = document.querySelector("#newsletter-title");
-    const blurb = document.querySelector("#newsletter-blurb");
-    const imageLink = document.querySelector("#newsletter-image-link");
-    const image = document.querySelector("#newsletter-image");
-    const readLink = document.querySelector("#newsletter-read-link");
+    if (!editions.length) return;
 
-    if (newsletter.url) {
-      if (imageLink) imageLink.href = newsletter.url;
-      if (readLink) readLink.href = newsletter.url;
+    const track = document.createElement("div");
+    track.className = "newsletter-track";
+    track.id = "newsletter-track";
+    for (const edition of editions) track.appendChild(buildNewsletterSlide(edition));
+
+    promo.classList.add("newsletter-carousel");
+    promo.textContent = "";
+    promo.appendChild(track);
+
+    const actions = document.createElement("div");
+    actions.className = "newsletter-actions";
+    const read = document.createElement("a");
+    read.className = "newsletter-cta";
+    read.target = "_blank";
+    read.rel = "noopener";
+    read.textContent = "Read now →";
+
+    const makeArrow = (dir, label, glyph) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "newsletter-arrow";
+      button.dataset.dir = dir;
+      button.setAttribute("aria-label", label);
+      button.textContent = glyph;
+      return button;
+    };
+    const prevArrow = makeArrow("prev", "Previous newsletter", "‹");
+    const nextArrow = makeArrow("next", "Next newsletter", "›");
+    const divider = document.createElement("span");
+    divider.className = "newsletter-divider";
+    divider.setAttribute("aria-hidden", "true");
+    actions.append(read, divider, prevArrow, nextArrow);
+    promo.appendChild(actions);
+
+    const slides = [...track.querySelectorAll(".newsletter-slide")];
+    const arrows = [prevArrow, nextArrow];
+    const copies = slides.map((slide) => slide.querySelector(".newsletter-copy")).filter(Boolean);
+
+    // Reserve the tallest copy block so title/subtitle/button never move
+    // between slides. All seven editions currently render at 2+2 lines.
+    const measure = () => {
+      track.style.setProperty("--copy-h", "0px");
+      const height = copies.reduce((max, node) => Math.max(max, node.offsetHeight), 0);
+      track.style.setProperty("--copy-h", height + "px");
+    };
+    // Long subtitles must stay fully visible without moving the layout:
+    // shrink the subtitle type until it fits the reserved copy box.
+    const fitSubtitles = () => {
+      for (const copy of copies) {
+        const title = copy.querySelector("h3");
+        const subhead = copy.querySelector("p");
+        if (!subhead) continue;
+        subhead.style.fontSize = "";
+        const styles = getComputedStyle(subhead);
+        let size = parseFloat(styles.fontSize) || 14;
+        const minimum = 10.5;
+        const margin = parseFloat(styles.marginTop) || 0;
+        const available = copy.clientHeight - (title ? title.offsetHeight : 0) - margin;
+        let guard = 40;
+        while (subhead.scrollHeight > available && size > minimum && guard > 0) {
+          size -= 0.5;
+          subhead.style.fontSize = size + "px";
+          guard -= 1;
+        }
+      }
+    };
+
+    measure();
+    fitSubtitles();
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => { measure(); fitSubtitles(); }).catch(() => {});
     }
-    if (newsletter.image && image) image.src = newsletterImageProxyUrl(newsletter.image) || newsletter.image;
-    if (title && newsletter.title) title.textContent = newsletter.title;
-    if (blurb && newsletter.blurb) blurb.textContent = newsletter.blurb;
+
+    let currentIndex = 0;
+
+    const sync = () => {
+      for (const arrow of arrows) {
+        arrow.disabled = arrow.dataset.dir === "prev"
+          ? currentIndex <= 0
+          : currentIndex >= slides.length - 1;
+      }
+    };
+
+    const isMobile = () => window.matchMedia("(max-width: 640px)").matches;
+    const go = (next, wrap = false) => {
+      const last = slides.length - 1;
+      currentIndex = wrap && isMobile()
+        ? ((next % slides.length) + slides.length) % slides.length
+        : Math.max(0, Math.min(last, next));
+      track.style.transform = `translateX(${-currentIndex * 100}%)`;
+      const edition = editions[currentIndex] || {};
+      read.href = edition.url || "#";
+      read.setAttribute("aria-label", `Read ${edition.title || "newsletter"} on Asia Tech Review`);
+      sync();
+    };
+
+    for (const arrow of arrows) {
+      arrow.addEventListener("click", () => {
+        go(currentIndex + (arrow.dataset.dir === "prev" ? -1 : 1));
+      });
+    }
+
+    // Gesture handling lives on the untransformed carousel container, not the
+    // track: once the track is translated, hit-testing on its children is
+    // unreliable on iOS and only the first slide keeps receiving swipes.
+    let startX = null;
+    let startY = null;
+    let horizontal = false;
+    let didSwipe = false;
+
+    const onTouchStart = (event) => {
+      const point = event.touches[0];
+      startX = point.clientX;
+      startY = point.clientY;
+      horizontal = false;
+    };
+
+    const onTouchMove = (event) => {
+      if (startX === null) return;
+      const point = event.touches[0];
+      const deltaX = point.clientX - startX;
+      const deltaY = point.clientY - startY;
+      if (!horizontal && Math.abs(deltaX) > 10 && Math.abs(deltaX) > Math.abs(deltaY)) {
+        horizontal = true;
+      }
+      if (horizontal) event.preventDefault();
+    };
+
+    const onTouchEnd = (event) => {
+      if (startX === null) return;
+      const point = event.changedTouches[0];
+      const deltaX = point.clientX - startX;
+      const deltaY = point.clientY - startY;
+      startX = null;
+      startY = null;
+      if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY)) {
+        go(currentIndex + (deltaX < 0 ? 1 : -1), true);
+        didSwipe = true;
+        window.setTimeout(() => { didSwipe = false; }, 400);
+      }
+    };
+
+    promo.addEventListener("touchstart", onTouchStart, { passive: true });
+    promo.addEventListener("touchmove", onTouchMove, { passive: false });
+    promo.addEventListener("touchend", onTouchEnd, { passive: true });
+    promo.addEventListener("touchcancel", onTouchEnd, { passive: true });
+    promo.addEventListener("click", (event) => {
+      if (!didSwipe) return;
+      event.preventDefault();
+      event.stopPropagation();
+      didSwipe = false;
+    }, true);
+
+    window.addEventListener("resize", () => { measure(); fitSubtitles(); sync(); });
+    go(0);
   } catch {
     // Keep the static fallback card.
   }
@@ -2407,4 +2588,4 @@ initThemeToggle();
 initFontScale();
 refreshFeed({ initial: true });
 startFeedPolling();
-loadNewsletterCard();
+loadNewsletterCarousel();

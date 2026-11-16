@@ -990,6 +990,145 @@ main {
   filter: brightness(1.08);
 }
 
+
+/* Newsletter carousel (Sai, Nov 2026): last 7 editions, fixed geometry */
+.newsletter-promo.newsletter-carousel {
+  display: block;
+  overflow: hidden;
+}
+
+.newsletter-track {
+  display: flex;
+  transition: transform 0.35s ease;
+  will-change: transform;
+  touch-action: pan-y;
+  -webkit-user-drag: none;
+}
+
+.newsletter-image-link {
+  touch-action: pan-y;
+}
+
+.newsletter-image-link img {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+.newsletter-track::-webkit-scrollbar {
+  display: none;
+}
+
+.newsletter-slide {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  display: grid;
+  grid-template-columns: minmax(0, 240px) minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-items: start;
+  column-gap: 18px;
+  row-gap: 14px;
+}
+
+.newsletter-slide .newsletter-copy {
+  grid-column: 2;
+  grid-row: 1;
+  display: flow-root;
+  min-height: var(--copy-h, 0px);
+}
+
+.newsletter-actions {
+  display: flex;
+  align-items: stretch;
+  width: max-content;
+  height: 30px;
+  margin: 14px auto 0;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: transparent;
+}
+
+.newsletter-cta {
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 14px;
+  color: var(--newsletter-accent);
+  font: 600 13px/1 var(--font-meta);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.newsletter-cta:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.newsletter-divider {
+  flex: 0 0 1px;
+  width: 1px;
+  background: var(--border);
+}
+
+
+/* Carousel subtitles: never truncate; shrink type to fit the reserved copy box */
+.newsletter-carousel .newsletter-slide .newsletter-copy p {
+  display: block;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+  font-size: calc(14px * var(--font-scale, 1));
+}
+
+.newsletter-arrow {
+  width: 30px;
+  height: 100%;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  font: 600 15px/1 var(--font-meta);
+  cursor: pointer;
+}
+
+.newsletter-arrow:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.newsletter-arrow:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+@media (max-width: 640px) {
+  .newsletter-slide {
+    grid-template-columns: 1fr;
+    align-items: center;
+  }
+
+  .newsletter-slide .newsletter-image-link {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .newsletter-slide .newsletter-copy {
+    grid-column: 1;
+    grid-row: 2;
+    text-align: center;
+  }
+
+  .newsletter-actions {
+    margin: 14px auto 0;
+  }
+
+  .newsletter-carousel .newsletter-slide .newsletter-copy p {
+    font-size: calc(13px * var(--font-scale, 1));
+  }
+}
+
 @media (max-width: 640px) {
   .item-headline-row {
     align-items: flex-start;
@@ -1735,4 +1874,73 @@ footer {
 .feed .item,
 .metric {
   border-top: 0;
+}
+
+/* Carousel: match the image column to the image width at each breakpoint so
+   tablet/desktop text never overlaps the artwork. */
+@media (min-width: 641px) {
+  .newsletter-slide {
+    grid-template-columns: 250px minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .newsletter-slide {
+    grid-template-columns: 270px minmax(0, 1fr);
+    column-gap: 24px;
+  }
+}
+
+/* iPad and other tablets: use the mobile stacked layout (image on top,
+   centred copy, centred control bar) instead of the desktop split. */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .newsletter-slide {
+    grid-template-columns: 1fr;
+    align-items: center;
+  }
+
+  .newsletter-slide .newsletter-image-link {
+    grid-column: 1;
+    grid-row: 1;
+    width: 86%;
+    max-width: 720px;
+    height: auto;
+    margin: 0 auto 14px;
+  }
+
+  .newsletter-slide .newsletter-copy {
+    grid-column: 1;
+    grid-row: 2;
+    width: 86%;
+    max-width: 720px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .newsletter-carousel .newsletter-slide .newsletter-copy p {
+    font-size: calc(14px * var(--font-scale, 1));
+  }
+
+  .newsletter-actions {
+    margin: 14px auto 0;
+  }
+}
+
+/* Sai (Nov 2026): one type step larger for section headings and date labels */
+.section-title {
+  font-size: calc(13px * var(--font-scale, 1));
+}
+
+.date {
+  font-size: calc(13px * var(--font-scale, 1));
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .section-title {
+    font-size: calc(15px * var(--font-scale, 1));
+  }
+
+  .date {
+    font-size: calc(15px * var(--font-scale, 1));
+  }
 }

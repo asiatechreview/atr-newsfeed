@@ -42,6 +42,26 @@ async function fetchLatestArchivePost() {
   return parseArchivePost(payload);
 }
 
+// Appends/updates the edition list so the homepage carousel keeps the last 7
+// newsletter cards instead of losing the previous one on every refresh.
+async function recordNewsletterEdition(env, item) {
+  if (!item?.title || !item?.link) return;
+  try {
+    const content = await readSiteContent(env);
+    const existing = Array.isArray(content.newsletterEditions) ? content.newsletterEditions : [];
+    const edition = {
+      title: item.title,
+      subhead: item.subhead || item.blurb || "",
+      url: item.link,
+      image: item.image || ""
+    };
+    const editions = [edition, ...existing.filter((entry) => entry && entry.url !== edition.url)].slice(0, 7);
+    await writeSiteContent(env, { newsletter_editions: editions }, "system:newsletter-editions");
+  } catch {
+    // Archiving must never block the card refresh.
+  }
+}
+
 // Shared newsletter refresh: fetches the latest Substack post and writes it to
 // site-content when it differs from what is stored. Used by the scheduled
 // newsletter cron (functions/_scheduled.js) and the manual admin trigger
@@ -73,6 +93,7 @@ export async function refreshNewsletterCardFromFeed(env, request = null) {
             image: archivePost.image || stored.image || ""
           }
         }, request ? "admin:newsletter-archive-fallback" : "scheduled:substack-archive-fallback");
+        await recordNewsletterEdition(env, archivePost);
         await writeOperationalEvent(env, request, {
           workflow: "site_content",
           action: "newsletter_auto_refresh",
@@ -149,6 +170,7 @@ export async function refreshNewsletterCardFromFeed(env, request = null) {
       image: item.image || stored.image || ""
     }
   }, request ? "admin:newsletter-refresh" : "scheduled:substack-refresh");
+  await recordNewsletterEdition(env, item);
 
   await writeOperationalEvent(env, request, {
     workflow: "site_content",
