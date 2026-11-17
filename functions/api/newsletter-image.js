@@ -1,7 +1,7 @@
 import { readSiteContent } from "../_lib/site-content.js";
 
 const DEFAULT_WIDTH = 960;
-const ALLOWED_WIDTHS = new Set([320, 480, 640, 960]);
+const ALLOWED_WIDTHS = new Set([320, 480, 640, 800, 960]);
 const ASPECT = 9 / 16;
 const IMAGE_QUALITY = 70;
 const CACHE_SECONDS = 7 * 24 * 60 * 60;

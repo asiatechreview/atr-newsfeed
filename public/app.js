@@ -2390,7 +2390,7 @@ function buildNewsletterSlide(edition) {
   const image = document.createElement("img");
   if (edition.image) {
     image.src = newsletterImageProxyUrl(edition.image, 640) || edition.image;
-    image.srcset = [320, 480, 640, 960]
+    image.srcset = [320, 480, 640, 800, 960]
       .map((width) => `${newsletterImageProxyUrl(edition.image, width)} ${width}w`)
       .join(", ");
     image.sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 86vw, 250px";
