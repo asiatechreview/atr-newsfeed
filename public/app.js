@@ -45,7 +45,7 @@ function newsletterImageProxyUrl(value, width) {
     if (url.protocol !== "https:") return "";
     if (!["substackcdn.com", "substack-post-media.s3.amazonaws.com"].includes(url.hostname)) return url.href;
     const suffix = width ? `&w=${encodeURIComponent(width)}` : "";
-    return `/api/newsletter-image?src=${encodeURIComponent(url.href)}${suffix}`;
+    return `/api/newsletter-image?src=${encodeURIComponent(url.href)}${suffix}&g=2`;
   } catch {
     return "";
   }
