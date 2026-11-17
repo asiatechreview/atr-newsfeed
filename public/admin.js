@@ -1864,7 +1864,7 @@ function renderList() {
   }
 
   const wrap = document.createElement("div");
-  wrap.className = "table-wrap";
+  wrap.className = "table-wrap item-table-wrap";
   const table = document.createElement("table");
   table.className = "item-table";
 
