@@ -1,8 +1,9 @@
 import { readSiteContent } from "../_lib/site-content.js";
 
-const IMAGE_WIDTH = 960;
-const IMAGE_HEIGHT = 540;
-const IMAGE_QUALITY = 78;
+const DEFAULT_WIDTH = 960;
+const ALLOWED_WIDTHS = new Set([320, 480, 640, 960]);
+const ASPECT = 9 / 16;
+const IMAGE_QUALITY = 70;
 const CACHE_SECONDS = 7 * 24 * 60 * 60;
 const ALLOWED_HOSTS = new Set([
   "substackcdn.com",
@@ -18,6 +19,10 @@ export async function onRequestGet({ env, request }) {
     source = content.newsletter?.image || "";
   }
 
+  const requestedWidth = Number(requestUrl.searchParams.get("w"));
+  const width = ALLOWED_WIDTHS.has(requestedWidth) ? requestedWidth : DEFAULT_WIDTH;
+  const height = Math.max(1, Math.round(width * ASPECT));
+
   const sourceUrl = parseAllowedImageUrl(source);
   if (!sourceUrl) {
     return new Response("Not found", {
@@ -32,6 +37,7 @@ export async function onRequestGet({ env, request }) {
   const cache = caches.default;
   const cacheUrl = new URL(request.url);
   cacheUrl.searchParams.set("src", sourceUrl.href);
+  cacheUrl.searchParams.set("w", String(width));
   const cacheKey = new Request(cacheUrl.toString(), request);
   const cached = await cache.match(cacheKey);
   if (cached) return cached;
@@ -41,8 +47,8 @@ export async function onRequestGet({ env, request }) {
     upstream = await fetch(sourceUrl.href, {
       cf: {
         image: {
-          width: IMAGE_WIDTH,
-          height: IMAGE_HEIGHT,
+          width,
+          height,
           fit: "cover",
           quality: IMAGE_QUALITY,
           format: "webp"

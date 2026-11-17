@@ -39,12 +39,13 @@ const SHOW_WATCHLIST = false;
 const FEATURED_ITEM_ID = "manual-telegram-2026-07-17-005";
 const FEATURED_SOURCE_URL = "https://www.bloomberg.com/news/newsletters/2026-07-17/china-can-still-win-the-ai-race-with-inferior-technology";
 
-function newsletterImageProxyUrl(value) {
+function newsletterImageProxyUrl(value, width) {
   try {
     const url = new URL(String(value || "").trim(), window.location.origin);
     if (url.protocol !== "https:") return "";
     if (!["substackcdn.com", "substack-post-media.s3.amazonaws.com"].includes(url.hostname)) return url.href;
-    return `/api/newsletter-image?src=${encodeURIComponent(url.href)}`;
+    const suffix = width ? `&w=${encodeURIComponent(width)}` : "";
+    return `/api/newsletter-image?src=${encodeURIComponent(url.href)}${suffix}`;
   } catch {
     return "";
   }
@@ -2387,7 +2388,15 @@ function buildNewsletterSlide(edition) {
   imageLink.rel = "noopener";
 
   const image = document.createElement("img");
-  image.src = newsletterImageProxyUrl(edition.image) || edition.image || "";
+  if (edition.image) {
+    image.src = newsletterImageProxyUrl(edition.image, 640) || edition.image;
+    image.srcset = [320, 480, 640, 960]
+      .map((width) => `${newsletterImageProxyUrl(edition.image, width)} ${width}w`)
+      .join(", ");
+    image.sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 86vw, 250px";
+  } else {
+    image.src = "";
+  }
   image.alt = edition.title || "Asia Tech Review newsletter";
   image.width = 960;
   image.height = 540;
