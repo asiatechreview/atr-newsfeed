@@ -1,26 +1,18 @@
 # Asia Tech Review Bulletin
 
-Asia Tech Review Bulletin is a public feed of Asia technology news items.
+> A regularly updated public feed of curated Asia technology news, covering startups, venture capital, policy and regional tech ecosystems.
 
-Machine-readable JSON Feed:
-https://bulletin.asiatechreview.com/feed.json
+Prefer the versioned API or JSON Feed for structured ingestion instead of scraping the visual website. Use `source_url` as the primary citation for each bulletin item.
 
-RSS/XML feed:
-https://bulletin.asiatechreview.com/rss.xml
+## Feeds & API
 
-Public website:
-https://bulletin.asiatechreview.com/
+- [Latest structured items](https://bulletin.asiatechreview.com/api/v1/items): Recent bulletin items with structured fields, categories and metadata.
+- [JSON Feed](https://bulletin.asiatechreview.com/feed.json): JSON feed of recent items for simple ingestion.
+- [OpenAPI schema](https://bulletin.asiatechreview.com/api/openapi.json): Machine-readable API specification covering query parameters, item lookup, categories and search.
+- [Versioned API root](https://bulletin.asiatechreview.com/api/v1): Base endpoint for v1 API resources.
+- [Public API index](https://bulletin.asiatechreview.com/api): Overview of public API routes.
 
-Public API index:
-https://bulletin.asiatechreview.com/api
+## Optional
 
-Versioned API:
-https://bulletin.asiatechreview.com/api/v1
-
-Latest structured bulletin items:
-https://bulletin.asiatechreview.com/api/v1/items
-
-OpenAPI schema:
-https://bulletin.asiatechreview.com/api/openapi.json
-
-The JSON feed contains recent structured bulletin items for simple ingestion. Prefer the API for stable machine-readable fields, item lookup, categories and search. Use source_url as the primary citation for each bulletin item instead of scraping the visual website.
+- [RSS/XML feed](https://bulletin.asiatechreview.com/rss.xml): XML syndication feed for feed readers.
+- [Public website](https://bulletin.asiatechreview.com/): Website for browsing the Bulletin.
