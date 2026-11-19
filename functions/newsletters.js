@@ -31,7 +31,8 @@ export function renderNewsletterArchive(editions = [], { page = 1, totalPages = 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Newsletter archive — Asia Tech Review</title>
   <meta name="description" content="Every Asia Tech Review newsletter, newest first.">
-  <link rel="icon" href="/atr-bulletin-20260905-v2.png" type="image/png">
+  <link rel="icon" href="/atr-icon-20261119.png" type="image/png" sizes="192x192">
+  <link rel="apple-touch-icon" sizes="180x180" href="/atr-apple-touch-icon-20261119.png">
   <link rel="alternate" type="application/rss+xml" title="Asia Tech Review Bulletin RSS" href="/rss.xml">
   <link rel="stylesheet" href="/styles.css">
   <script>
