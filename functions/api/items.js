@@ -315,12 +315,27 @@ export async function loadFeedItems({
   if (authorized && d1Items.length) {
     try {
       const shareRows = await env.ATR_FEED_DB.prepare(
-        "SELECT item_id, COUNT(*) AS count FROM operational_events WHERE workflow = 'share' AND action = 'copy' GROUP BY item_id"
+        `SELECT item_id,
+                COUNT(*) AS total,
+                SUM(CASE WHEN occurred_at >= strftime('%Y-%m-%dT%H:%M:%SZ','now','-7 days') THEN 1 ELSE 0 END) AS recent
+         FROM operational_events
+         WHERE workflow = 'share' AND action = 'copy'
+         GROUP BY item_id`
       ).all();
-      const shareCounts = new Map((shareRows.results || []).map((row) => [String(row.item_id), Number(row.count) || 0]));
-      for (const item of d1Items) item.share_count = shareCounts.get(String(item.id)) || 0;
+      const shareCounts = new Map((shareRows.results || []).map((row) => [
+        String(row.item_id),
+        { total: Number(row.total) || 0, recent: Number(row.recent) || 0 }
+      ]));
+      for (const item of d1Items) {
+        const counts = shareCounts.get(String(item.id));
+        item.share_count = counts?.total || 0;
+        item.share_count_7d = counts?.recent || 0;
+      }
     } catch {
-      for (const item of d1Items) item.share_count = 0;
+      for (const item of d1Items) {
+        item.share_count = 0;
+        item.share_count_7d = 0;
+      }
     }
   }
 

@@ -14,7 +14,7 @@
       document.documentElement.dataset.theme = localStorage.getItem("atr-admin-theme") === "dark" ? "dark" : "light";
     } catch (error) {}
   </script>
-  <link rel="stylesheet" href="/admin.css?v=20261117-mobile-items">
+  <link rel="stylesheet" href="/admin.css?v=20261122-share-stats">
 </head>
 <body class="logged-out">
   <div class="app">
@@ -289,6 +289,12 @@
 
         <!-- ============ LIVE ITEMS ============ -->
         <section id="live-view">
+          <div class="card" id="top-shared-card">
+            <div class="card-head">
+              <div class="card-title">Top shared <small id="top-shared-count">-</small></div>
+            </div>
+            <div id="top-shared-list" class="top-shared-list"></div>
+          </div>
           <div class="card">
             <div class="card-head">
               <div class="card-title">Live Items <small id="list-count">-</small></div>
@@ -912,6 +918,6 @@
     <button id="mobile-refresh-button" type="button">Refresh</button>
   </nav>
 
-  <script src="/admin.js?v=20261122-share-counts" defer></script>
+  <script src="/admin.js?v=20261122-share-stats" defer></script>
 </body>
 </html>

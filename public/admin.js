@@ -285,6 +285,8 @@ const els = {
   selectedId: document.querySelector("#selected-id"),
   selectedDetail: document.querySelector("#selected-detail"),
   listCount: document.querySelector("#list-count"),
+  topSharedList: document.querySelector("#top-shared-list"),
+  topSharedCount: document.querySelector("#top-shared-count"),
   searchInput: document.querySelector("#search-input"),
   categoryFilter: document.querySelector("#category-filter"),
   sourceFilter: document.querySelector("#source-filter"),
@@ -972,6 +974,7 @@ async function loadItems() {
     // Fetch page 1 only (25 items). Next/Previous refetch the relevant
     // offset from the server instead of growing the loaded set.
     await fetchPage(1);
+    await loadTopShared();
   } catch (error) {
     setStatus("Error", error.message);
   } finally {
@@ -2015,7 +2018,17 @@ function renderList() {
     regionTd.append(buildCountryPill());
     tr.append(regionTd);
 
-    tr.append(cell(String(item.share_count ?? 0), "nowrap share-cell", "Shares"));
+    const shareTd = document.createElement("td");
+    shareTd.className = "nowrap share-cell";
+    shareTd.dataset.label = "Shares";
+    shareTd.textContent = String(item.share_count ?? 0);
+    if (item.share_count_7d) {
+      const recent = document.createElement("span");
+      recent.className = "share-recent";
+      recent.textContent = ` · ${item.share_count_7d} in 7d`;
+      shareTd.append(recent);
+    }
+    tr.append(shareTd);
 
     tr.append(cell(formatDateTime(item.published_at), "nowrap", "Published"));
 
@@ -2947,6 +2960,39 @@ async function saveNewsletter() {
   } catch (error) {
     els.newsletterReadbackStatus.textContent = "Error";
     els.newsletterReadbackOutput.textContent = error.message;
+  }
+}
+
+async function loadTopShared() {
+  if (!els.topSharedList) return;
+  try {
+    const response = await fetch("/api/share-stats?limit=5", { credentials: "same-origin" });
+    if (!response.ok) throw new Error(`share stats ${response.status}`);
+    const data = await response.json();
+    const top = Array.isArray(data.top) ? data.top : [];
+    els.topSharedCount.textContent = top.length ? `${top.length} stories` : "No shares yet";
+    els.topSharedList.textContent = "";
+    if (!top.length) {
+      const empty = document.createElement("p");
+      empty.className = "muted";
+      empty.textContent = "No shares recorded yet.";
+      els.topSharedList.append(empty);
+      return;
+    }
+    top.forEach((row, index) => {
+      const item = document.createElement("div");
+      item.className = "top-shared-item";
+      const title = document.createElement("span");
+      title.className = "top-shared-title";
+      title.textContent = `${index + 1}. ${row.headline || `Item ${row.item_id}`}`;
+      const count = document.createElement("span");
+      count.className = "top-shared-count";
+      count.textContent = `${row.total}${row.recent ? ` (${row.recent} in 7d)` : ""}`;
+      item.append(title, count);
+      els.topSharedList.append(item);
+    });
+  } catch {
+    els.topSharedCount.textContent = "Unavailable";
   }
 }
 

@@ -1364,3 +1364,44 @@ body.logged-out .auth-panel { min-height: calc(100vh - 48px); }
     white-space: normal;
   }
 }
+
+/* Share stats */
+.top-shared-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.top-shared-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.top-shared-item:last-child {
+  border-bottom: 0;
+}
+
+.top-shared-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.top-shared-count {
+  color: var(--muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.share-cell {
+  font-variant-numeric: tabular-nums;
+}
+
+.share-recent {
+  color: var(--muted);
+  font-size: 11px;
+}
