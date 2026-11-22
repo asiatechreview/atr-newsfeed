@@ -2137,6 +2137,26 @@ function copyItemLink(item, button) {
     button.setAttribute("aria-label", "Copied to clipboard");
     button.innerHTML = CHECK_ICON_SVG + '<span class="item-copy-label">Copied</span>';
     button.classList.add("copied");
+    // Silent, best-effort share counter (readers see no difference).
+    try {
+      const payload = JSON.stringify({
+        id: item.id,
+        link_key: item.link_key || null,
+        source: source || null
+      });
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon("/api/events/share", new Blob([payload], { type: "application/json" }));
+      } else {
+        fetch("/api/events/share", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: payload,
+          keepalive: true
+        }).catch(() => {});
+      }
+    } catch {
+      // Counting is advisory; never block the copy.
+    }
     window.setTimeout(() => {
       button.setAttribute("aria-label", "Share story");
       button.innerHTML = SHARE_ICON_SVG + '<span class="item-copy-label">Share</span>';

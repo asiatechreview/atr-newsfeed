@@ -1886,7 +1886,7 @@ function renderList() {
   });
   checkTh.append(selectAll);
   headRow.append(checkTh);
-  for (const label of ["ID", "Title", "Publisher", "Category", "Region", "Published", "Visible", "Link"]) {
+  for (const label of ["ID", "Title", "Publisher", "Category", "Region", "Shares", "Published", "Visible", "Link"]) {
     const th = document.createElement("th");
     th.textContent = label;
     if (label === "ID") th.className = "id-cell";
@@ -2014,6 +2014,8 @@ function renderList() {
 
     regionTd.append(buildCountryPill());
     tr.append(regionTd);
+
+    tr.append(cell(String(item.share_count ?? 0), "nowrap share-cell", "Shares"));
 
     tr.append(cell(formatDateTime(item.published_at), "nowrap", "Published"));
 

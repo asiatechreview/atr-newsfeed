@@ -310,6 +310,20 @@ export async function loadFeedItems({
     d1Items = await loadD1ItemsWithoutHeadline({ env, category, source, limit: queryLimit });
   }
 
+  // Share counts for the admin view: one aggregate query per request, only
+  // for authorised reads. Missing table or errors simply mean zero counts.
+  if (authorized && d1Items.length) {
+    try {
+      const shareRows = await env.ATR_FEED_DB.prepare(
+        "SELECT item_id, COUNT(*) AS count FROM operational_events WHERE workflow = 'share' AND action = 'copy' GROUP BY item_id"
+      ).all();
+      const shareCounts = new Map((shareRows.results || []).map((row) => [String(row.item_id), Number(row.count) || 0]));
+      for (const item of d1Items) item.share_count = shareCounts.get(String(item.id)) || 0;
+    } catch {
+      for (const item of d1Items) item.share_count = 0;
+    }
+  }
+
   // Static archive items (md-*, html-*, manual-telegram-*) live in code and
   // have no D1 row, so they can never be "removed" and are excluded from the
   // removed view. Also drop any static item whose source_url already exists
